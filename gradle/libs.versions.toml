@@ -5,6 +5,7 @@ kotlin = "2.0.0"
 kotlinxSerializationJson = "1.7.0"
 ktor = "2.3.11"
 realm = "2.0.0"
+skie = "0.8.2"
 
 [libraries]
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -21,3 +22,4 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 realm = { id = "io.realm.kotlin", version.ref = "realm" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }

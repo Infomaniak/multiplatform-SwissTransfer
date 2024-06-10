@@ -1,3 +1,4 @@
+import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -5,11 +6,13 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.skie)
 }
 
 val sharedMinSdk: Int by rootProject.extra
 val sharedCompileSdk: Int by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
+val skieMaxArgumentCount: Int by rootProject.extra
 
 kotlin {
     androidTarget {
@@ -19,6 +22,7 @@ kotlin {
         }
     }
 
+    val xcframeworkName = "Core"
     val xcf = XCFramework()
     listOf(
         iosX64(),
@@ -28,7 +32,8 @@ kotlin {
         macosArm64(),
     ).forEach {
         it.binaries.framework {
-            baseName = "Core"
+            baseName = xcframeworkName
+            binaryOption("bundleId", "com.infomaniak.multiplatform_swisstransfer.${xcframeworkName}")
             xcf.add(this)
             isStatic = true
         }
@@ -43,6 +48,18 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+skie {
+    features {
+        group {
+            DefaultArgumentInterop.Enabled(true)
+            DefaultArgumentInterop.MaximumDefaultArgumentCount(skieMaxArgumentCount)
+        }
+    }
+    build {
+        produceDistributableFramework()
     }
 }
 
