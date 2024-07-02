@@ -46,7 +46,7 @@ kotlin {
             implementation(libs.ktor.client.content.negociation)
             implementation(libs.ktor.client.json)
             implementation(libs.ktor.client.encoding)
-            implementation(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
