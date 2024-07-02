@@ -1,4 +1,4 @@
-name: Android CI
+name: Multiplatform CI
 
 on:
   pull_request:
@@ -31,7 +31,10 @@ jobs:
       - name: Build with Gradle
         run: |
           ./gradlew clean
-          ./gradlew build
+          ./gradlew :Common:build
+          ./gradlew :Core:build
+          ./gradlew :DB:build
+          ./gradlew :Network:build
 
       # Run tests
       - name: Run Unit tests
