@@ -1,3 +1,4 @@
+import com.infomaniak.multiplatform_swisstranfer.utils.Versions
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -7,15 +8,11 @@ plugins {
     alias(libs.plugins.androidLibrary)
 }
 
-val sharedMinSdk: Int by rootProject.extra
-val sharedCompileSdk: Int by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
-
 kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
-            jvmTarget.set(JvmTarget.fromTarget(javaVersion.toString()))
+            jvmTarget.set(JvmTarget.fromTarget(Versions.javaVersion.toString()))
         }
     }
 
@@ -37,6 +34,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -46,12 +44,12 @@ kotlin {
 
 android {
     namespace = "com.infomaniak.multiplatform_swisstransfer.common"
-    compileSdk = sharedCompileSdk
+    compileSdk = Versions.compileSdk
     defaultConfig {
-        minSdk = sharedMinSdk
+        minSdk = Versions.minSdk
     }
     compileOptions {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
+        sourceCompatibility = Versions.javaVersion
+        targetCompatibility = Versions.javaVersion
     }
 }

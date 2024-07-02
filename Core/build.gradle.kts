@@ -1,4 +1,6 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import com.infomaniak.multiplatform_swisstranfer.gradle.PublishPlugin
+import com.infomaniak.multiplatform_swisstranfer.utils.Versions
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -8,18 +10,17 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.skie)
 }
-
-val sharedMinSdk: Int by rootProject.extra
-val sharedCompileSdk: Int by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
-val skieMaxArgumentCount: Int by rootProject.extra
+apply<PublishPlugin>()
 
 kotlin {
+    withSourcesJar(publish = false)
     androidTarget {
+        withSourcesJar(publish = true)
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
-            jvmTarget.set(JvmTarget.fromTarget(javaVersion.toString()))
+            jvmTarget.set(JvmTarget.fromTarget(Versions.javaVersion.toString()))
         }
+        publishLibraryVariants("release")
     }
 
     val xcframeworkName = "Core"
@@ -55,7 +56,7 @@ skie {
     features {
         group {
             DefaultArgumentInterop.Enabled(true)
-            DefaultArgumentInterop.MaximumDefaultArgumentCount(skieMaxArgumentCount)
+            DefaultArgumentInterop.MaximumDefaultArgumentCount(Versions.skieMaxArgumentCount)
         }
     }
     build {
@@ -65,12 +66,12 @@ skie {
 
 android {
     namespace = "com.infomaniak.multiplatform_swisstransfer"
-    compileSdk = sharedCompileSdk
+    compileSdk = Versions.compileSdk
     defaultConfig {
-        minSdk = sharedMinSdk
+        minSdk = Versions.minSdk
     }
     compileOptions {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
+        sourceCompatibility = Versions.javaVersion
+        targetCompatibility = Versions.javaVersion
     }
 }
