@@ -26,7 +26,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRep
 import com.infomaniak.multiplatform_swisstransfer.utils.Constants
 
 /**
- * SwissTransferProvider is a class responsible for initializing all the classes needed
+ * SwissTransferInjection is a class responsible for initializing all the classes needed
  * to manage transfers and downloads. It replaces traditional dependency injections
  * and provides centralized access to all functionality via lazily initialized properties and methods.
  * lazily initialized properties and methods.
@@ -35,7 +35,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.Constants
  *
  * @property transferManager A manager used to orchestrate transfer operations.
  */
-class SwissTransferProvider {
+class SwissTransferInjection {
     private val realmProvider by lazy { RealmProvider() }
     private val apiClientProvider by lazy { ApiClientProvider() }
 
