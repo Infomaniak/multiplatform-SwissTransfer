@@ -25,6 +25,6 @@ class AndroidGreetingTest {
 
     @Test
     fun testExample() {
-        assertTrue("Check Android is mentioned", Greeting().greet().contains("Android"))
+        assertTrue("Check platform is android", getPlatform().name.contains("Android"))
     }
 }
