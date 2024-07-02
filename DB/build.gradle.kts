@@ -1,4 +1,7 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import com.infomaniak.multiplatform_swisstranfer.gradle.PublishExtension.Companion.publishConfig
+import com.infomaniak.multiplatform_swisstranfer.gradle.PublishPlugin
+import com.infomaniak.multiplatform_swisstranfer.utils.Versions
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -9,18 +12,19 @@ plugins {
     alias(libs.plugins.realm)
     alias(libs.plugins.skie)
 }
+apply<PublishPlugin>()
 
-val sharedMinSdk: Int by rootProject.extra
-val sharedCompileSdk: Int by rootProject.extra
-val javaVersion: JavaVersion by rootProject.extra
-val skieMaxArgumentCount: Int by rootProject.extra
+publishConfig {
+    mavenName = "database"
+}
 
 kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
-            jvmTarget.set(JvmTarget.fromTarget(javaVersion.toString()))
+            jvmTarget.set(JvmTarget.fromTarget(Versions.javaVersion.toString()))
         }
+        publishLibraryVariants("release")
     }
 
     val xcframeworkName = "DB"
@@ -55,7 +59,7 @@ skie {
     features {
         group {
             DefaultArgumentInterop.Enabled(true)
-            DefaultArgumentInterop.MaximumDefaultArgumentCount(skieMaxArgumentCount)
+            DefaultArgumentInterop.MaximumDefaultArgumentCount(Versions.skieMaxArgumentCount)
         }
     }
     build {
@@ -65,12 +69,12 @@ skie {
 
 android {
     namespace = "com.infomaniak.multiplatform_swisstransfer.db"
-    compileSdk = sharedCompileSdk
+    compileSdk = Versions.compileSdk
     defaultConfig {
-        minSdk = sharedMinSdk
+        minSdk = Versions.minSdk
     }
     compileOptions {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
+        sourceCompatibility = Versions.javaVersion
+        targetCompatibility = Versions.javaVersion
     }
 }
