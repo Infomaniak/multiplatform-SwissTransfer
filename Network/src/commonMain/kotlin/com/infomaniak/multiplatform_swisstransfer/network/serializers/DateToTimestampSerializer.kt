@@ -29,7 +29,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.jsonPrimitive
 
-object DateToTimestampSerializer : JsonTransformingSerializer<Long>(Long.serializer()) {
+internal object DateToTimestampSerializer : JsonTransformingSerializer<Long>(Long.serializer()) {
     @OptIn(FormatStringsInDatetimeFormats::class)
     override fun transformDeserialize(element: JsonElement): JsonElement {
         val dateString = element.jsonPrimitive.content

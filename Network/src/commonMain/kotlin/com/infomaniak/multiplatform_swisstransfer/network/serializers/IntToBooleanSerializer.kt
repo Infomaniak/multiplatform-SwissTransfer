@@ -25,7 +25,7 @@ import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 
-object IntToBooleanSerializer : JsonTransformingSerializer<Boolean>(Boolean.serializer()) {
+internal object IntToBooleanSerializer : JsonTransformingSerializer<Boolean>(Boolean.serializer()) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return runCatching { JsonPrimitive(element.jsonPrimitive.int > 0) }.getOrDefault(element)
     }
