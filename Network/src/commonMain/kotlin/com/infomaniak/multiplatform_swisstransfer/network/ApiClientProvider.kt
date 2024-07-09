@@ -18,6 +18,7 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnknownApiException
@@ -36,7 +37,9 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.errors.IOException
 import kotlinx.serialization.json.Json
 
-class ApiClientProvider {
+class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>? = null) {
+
+    constructor() : this(null)
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -45,7 +48,9 @@ class ApiClientProvider {
         useAlternativeNames = false
     }
 
-    fun createHttpClient(engine: HttpClientEngineFactory<*>? = null): HttpClient {
+    val httpClient = createHttpClient(engine)
+
+    fun createHttpClient(engine: HttpClientEngineFactory<*>?): HttpClient {
         val block: HttpClientConfig<*>.() -> Unit = {
             install(ContentNegotiation) {
                 json(this@ApiClientProvider.json)
@@ -68,21 +73,22 @@ class ApiClientProvider {
             }
             HttpResponseValidator {
                 validateResponse { response: HttpResponse ->
-                    val errorCode = response.status.value
+                    val statusCode = response.status.value
                     val bodyResponse = response.bodyAsText()
-                    if (errorCode >= 300) {
+                    if (statusCode >= 300) {
                         runCatching {
                             val apiError = json.decodeFromString<ApiError>(bodyResponse)
                             throw ApiException(apiError.errorCode, apiError.message)
                         }.onFailure {
-                            throw UnknownApiException(errorCode, bodyResponse)
+                            throw UnknownApiException(statusCode, bodyResponse)
                         }
                     }
                 }
                 handleResponseExceptionWithRequest { cause, _ ->
                     when (cause) {
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
-                        else -> throw cause
+                        is ApiException, is UnknownApiException -> throw cause
+                        else -> throw UnknownException(cause)
                     }
                 }
             }

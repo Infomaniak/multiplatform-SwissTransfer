@@ -18,4 +18,4 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
-class UnknownApiException(val errorCode: Int, val bodyResponse: String) : Exception(bodyResponse)
+class UnknownApiException(val statusCode: Int, val bodyResponse: String) : Exception(bodyResponse)
