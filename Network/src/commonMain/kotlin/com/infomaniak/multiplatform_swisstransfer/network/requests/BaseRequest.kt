@@ -31,7 +31,7 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 
-internal open class BaseRequest(protected val json: Json) {
+internal open class BaseRequest(protected val json: Json, protected val httpClient: HttpClient) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
         val baseUrl = Url(UrlConstants.baseUrl + path)
@@ -40,20 +40,20 @@ internal open class BaseRequest(protected val json: Json) {
         }.build()
     }
 
-    protected suspend inline fun <reified R> get(client: HttpClient, url: Url): R {
-        return client.get(url) {}.decode<R>()
+    protected suspend inline fun <reified R> get(url: Url, httpClient: HttpClient = this.httpClient): R {
+        return httpClient.get(url) {}.decode<R>()
     }
 
-    protected suspend inline fun <reified R> post(client: HttpClient, url: Url, data: Any?): R {
-        return client.post(url) { setBody(data) }.decode<R>()
+    protected suspend inline fun <reified R> post(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
+        return httpClient.post(url) { setBody(data) }.decode<R>()
     }
 
-    protected suspend inline fun <reified R> put(client: HttpClient, url: Url, data: Any?): R {
-        return client.put(url) { setBody(data) }.decode<R>()
+    protected suspend inline fun <reified R> put(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
+        return httpClient.put(url) { setBody(data) }.decode<R>()
     }
 
-    protected suspend inline fun <reified R> delete(client: HttpClient, url: Url): R {
-        return client.delete(url) {}.decode<R>()
+    protected suspend inline fun <reified R> delete(url: Url, httpClient: HttpClient = this.httpClient): R {
+        return httpClient.delete(url) {}.decode<R>()
     }
 
     protected suspend inline fun <reified R> HttpResponse.decode(): R {

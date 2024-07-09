@@ -24,10 +24,9 @@ import com.infomaniak.multiplatform_swisstransfer.network.utils.UrlConstants
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 
-internal class TransferRequest internal constructor(json: Json, private val httpClient: HttpClient) : BaseRequest(json) {
+internal class TransferRequest constructor(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
     suspend fun getTransfer(linkUUID: String): ApiResponse<TransferApi> {
-        val url = createUrl("${UrlConstants.links}/$linkUUID")
-        return get(httpClient, url)
+        return get(url = createUrl("${UrlConstants.links}/$linkUUID"))
     }
 }

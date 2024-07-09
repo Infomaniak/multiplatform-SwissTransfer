@@ -21,7 +21,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.requests
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 
-internal class UploadRequest internal constructor(json: Json, private val httpClient: HttpClient) : BaseRequest(json) {
+internal class UploadRequest internal constructor(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
     // TODO: implement method here
 }
