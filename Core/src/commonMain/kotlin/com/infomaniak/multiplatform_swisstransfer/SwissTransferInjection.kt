@@ -39,18 +39,8 @@ class SwissTransferInjection {
     private val realmProvider by lazy { RealmProvider() }
     private val apiClientProvider by lazy { ApiClientProvider() }
 
-    private val transferRepository by lazy {
-        TransferRepository(
-            json = apiClientProvider.json,
-            httpClient = apiClientProvider.createHttpClient(),
-        )
-    }
-    private val uploadRepository by lazy {
-        UploadRepository(
-            json = apiClientProvider.json,
-            httpClient = apiClientProvider.createHttpClient(),
-        )
-    }
+    private val transferRepository by lazy { TransferRepository(apiClientProvider) }
+    private val uploadRepository by lazy { UploadRepository(apiClientProvider) }
 
     /**
      * Loads the default user account and initializes Realm transfers
