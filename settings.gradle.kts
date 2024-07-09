@@ -17,5 +17,5 @@ dependencyResolutionManagement {
 rootProject.name = "multiplatform-SwissTransfer"
 include(":Common")
 include(":Network")
-include(":DB")
+include(":Database")
 include(":Core")

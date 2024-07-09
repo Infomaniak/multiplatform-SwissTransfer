@@ -8,8 +8,8 @@ let package = Package(
         .macOS(.v11)
     ],
     products: [
-        .library(name: "Core", targets: ["Shared"]),
-        .library(name: "DB", targets: ["DB"]),
+        .library(name: "Core", targets: ["Core"]),
+        .library(name: "Database", targets: ["Database"]),
         .library(name: "Network", targets: ["Network"])
     ],
     targets: [
@@ -18,8 +18,8 @@ let package = Package(
             path: "Core.xcframework.zip"
         ),
         .binaryTarget(
-            name: "DB",
-            path: "DB.xcframework.zip"
+            name: "Database",
+            path: "Database.xcframework.zip"
         ),
         .binaryTarget(
             name: "Network",

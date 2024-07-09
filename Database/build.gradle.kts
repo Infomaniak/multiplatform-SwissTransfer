@@ -1,4 +1,5 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import com.infomaniak.multiplatform_swisstranfer.gradle.PublishExtension.Companion.publishConfig
 import com.infomaniak.multiplatform_swisstranfer.gradle.PublishPlugin
 import com.infomaniak.multiplatform_swisstranfer.utils.Versions
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -8,14 +9,17 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.realm)
     alias(libs.plugins.skie)
 }
 apply<PublishPlugin>()
 
+publishConfig {
+    mavenName = "database"
+}
+
 kotlin {
-    withSourcesJar(publish = false)
     androidTarget {
-        withSourcesJar(publish = true)
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.fromTarget(Versions.javaVersion.toString()))
@@ -23,7 +27,7 @@ kotlin {
         publishLibraryVariants("release")
     }
 
-    val xcframeworkName = "Core"
+    val xcframeworkName = "Database"
     val xcf = XCFramework()
     listOf(
         iosX64(),
@@ -43,8 +47,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":Common"))
-            implementation(project(":Database"))
-            implementation(project(":Network"))
+            implementation(libs.realm.base)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -65,7 +68,7 @@ skie {
 }
 
 android {
-    namespace = "com.infomaniak.multiplatform_swisstransfer"
+    namespace = "com.infomaniak.multiplatform_swisstransfer.database"
     compileSdk = Versions.compileSdk
     defaultConfig {
         minSdk = Versions.minSdk
