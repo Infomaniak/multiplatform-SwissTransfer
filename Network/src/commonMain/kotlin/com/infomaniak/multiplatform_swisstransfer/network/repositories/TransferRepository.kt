@@ -18,15 +18,33 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.repositories
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnknownApiException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.requests.TransferRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.cancellation.CancellationException
 
 class TransferRepository internal constructor(private val transferRequest: TransferRequest) {
 
-    constructor(json: Json, httpClient: HttpClient) : this(TransferRequest(json, httpClient))
+    constructor(apiClientProvider: ApiClientProvider = ApiClientProvider()) : this(
+        json = apiClientProvider.json,
+        httpClient = apiClientProvider.httpClient,
+    )
 
+    internal constructor(json: Json, httpClient: HttpClient) : this(TransferRequest(json, httpClient))
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnknownApiException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
     suspend fun getTransfer(linkUUID: String): ApiResponse<TransferApi> = transferRequest.getTransfer(linkUUID)
 }

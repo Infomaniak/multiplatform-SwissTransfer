@@ -18,13 +18,19 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.repositories
 
+import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 
 class UploadRepository internal constructor(private val uploadRequest: UploadRequest) {
 
-    constructor(json: Json, httpClient: HttpClient) : this(UploadRequest(json, httpClient))
+    constructor(apiClientProvider: ApiClientProvider = ApiClientProvider()) : this(
+        apiClientProvider.json,
+        apiClientProvider.httpClient,
+    )
+
+    internal constructor(json: Json, httpClient: HttpClient) : this(UploadRequest(json, httpClient))
 
     // TODO: implement method here
 }
