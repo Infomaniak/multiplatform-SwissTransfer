@@ -1,12 +1,3 @@
-package com.infomaniak.gradle.plugins
-
-import com.infomaniak.gradle.extensions.configureAndroid
-import com.infomaniak.gradle.extensions.configureKotlinMultiplatform
-import com.infomaniak.gradle.extensions.configureSkie
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
-
 /*
  * Infomaniak SwissTransfer - Multiplatform
  * Copyright (C) 2024 Infomaniak Network SA
@@ -24,6 +15,15 @@ import org.gradle.kotlin.dsl.configure
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+package com.infomaniak.gradle.plugins
+
+import com.infomaniak.gradle.extensions.configureAndroid
+import com.infomaniak.gradle.extensions.configureKotlinMultiplatform
+import com.infomaniak.gradle.extensions.configureSkie
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 
 class KotlinMultiplatformPlugin : Plugin<Project> {
 
