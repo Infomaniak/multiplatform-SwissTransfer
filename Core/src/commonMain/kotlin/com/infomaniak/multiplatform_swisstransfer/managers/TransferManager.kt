@@ -18,7 +18,7 @@
 
 package com.infomaniak.multiplatform_swisstransfer.managers
 
-import com.infomaniak.multiplatform_swisstransfer.db.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 
 /**
