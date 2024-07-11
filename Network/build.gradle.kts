@@ -41,8 +41,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":Common"))
+            api(project(":Common"))
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negociation)
+            implementation(libs.ktor.client.json)
+            implementation(libs.ktor.client.encoding)
             implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
