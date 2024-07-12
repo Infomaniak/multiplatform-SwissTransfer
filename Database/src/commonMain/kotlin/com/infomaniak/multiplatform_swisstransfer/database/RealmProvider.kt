@@ -39,8 +39,26 @@ class RealmProvider {
         realmTransfers = Realm.open(realmTransfersConfiguration(userId))
     }
 
+    fun closeRealmAppSettings() {
+        realmAppSettings.close()
+    }
+
+    fun closeRealmUploadTasks() {
+        realmUploadTasks.close()
+    }
+
+    fun closeCurrentRealmTransfers() {
+        realmTransfers?.close()
+    }
+
     fun closeRealm(realm: Realm) {
         realm.close()
+    }
+
+    fun closeAllRealms() {
+        closeRealmAppSettings()
+        closeRealmUploadTasks()
+        closeCurrentRealmTransfers()
     }
 
     private val realmAppSettingsConfiguration = RealmConfiguration
