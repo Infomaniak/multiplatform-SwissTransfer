@@ -49,9 +49,7 @@ internal class RealmProvider {
 
     val realmUploadTasks by lazy { Realm.open(realmUploadTasksConfiguration) }
 
-    fun realmTransfers(userId: Int): Realm {
-        return Realm.open(realmTransfersConfiguration)
-    }
+    fun realmTransfers(userId: Int): Realm = Realm.open(realmTransfersConfiguration)
 
     fun closeRealm(realm: Realm) {
         realm.close()
