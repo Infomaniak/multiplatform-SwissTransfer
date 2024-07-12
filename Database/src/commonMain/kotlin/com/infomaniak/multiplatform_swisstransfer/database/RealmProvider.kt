@@ -26,7 +26,40 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadT
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-internal class RealmProvider {
+class RealmProvider {
+
+    val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
+
+    val realmUploadTasks by lazy { Realm.open(realmUploadTasksConfiguration) }
+
+    var realmTransfers: Realm? = null
+        private set
+
+    fun loadRealmTransfers(userId: Int) {
+        realmTransfers = Realm.open(realmTransfersConfiguration(userId))
+    }
+
+    fun closeRealmAppSettings() {
+        realmAppSettings.close()
+    }
+
+    fun closeRealmUploadTasks() {
+        realmUploadTasks.close()
+    }
+
+    fun closeCurrentRealmTransfers() {
+        realmTransfers?.close()
+    }
+
+    fun closeRealm(realm: Realm) {
+        realm.close()
+    }
+
+    fun closeAllRealms() {
+        closeRealmAppSettings()
+        closeRealmUploadTasks()
+        closeCurrentRealmTransfers()
+    }
 
     private val realmAppSettingsConfiguration = RealmConfiguration
         .Builder(schema = setOf(AppSettings::class))
@@ -38,20 +71,10 @@ internal class RealmProvider {
         .name("UploadTasks")
         .build()
 
-    private val realmTransfersConfiguration = RealmConfiguration
+    private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
         .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class))
-        .name(transferRealmName())
+        .name(transferRealmName(userId))
         .build()
 
-    private fun transferRealmName(userId: Int = 0) = "Transfers-$userId"
-
-    val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
-
-    val realmUploadTasks by lazy { Realm.open(realmUploadTasksConfiguration) }
-
-    fun realmTransfers(userId: Int): Realm = Realm.open(realmTransfersConfiguration)
-
-    fun closeRealm(realm: Realm) {
-        realm.close()
-    }
+    private fun transferRealmName(userId: Int) = "Transfers-$userId"
 }
