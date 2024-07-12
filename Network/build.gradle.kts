@@ -4,7 +4,7 @@ plugins {
     kotlin("plugin.serialization") version libs.versions.kotlin
     alias(libs.plugins.skie)
     id("infomaniak.kotlinMultiplatform")
-    id("infomaniak.PublishPlugin")
+    id("infomaniak.publishPlugin")
 }
 
 kotlin {

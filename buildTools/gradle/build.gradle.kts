@@ -29,8 +29,8 @@ gradlePlugin {
             implementationClass = "com.infomaniak.gradle.plugins.KotlinMultiplatformPlugin"
         }
 
-        register("PublishPlugin") {
-            id = "infomaniak.PublishPlugin"
+        register("infomaniak.publishPlugin") {
+            id = "infomaniak.publishPlugin"
             implementationClass = "com.infomaniak.gradle.plugins.PublishPlugin"
         }
     }

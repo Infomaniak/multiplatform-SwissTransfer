@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.realm)
     alias(libs.plugins.skie)
     id("infomaniak.kotlinMultiplatform")
-    id("infomaniak.PublishPlugin")
+    id("infomaniak.publishPlugin")
 }
 
 //publishConfig {
