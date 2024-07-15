@@ -1,0 +1,133 @@
+#!/bin/bash
+
+#
+# Infomaniak SwissTransfer - Multiplatform
+# Copyright (C) 2024 Infomaniak Network SA
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# Variables
+BOLD=$(tput bold)
+END_BOLD=$(tput sgr0)
+BOLD_GREEN='\033[1;32m'
+COLOR_OFF='\033[0m'
+
+# Function to check whether a string is a valid version (x.x.x)
+function is_valid_version {
+    if [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Function to display documentation
+function show_help {
+    echo "Usage: $0 <version> [--ios | --android]"
+    echo "  <version>   The version number in the format x.x.x"
+    echo "  --ios       Release for iOS platform only"
+    echo "  --android   Release for Android platform only"
+    echo "Examples:"
+    echo "  $0 1.2.3"
+    echo "  $0 1.2.3 --ios"
+    echo "  $0 1.2.3 --android"
+}
+
+function release_android {
+    echo "Releasing Android version $1"
+    sed -i '' "s|mavenVersionName = \".*\"|mavenVersionName = \"$1\"|g" buildTools/gradle/src/main/kotlin/com/infomaniak/gradle/utils/Versions.kt
+}
+
+function release_ios {
+    IOS_TAG=$1
+    echo "Releasing iOS version $1"
+    echo "Deletes all old caches"
+    ./gradlew clean
+    rm -rf build # We delete to avoid caching problems
+    rm -rf .gradle # We delete to avoid caching problems
+    rm -rf release # The release folder contains the old archives
+
+    # Build
+    echo "Build all Modules for XCFrameworks"
+    ./gradlew :Network:assembleNetworkReleaseXCFramework
+    ./gradlew :Database:assembleDatabaseReleaseXCFramework
+    ./gradlew :Core:assembleCoreReleaseXCFramework
+
+    # Archive
+    echo "Archive XCFramework to ${BOLD}release${END_BOLD} folder"
+    mkdir -p release
+    zip -r release/Network.xcframework.zip Network/build/XCFrameworks/release/Network.xcframework
+    zip -r release/Database.xcframework.zip Database/build/XCFrameworks/release/Database.xcframework
+    zip -r release/Core.xcframework.zip Core/build/XCFrameworks/release/Core.xcframework
+
+    # Calculate checksums
+    echo "Calculate modules checksums from release folder"
+    NETWORK_CHECKSUM=$(swift package compute-checksum release/Network.xcframework.zip)
+    DATABASE_CHECKSUM=$(swift package compute-checksum release/Database.xcframework.zip)
+    CORE_CHECKSUM=$(swift package compute-checksum release/Core.xcframework.zip)
+
+    # Update Package.swift
+    echo "${BOLD}Update Package.swift${END_BOLD}"
+    NETWORK_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/Network.xcframework.zip"
+    DATABASE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/Database.xcframework.zip"
+    CORE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/Core.xcframework.zip"
+    # With the `sed` command the regex doesn't work, whereas with the `perl` command it does.
+    perl -0777 -pi -e "s|url: \".*Network.xcframework.zip\",(\s*)checksum: \".*\"|url: \"$NETWORK_URL\",\1checksum: \"$NETWORK_CHECKSUM\"|g" Package.swift
+    perl -0777 -pi -e "s|url: \".*Database.xcframework.zip\",(\s*)checksum: \".*\"|url: \"$DATABASE_URL\",\1checksum: \"$DATABASE_CHECKSUM\"|g" Package.swift
+    perl -0777 -pi -e "s|url: \".*Core.xcframework.zip\",(\s*)checksum: \".*\"|url: \"$CORE_URL\",\1checksum: \"$CORE_CHECKSUM\"|g" Package.swift
+
+    # Upload info
+    echo "${BOLD_GREEN}Check the ${BOLD}release${END_BOLD} folder to see if the archives are there, then you can upload them to a github release.${COLOR_OFF}"
+}
+
+# Release Android and iOS
+function release_both {
+    echo "Releasing both iOS and Android version $1"
+    release_android "$1"
+    release_ios "$1"
+}
+
+# Check arguments, if no arguments are supplied, the documentation is displayed
+if [ $# -eq 0 ]; then
+    show_help
+    exit 1
+fi
+
+VERSION=$1
+
+if ! is_valid_version "$VERSION"; then
+    echo "Error: Invalid version format. It should be x.x.x"
+    show_help
+    exit 1
+fi
+
+# No options have been provided, so release of both iOS and Android versions
+if [ $# -eq 1 ]; then
+    release_both "$VERSION"
+    exit 0
+fi
+
+# An option has been provided
+OPTION=$2
+
+if [[ "$OPTION" == "--ios" ]]; then
+    release_ios "$VERSION"
+elif [[ "$OPTION" == "--android" ]]; then
+    release_android "$VERSION"
+else
+    echo "Error: Invalid option $OPTION"
+    show_help
+    exit 1
+fi
