@@ -7,10 +7,6 @@ plugins {
     id("infomaniak.publishPlugin")
 }
 
-//publishConfig {
-//    mavenName = "database"
-//}
-
 kotlin {
     sourceSets {
         commonMain.dependencies {
