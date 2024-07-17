@@ -15,15 +15,18 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "Core",
-            path: "Core.xcframework.zip"
+            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/v0.0.1/Core.xcframework.zip",
+            checksum: "core-xcframework-checksum"
         ),
         .binaryTarget(
             name: "Database",
-            path: "Database.xcframework.zip"
+            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/v0.0.1/Database.xcframework.zip",
+            checksum: "database-xcframework-checksum"
         ),
         .binaryTarget(
             name: "Network",
-            path: "Network.xcframework.zip"
+            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/v0.0.1/Network.xcframework.zip",
+            checksum: "network-xcframework-checksum"
         ),
     ]
 )

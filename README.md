@@ -129,6 +129,48 @@ val manager = core.transferManager
 // Use the manager to perform actions
 ```
 
+## Release Process
+
+To release a new version of the SwissTransfer Core project, you can use the `buildRelease` script. This script allows you to
+specify the version and optionally limit the release to a specific platform (iOS or Android).
+
+### Usage
+
+```bash
+./buildRelease <version> [--ios | --android]
+```
+
+- `<version>`: The version number in the format `x.x.x`. This parameter is required and cannot start with `-` or `--`.
+- `--ios`: Optional. Release for the iOS platform only.
+- `--android`: Optional. Release for the Android platform only.
+
+### Examples
+
+- Release for both platforms:
+
+    ```bash
+    ./buildRelease 1.2.3
+    ```
+
+- Release for iOS only:
+
+    ```bash
+    ./buildRelease 1.2.3 --ios
+    ```
+
+- Release for Android only:
+
+    ```bash
+    ./buildRelease 1.2.3 --android
+    ```
+
+If no parameters are provided or the parameters are incorrect, the script will display usage instructions.
+
+### iOS Release Note
+
+For iOS releases, once the release process is complete, the generated archives will be located in the **release** directory.
+You will need to upload these archives as release assets on GitHub.
+
 ## Contributing
 
 If you see a bug or an enhanceable point, feel free to create an issue, so that we can discuss about it, and once approved, we or
