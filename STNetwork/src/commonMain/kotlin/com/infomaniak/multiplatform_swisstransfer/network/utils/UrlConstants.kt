@@ -26,6 +26,7 @@ internal object UrlConstants {
     //endRegion
 
     //region Upload
+    const val containers = "containers"
     const val uploadComplete = "uploadComplete"
     //endregion
 }

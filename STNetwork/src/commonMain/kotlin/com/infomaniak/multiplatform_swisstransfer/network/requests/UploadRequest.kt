@@ -18,10 +18,16 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
+import com.infomaniak.multiplatform_swisstransfer.network.utils.UrlConstants
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 
 internal class UploadRequest internal constructor(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
-    // TODO: implement method here
+    suspend fun createContainer(containerRequest: ContainerRequest): UploadContainerResponseApi {
+        return post(url = createUrl(UrlConstants.containers), containerRequest)
+    }
+
 }
