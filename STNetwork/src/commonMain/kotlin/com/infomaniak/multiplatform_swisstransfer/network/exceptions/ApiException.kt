@@ -18,4 +18,4 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
-class ApiException(val errorCode: Int, errorMessage: String) : Exception(errorMessage)
+open class ApiException(val errorCode: Int, errorMessage: String) : Exception(errorMessage)
