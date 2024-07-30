@@ -31,7 +31,7 @@ class PublishPlugin : Plugin<Project> {
         target.plugins.apply("maven-publish")
 
         // Create the PublishExtension and add it to the project
-        val extension = target.extensions.create<PublishExtension>(PublishExtension.extensionName)
+        val extension = target.extensions.create<PublishExtension>(PublishExtension.EXTENSION_NAME)
 
         target.group = "com.github.infomaniak.multiplatform_swisstransfer"
         target.version = Versions.mavenVersionName
