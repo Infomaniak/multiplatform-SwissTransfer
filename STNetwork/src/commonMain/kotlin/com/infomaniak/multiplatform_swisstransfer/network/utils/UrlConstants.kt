@@ -26,7 +26,18 @@ internal object UrlConstants {
     //endRegion
 
     //region Upload
-    const val containers = "containers"
+    private const val containers = "containers"
+    private const val uploadChunk = "uploadChunk"
     const val uploadComplete = "uploadComplete"
+
+    fun createContainer() = containers
+
+    fun uploadChunk(containerUUID: String, fileUUID: String, chunkIndex: Int, lastChunk: Boolean): String {
+        return "$uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${lastChunk.int()}"
+    }
+    //endregion
+
+    //region Utils
+    private fun Boolean.int() = if (this) 1 else 0
     //endregion
 }

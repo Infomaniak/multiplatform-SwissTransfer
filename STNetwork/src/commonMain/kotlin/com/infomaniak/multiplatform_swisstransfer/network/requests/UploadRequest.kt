@@ -20,14 +20,32 @@ package com.infomaniak.multiplatform_swisstransfer.network.requests
 
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
-import com.infomaniak.multiplatform_swisstransfer.network.utils.UrlConstants
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 
 internal class UploadRequest internal constructor(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
     suspend fun createContainer(containerRequest: ContainerRequest): UploadContainerResponseApi {
-        return post(url = createUrl(UrlConstants.containers), containerRequest)
+        return post(url = createUrl(ApiRoutes.createContainer()), containerRequest)
+    }
+
+    suspend fun uploadChunk(
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        lastChunk: Boolean,
+        data: ByteArray,
+    ): Boolean {
+        val httpResponse = httpClient.post(
+            url = createUrl(ApiRoutes.uploadChunk(containerUUID, fileUUID, chunkIndex, lastChunk))
+        ) {
+            setBody(data)
+        }
+        return httpResponse.status.isSuccess()
     }
 
 }

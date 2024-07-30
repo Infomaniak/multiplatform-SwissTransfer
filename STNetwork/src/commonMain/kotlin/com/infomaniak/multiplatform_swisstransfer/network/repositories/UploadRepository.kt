@@ -61,4 +61,20 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         }
     }
 
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnknownApiException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun uploadChunk(
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        lastChunk: Boolean,
+        data: ByteArray,
+    ): Boolean {
+        return uploadRequest.uploadChunk(containerUUID, fileUUID, chunkIndex, lastChunk, data)
+    }
 }
