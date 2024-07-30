@@ -18,6 +18,6 @@
 
 package com.infomaniak.multiplatform_swisstransfer.utils
 
-object Constants {
+internal object Constants {
     const val DEFAULT_USER_ID = 0
 }
