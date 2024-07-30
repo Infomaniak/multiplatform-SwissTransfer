@@ -6,10 +6,16 @@ plugins {
     id("infomaniak.publishPlugin")
 }
 
+private val commonProject = project(":STCommon")
+
+kotlinMultiplatformConfig {
+    appleExportedProjects = listOf(commonProject)
+}
+
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":STCommon"))
+            api(commonProject)
             implementation(project(":STDatabase"))
             implementation(project(":STNetwork"))
         }
