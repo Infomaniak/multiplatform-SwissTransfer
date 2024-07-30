@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.realm)
     alias(libs.plugins.skie)
     id("infomaniak.kotlinMultiplatform")
     id("infomaniak.publishPlugin")
@@ -10,8 +9,9 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":Common"))
-            implementation(libs.realm.base)
+            implementation(project(":STCommon"))
+            implementation(project(":STDatabase"))
+            implementation(project(":STNetwork"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

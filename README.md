@@ -89,13 +89,13 @@ dependencyResolutionManagement {
 Add the following dependency to your `build.gradle.kts` file:
 
 ```kts
-implementation("com.github.infomaniak.multiplatform-SwissTransfer:core:{tag}")
+implementation("com.github.infomaniak.multiplatform-SwissTransfer:STCore:{tag}")
 ```
 
 `build.gradle` file:
 
 ```gradle
-implementation 'com.github.infomaniak.multiplatform-SwissTransfer:core:{tag}'
+implementation 'com.github.infomaniak.multiplatform-SwissTransfer:STCore:{tag}'
 ```
 
 For others modules:

@@ -12,7 +12,7 @@ API and providing repositories for transfer and upload operations.
 To install the Network module for Android, add the following dependency to your `build.gradle.kts` file:
 
 ```kts
-implementation("com.github.infomaniak.multiplatform-SwissTransfer:network:{tag}")
+implementation("com.github.infomaniak.multiplatform-SwissTransfer:STNetwork:{tag}")
 ```
 
 ### iOS

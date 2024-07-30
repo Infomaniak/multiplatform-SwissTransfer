@@ -61,28 +61,28 @@ function release_ios {
 
     # Build
     echo "Build all Modules for XCFrameworks"
-    ./gradlew :Network:assembleNetworkReleaseXCFramework
-    ./gradlew :Database:assembleDatabaseReleaseXCFramework
-    ./gradlew :Core:assembleCoreReleaseXCFramework
+    ./gradlew :STNetwork:assembleSTNetworkReleaseXCFramework
+    ./gradlew :STDatabase:assembleSTDatabaseReleaseXCFramework
+    ./gradlew :STCore:assembleSTCoreReleaseXCFramework
 
     # Archive
     echo "Archive XCFramework to ${BOLD}release${END_BOLD} folder"
     mkdir -p release
-    zip -r release/Network.xcframework.zip Network/build/XCFrameworks/release/Network.xcframework
-    zip -r release/Database.xcframework.zip Database/build/XCFrameworks/release/Database.xcframework
-    zip -r release/Core.xcframework.zip Core/build/XCFrameworks/release/Core.xcframework
+    zip -r release/STNetwork.xcframework.zip STNetwork/build/XCFrameworks/release/STNetwork.xcframework
+    zip -r release/STDatabase.xcframework.zip STDatabase/build/XCFrameworks/release/STDatabase.xcframework
+    zip -r release/STCore.xcframework.zip STCore/build/XCFrameworks/release/STCore.xcframework
 
     # Calculate checksums
     echo "Calculate modules checksums from release folder"
-    NETWORK_CHECKSUM=$(swift package compute-checksum release/Network.xcframework.zip)
-    DATABASE_CHECKSUM=$(swift package compute-checksum release/Database.xcframework.zip)
-    CORE_CHECKSUM=$(swift package compute-checksum release/Core.xcframework.zip)
+    NETWORK_CHECKSUM=$(swift package compute-checksum release/STNetwork.xcframework.zip)
+    DATABASE_CHECKSUM=$(swift package compute-checksum release/STDatabase.xcframework.zip)
+    CORE_CHECKSUM=$(swift package compute-checksum release/STCore.xcframework.zip)
 
     # Update Package.swift
     echo "${BOLD}Update Package.swift${END_BOLD}"
-    NETWORK_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/Network.xcframework.zip"
-    DATABASE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/Database.xcframework.zip"
-    CORE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/Core.xcframework.zip"
+    NETWORK_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/STNetwork.xcframework.zip"
+    DATABASE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/STDatabase.xcframework.zip"
+    CORE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/STCore.xcframework.zip"
     # With the `sed` command the regex doesn't work, whereas with the `perl` command it does.
     perl -0777 -pi -e "s|url: \".*Network.xcframework.zip\",(\s*)checksum: \".*\"|url: \"$NETWORK_URL\",\1checksum: \"$NETWORK_CHECKSUM\"|g" Package.swift
     perl -0777 -pi -e "s|url: \".*Database.xcframework.zip\",(\s*)checksum: \".*\"|url: \"$DATABASE_URL\",\1checksum: \"$DATABASE_CHECKSUM\"|g" Package.swift
