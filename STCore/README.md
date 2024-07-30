@@ -13,7 +13,7 @@ initialized properties and methods. This class replaces traditional dependency i
 To install the Network module for Android, add the following dependency to your `build.gradle.kts` file:
 
 ```kts
-implementation("com.github.infomaniak.multiplatform-SwissTransfer:core:{tag}")
+implementation("com.github.infomaniak.multiplatform-SwissTransfer:STCore:{tag}")
 ```
 
 ### iOS
