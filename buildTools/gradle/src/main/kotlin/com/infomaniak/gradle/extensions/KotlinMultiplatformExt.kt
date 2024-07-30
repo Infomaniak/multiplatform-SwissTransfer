@@ -53,11 +53,14 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
         it.binaries.framework {
             baseName = xcframeworkName
             binaryOption("bundleId", "com.infomaniak.multiplatform_swisstransfer.${xcframeworkName}")
-            stMultiplatformExtension.appleExportedProjects.forEach { stProject ->
-                export(stProject)
-            }
             xcf.add(this)
             isStatic = true
+
+            afterEvaluate {
+                stMultiplatformExtension.appleExportedProjects.forEach { stProject ->
+                    export(stProject)
+                }
+            }
         }
     }
 }

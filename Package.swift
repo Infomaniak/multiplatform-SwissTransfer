@@ -16,17 +16,17 @@ let package = Package(
         .binaryTarget(
             name: "Core",
             url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/0.0.2/STCore.xcframework.zip",
-            checksum: "c3f83598e0103049745b37af8f351b83d63db8a5cee35791a15c94d05f987ca8"
+            checksum: "4dffa7bf322805ed53bd450444d3abb7b3cfee40cfe0c5a70343206bbb204fc1"
         ),
         .binaryTarget(
             name: "Database",
             url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/0.0.2/STDatabase.xcframework.zip",
-            checksum: "4e1ca5dee921e56fd06fdc3ca2bac0585c0e2b3bae71252cb2cf74a13e71f45d"
+            checksum: "b535793a27c240b6b352c8989d257ac9e4647fbafafc48c96ef440bf05c047a8"
         ),
         .binaryTarget(
             name: "Network",
             url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/0.0.2/STNetwork.xcframework.zip",
-            checksum: "3a493f4df7b51324b8cc432627d14b59525a1700242b9f0dc028f34c8ba3bc85"
+            checksum: "cc2f2e1cac12b41ab93228b36c54d42215bbf35bc2e1e45afbe514402f2c7de8"
         ),
     ]
 )
