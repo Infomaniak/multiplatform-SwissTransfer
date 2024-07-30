@@ -63,4 +63,10 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
             }
         }
     }
+
+    // Provide documentation with kDoc in Objective-C header
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-Xexport-kdoc")
+    }
 }

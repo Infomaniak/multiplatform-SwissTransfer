@@ -43,9 +43,9 @@ class SwissTransferInjection {
     private val uploadRepository by lazy { UploadRepository(apiClientProvider) }
 
     /**
-     * Loads the default user account and initializes Realm transfers
-     * for the default user ID defined in the constants.
+     * Loads the default user account and initializes Realm transfers for the default user ID defined in the constants.
      */
+    @Throws(Exception::class)
     fun loadDefaultAccount() {
         realmProvider.loadRealmTransfers(Constants.DEFAULT_USER_ID)
     }
