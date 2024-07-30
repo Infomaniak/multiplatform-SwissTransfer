@@ -22,13 +22,13 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 
-open class PublishExtension {
-    var mavenName: String? = null
+open class STMultiplatformExtension {
+    var appleExportedProjects = listOf<Project>()
 
     companion object {
-        internal const val EXTENSION_NAME = "publishConfig"
+        internal const val EXTENSION_NAME = "kotlinMultiplatformConfig"
 
-        fun Project.publishConfig(configure: Action<PublishExtension>): Unit =
+        fun Project.kotlinMultiplatformConfig(configure: Action<STMultiplatformExtension>): Unit =
             (this as ExtensionAware).extensions.configure(EXTENSION_NAME, configure)
     }
 }

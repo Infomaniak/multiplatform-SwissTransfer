@@ -18,14 +18,20 @@
 
 package com.infomaniak.gradle.extensions
 
+import com.infomaniak.gradle.plugins.STMultiplatformExtension
 import com.infomaniak.gradle.utils.Versions
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.create
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatformExtension) = extension.apply {
+    // Create the STMultiplatformExtension and add it to the project
+    val stMultiplatformExtension = extensions.create<STMultiplatformExtension>(STMultiplatformExtension.EXTENSION_NAME)
+
+    // Do not generate source code for all platforms, only for Android
     withSourcesJar(publish = false)
     // Targets
     androidTarget {
@@ -47,6 +53,9 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
         it.binaries.framework {
             baseName = xcframeworkName
             binaryOption("bundleId", "com.infomaniak.multiplatform_swisstransfer.${xcframeworkName}")
+            stMultiplatformExtension.appleExportedProjects.forEach { stProject ->
+                export(stProject)
+            }
             xcf.add(this)
             isStatic = true
         }

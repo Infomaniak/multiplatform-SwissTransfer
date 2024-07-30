@@ -10,7 +10,7 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(project(":STCommon"))
+            implementation(project(":STCommon"))
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negociation)
             implementation(libs.ktor.client.json)
