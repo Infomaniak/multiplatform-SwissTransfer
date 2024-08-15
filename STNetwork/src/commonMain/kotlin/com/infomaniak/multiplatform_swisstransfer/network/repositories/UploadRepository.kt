@@ -20,13 +20,13 @@ package com.infomaniak.multiplatform_swisstransfer.network.repositories
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnknownApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.EmailValidationData
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
@@ -43,10 +43,10 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
-        UnknownApiException::class,
         ContainerErrorsException::class,
+        ApiException::class,
         NetworkException::class,
+        UnknownApiException::class,
         UnknownException::class,
     )
     suspend fun createContainer(containerRequest: ContainerRequest): UploadContainerResponseApi {
@@ -55,6 +55,26 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         }.getOrElse { exception ->
             if (exception is UnknownApiException) {
                 throw exception.toContainerErrorsException()
+            } else {
+                throw exception
+            }
+        }
+    }
+
+    @Throws(
+        CancellationException::class,
+        EmailValidationException::class,
+        ApiException::class,
+        NetworkException::class,
+        UnknownApiException::class,
+        UnknownException::class,
+    )
+    suspend fun emailValidation(emailValidationData: EmailValidationData): AuthorEmailToken {
+        return runCatching {
+            uploadRequest.emailValidation(emailValidationData)
+        }.getOrElse { exception ->
+            if (exception is UnknownApiException) {
+                throw exception.toEmailValidationException()
             } else {
                 throw exception
             }
