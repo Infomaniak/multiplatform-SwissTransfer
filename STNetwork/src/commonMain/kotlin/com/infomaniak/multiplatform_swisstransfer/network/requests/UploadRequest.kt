@@ -22,6 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEm
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
@@ -38,6 +39,12 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
     suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {
         return post(url = createUrl(ApiRoutes.verifyEmailCode), verifyEmailCodeBody)
     }
+
+    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody): Boolean {
+        val httpResponse = httpClient.post(url = createUrl(ApiRoutes.resendEmailCode)) {
+            setBody(resendEmailCodeBody)
+        }
+        return httpResponse.status.isSuccess()
     }
 
     suspend fun uploadChunk(

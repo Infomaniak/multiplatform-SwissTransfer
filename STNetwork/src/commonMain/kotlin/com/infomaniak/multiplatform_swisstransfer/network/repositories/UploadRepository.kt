@@ -26,6 +26,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValida
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
 import io.ktor.client.HttpClient
@@ -79,6 +80,17 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
                 throw exception
             }
         }
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        NetworkException::class,
+        UnknownApiException::class,
+        UnknownException::class,
+    )
+    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody): Boolean {
+        return uploadRequest.resendEmailCode(resendEmailCodeBody)
     }
 
     @Throws(
