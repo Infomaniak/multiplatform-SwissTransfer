@@ -21,7 +21,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.requests
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.EmailValidationData
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
@@ -35,8 +35,9 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
         return post(url = createUrl(ApiRoutes.createContainer), containerRequest)
     }
 
-    suspend fun emailValidation(emailValidationData: EmailValidationData): AuthorEmailToken {
-        return post(url = createUrl(ApiRoutes.emailValidation), emailValidationData)
+    suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {
+        return post(url = createUrl(ApiRoutes.verifyEmailCode), verifyEmailCodeBody)
+    }
     }
 
     suspend fun uploadChunk(

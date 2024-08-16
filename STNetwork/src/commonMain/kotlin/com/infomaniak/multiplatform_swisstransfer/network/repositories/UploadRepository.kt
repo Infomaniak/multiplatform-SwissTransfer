@@ -26,7 +26,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValida
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.EmailValidationData
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
@@ -69,9 +69,9 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         UnknownApiException::class,
         UnknownException::class,
     )
-    suspend fun emailValidation(emailValidationData: EmailValidationData): AuthorEmailToken {
+    suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {
         return runCatching {
-            uploadRequest.emailValidation(emailValidationData)
+            uploadRequest.verifyEmailCode(verifyEmailCodeBody)
         }.getOrElse { exception ->
             if (exception is UnknownApiException) {
                 throw exception.toEmailValidationException()

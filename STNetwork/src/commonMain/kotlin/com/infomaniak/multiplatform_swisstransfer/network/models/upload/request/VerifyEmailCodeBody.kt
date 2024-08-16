@@ -22,7 +22,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class EmailValidationData(
+data class VerifyEmailCodeBody(
     val code: String,
     @SerialName("address")
     val email: String,
