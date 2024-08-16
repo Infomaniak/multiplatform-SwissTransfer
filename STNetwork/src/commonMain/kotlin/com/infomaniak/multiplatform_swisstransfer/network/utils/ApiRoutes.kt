@@ -23,6 +23,14 @@ internal object ApiRoutes {
 
     //region Transfer
     const val links = "links"
+
+    fun downloadFiles(downloadHost: String, linkUUID: String): String {
+        return "https://$downloadHost/api/download/$linkUUID"
+    }
+
+    fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?): String {
+        return "${downloadFiles(downloadHost, linkUUID)}/$fileUUID"
+    }
     //endRegion
 
     //region Upload
