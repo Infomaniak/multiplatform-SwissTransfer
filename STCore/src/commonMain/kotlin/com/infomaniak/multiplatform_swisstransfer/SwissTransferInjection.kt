@@ -45,7 +45,7 @@ class SwissTransferInjection {
     /**
      * Loads the default user account and initializes Realm transfers for the default user ID defined in the constants.
      */
-    @Throws(Exception::class)
+    @Throws(IllegalArgumentException::class, IllegalStateException::class)
     fun loadDefaultAccount() {
         realmProvider.loadRealmTransfers(Constants.DEFAULT_USER_ID)
     }
