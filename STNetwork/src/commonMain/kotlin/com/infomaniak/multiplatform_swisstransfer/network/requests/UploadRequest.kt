@@ -19,7 +19,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponseApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
@@ -64,7 +64,7 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
         return httpResponse.status.isSuccess()
     }
 
-    suspend fun finishUpload(finishUploadBody: FinishUploadBody): List<UploadCompleteResponseApi> {
+    suspend fun finishUpload(finishUploadBody: FinishUploadBody): List<UploadCompleteResponse> {
         return post(createUrl(ApiRoutes.finishUpload), finishUploadBody)
     }
 }
