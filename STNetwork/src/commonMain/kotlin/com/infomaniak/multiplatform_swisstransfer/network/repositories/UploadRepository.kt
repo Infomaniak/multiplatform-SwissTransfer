@@ -24,10 +24,10 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.InitUploadResponseApi
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
@@ -103,13 +103,14 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         UnknownException::class,
     )
     suspend fun uploadChunk(
+        uploadHost: String,
         containerUUID: String,
         fileUUID: String,
         chunkIndex: Int,
         lastChunk: Boolean,
         data: ByteArray,
     ): Boolean {
-        return uploadRequest.uploadChunk(containerUUID, fileUUID, chunkIndex, lastChunk, data)
+        return uploadRequest.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, lastChunk, data)
     }
 
     @Throws(

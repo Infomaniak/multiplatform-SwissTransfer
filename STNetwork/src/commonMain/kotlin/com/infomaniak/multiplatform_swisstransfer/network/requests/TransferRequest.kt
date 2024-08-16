@@ -24,9 +24,9 @@ import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 
-internal class TransferRequest constructor(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
+internal class TransferRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
     suspend fun getTransfer(linkUUID: String): ApiResponse<TransferApi> {
-        return get(url = createUrl("${ApiRoutes.links}/$linkUUID"))
+        return get(url = createUrl(ApiRoutes.getTransfer(linkUUID)))
     }
 }

@@ -22,19 +22,27 @@ internal object ApiRoutes {
     const val baseUrl = "https://www.swisstransfer.com/api/"
 
     //region Transfer
-    const val links = "links"
+    fun getTransfer(linkUUID: String): String {
+        return "links/$linkUUID"
+    }
+
+    fun downloadFiles(downloadHost: String, linkUUID: String): String {
+        return "https://$downloadHost/api/download/$linkUUID"
+    }
+
+    fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?): String {
+        return "${downloadFiles(downloadHost, linkUUID)}/$fileUUID"
+    }
     //endRegion
 
     //region Upload
-    private const val uploadChunk = "uploadChunk"
-
     const val initUpload = "containers"
     const val verifyEmailCode = "emails-validation"
     const val resendEmailCode = "$verifyEmailCode/resend"
     const val finishUpload = "uploadComplete"
 
-    fun uploadChunk(containerUUID: String, fileUUID: String, chunkIndex: Int, lastChunk: Boolean): String {
-        return "$uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${lastChunk.int()}"
+    fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, lastChunk: Boolean): String {
+        return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${lastChunk.int()}"
     }
     //endregion
 

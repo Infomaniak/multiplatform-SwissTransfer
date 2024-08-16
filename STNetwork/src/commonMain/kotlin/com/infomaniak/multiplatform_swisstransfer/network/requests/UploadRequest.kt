@@ -19,12 +19,12 @@
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.InitUploadResponseApi
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
@@ -32,7 +32,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 
-internal class UploadRequest internal constructor(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
+internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
     suspend fun initUpload(initUploadBody: InitUploadBody): InitUploadResponseApi {
         return post(url = createUrl(ApiRoutes.initUpload), initUploadBody)
@@ -50,6 +50,7 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
     }
 
     suspend fun uploadChunk(
+        uploadHost: String,
         containerUUID: String,
         fileUUID: String,
         chunkIndex: Int,
@@ -57,7 +58,7 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
         data: ByteArray,
     ): Boolean {
         val httpResponse = httpClient.post(
-            url = createUrl(ApiRoutes.uploadChunk(containerUUID, fileUUID, chunkIndex, lastChunk))
+            urlString = ApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, lastChunk)
         ) {
             setBody(data)
         }
