@@ -25,14 +25,6 @@ internal object ApiRoutes {
     fun getTransfer(linkUUID: String): String {
         return "links/$linkUUID"
     }
-
-    fun downloadFiles(downloadHost: String, linkUUID: String): String {
-        return "https://$downloadHost/api/download/$linkUUID"
-    }
-
-    fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?): String {
-        return "${downloadFiles(downloadHost, linkUUID)}/$fileUUID"
-    }
     //endRegion
 
     //region Upload
@@ -40,13 +32,5 @@ internal object ApiRoutes {
     const val verifyEmailCode = "emails-validation"
     const val resendEmailCode = "$verifyEmailCode/resend"
     const val finishUpload = "uploadComplete"
-
-    fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, lastChunk: Boolean): String {
-        return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${lastChunk.int()}"
-    }
-    //endregion
-
-    //region Utils
-    private fun Boolean.int() = if (this) 1 else 0
     //endregion
 }

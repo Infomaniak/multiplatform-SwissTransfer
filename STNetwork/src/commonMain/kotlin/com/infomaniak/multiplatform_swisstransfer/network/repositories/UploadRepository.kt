@@ -107,10 +107,10 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         containerUUID: String,
         fileUUID: String,
         chunkIndex: Int,
-        lastChunk: Boolean,
+        isLastChunk: Boolean,
         data: ByteArray,
     ): Boolean {
-        return uploadRequest.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, lastChunk, data)
+        return uploadRequest.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk, data)
     }
 
     @Throws(
