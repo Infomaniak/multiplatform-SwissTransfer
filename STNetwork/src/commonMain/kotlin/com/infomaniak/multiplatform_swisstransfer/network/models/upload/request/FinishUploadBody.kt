@@ -22,7 +22,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UploadComplete(
+data class FinishUploadBody(
     @SerialName("UUID")
     val containerUUID: String = "",
     val lang: String = "",
