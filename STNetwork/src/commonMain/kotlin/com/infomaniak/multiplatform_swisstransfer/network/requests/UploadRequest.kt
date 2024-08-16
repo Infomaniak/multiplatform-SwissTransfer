@@ -50,6 +50,7 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
     }
 
     suspend fun uploadChunk(
+        uploadHost: String,
         containerUUID: String,
         fileUUID: String,
         chunkIndex: Int,
@@ -57,7 +58,7 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
         data: ByteArray,
     ): Boolean {
         val httpResponse = httpClient.post(
-            url = createUrl(ApiRoutes.uploadChunk(containerUUID, fileUUID, chunkIndex, lastChunk))
+            urlString = ApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, lastChunk)
         ) {
             setBody(data)
         }
