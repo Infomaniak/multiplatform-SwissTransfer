@@ -18,19 +18,17 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.utils
 
-internal object ApiRoutes {
-    const val baseUrl = "https://www.swisstransfer.com/api/"
+object SharedApiRoutes {
 
-    //region Transfer
-    fun getTransfer(linkUUID: String): String {
-        return "links/$linkUUID"
+    fun downloadFiles(downloadHost: String, linkUUID: String): String {
+        return "https://$downloadHost/api/download/$linkUUID"
     }
-    //endRegion
 
-    //region Upload
-    const val initUpload = "containers"
-    const val verifyEmailCode = "emails-validation"
-    const val resendEmailCode = "$verifyEmailCode/resend"
-    const val finishUpload = "uploadComplete"
-    //endregion
+    fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?): String {
+        return "${downloadFiles(downloadHost, linkUUID)}/$fileUUID"
+    }
+
+    fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String {
+        return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}"
+    }
 }

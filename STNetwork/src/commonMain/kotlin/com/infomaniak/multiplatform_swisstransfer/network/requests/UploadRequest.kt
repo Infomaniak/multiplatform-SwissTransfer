@@ -26,6 +26,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
+import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -54,11 +55,11 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
         containerUUID: String,
         fileUUID: String,
         chunkIndex: Int,
-        lastChunk: Boolean,
+        isLastChunk: Boolean,
         data: ByteArray,
     ): Boolean {
         val httpResponse = httpClient.post(
-            urlString = ApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, lastChunk)
+            urlString = SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
         ) {
             setBody(data)
         }
