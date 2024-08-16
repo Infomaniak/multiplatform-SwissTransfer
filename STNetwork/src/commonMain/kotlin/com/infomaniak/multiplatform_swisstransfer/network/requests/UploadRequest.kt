@@ -64,7 +64,7 @@ internal class UploadRequest internal constructor(json: Json, httpClient: HttpCl
         return httpResponse.status.isSuccess()
     }
 
-    suspend fun finishUpload(finishUploadBody: FinishUploadBody): UploadCompleteResponseApi {
+    suspend fun finishUpload(finishUploadBody: FinishUploadBody): List<UploadCompleteResponseApi> {
         return post(createUrl(ApiRoutes.finishUpload), finishUploadBody)
     }
 }

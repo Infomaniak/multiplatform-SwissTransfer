@@ -119,7 +119,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun finishUpload(finishUploadBody: FinishUploadBody): UploadCompleteResponseApi {
+    suspend fun finishUpload(finishUploadBody: FinishUploadBody): List<UploadCompleteResponseApi> {
         return uploadRequest.finishUpload(finishUploadBody)
     }
 }
