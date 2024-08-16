@@ -18,13 +18,10 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UploadComplete(
-    @SerialName("UUID")
-    val containerUUID: String = "",
-    val lang: String = "",
-    val recipientsEmails: List<String>? = null,
+data class ResendEmailCodeBody(
+    val address: String,
+    val lang: String, // example "fr_FR"
 )

@@ -18,9 +18,9 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainerResponse
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.InitUploadResponse
 
-class UploadContainerResponseApi : UploadContainerResponse<UploadContainerApi> {
+class InitUploadResponseApi : InitUploadResponse<UploadContainerApi> {
     override var container: UploadContainerApi = UploadContainerApi()
     override var uploadHost: String = ""
     override var filesUUID: List<String> = emptyList()

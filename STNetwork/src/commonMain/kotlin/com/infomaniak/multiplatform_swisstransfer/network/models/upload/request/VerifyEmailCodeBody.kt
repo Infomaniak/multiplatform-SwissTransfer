@@ -18,20 +18,12 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class UploadRequest(
-    val duration: String = "",
-    val authorEmail: String = "",
-    val password: String = "",
-    val message: String = "",
-    val sizeOfUpload: Long = 0,
-    val numberOfDownload: Long = 0,
-    val numberOfFile: Long = 0,
-    val recaptcha: String = "",
-    val recaptchaVersion: Long = 0,
-    val lang: String = "",
-    val files: List<UploadFileRequest> = emptyList(),
-    val recipientsEmails: String = "",
+data class VerifyEmailCodeBody(
+    val code: String,
+    @SerialName("address")
+    val email: String,
 )

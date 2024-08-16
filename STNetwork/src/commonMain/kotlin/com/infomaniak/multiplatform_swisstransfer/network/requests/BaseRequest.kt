@@ -18,7 +18,7 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
-import com.infomaniak.multiplatform_swisstransfer.network.utils.UrlConstants
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -34,7 +34,7 @@ import kotlinx.serialization.json.Json
 internal open class BaseRequest(protected val json: Json, protected val httpClient: HttpClient) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
-        val baseUrl = Url(UrlConstants.baseUrl + path)
+        val baseUrl = Url(ApiRoutes.baseUrl + path)
         return URLBuilder(baseUrl).apply {
             queries.forEach { parameters.append(it.first, it.second) }
         }.build()

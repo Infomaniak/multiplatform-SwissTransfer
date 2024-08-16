@@ -1,5 +1,6 @@
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
+    includeBuild("buildTools")
     repositories {
         google()
         gradlePluginPortal()
@@ -8,6 +9,7 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
     repositories {
         google()
         mavenCentral()
@@ -19,4 +21,3 @@ include(":STCommon")
 include(":STNetwork")
 include(":STDatabase")
 include(":STCore")
-includeBuild("buildTools")

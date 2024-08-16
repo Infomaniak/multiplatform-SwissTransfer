@@ -16,6 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.infomaniak.multiplatform_swisstransfer.network.exceptions
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
-open class ApiException(val errorCode: Int, errorMessage: String) : Exception(errorMessage)
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class FinishUploadBody(
+    @SerialName("UUID")
+    val containerUUID: String = "",
+    val lang: String = "",
+    val recipientsEmails: List<String>? = null,
+)

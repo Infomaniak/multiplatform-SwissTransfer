@@ -16,6 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.infomaniak.multiplatform_swisstransfer.network.exceptions
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
-open class ApiException(val errorCode: Int, errorMessage: String) : Exception(errorMessage)
+import kotlinx.serialization.Serializable
+
+@Serializable
+class InitUploadBody(
+    val duration: String = "",
+    val authorEmail: String = "",
+    val password: String = "",
+    val message: String = "",
+    val sizeOfUpload: Long = 0,
+    val numberOfDownload: Int = 0,
+    val numberOfFile: Int = 0,
+    val recaptcha: String = "",
+    val recaptchaVersion: Long = 0,
+    val lang: String = "",
+    val files: List<UploadFileRequest> = emptyList(),
+    val recipientsEmails: String = "",
+)

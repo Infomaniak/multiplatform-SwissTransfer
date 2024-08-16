@@ -18,13 +18,8 @@
 
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
-interface UploadCompleteResponse {
-    var linkUUID: String
-    var containerUUID: String
-    var userEmail: String?
-    var downloadCounterCredit: Long
-    var createdDateTimestamp: Long
-    var expiredDateTimestamp: Long
-    var isDownloadOnetime: Boolean
-    var isMailSent: Boolean
+interface InitUploadResponse<C : UploadContainer> {
+    var container: C
+    var uploadHost: String
+    var filesUUID: List<String>
 }

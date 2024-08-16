@@ -18,30 +18,25 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.IntToBooleanSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class UploadCompleteResponseApi : UploadCompleteResponse {
-    override var linkUUID: String = ""
-    override var containerUUID: String = ""
-    override var userEmail: String? = null
-    override var downloadCounterCredit: Long = 0
-
+class UploadCompleteResponse(
+    var linkUUID: String = "",
+    var containerUUID: String = "",
+    var userEmail: String? = null,
+    var downloadCounterCredit: Long = 0,
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var createdDateTimestamp: Long = 0
-
+    var createdDateTimestamp: Long = 0,
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var expiredDateTimestamp: Long = 0
-
+    var expiredDateTimestamp: Long = 0,
     @Serializable(with = IntToBooleanSerializer::class)
-    override var isDownloadOnetime: Boolean = false
-
+    var isDownloadOnetime: Boolean = false,
     @Serializable(with = IntToBooleanSerializer::class)
-    override var isMailSent: Boolean = false
-}
+    var isMailSent: Boolean = false,
+)

@@ -18,7 +18,7 @@
 
 package com.infomaniak.multiplatform_swisstransfer.network.utils
 
-internal object UrlConstants {
+internal object ApiRoutes {
     const val baseUrl = "https://www.swisstransfer.com/api/"
 
     //region Transfer
@@ -26,6 +26,19 @@ internal object UrlConstants {
     //endRegion
 
     //region Upload
-    const val uploadComplete = "uploadComplete"
+    private const val uploadChunk = "uploadChunk"
+
+    const val initUpload = "containers"
+    const val verifyEmailCode = "emails-validation"
+    const val resendEmailCode = "$verifyEmailCode/resend"
+    const val finishUpload = "uploadComplete"
+
+    fun uploadChunk(containerUUID: String, fileUUID: String, chunkIndex: Int, lastChunk: Boolean): String {
+        return "$uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${lastChunk.int()}"
+    }
+    //endregion
+
+    //region Utils
+    private fun Boolean.int() = if (this) 1 else 0
     //endregion
 }

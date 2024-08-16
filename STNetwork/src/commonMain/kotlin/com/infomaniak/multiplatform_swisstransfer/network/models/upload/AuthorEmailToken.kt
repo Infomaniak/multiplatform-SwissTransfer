@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload
 
-interface UploadContainerResponse<C : UploadContainer> {
-    var container: C
-    var uploadHost: String
-    var filesUUID: List<String>
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class AuthorEmailToken(
+    val token: String,
+)
