@@ -16,22 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload
 
-import kotlinx.serialization.Serializable
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.InitUploadResponse
 
-@Serializable
-class ContainerRequest(
-    val duration: String = "",
-    val authorEmail: String = "",
-    val password: String = "",
-    val message: String = "",
-    val sizeOfUpload: Long = 0,
-    val numberOfDownload: Int = 0,
-    val numberOfFile: Int = 0,
-    val recaptcha: String = "",
-    val recaptchaVersion: Long = 0,
-    val lang: String = "",
-    val files: List<UploadFileRequest> = emptyList(),
-    val recipientsEmails: String = "",
-)
+class InitUploadResponseApi : InitUploadResponse<UploadContainerApi> {
+    override var container: UploadContainerApi = UploadContainerApi()
+    override var uploadHost: String = ""
+    override var filesUUID: List<String> = emptyList()
+}

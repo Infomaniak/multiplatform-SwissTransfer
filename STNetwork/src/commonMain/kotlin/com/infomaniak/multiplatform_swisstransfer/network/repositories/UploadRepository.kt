@@ -25,8 +25,8 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerEr
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponse
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.InitUploadResponseApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
@@ -52,9 +52,9 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         UnknownApiException::class,
         UnknownException::class,
     )
-    suspend fun createContainer(containerRequest: ContainerRequest): UploadContainerResponseApi {
+    suspend fun initUpload(initUploadBody: InitUploadBody): InitUploadResponseApi {
         return runCatching {
-            uploadRequest.createContainer(containerRequest)
+            uploadRequest.initUpload(initUploadBody)
         }.getOrElse { exception ->
             if (exception is UnknownApiException) {
                 throw exception.toContainerErrorsException()

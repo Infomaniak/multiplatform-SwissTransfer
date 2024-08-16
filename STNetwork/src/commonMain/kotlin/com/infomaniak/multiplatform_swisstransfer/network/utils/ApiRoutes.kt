@@ -28,7 +28,7 @@ internal object ApiRoutes {
     //region Upload
     private const val uploadChunk = "uploadChunk"
 
-    const val createContainer = "containers"
+    const val initUpload = "containers"
     const val verifyEmailCode = "emails-validation"
     const val resendEmailCode = "$verifyEmailCode/resend"
     const val finishUpload = "uploadComplete"
