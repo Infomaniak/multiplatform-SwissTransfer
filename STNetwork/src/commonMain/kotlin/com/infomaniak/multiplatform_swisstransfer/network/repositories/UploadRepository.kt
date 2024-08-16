@@ -24,8 +24,10 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadContainerResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ContainerRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
@@ -108,5 +110,16 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         data: ByteArray,
     ): Boolean {
         return uploadRequest.uploadChunk(containerUUID, fileUUID, chunkIndex, lastChunk, data)
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnknownApiException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun finishUpload(finishUploadBody: FinishUploadBody): UploadCompleteResponseApi {
+        return uploadRequest.finishUpload(finishUploadBody)
     }
 }

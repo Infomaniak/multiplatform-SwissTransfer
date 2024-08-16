@@ -27,11 +27,11 @@ internal object ApiRoutes {
 
     //region Upload
     private const val uploadChunk = "uploadChunk"
-    const val uploadComplete = "uploadComplete"
 
     const val createContainer = "containers"
     const val verifyEmailCode = "emails-validation"
     const val resendEmailCode = "$verifyEmailCode/resend"
+    const val finishUpload = "uploadComplete"
 
     fun uploadChunk(containerUUID: String, fileUUID: String, chunkIndex: Int, lastChunk: Boolean): String {
         return "$uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${lastChunk.int()}"
