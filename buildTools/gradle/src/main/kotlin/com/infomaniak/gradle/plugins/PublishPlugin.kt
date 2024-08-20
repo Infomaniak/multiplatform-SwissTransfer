@@ -24,6 +24,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.get
 
 class PublishPlugin : Plugin<Project> {
 
@@ -37,12 +38,14 @@ class PublishPlugin : Plugin<Project> {
         target.version = Versions.mavenVersionName
 
         target.afterEvaluate {
-            val mavenName = extension.mavenName ?: target.name.lowercase()
+            val mavenName = extension.mavenName ?: target.name
 
             target.extensions.configure<org.gradle.api.publish.PublishingExtension> {
                 publications {
                     create<MavenPublication>("android") {
                         from(components.findByName("release"))
+                        artifact(tasks.getByName("bundleReleaseAar"))
+                        artifact(artifact(tasks["sourcesJar"]))
                         groupId = "com.github.infomaniak.multiplatform_swisstransfer"
                         artifactId = mavenName
                         version = Versions.mavenVersionName
