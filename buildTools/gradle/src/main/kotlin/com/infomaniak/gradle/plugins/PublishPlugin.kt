@@ -24,6 +24,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.withType
 
 class PublishPlugin : Plugin<Project> {
 
@@ -37,15 +38,41 @@ class PublishPlugin : Plugin<Project> {
         target.version = Versions.mavenVersionName
 
         target.afterEvaluate {
-            val mavenName = extension.mavenName ?: target.name.lowercase()
+            val mavenName = extension.mavenName ?: target.name
 
             target.extensions.configure<org.gradle.api.publish.PublishingExtension> {
                 publications {
-                    create<MavenPublication>("android") {
-                        from(components.findByName("release"))
-                        groupId = "com.github.infomaniak.multiplatform_swisstransfer"
-                        artifactId = mavenName
-                        version = Versions.mavenVersionName
+                    withType<MavenPublication> {
+                        pom {
+                            name.set(mavenName)
+                            description.set("Multiplatform SwissTransfer - $mavenName")
+                            licenses {
+                                license {
+                                    name.set("GPL-3.0")
+                                    url.set("https://www.gnu.org/licenses/gpl-3.0.fr.html")
+                                }
+                            }
+                            url.set("https://github.com/Infomaniak/multiplatform-SwissTransfer")
+                            issueManagement {
+                                system.set("Github")
+                                url.set("https://github.com/Infomaniak/multiplatform-SwissTransfer/issues")
+                            }
+                            scm {
+                                connection.set("https://github.com/Infomaniak/multiplatform-SwissTransfer.git")
+                                url.set("https://github.com/Infomaniak/multiplatform-SwissTransfer")
+                            }
+                            organization {
+                                name.set("Infomaniak Network SA")
+                                url.set("https://www.infomaniak.com/")
+                            }
+                            developers {
+                                developer {
+                                    id.set("infomaniak")
+                                    name.set("Infomaniak Development Team")
+                                    url.set("https://www.infomaniak.com/")
+                                }
+                            }
+                        }
                     }
                 }
             }
