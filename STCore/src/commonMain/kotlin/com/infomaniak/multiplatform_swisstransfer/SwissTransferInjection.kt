@@ -19,6 +19,8 @@
 package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
@@ -42,14 +44,19 @@ class SwissTransferInjection {
     private val transferRepository by lazy { TransferRepository(apiClientProvider) }
     private val uploadRepository by lazy { UploadRepository(apiClientProvider) }
 
+    private val appSettingsController by lazy { AppSettingsController(realmProvider) }
+
     /**
      * Loads the default user account and initializes Realm transfers for the default user ID defined in the constants.
      */
     @Throws(IllegalArgumentException::class, IllegalStateException::class)
-    fun loadDefaultAccount() {
+    suspend fun loadDefaultAccount() {
+        appSettingsController.initAppSettings()
         realmProvider.loadRealmTransfers(Constants.DEFAULT_USER_ID)
     }
 
     /** A manager used to orchestrate transfer operations. */
     val transferManager by lazy { TransferManager(realmProvider, apiClientProvider) }
+
+    val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
 }

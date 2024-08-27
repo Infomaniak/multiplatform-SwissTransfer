@@ -16,21 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.infomaniak.multiplatform_swisstransfer.database.models
+package com.infomaniak.multiplatform_swisstransfer.common.models
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.Transfer
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
+enum class ValidityPeriod(val realmKey: String, val value: Int) {
+    THIRTY("30", 30),
+    FIFTEEN("15", 15),
+    SEVEN("7", 7),
+    ONE("1", 1);
 
-class TransferDB : Transfer<ContainerDB?>, RealmObject {
-    @PrimaryKey
-    override var linkUUID: String = ""
-    override var containerUUID: String = ""
-    override var downloadCounterCredit: Long = 0
-    override var createdDateTimestamp: Long = 0
-    override var expiredDateTimestamp: Long = 0
-    override var isDownloadOnetime: Long = 0 // TODO: Boolean ?
-    override var isMailSent: Boolean = false
-    override var downloadHost: String = ""
-    override var container: ContainerDB? = null
+    fun indexOf() = entries.indexOf(this)
 }

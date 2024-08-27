@@ -1,0 +1,66 @@
+/*
+ * Infomaniak SwissTransfer - Multiplatform
+ * Copyright (C) 2024 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.infomaniak.multiplatform_swisstransfer.database.models.setting
+
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
+import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
+import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import io.realm.kotlin.types.RealmObject
+
+class AppSettingsDB : RealmObject, AppSettings {
+    private var _theme: String = Theme.SYSTEM.realmKey
+    override var theme: Theme
+        get() = Theme.entries.find { it.realmKey == _theme } ?: DEFAULT_THEME
+        set(value) {
+            _theme = value.realmKey
+        }
+
+    private var _validityPeriod: String = ValidityPeriod.THIRTY.realmKey
+    override var validityPeriod: ValidityPeriod
+        get() = ValidityPeriod.entries.find { it.realmKey == _validityPeriod } ?: DEFAULT_VALIDITY_PERIOD
+        set(value) {
+            _validityPeriod = value.realmKey
+        }
+
+    private var _downloadLimit: String = DownloadLimit.TWOHUNDREDFIFTY.realmKey
+    override var downloadLimit: DownloadLimit
+        get() = DownloadLimit.entries.find { it.realmKey == _downloadLimit } ?: DEFAULT_DOWNLOAD_LIMIT
+        set(value) {
+            _downloadLimit = value.realmKey
+        }
+
+    private var _emailLanguage: String = DEFAULT_EMAIL_LANGUAGE.realmKey
+    override var emailLanguage: EmailLanguage
+        get() = EmailLanguage.entries.find { it.realmKey == _emailLanguage } ?: DEFAULT_EMAIL_LANGUAGE
+        set(value) {
+            _emailLanguage = value.realmKey
+        }
+
+    companion object {
+        private const val DEFAULT_TRANSFER_VALIDITY_IN_DAYS = 30
+        private const val DEFAULT_LIMIT_NUMBER_DOWNLOADS = 250
+
+        private val DEFAULT_THEME = Theme.SYSTEM //TODO do we want the default theme of the phone ?
+        private val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
+        private val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWOHUNDREDFIFTY
+        private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.FRENCH //TODO do we want the default language of the phone ?
+    }
+}
