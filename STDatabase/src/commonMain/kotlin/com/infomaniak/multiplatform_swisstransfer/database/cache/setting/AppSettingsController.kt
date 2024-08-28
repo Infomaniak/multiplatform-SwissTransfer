@@ -18,6 +18,7 @@
 
 package com.infomaniak.multiplatform_swisstransfer.database.cache.setting
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
@@ -52,25 +53,20 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
         return appSettingsQuery.asFlow().mapLatest { it.obj }
     }
 
-    fun getTheme(): Flow<Theme> {
-        return appSettingsQuery.asFlow().mapLatest { it.obj?.theme ?: Theme.SYSTEM }
-    }
-
-    fun getValidityPeriod(): Flow<ValidityPeriod> {
-        return appSettingsQuery.asFlow().mapLatest { it.obj?.validityPeriod ?: ValidityPeriod.THIRTY }
-    }
-
-    fun getDownloadsLimit(): Flow<DownloadLimit> {
-        return appSettingsQuery.asFlow().mapLatest { it.obj?.downloadLimit ?: DownloadLimit.TWOHUNDREDFIFTY}
-    }
-
-    fun getEmailLanguage(): Flow<EmailLanguage> {
-        return appSettingsQuery.asFlow().mapLatest { it.obj?.emailLanguage ?: EmailLanguage.FRENCH }
-    }
-
     //endregion
 
     //region Edit data
+
+    private suspend fun updateAppSettings(onUpdate: (AppSettings) -> Unit) {
+        val appSettings = appSettingsQuery.find() ?: return
+
+        realm.write {
+            findLatest(appSettings)?.let { mutableAppSettings ->
+                onUpdate(mutableAppSettings)
+            }
+        }
+    }
+
     suspend fun setTheme(theme: Theme) {
         val appSettings = appSettingsQuery.find() ?: return
 
@@ -82,33 +78,22 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     }
 
     suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) {
-        val appSettings = appSettingsQuery.find() ?: return
-
-        realm.write {
-            findLatest(appSettings)?.let { mutableAppSettings ->
-                mutableAppSettings.validityPeriod = validityPeriod
-            }
+        updateAppSettings { mutableAppSettings ->
+            mutableAppSettings.validityPeriod = validityPeriod
         }
     }
 
     suspend fun setDownloadLimit(downloadLimit: DownloadLimit) {
-        val appSettings = appSettingsQuery.find() ?: return
-
-        realm.write {
-            findLatest(appSettings)?.let { mutableAppSettings ->
-                mutableAppSettings.downloadLimit = downloadLimit
-            }
+        updateAppSettings { mutableAppSettings ->
+            mutableAppSettings.downloadLimit = downloadLimit
         }
     }
 
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) {
-        val appSettings = appSettingsQuery.find() ?: return
-
-        realm.write {
-            findLatest(appSettings)?.let { mutableAppSettings ->
-                mutableAppSettings.emailLanguage = emailLanguage
-            }
+        updateAppSettings { mutableAppSettings ->
+            mutableAppSettings.emailLanguage = emailLanguage
         }
     }
+
     //endregion
 }

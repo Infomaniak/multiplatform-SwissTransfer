@@ -36,25 +36,17 @@ class AppSettingsManager internal constructor(
     val appSettings: Flow<AppSettings?>
         get() = appSettingsController.getAppSettingsFlow().flowOn(Dispatchers.IO)
 
-    fun getTheme() = appSettingsController.getTheme()
-
     suspend fun setTheme(theme: Theme) = withContext(Dispatchers.IO) {
         appSettingsController.setTheme(theme)
     }
-
-    fun getValidityPeriod() = appSettingsController.getValidityPeriod()
 
     suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) = withContext(Dispatchers.IO) {
         appSettingsController.setValidityPeriod(validityPeriod)
     }
 
-    fun getDownloadLimit() = appSettingsController.getDownloadsLimit()
-
     suspend fun setDownloadLimit(downloadLimit: DownloadLimit) = withContext(Dispatchers.IO) {
         appSettingsController.setDownloadLimit(downloadLimit)
     }
-
-    fun getEmailLanguage() = appSettingsController.getEmailLanguage()
 
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = withContext(Dispatchers.IO) {
         appSettingsController.setEmailLanguage(emailLanguage)
