@@ -30,24 +30,54 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 
+/**
+ * Provides a convenient interface for managing application settings, abstracting the underlying
+ * [AppSettingsController]. It handles asynchronous operations and ensures settings updates are
+ * performed on a background thread.
+ **/
 class AppSettingsManager internal constructor(
     private val appSettingsController: AppSettingsController,
 ) {
+
+    /**
+     * A [Flow] that emits the current [AppSettings] object whenever it changes. This flow operates
+     * on the [Dispatchers.IO] context to avoid blocking the main thread.
+     */
     val appSettings: Flow<AppSettings?>
         get() = appSettingsController.getAppSettingsFlow().flowOn(Dispatchers.IO)
 
+    /**
+     * Asynchronously sets the application theme.
+     *
+     * @param theme The new theme to apply.
+     */
     suspend fun setTheme(theme: Theme) = withContext(Dispatchers.IO) {
         appSettingsController.setTheme(theme)
     }
 
+    /**
+     * Asynchronously sets the validity period for certain application features.
+     *
+     * @param validityPeriod The new validity period.
+     */
     suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) = withContext(Dispatchers.IO) {
         appSettingsController.setValidityPeriod(validityPeriod)
     }
 
+    /**
+     * Asynchronously sets the download limit for files.
+     *
+     * @param downloadLimit The new download limit.
+     */
     suspend fun setDownloadLimit(downloadLimit: DownloadLimit) = withContext(Dispatchers.IO) {
         appSettingsController.setDownloadLimit(downloadLimit)
     }
 
+    /**
+     * Asynchronously sets the language for email communications.
+     *
+     * @param emailLanguage The new email language.
+     */
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = withContext(Dispatchers.IO) {
         appSettingsController.setEmailLanguage(emailLanguage)
     }
