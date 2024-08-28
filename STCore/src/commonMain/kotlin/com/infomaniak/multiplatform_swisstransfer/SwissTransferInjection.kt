@@ -36,6 +36,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.Constants
  * This class serves as the main access point.
  *
  * @property transferManager A manager used to orchestrate transfer operations.
+ * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  */
 class SwissTransferInjection {
     private val realmProvider by lazy { RealmProvider() }
@@ -58,5 +59,6 @@ class SwissTransferInjection {
     /** A manager used to orchestrate transfer operations. */
     val transferManager by lazy { TransferManager(realmProvider, apiClientProvider) }
 
+    /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
 }

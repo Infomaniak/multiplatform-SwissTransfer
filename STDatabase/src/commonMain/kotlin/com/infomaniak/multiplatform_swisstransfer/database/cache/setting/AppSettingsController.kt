@@ -27,6 +27,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.setting.AppSettingsDB
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
@@ -55,8 +56,9 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
 
     //endregion
 
-    //region Edit data
+    //region Update data
 
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     private suspend fun updateAppSettings(onUpdate: (AppSettings) -> Unit) {
         val appSettings = appSettingsQuery.find() ?: return
 
@@ -67,28 +69,28 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
         }
     }
 
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     suspend fun setTheme(theme: Theme) {
-        val appSettings = appSettingsQuery.find() ?: return
-
-        realm.write {
-            findLatest(appSettings)?.let { mutableAppSettings ->
-                mutableAppSettings.theme = theme
-            }
+        updateAppSettings { mutableAppSettings ->
+            mutableAppSettings.theme = theme
         }
     }
 
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.validityPeriod = validityPeriod
         }
     }
 
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     suspend fun setDownloadLimit(downloadLimit: DownloadLimit) {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.downloadLimit = downloadLimit
         }
     }
 
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.emailLanguage = emailLanguage

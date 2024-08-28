@@ -18,11 +18,11 @@
 
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class DownloadLimit(val realmKey: String, val value: Int) {
-    TWOHUNDREDFIFTY("250", 250),
-    ONEHUNDRED("100", 100),
-    TWENTY("20", 20),
-    ONE("1", 1);
+enum class DownloadLimit(val value: String) {
+    TWOHUNDREDFIFTY("250"),
+    ONEHUNDRED("100"),
+    TWENTY("20"),
+    ONE("1");
 
     fun indexOf() = entries.indexOf(this)
 }

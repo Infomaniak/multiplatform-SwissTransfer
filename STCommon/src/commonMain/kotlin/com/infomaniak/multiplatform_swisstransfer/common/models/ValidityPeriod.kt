@@ -18,11 +18,11 @@
 
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class ValidityPeriod(val realmKey: String, val value: Int) {
-    THIRTY("30", 30),
-    FIFTEEN("15", 15),
-    SEVEN("7", 7),
-    ONE("1", 1);
+enum class ValidityPeriod(val value: String) {
+    THIRTY("30"),
+    FIFTEEN("15"),
+    SEVEN("7"),
+    ONE("1");
 
     fun indexOf() = entries.indexOf(this)
 }

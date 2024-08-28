@@ -33,18 +33,18 @@ class AppSettingsDB : RealmObject, AppSettings {
             _theme = value.realmKey
         }
 
-    private var _validityPeriod: String = ValidityPeriod.THIRTY.realmKey
+    private var _validityPeriod: String = ValidityPeriod.THIRTY.value
     override var validityPeriod: ValidityPeriod
-        get() = ValidityPeriod.entries.find { it.realmKey == _validityPeriod } ?: DEFAULT_VALIDITY_PERIOD
+        get() = ValidityPeriod.entries.find { it.value == _validityPeriod } ?: DEFAULT_VALIDITY_PERIOD
         set(value) {
-            _validityPeriod = value.realmKey
+            _validityPeriod = value.value
         }
 
-    private var _downloadLimit: String = DownloadLimit.TWOHUNDREDFIFTY.realmKey
+    private var _downloadLimit: String = DownloadLimit.TWOHUNDREDFIFTY.value
     override var downloadLimit: DownloadLimit
-        get() = DownloadLimit.entries.find { it.realmKey == _downloadLimit } ?: DEFAULT_DOWNLOAD_LIMIT
+        get() = DownloadLimit.entries.find { it.value == _downloadLimit } ?: DEFAULT_DOWNLOAD_LIMIT
         set(value) {
-            _downloadLimit = value.realmKey
+            _downloadLimit = value.value
         }
 
     private var _emailLanguage: String = DEFAULT_EMAIL_LANGUAGE.realmKey
@@ -55,9 +55,6 @@ class AppSettingsDB : RealmObject, AppSettings {
         }
 
     companion object {
-        private const val DEFAULT_TRANSFER_VALIDITY_IN_DAYS = 30
-        private const val DEFAULT_LIMIT_NUMBER_DOWNLOADS = 250
-
         private val DEFAULT_THEME = Theme.SYSTEM //TODO do we want the default theme of the phone ?
         private val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         private val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWOHUNDREDFIFTY
