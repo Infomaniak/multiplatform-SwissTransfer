@@ -22,6 +22,4 @@ enum class Theme(val value: String) {
     SYSTEM("system"),
     LIGHT("light"),
     DARK("dark");
-
-    fun indexOf() = entries.indexOf(this)
 }

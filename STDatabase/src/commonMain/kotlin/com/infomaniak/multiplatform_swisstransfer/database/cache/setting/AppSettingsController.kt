@@ -37,8 +37,7 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
 
     private val realm by lazy { realmProvider.realmAppSettings }
 
-    private val appSettingsQuery
-        get() = realm.query<AppSettingsDB>().first()
+    private val appSettingsQuery get() = realm.query<AppSettingsDB>().first()
 
     suspend fun initAppSettings() {
         if (appSettingsQuery.find() == null) {

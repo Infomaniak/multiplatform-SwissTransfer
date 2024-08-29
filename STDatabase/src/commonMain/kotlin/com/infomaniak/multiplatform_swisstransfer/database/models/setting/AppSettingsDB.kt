@@ -55,9 +55,9 @@ class AppSettingsDB : RealmObject, AppSettings {
         }
 
     companion object {
-        private val DEFAULT_THEME = Theme.SYSTEM //TODO do we want the default theme of the phone ?
+        private val DEFAULT_THEME = Theme.SYSTEM
         private val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         private val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWOHUNDREDFIFTY
-        private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.FRENCH //TODO do we want the default language of the phone ?
+        private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
     }
 }

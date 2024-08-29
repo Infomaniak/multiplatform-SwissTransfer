@@ -35,25 +35,11 @@ centralized access point to orchestrate transfer operations.
 
 | Type     | Name               | Description                                                                   |
 |----------|--------------------|-------------------------------------------------------------------------------|
-| Property | transferManager    | A manager used to orchestrate transfer operations.                            |
 | Property | appSettingsManager | A manager used to orchestrate AppSettings operations.                         |
+| Property | transferManager    | A manager used to orchestrate transfer operations.                            |
 | Method   | loadDefaultAccount | Loads the default user account and initializes Realm transfers for this user. |
 
 ### Details of Properties and Methods
-
-#### Property: `transferManager`
-
-- **Type**: `TransferManager`
-- **Description**:
-    - `transferManager` is a lazily initialized property that provides a manager to orchestrate all transfer operations. It
-      uses `realmProvider` and `apiClientProvider` to configure and manage transfers efficiently.
-
-- **Usage Example**:
-  ```kotlin
-  val core = SwissTransferInjection()
-  val transferManager = core.transferManager
-  // Use the transferManager to orchestrate transfers
-  ```
 
 #### Property: `appSettingsManager`
 
@@ -67,6 +53,20 @@ centralized access point to orchestrate transfer operations.
   val core = SwissTransferInjection()
   val appSettingsManager = core.appSettingsManager
   // Use the appSettingsManager to orchestrate AppSettings related operations
+  ```
+
+#### Property: `transferManager`
+
+- **Type**: `TransferManager`
+- **Description**:
+    - `transferManager` is a lazily initialized property that provides a manager to orchestrate all transfer operations. It
+      uses `realmProvider` and `apiClientProvider` to configure and manage transfers efficiently.
+
+- **Usage Example**:
+  ```kotlin
+  val core = SwissTransferInjection()
+  val transferManager = core.transferManager
+  // Use the transferManager to orchestrate transfers
   ```
 
 #### Method: `loadDefaultAccount`
