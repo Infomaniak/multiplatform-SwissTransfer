@@ -55,6 +55,7 @@ class AppSettingsManager internal constructor(
      * @throws IllegalArgumentException If the provided theme is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
+    @Throws(IllegalArgumentException::class,  CancellationException::class)
     suspend fun setTheme(theme: Theme) = withContext(Dispatchers.IO) {
         appSettingsController.setTheme(theme)
     }
@@ -67,6 +68,7 @@ class AppSettingsManager internal constructor(
      * @throws IllegalArgumentException If the provided validity period is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
+    @Throws(IllegalArgumentException::class,  CancellationException::class)
     suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) = withContext(Dispatchers.IO) {
         appSettingsController.setValidityPeriod(validityPeriod)
     }
@@ -79,6 +81,7 @@ class AppSettingsManager internal constructor(
      * @throws IllegalArgumentException If the provided download limit is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
+    @Throws(IllegalArgumentException::class,  CancellationException::class)
     suspend fun setDownloadLimit(downloadLimit: DownloadLimit) = withContext(Dispatchers.IO) {
         appSettingsController.setDownloadLimit(downloadLimit)
     }
@@ -91,6 +94,7 @@ class AppSettingsManager internal constructor(
      * @throws IllegalArgumentException If the provided email language is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
+    @Throws(IllegalArgumentException::class,  CancellationException::class)
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = withContext(Dispatchers.IO) {
         appSettingsController.setEmailLanguage(emailLanguage)
     }
