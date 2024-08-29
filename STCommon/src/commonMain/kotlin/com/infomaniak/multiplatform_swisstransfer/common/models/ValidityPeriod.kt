@@ -23,6 +23,4 @@ enum class ValidityPeriod(val value: String) {
     FIFTEEN("15"),
     SEVEN("7"),
     ONE("1");
-
-    fun indexOf() = entries.indexOf(this)
 }

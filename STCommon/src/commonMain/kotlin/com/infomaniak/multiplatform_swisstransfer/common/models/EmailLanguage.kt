@@ -18,7 +18,7 @@
 
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class EmailLanguage(val realmKey: String) {
+enum class EmailLanguage(val value: String) {
     ENGLISH("english"),
     FRENCH("french"),
     GERMAN("german"),

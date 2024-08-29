@@ -23,6 +23,4 @@ enum class DownloadLimit(val value: String) {
     ONEHUNDRED("100"),
     TWENTY("20"),
     ONE("1");
-
-    fun indexOf() = entries.indexOf(this)
 }

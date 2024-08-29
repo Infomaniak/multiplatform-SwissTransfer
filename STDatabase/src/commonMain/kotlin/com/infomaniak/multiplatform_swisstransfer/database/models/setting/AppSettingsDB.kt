@@ -26,11 +26,11 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import io.realm.kotlin.types.RealmObject
 
 class AppSettingsDB : RealmObject, AppSettings {
-    private var _theme: String = Theme.SYSTEM.realmKey
+    private var _theme: String = Theme.SYSTEM.value
     override var theme: Theme
-        get() = Theme.entries.find { it.realmKey == _theme } ?: DEFAULT_THEME
+        get() = Theme.entries.find { it.value == _theme } ?: DEFAULT_THEME
         set(value) {
-            _theme = value.realmKey
+            _theme = value.value
         }
 
     private var _validityPeriod: String = ValidityPeriod.THIRTY.value
@@ -47,11 +47,11 @@ class AppSettingsDB : RealmObject, AppSettings {
             _downloadLimit = value.value
         }
 
-    private var _emailLanguage: String = DEFAULT_EMAIL_LANGUAGE.realmKey
+    private var _emailLanguage: String = DEFAULT_EMAIL_LANGUAGE.value
     override var emailLanguage: EmailLanguage
-        get() = EmailLanguage.entries.find { it.realmKey == _emailLanguage } ?: DEFAULT_EMAIL_LANGUAGE
+        get() = EmailLanguage.entries.find { it.value == _emailLanguage } ?: DEFAULT_EMAIL_LANGUAGE
         set(value) {
-            _emailLanguage = value.realmKey
+            _emailLanguage = value.value
         }
 
     companion object {
