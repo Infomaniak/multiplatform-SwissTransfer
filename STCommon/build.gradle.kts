@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     id("infomaniak.kotlinMultiplatform")
+    id("infomaniak.publishPlugin")
 }
 
 kotlin {

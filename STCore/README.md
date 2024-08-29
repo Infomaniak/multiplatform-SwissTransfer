@@ -35,10 +35,25 @@ centralized access point to orchestrate transfer operations.
 
 | Type     | Name               | Description                                                                   |
 |----------|--------------------|-------------------------------------------------------------------------------|
+| Property | appSettingsManager | A manager used to orchestrate AppSettings operations.                         |
 | Property | transferManager    | A manager used to orchestrate transfer operations.                            |
 | Method   | loadDefaultAccount | Loads the default user account and initializes Realm transfers for this user. |
 
 ### Details of Properties and Methods
+
+#### Property: `appSettingsManager`
+
+- **Type**: `AppSettingsManager`
+- **Description**:
+    - `appSettingsManager` is a lazily initialized property that provides a manager to orchestrate all AppSettings operations. It
+      uses `realmProvider` to configure and manage AppSettings efficiently.
+
+- **Usage Example**:
+  ```kotlin
+  val core = SwissTransferInjection()
+  val appSettingsManager = core.appSettingsManager
+  // Use the appSettingsManager to orchestrate AppSettings related operations
+  ```
 
 #### Property: `transferManager`
 

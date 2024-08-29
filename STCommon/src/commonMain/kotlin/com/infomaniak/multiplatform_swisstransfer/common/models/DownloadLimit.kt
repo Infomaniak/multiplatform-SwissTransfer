@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.infomaniak.multiplatform_swisstransfer.database.models.setting
+package com.infomaniak.multiplatform_swisstransfer.common.models
 
-import io.realm.kotlin.types.RealmObject
-
-class AppSettings : RealmObject {
-    //TODO: implement here
+enum class DownloadLimit(val value: String) {
+    TWOHUNDREDFIFTY("250"),
+    ONEHUNDRED("100"),
+    TWENTY("20"),
+    ONE("1");
 }

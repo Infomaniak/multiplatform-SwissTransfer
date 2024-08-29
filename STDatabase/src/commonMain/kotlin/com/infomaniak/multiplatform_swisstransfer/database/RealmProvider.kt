@@ -21,7 +21,7 @@ package com.infomaniak.multiplatform_swisstransfer.database
 import com.infomaniak.multiplatform_swisstransfer.database.models.ContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.TransferDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.setting.AppSettings
+import com.infomaniak.multiplatform_swisstransfer.database.models.setting.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadTasks
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -62,7 +62,7 @@ class RealmProvider {
     }
 
     private val realmAppSettingsConfiguration = RealmConfiguration
-        .Builder(schema = setOf(AppSettings::class))
+        .Builder(schema = setOf(AppSettingsDB::class))
         .name("AppSettings")
         .build()
 
