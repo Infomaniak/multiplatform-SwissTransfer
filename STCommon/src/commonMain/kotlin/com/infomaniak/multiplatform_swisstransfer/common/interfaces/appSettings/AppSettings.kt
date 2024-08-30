@@ -24,8 +24,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 
 interface AppSettings {
-    var theme: Theme
-    var validityPeriod: ValidityPeriod
-    var downloadLimit: DownloadLimit
-    var emailLanguage: EmailLanguage
+    val theme: Theme
+    val validityPeriod: ValidityPeriod
+    val downloadLimit: DownloadLimit
+    val emailLanguage: EmailLanguage
 }
