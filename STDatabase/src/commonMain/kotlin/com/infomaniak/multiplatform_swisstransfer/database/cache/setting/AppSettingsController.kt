@@ -58,7 +58,7 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     //region Update data
 
     @Throws(IllegalArgumentException::class, CancellationException::class)
-    private suspend fun updateAppSettings(onUpdate: (AppSettings) -> Unit) {
+    private suspend fun updateAppSettings(onUpdate: (AppSettingsDB) -> Unit) {
         val appSettings = appSettingsQuery.find() ?: return
 
         realm.write {
