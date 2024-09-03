@@ -39,7 +39,7 @@ class AppSettingsDB : RealmObject, AppSettings {
             _validityPeriod = value.value
         }
 
-    private var _downloadLimit: String = DownloadLimit.TWOHUNDREDFIFTY.value
+    private var _downloadLimit: String = DownloadLimit.TWO_HUNDRED_FIFTY.value
     override var downloadLimit: DownloadLimit
         get() = DownloadLimit.entries.find { it.value == _downloadLimit } ?: DEFAULT_DOWNLOAD_LIMIT
         set(value) {
@@ -56,7 +56,7 @@ class AppSettingsDB : RealmObject, AppSettings {
     companion object {
         private val DEFAULT_THEME = Theme.SYSTEM
         private val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
-        private val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWOHUNDREDFIFTY
+        private val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY
         private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
     }
 }
