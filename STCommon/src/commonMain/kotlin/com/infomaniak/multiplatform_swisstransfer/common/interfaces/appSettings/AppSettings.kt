@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings
 
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
