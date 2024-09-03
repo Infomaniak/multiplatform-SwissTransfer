@@ -18,11 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.serializers
 
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.JsonTransformingSerializer
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 
 internal object IntToBooleanSerializer : JsonTransformingSerializer<Boolean>(Boolean.serializer()) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
