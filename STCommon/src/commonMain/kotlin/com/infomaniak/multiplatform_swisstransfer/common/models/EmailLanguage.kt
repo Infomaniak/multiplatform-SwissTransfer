@@ -22,5 +22,5 @@ enum class EmailLanguage(val value: String) {
     FRENCH("french"),
     GERMAN("german"),
     ITALIAN("italian"),
-    SPANISH("spanish");
+    SPANISH("spanish"),
 }

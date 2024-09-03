@@ -21,5 +21,5 @@ enum class DownloadLimit(val value: String) {
     TWOHUNDREDFIFTY("250"),
     ONEHUNDRED("100"),
     TWENTY("20"),
-    ONE("1");
+    ONE("1"),
 }
