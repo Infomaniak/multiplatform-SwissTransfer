@@ -18,8 +18,8 @@
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
 enum class DownloadLimit(val value: String) {
-    TWOHUNDREDFIFTY("250"),
-    ONEHUNDRED("100"),
+    TWO_HUNDRED_FIFTY("250"),
+    ONE_HUNDRED("100"),
     TWENTY("20"),
     ONE("1"),
 }
