@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
 import io.realm.kotlin.types.RealmObject
