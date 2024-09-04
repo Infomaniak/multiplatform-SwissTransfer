@@ -20,5 +20,5 @@ package com.infomaniak.multiplatform_swisstransfer.common.models
 enum class Theme(val value: String) {
     SYSTEM("system"),
     LIGHT("light"),
-    DARK("dark");
+    DARK("dark"),
 }

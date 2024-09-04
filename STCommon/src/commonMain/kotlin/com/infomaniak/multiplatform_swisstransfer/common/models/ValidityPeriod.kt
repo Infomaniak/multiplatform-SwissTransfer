@@ -21,5 +21,5 @@ enum class ValidityPeriod(val value: String) {
     THIRTY("30"),
     FIFTEEN("15"),
     SEVEN("7"),
-    ONE("1");
+    ONE("1"),
 }
