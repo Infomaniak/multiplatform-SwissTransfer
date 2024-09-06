@@ -15,12 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.InitUploadResponse
+interface Container<F : List<File>> {
+    var uuid: String
+    var duration: Long
+    var createdDateTimestamp: Long
+    var expiredDateTimestamp: Long
+    var numberOfFile: Long
+    var message: String?
+    var needPassword: Long
+    var lang: String
+    var sizeUploaded: Long
+    var deletedDateTimestamp: Long?
+    var swiftVersion: Long
+    var downloadLimit: Long
+    var source: String
 
-class InitUploadResponseApi : InitUploadResponse<UploadContainerApi> {
-    override var container: UploadContainerApi = UploadContainerApi()
-    override var uploadHost: String = ""
-    override var filesUUID: List<String> = emptyList()
+    //    @SerialName("WSUser") TODO: What's it ?
+    //val wsUser: JsonElement?
+
+    var files: F
 }

@@ -15,24 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.database.models
+package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.File
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class FileDB : File, RealmObject {
+class TransferDB : Transfer<ContainerDB?>, RealmObject {
     @PrimaryKey
+    override var linkUUID: String = ""
     override var containerUUID: String = ""
-    override var uuid: String = ""
-    override var fileName: String = ""
-    override var fileSizeInBytes: Long = 0
-    override var downloadCounter: Long = 0
+    override var downloadCounterCredit: Long = 0
     override var createdDateTimestamp: Long = 0
     override var expiredDateTimestamp: Long = 0
-    override var eVirus: String = ""
-    override var deletedDate: String? = null
-    override var mimeType: String = ""
-    override var receivedSizeInBytes: Long = 0
-    override var path: String? = ""
+    override var isDownloadOnetime: Long = 0 // TODO: Boolean ?
+    override var isMailSent: Boolean = false
+    override var downloadHost: String = ""
+    override var container: ContainerDB? = null
 }

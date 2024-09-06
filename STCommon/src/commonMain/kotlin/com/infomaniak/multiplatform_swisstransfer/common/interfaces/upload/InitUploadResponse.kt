@@ -20,5 +20,5 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 interface InitUploadResponse<C : UploadContainer> {
     var container: C
     var uploadHost: String
-    var filesUUID: List<String>
+    var filesUuid: List<String>
 }

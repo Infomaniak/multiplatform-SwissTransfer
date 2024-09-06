@@ -17,7 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.models.transfer
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.File
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

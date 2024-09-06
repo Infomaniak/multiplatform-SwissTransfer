@@ -17,11 +17,11 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-import com.infomaniak.multiplatform_swisstransfer.database.models.ContainerDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.FileDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.TransferDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.setting.AppSettingsDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadTasks
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.Upload
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
@@ -29,7 +29,7 @@ class RealmProvider {
 
     val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
 
-    val realmUploadTasks by lazy { Realm.open(realmUploadTasksConfiguration) }
+    val realmUploads by lazy { Realm.open(realmUploadConfiguration) }
 
     var realmTransfers: Realm? = null
         private set
@@ -42,11 +42,11 @@ class RealmProvider {
         realmAppSettings.close()
     }
 
-    fun closeRealmUploadTasks() {
-        realmUploadTasks.close()
+    fun closeRealmUploads() {
+        realmUploads.close()
     }
 
-    fun closeCurrentRealmTransfers() {
+    fun closeRealmTransfers() {
         realmTransfers?.close()
     }
 
@@ -56,8 +56,8 @@ class RealmProvider {
 
     fun closeAllRealms() {
         closeRealmAppSettings()
-        closeRealmUploadTasks()
-        closeCurrentRealmTransfers()
+        closeRealmUploads()
+        closeRealmTransfers()
     }
 
     private val realmAppSettingsConfiguration = RealmConfiguration
@@ -65,9 +65,9 @@ class RealmProvider {
         .name("AppSettings")
         .build()
 
-    private val realmUploadTasksConfiguration = RealmConfiguration
-        .Builder(schema = setOf(UploadTasks::class))
-        .name("UploadTasks")
+    private val realmUploadConfiguration = RealmConfiguration
+        .Builder(schema = setOf(Upload::class))
+        .name("Uploads")
         .build()
 
     private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration

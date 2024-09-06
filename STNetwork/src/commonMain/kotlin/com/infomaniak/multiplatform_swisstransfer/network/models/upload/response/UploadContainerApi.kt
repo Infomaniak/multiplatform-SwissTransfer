@@ -15,27 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
-import com.infomaniak.multiplatform_swisstransfer.network.serializers.IntToBooleanSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class UploadCompleteResponse(
-    var linkUUID: String = "",
-    var containerUUID: String = "",
-    var userEmail: String? = null,
-    var downloadCounterCredit: Long = 0,
-    @SerialName("createdDate")
-    @Serializable(DateToTimestampSerializer::class)
-    var createdDateTimestamp: Long = 0,
+class UploadContainerApi : UploadContainer {
+    @SerialName("UUID")
+    override var uuid: String = ""
+
+    override var duration: String = ""
+    override var downloadLimit: Long = 0
+    override var lang: String = ""
+    override var source: String = ""
+
+    @SerialName("WSUser")
+    override var wsUser: String? = null
+
+    override var authorIP: String = ""
+    override var swiftVersion: String = ""
+
+    // var createdDate: String // TODO: Why a complex date instead of a simple date ? May be Custom serial this
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    var expiredDateTimestamp: Long = 0,
-    @Serializable(with = IntToBooleanSerializer::class)
-    var isDownloadOnetime: Boolean = false,
-    @Serializable(with = IntToBooleanSerializer::class)
-    var isMailSent: Boolean = false,
-)
+    override var expiredDateTimestamp: Long = 0
+    override var needPassword: Boolean = false
+    override var message: String = ""
+    @SerialName("numberOfFile")
+    override var numberOfFiles: Long = 0
+}

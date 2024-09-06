@@ -15,14 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.database.models.upload
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
-import io.realm.kotlin.types.RealmObject
-
-/**
- * Class representing files to be uploaded
- */
-class UploadTasks : RealmObject {
-    var userId: Long = 0
-    //TODO: implement
+interface Transfer<ContainerType> {
+    var linkUUID: String
+    var containerUUID: String
+    var downloadCounterCredit: Long
+    var createdDateTimestamp: Long
+    var expiredDateTimestamp: Long
+    var isDownloadOnetime: Long
+    var isMailSent: Boolean
+    var downloadHost: String
+    var container: ContainerType
 }

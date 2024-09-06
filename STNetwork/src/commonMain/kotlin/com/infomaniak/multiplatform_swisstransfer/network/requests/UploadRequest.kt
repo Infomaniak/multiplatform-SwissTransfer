@@ -17,9 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.AuthorEmailToken
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.InitUploadResponseApi
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.UploadCompleteResponse
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
