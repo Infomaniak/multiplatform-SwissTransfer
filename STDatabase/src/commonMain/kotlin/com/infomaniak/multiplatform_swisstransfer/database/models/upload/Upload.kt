@@ -23,6 +23,6 @@ import io.realm.kotlin.types.RealmObject
  * Class representing files to be uploaded
  */
 class Upload : RealmObject {
-    var userId: Long = 0
+    var userId: Long = 0L
     //TODO: implement
 }

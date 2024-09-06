@@ -22,6 +22,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UploadFileRequest(
     val name: String = "",
-    val size: Long = 0,
+    val size: Long = 0L,
     val type: String = "",
 )

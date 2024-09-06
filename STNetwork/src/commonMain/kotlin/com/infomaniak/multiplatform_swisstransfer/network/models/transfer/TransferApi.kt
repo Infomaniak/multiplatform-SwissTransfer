@@ -27,16 +27,16 @@ import kotlinx.serialization.Serializable
 class TransferApi : Transfer<ContainerApi> {
     override var linkUUID: String = ""
     override var containerUUID: String = ""
-    override var downloadCounterCredit: Long = 0
+    override var downloadCounterCredit: Long = 0L
 
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var createdDateTimestamp: Long = 0
+    override var createdDateTimestamp: Long = 0L
 
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var expiredDateTimestamp: Long = 0
-    override var isDownloadOnetime: Long = 0
+    override var expiredDateTimestamp: Long = 0L
+    override var isDownloadOnetime: Long = 0L
 
     @Serializable(with = IntToBooleanSerializer::class)
     override var isMailSent: Boolean = false

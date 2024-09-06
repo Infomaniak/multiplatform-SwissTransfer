@@ -26,17 +26,17 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 class ContainerDB : Container<RealmList<FileDB>>, RealmObject {
     @PrimaryKey
     override var uuid: String = ""
-    override var duration: Long = 0
-    override var createdDateTimestamp: Long = 0
-    override var expiredDateTimestamp: Long = 0
-    override var numberOfFile: Long = 0
+    override var duration: Long = 0L
+    override var createdDateTimestamp: Long = 0L
+    override var expiredDateTimestamp: Long = 0L
+    override var numberOfFile: Long = 0L
     override var message: String? = ""
-    override var needPassword: Long = 0 // TODO: Boolean ?
+    override var needPassword: Long = 0L // TODO: Boolean ?
     override var lang: String = ""
-    override var sizeUploaded: Long = 0
+    override var sizeUploaded: Long = 0L
     override var deletedDateTimestamp: Long? = null
-    override var swiftVersion: Long = 0
-    override var downloadLimit: Long = 0
+    override var swiftVersion: Long = 0L
+    override var downloadLimit: Long = 0L
     override var source: String = ""
 
     //    @SerialName("WSUser") TODO: What's it ?
