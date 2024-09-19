@@ -27,9 +27,9 @@ interface UploadContainer {
     val authorIP: String
     val swiftVersion: String
 
-    //    val createdDate: Object TODO: (Date) Waiting or deserialize this complex date object to timestamp
+    // val createdDate: Object // TODO: (Date) Waiting or deserialize this complex date object to timestamp
     val expiredDateTimestamp: Long
     val needPassword: Boolean
     val message: String
-    val numberOfFile: Long
+    val numberOfFiles: Long
 }

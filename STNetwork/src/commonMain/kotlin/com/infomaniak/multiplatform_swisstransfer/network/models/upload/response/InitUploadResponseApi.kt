@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 
-import kotlinx.serialization.Serializable
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.InitUploadResponse
 
-@Serializable
-data class AuthorEmailToken(
-    val token: String,
-)
+class InitUploadResponseApi : InitUploadResponse<UploadContainerApi> {
+    override var container: UploadContainerApi = UploadContainerApi()
+    override var uploadHost: String = ""
+    override var filesUuid: List<String> = emptyList()
+}

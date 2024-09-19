@@ -15,19 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 
-interface File {
-    var containerUUID: String
-    var uuid: String
-    var fileName: String
-    var fileSizeInBytes: Long
-    var downloadCounter: Long
-    var createdDateTimestamp: Long
-    var expiredDateTimestamp: Long
-    var eVirus: String
-    var deletedDate: String?
-    var mimeType: String
-    var receivedSizeInBytes: Long
-    var path: String?
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class AuthorEmailToken(
+    val token: String,
+)

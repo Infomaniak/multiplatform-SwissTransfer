@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.database.models
+package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.Container
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject

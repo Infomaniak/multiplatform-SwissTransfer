@@ -22,7 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.models.setting.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,15 +46,12 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     }
 
     //region Get data
-
     fun getAppSettingsFlow(): Flow<AppSettingsDB?> {
         return appSettingsQuery.asFlow().mapLatest { it.obj }
     }
-
     //endregion
 
     //region Update data
-
     @Throws(IllegalArgumentException::class, CancellationException::class)
     private suspend fun updateAppSettings(onUpdate: (AppSettingsDB) -> Unit) {
         val appSettings = appSettingsQuery.find() ?: return
@@ -93,6 +90,5 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
             mutableAppSettings.emailLanguage = emailLanguage
         }
     }
-
     //endregion
 }

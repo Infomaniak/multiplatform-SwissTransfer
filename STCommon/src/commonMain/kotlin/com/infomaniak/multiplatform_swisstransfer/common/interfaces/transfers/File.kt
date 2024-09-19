@@ -15,25 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
-interface Container<F : List<File>> {
+interface File {
+    var containerUUID: String
     var uuid: String
-    var duration: Long
+    var fileName: String
+    var fileSizeInBytes: Long
+    var downloadCounter: Long
     var createdDateTimestamp: Long
     var expiredDateTimestamp: Long
-    var numberOfFile: Long
-    var message: String?
-    var needPassword: Long
-    var lang: String
-    var sizeUploaded: Long
-    var deletedDateTimestamp: Long?
-    var swiftVersion: Long
-    var downloadLimit: Long
-    var source: String
-
-    //    @SerialName("WSUser") TODO: What's it ?
-    //val wsUser: JsonElement?
-
-    var files: F
+    var eVirus: String
+    var deletedDate: String?
+    var mimeType: String
+    var receivedSizeInBytes: Long
+    var path: String?
 }
