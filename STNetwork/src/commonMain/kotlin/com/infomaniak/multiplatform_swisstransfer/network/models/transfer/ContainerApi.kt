@@ -27,26 +27,26 @@ class ContainerApi : Container<List<FileApi>> {
     @SerialName("UUID")
     override var uuid: String = ""
 
-    override var duration: Long = 0
+    override var duration: Long = 0L
 
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var createdDateTimestamp: Long = 0
+    override var createdDateTimestamp: Long = 0L
 
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var expiredDateTimestamp: Long = 0
-    override var numberOfFile: Long = 0
+    override var expiredDateTimestamp: Long = 0L
+    override var numberOfFile: Long = 0L
     override var message: String? = null
-    override var needPassword: Long = 0
+    override var needPassword: Long = 0L
     override var lang: String = ""
-    override var sizeUploaded: Long = 0
+    override var sizeUploaded: Long = 0L
 
     @SerialName("deletedDate")
     @Serializable(DateToTimestampSerializer::class)
     override var deletedDateTimestamp: Long? = null
-    override var swiftVersion: Long = 0
-    override var downloadLimit: Long = 0
+    override var swiftVersion: Long = 0L
+    override var downloadLimit: Long = 0L
     override var source: String = "ST"
 
 //    @SerialName("WSUser") TODO: What's it ?

@@ -26,13 +26,13 @@ class FileDB : File, RealmObject {
     override var containerUUID: String = ""
     override var uuid: String = ""
     override var fileName: String = ""
-    override var fileSizeInBytes: Long = 0
-    override var downloadCounter: Long = 0
-    override var createdDateTimestamp: Long = 0
-    override var expiredDateTimestamp: Long = 0
+    override var fileSizeInBytes: Long = 0L
+    override var downloadCounter: Long = 0L
+    override var createdDateTimestamp: Long = 0L
+    override var expiredDateTimestamp: Long = 0L
     override var eVirus: String = ""
     override var deletedDate: String? = null
     override var mimeType: String = ""
-    override var receivedSizeInBytes: Long = 0
+    override var receivedSizeInBytes: Long = 0L
     override var path: String? = ""
 }

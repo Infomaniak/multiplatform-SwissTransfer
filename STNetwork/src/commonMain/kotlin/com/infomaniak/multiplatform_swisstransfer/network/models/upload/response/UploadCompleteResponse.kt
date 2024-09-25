@@ -27,13 +27,13 @@ class UploadCompleteResponse(
     var linkUUID: String = "",
     var containerUUID: String = "",
     var userEmail: String? = null,
-    var downloadCounterCredit: Long = 0,
+    var downloadCounterCredit: Long = 0L,
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
-    var createdDateTimestamp: Long = 0,
+    var createdDateTimestamp: Long = 0L,
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    var expiredDateTimestamp: Long = 0,
+    var expiredDateTimestamp: Long = 0L,
     @Serializable(with = IntToBooleanSerializer::class)
     var isDownloadOnetime: Boolean = false,
     @Serializable(with = IntToBooleanSerializer::class)

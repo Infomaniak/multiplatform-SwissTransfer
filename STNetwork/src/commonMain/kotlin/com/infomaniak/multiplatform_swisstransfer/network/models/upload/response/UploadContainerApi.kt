@@ -28,7 +28,7 @@ class UploadContainerApi : UploadContainer {
     override var uuid: String = ""
 
     override var duration: String = ""
-    override var downloadLimit: Long = 0
+    override var downloadLimit: Long = 0L
     override var lang: String = ""
     override var source: String = ""
 
@@ -41,9 +41,9 @@ class UploadContainerApi : UploadContainer {
     // var createdDate: String // TODO: Why a complex date instead of a simple date ? May be Custom serial this
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var expiredDateTimestamp: Long = 0
+    override var expiredDateTimestamp: Long = 0L
     override var needPassword: Boolean = false
     override var message: String = ""
     @SerialName("numberOfFile")
-    override var numberOfFiles: Long = 0
+    override var numberOfFiles: Long = 0L
 }
