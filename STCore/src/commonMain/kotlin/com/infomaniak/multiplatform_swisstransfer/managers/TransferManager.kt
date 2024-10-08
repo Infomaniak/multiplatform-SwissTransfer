@@ -35,5 +35,5 @@ class TransferManager internal constructor(
     private val realmProvider: RealmProvider,
     private val clientProvider: ApiClientProvider,
 ) {
-    //TODO: Implement here
+    // TODO: Implement here
 }

@@ -22,6 +22,14 @@ import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSett
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadController
 
+/**
+ * AccountManager is responsible for orchestrating Accounts operations using Realm for local data management.
+ *
+ * @property appSettingsController The controller for managing AppSettings operations.
+ * @property uploadController The controller for managing Upload operations.
+ * @property transfersController The controller for managing Transfers operation.
+ * @property realmProvider The provider for managing Realm database operations.
+ */
 class AccountManager internal constructor(
     private val appSettingsController: AppSettingsController,
     private val uploadController: UploadController,
