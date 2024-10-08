@@ -25,6 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import io.realm.kotlin.types.RealmObject
 
 class AppSettingsDB : RealmObject, AppSettings {
+
     private var _theme: String = Theme.SYSTEM.value
     override var theme: Theme
         get() = Theme.entries.find { it.value == _theme } ?: DEFAULT_THEME

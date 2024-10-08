@@ -24,8 +24,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class UploadCompleteResponse(
-    var linkUUID: String = "",
-    var containerUUID: String = "",
+    @SerialName("linkUUID")
+    var linkUuid: String = "",
+    @SerialName("containerUUID")
+    var containerUuid: String = "",
     var userEmail: String? = null,
     var downloadCounterCredit: Long = 0L,
     @SerialName("createdDate")

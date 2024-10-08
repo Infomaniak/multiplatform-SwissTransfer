@@ -18,12 +18,12 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 interface Transfer<ContainerType> {
-    var linkUUID: String
-    var containerUUID: String
-    var downloadCounterCredit: Long
+    var linkUuid: String
+    var containerUuid: String
+    var downloadCounterCredit: Int
     var createdDateTimestamp: Long
     var expiredDateTimestamp: Long
-    var isDownloadOnetime: Long
+    var isDownloadOnetime: Int
     var isMailSent: Boolean
     var downloadHost: String
     var container: ContainerType

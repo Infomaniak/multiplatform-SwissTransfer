@@ -21,8 +21,8 @@ internal object ApiRoutes {
     const val baseUrl = "https://www.swisstransfer.com/api/"
 
     //region Transfer
-    fun getTransfer(linkUUID: String): String {
-        return "links/$linkUUID"
+    fun getTransfer(linkUuid: String): String {
+        return "links/$linkUuid"
     }
     //endRegion
 

@@ -23,12 +23,12 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 
 class TransferDB : Transfer<ContainerDB?>, RealmObject {
     @PrimaryKey
-    override var linkUUID: String = ""
-    override var containerUUID: String = ""
-    override var downloadCounterCredit: Long = 0L
+    override var linkUuid: String = ""
+    override var containerUuid: String = ""
+    override var downloadCounterCredit: Int = 0
     override var createdDateTimestamp: Long = 0L
     override var expiredDateTimestamp: Long = 0L
-    override var isDownloadOnetime: Long = 0L // TODO: Boolean ?
+    override var isDownloadOnetime: Int = 0 // TODO: Boolean ?
     override var isMailSent: Boolean = false
     override var downloadHost: String = ""
     override var container: ContainerDB? = null

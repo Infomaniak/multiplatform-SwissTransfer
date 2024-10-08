@@ -45,5 +45,5 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun getTransfer(linkUUID: String): ApiResponse<TransferApi> = transferRequest.getTransfer(linkUUID)
+    suspend fun getTransfer(linkUuid: String): ApiResponse<TransferApi> = transferRequest.getTransfer(linkUuid)
 }

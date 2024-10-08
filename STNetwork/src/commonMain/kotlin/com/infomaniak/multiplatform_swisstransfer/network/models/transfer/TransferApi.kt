@@ -25,25 +25,20 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class TransferApi : Transfer<ContainerApi> {
-    override var linkUUID: String = ""
-    override var containerUUID: String = ""
-    override var downloadCounterCredit: Long = 0L
-
+    override var linkUuid: String = ""
+    override var containerUuid: String = ""
+    override var downloadCounterCredit: Int = 0
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
     override var createdDateTimestamp: Long = 0L
-
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
     override var expiredDateTimestamp: Long = 0L
-    override var isDownloadOnetime: Long = 0L
-
+    override var isDownloadOnetime: Int = 0
     @Serializable(with = IntToBooleanSerializer::class)
     override var isMailSent: Boolean = false
     override var downloadHost: String = ""
-    override var container: ContainerApi = ContainerApi()
-
-    // TODO: Add download method url
-    val downloadUrl get() = "https://$downloadHost/api/download/??Quoi "
+    val downloadUrl get() = "https://$downloadHost/api/download/??Quoi " // TODO: Add download method url
     // https://dl-j5769qrh.swisstransfer.com/api/download/ec6bc7ac-96b3-4a6e-8d30-8e12e379d11a/97a742c9-b0f5-4fa5-b6bf-cb2c2d6bbe94
+    override var container: ContainerApi = ContainerApi()
 }

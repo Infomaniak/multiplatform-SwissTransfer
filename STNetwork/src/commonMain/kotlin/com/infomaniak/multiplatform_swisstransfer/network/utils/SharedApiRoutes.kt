@@ -19,15 +19,15 @@ package com.infomaniak.multiplatform_swisstransfer.network.utils
 
 object SharedApiRoutes {
 
-    fun downloadFiles(downloadHost: String, linkUUID: String): String {
-        return "https://$downloadHost/api/download/$linkUUID"
+    fun downloadFiles(downloadHost: String, linkUuid: String): String {
+        return "https://$downloadHost/api/download/$linkUuid"
     }
 
-    fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?): String {
-        return "${downloadFiles(downloadHost, linkUUID)}/$fileUUID"
+    fun downloadFile(downloadHost: String, linkUuid: String, fileUuid: String?): String {
+        return "${downloadFiles(downloadHost, linkUuid)}/$fileUuid"
     }
 
-    fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String {
-        return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}"
+    fun uploadChunk(uploadHost: String, containerUuid: String, fileUuid: String, chunkIndex: Int, isLastChunk: Boolean): String {
+        return "https://$uploadHost/api/uploadChunk/$containerUuid/$fileUuid/$chunkIndex/${isLastChunk.int()}"
     }
 }

@@ -26,18 +26,15 @@ import kotlinx.serialization.Serializable
 class UploadContainerApi : UploadContainer {
     @SerialName("UUID")
     override var uuid: String = ""
-
     override var duration: String = ""
     override var downloadLimit: Long = 0L
-    override var lang: String = ""
+    @SerialName("lang")
+    override var language: String = ""
     override var source: String = ""
-
     @SerialName("WSUser")
     override var wsUser: String? = null
-
     override var authorIP: String = ""
     override var swiftVersion: String = ""
-
     // var createdDate: String // TODO: Why a complex date instead of a simple date ? May be Custom serial this
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
@@ -45,5 +42,5 @@ class UploadContainerApi : UploadContainer {
     override var needPassword: Boolean = false
     override var message: String = ""
     @SerialName("numberOfFile")
-    override var numberOfFiles: Long = 0L
+    override var numberOfFiles: Int = 0
 }

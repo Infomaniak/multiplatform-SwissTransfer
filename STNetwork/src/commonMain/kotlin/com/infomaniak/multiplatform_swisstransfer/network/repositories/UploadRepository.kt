@@ -103,13 +103,13 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
     )
     suspend fun uploadChunk(
         uploadHost: String,
-        containerUUID: String,
-        fileUUID: String,
+        containerUuid: String,
+        fileUuid: String,
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
     ): Boolean {
-        return uploadRequest.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk, data)
+        return uploadRequest.uploadChunk(uploadHost, containerUuid, fileUuid, chunkIndex, isLastChunk, data)
     }
 
     @Throws(
