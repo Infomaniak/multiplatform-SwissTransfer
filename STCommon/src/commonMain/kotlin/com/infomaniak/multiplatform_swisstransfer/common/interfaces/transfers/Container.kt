@@ -24,7 +24,7 @@ interface Container<F : List<File>> {
     var expiredDateTimestamp: Long
     var numberOfFiles: Int
     var message: String?
-    var needPassword: Int
+    var needPassword: Boolean
     var language: String
     var sizeUploaded: Long
     var deletedDateTimestamp: Long?

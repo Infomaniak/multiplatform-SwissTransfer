@@ -31,7 +31,7 @@ class ContainerDB : Container<RealmList<FileDB>>, RealmObject {
     override var expiredDateTimestamp: Long = 0L
     override var numberOfFiles: Int = 0
     override var message: String? = ""
-    override var needPassword: Int = 0 // TODO: Boolean ?
+    override var needPassword: Boolean = false
     override var language: String = ""
     override var sizeUploaded: Long = 0L
     override var deletedDateTimestamp: Long? = null

@@ -23,7 +23,7 @@ interface Transfer<ContainerType> {
     var downloadCounterCredit: Int
     var createdDateTimestamp: Long
     var expiredDateTimestamp: Long
-    var isDownloadOnetime: Int
+    var hasBeenDownloadedOneTime: Boolean
     var isMailSent: Boolean
     var downloadHost: String
     var container: ContainerType

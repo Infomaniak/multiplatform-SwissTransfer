@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.models.transfer
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
+import com.infomaniak.multiplatform_swisstransfer.network.serializers.IntToBooleanSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -35,7 +36,8 @@ class ContainerApi : Container<List<FileApi>> {
     override var expiredDateTimestamp: Long = 0L
     override var numberOfFiles: Int = 0
     override var message: String? = null
-    override var needPassword: Int = 0
+    @Serializable(with = IntToBooleanSerializer::class)
+    override var needPassword: Boolean = false
     @SerialName("lang")
     override var language: String = ""
     override var sizeUploaded: Long = 0L

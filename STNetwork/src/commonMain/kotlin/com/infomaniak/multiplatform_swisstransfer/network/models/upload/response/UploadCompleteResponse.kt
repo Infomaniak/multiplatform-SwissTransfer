@@ -36,8 +36,9 @@ class UploadCompleteResponse(
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
     var expiredDateTimestamp: Long = 0L,
+    @SerialName("isDownloadOnetime")
     @Serializable(with = IntToBooleanSerializer::class)
-    var isDownloadOnetime: Boolean = false,
+    var hasBeenDownloadedOneTime: Boolean = false,
     @Serializable(with = IntToBooleanSerializer::class)
     var isMailSent: Boolean = false,
 )

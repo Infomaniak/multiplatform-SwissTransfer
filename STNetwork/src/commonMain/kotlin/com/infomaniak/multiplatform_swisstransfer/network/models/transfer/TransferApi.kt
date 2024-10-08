@@ -34,7 +34,9 @@ class TransferApi : Transfer<ContainerApi> {
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
     override var expiredDateTimestamp: Long = 0L
-    override var isDownloadOnetime: Int = 0
+    @SerialName("isDownloadOnetime")
+    @Serializable(with = IntToBooleanSerializer::class)
+    override var hasBeenDownloadedOneTime: Boolean = false
     @Serializable(with = IntToBooleanSerializer::class)
     override var isMailSent: Boolean = false
     override var downloadHost: String = ""
