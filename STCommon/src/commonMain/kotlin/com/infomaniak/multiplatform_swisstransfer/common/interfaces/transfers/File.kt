@@ -18,11 +18,11 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 interface File {
-    var containerUUID: String
+    var containerUuid: String
     var uuid: String
     var fileName: String
     var fileSizeInBytes: Long
-    var downloadCounter: Long
+    var downloadCounter: Int
     var createdDateTimestamp: Long
     var expiredDateTimestamp: Long
     var eVirus: String

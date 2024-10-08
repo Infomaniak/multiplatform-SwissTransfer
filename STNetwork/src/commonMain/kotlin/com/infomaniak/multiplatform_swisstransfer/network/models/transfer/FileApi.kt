@@ -25,18 +25,16 @@ import kotlinx.serialization.Transient
 
 @Serializable
 class FileApi : File {
-    override var containerUUID: String = ""
 
+    override var containerUuid: String = ""
     @SerialName("UUID")
     override var uuid: String = ""
     override var fileName: String = ""
     override var fileSizeInBytes: Long = 0L
-    override var downloadCounter: Long = 0L
-
+    override var downloadCounter: Int = 0
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
     override var createdDateTimestamp: Long = 0L
-
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
     override var expiredDateTimestamp: Long = 0L

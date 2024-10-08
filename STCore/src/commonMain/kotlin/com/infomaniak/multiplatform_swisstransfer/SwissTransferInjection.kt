@@ -38,11 +38,12 @@ import com.infomaniak.multiplatform_swisstransfer.utils.Constants
  * @property transferManager A manager used to orchestrate transfer operations.
  */
 class SwissTransferInjection {
+
     private val realmProvider by lazy { RealmProvider() }
     private val apiClientProvider by lazy { ApiClientProvider() }
 
-    private val transferRepository by lazy { TransferRepository(apiClientProvider) }
     private val uploadRepository by lazy { UploadRepository(apiClientProvider) }
+    private val transferRepository by lazy { TransferRepository(apiClientProvider) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
 

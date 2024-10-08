@@ -51,14 +51,14 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
 
     suspend fun uploadChunk(
         uploadHost: String,
-        containerUUID: String,
-        fileUUID: String,
+        containerUuid: String,
+        fileUuid: String,
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
     ): Boolean {
         val httpResponse = httpClient.post(
-            urlString = SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
+            urlString = SharedApiRoutes.uploadChunk(uploadHost, containerUuid, fileUuid, chunkIndex, isLastChunk)
         ) {
             setBody(data)
         }

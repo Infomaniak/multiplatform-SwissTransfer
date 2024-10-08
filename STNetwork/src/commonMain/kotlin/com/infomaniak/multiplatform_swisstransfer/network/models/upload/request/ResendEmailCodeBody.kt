@@ -17,10 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ResendEmailCodeBody(
     val address: String,
-    val lang: String, // example "fr_FR"
+    @SerialName("lang")
+    val language: String, // example "fr_FR"
 )

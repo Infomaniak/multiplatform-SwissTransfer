@@ -25,7 +25,7 @@ import kotlinx.serialization.json.Json
 
 internal class TransferRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
-    suspend fun getTransfer(linkUUID: String): ApiResponse<TransferApi> {
-        return get(url = createUrl(ApiRoutes.getTransfer(linkUUID)))
+    suspend fun getTransfer(linkUuid: String): ApiResponse<TransferApi> {
+        return get(url = createUrl(ApiRoutes.getTransfer(linkUuid)))
     }
 }

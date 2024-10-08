@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,7 +31,8 @@ class InitUploadBody(
     val numberOfFile: Int = 0,
     val recaptcha: String = "",
     val recaptchaVersion: Long = 0L,
-    val lang: String = "",
+    @SerialName("lang")
+    val language: String = "",
     val files: List<UploadFileRequest> = emptyList(),
     val recipientsEmails: String = "",
 )

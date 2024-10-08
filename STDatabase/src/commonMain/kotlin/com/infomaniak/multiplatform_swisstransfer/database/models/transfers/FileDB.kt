@@ -23,11 +23,11 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 
 class FileDB : File, RealmObject {
     @PrimaryKey
-    override var containerUUID: String = ""
+    override var containerUuid: String = ""
     override var uuid: String = ""
     override var fileName: String = ""
     override var fileSizeInBytes: Long = 0L
-    override var downloadCounter: Long = 0L
+    override var downloadCounter: Int = 0
     override var createdDateTimestamp: Long = 0L
     override var expiredDateTimestamp: Long = 0L
     override var eVirus: String = ""

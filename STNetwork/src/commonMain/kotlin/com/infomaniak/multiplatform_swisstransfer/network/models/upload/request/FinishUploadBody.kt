@@ -23,7 +23,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FinishUploadBody(
     @SerialName("UUID")
-    val containerUUID: String = "",
-    val lang: String = "",
+    val containerUuid: String = "",
+    @SerialName("lang")
+    val language: String = "",
     val recipientsEmails: List<String>? = null,
 )

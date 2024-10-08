@@ -24,8 +24,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class UploadCompleteResponse(
-    var linkUUID: String = "",
-    var containerUUID: String = "",
+    @SerialName("linkUUID")
+    var linkUuid: String = "",
+    @SerialName("containerUUID")
+    var containerUuid: String = "",
     var userEmail: String? = null,
     var downloadCounterCredit: Long = 0L,
     @SerialName("createdDate")
@@ -34,8 +36,9 @@ class UploadCompleteResponse(
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
     var expiredDateTimestamp: Long = 0L,
+    @SerialName("isDownloadOnetime")
     @Serializable(with = IntToBooleanSerializer::class)
-    var isDownloadOnetime: Boolean = false,
+    var hasBeenDownloadedOneTime: Boolean = false,
     @Serializable(with = IntToBooleanSerializer::class)
     var isMailSent: Boolean = false,
 )

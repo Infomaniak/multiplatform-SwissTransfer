@@ -21,15 +21,14 @@ interface UploadContainer {
     val uuid: String
     val duration: String
     val downloadLimit: Long
-    val lang: String
+    val language: String
     val source: String
     val wsUser: String?
     val authorIP: String
     val swiftVersion: String
-
     // val createdDate: Object // TODO: (Date) Waiting or deserialize this complex date object to timestamp
     val expiredDateTimestamp: Long
     val needPassword: Boolean
     val message: String
-    val numberOfFiles: Long
+    val numberOfFiles: Int
 }

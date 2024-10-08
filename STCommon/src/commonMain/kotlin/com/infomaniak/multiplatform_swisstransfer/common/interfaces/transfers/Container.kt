@@ -22,18 +22,16 @@ interface Container<F : List<File>> {
     var duration: Long
     var createdDateTimestamp: Long
     var expiredDateTimestamp: Long
-    var numberOfFile: Long
+    var numberOfFiles: Int
     var message: String?
-    var needPassword: Long
-    var lang: String
+    var needPassword: Boolean
+    var language: String
     var sizeUploaded: Long
     var deletedDateTimestamp: Long?
-    var swiftVersion: Long
-    var downloadLimit: Long
+    var swiftVersion: Int
+    var downloadLimit: Int
     var source: String
-
-    //    @SerialName("WSUser") TODO: What's it ?
-    //val wsUser: JsonElement?
-
+    // @SerialName("WSUser") // TODO: What's this ?
+    // val wsUser: JsonElement?
     var files: F
 }

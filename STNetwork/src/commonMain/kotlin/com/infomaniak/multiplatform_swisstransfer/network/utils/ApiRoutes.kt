@@ -18,12 +18,11 @@
 package com.infomaniak.multiplatform_swisstransfer.network.utils
 
 internal object ApiRoutes {
+
     const val baseUrl = "https://www.swisstransfer.com/api/"
 
     //region Transfer
-    fun getTransfer(linkUUID: String): String {
-        return "links/$linkUUID"
-    }
+    fun getTransfer(linkUuid: String): String = "links/$linkUuid"
     //endRegion
 
     //region Upload
