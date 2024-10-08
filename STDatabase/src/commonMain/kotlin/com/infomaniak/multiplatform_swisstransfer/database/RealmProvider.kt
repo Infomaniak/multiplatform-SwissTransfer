@@ -28,13 +28,11 @@ import io.realm.kotlin.RealmConfiguration
 class RealmProvider {
 
     val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
-
     val realmUploads by lazy { Realm.open(realmUploadConfiguration) }
-
     var realmTransfers: Realm? = null
         private set
 
-    fun loadRealmTransfers(userId: Int) {
+    fun openRealmTransfers(userId: Int) {
         realmTransfers = Realm.open(realmTransfersConfiguration(userId))
     }
 
@@ -48,10 +46,6 @@ class RealmProvider {
 
     fun closeRealmTransfers() {
         realmTransfers?.close()
-    }
-
-    fun closeRealm(realm: Realm) {
-        realm.close()
     }
 
     fun closeAllRealms() {

@@ -21,7 +21,6 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadController
-import com.infomaniak.multiplatform_swisstransfer.utils.Constants
 
 class AccountManager internal constructor(
     private val appSettingsController: AppSettingsController,
@@ -36,7 +35,7 @@ class AccountManager internal constructor(
     @Throws(IllegalArgumentException::class, IllegalStateException::class)
     suspend fun loadUser(userId: Int) {
         appSettingsController.initAppSettings()
-        realmProvider.loadRealmTransfers(Constants.DEFAULT_USER_ID)
+        realmProvider.openRealmTransfers(userId)
     }
 
     /**
@@ -45,10 +44,10 @@ class AccountManager internal constructor(
     @Throws(IllegalArgumentException::class, IllegalStateException::class)
     suspend fun removeUser(userId: Int) {
 
-        // TODO: If we are removing the last User, we also need to delete AppSettings data.
-        // if (users.count() == 1) appSettingsController.removeData()
-
+        appSettingsController.removeData()
         uploadController.removeData()
         transfersController.removeData()
+
+        realmProvider.closeAllRealms()
     }
 }
