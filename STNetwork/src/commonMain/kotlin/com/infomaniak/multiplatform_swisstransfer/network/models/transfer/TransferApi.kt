@@ -40,7 +40,7 @@ class TransferApi : Transfer<ContainerApi> {
     @Serializable(with = IntToBooleanSerializer::class)
     override var isMailSent: Boolean = false
     override var downloadHost: String = ""
-    val downloadUrl get() = "https://$downloadHost/api/download/??Quoi " // TODO: Add download method url
+    val downloadUrl get() = "https://$downloadHost/api/download/??QuoiFeur " // TODO: Add download method url
     // https://dl-j5769qrh.swisstransfer.com/api/download/ec6bc7ac-96b3-4a6e-8d30-8e12e379d11a/97a742c9-b0f5-4fa5-b6bf-cb2c2d6bbe94
     override var container: ContainerApi = ContainerApi()
 }
