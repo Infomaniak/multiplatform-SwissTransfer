@@ -30,4 +30,5 @@ interface File {
     var mimeType: String
     var receivedSizeInBytes: Long
     var path: String?
+    var thumbnailPath: String?
 }

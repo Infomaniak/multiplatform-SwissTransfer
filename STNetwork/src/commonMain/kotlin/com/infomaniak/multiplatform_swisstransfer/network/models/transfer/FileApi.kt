@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Fi
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 class FileApi : File {
@@ -44,4 +45,6 @@ class FileApi : File {
     override var mimeType: String = ""
     override var receivedSizeInBytes: Long = 0L
     override var path: String? = null
+    @Transient
+    override var thumbnailPath: String? = null
 }

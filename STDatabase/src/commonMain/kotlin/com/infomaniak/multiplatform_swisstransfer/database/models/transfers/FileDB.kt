@@ -35,4 +35,5 @@ class FileDB : File, RealmObject {
     override var mimeType: String = ""
     override var receivedSizeInBytes: Long = 0L
     override var path: String? = ""
+    override var thumbnailPath: String? = ""
 }
