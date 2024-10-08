@@ -90,5 +90,10 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
             mutableAppSettings.emailLanguage = emailLanguage
         }
     }
+
+    @Throws(IllegalArgumentException::class, CancellationException::class)
+    suspend fun removeData() {
+        realm.write { deleteAll() }
+    }
     //endregion
 }

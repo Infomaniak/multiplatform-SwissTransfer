@@ -18,17 +18,28 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
 import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.RealmUUID
-import io.realm.kotlin.types.annotations.PrimaryKey
+import io.realm.kotlin.types.EmbeddedRealmObject
 
-/**
- * Class representing files to be uploaded
- */
-class Upload : RealmObject {
-    @PrimaryKey
-    var uuid: RealmUUID = RealmUUID.random()
-    var container: UploadContainerDB? = null
-    var uploadHost: String = ""
-    var files = realmListOf<UploadFile>()
+class UploadFile : EmbeddedRealmObject {
+
+    var uuid: String = ""
+    var path: String = ""
+
+    /**
+     * We always try to resume upload, and we check at the end if it went ok.
+     * Otherwise, we restart from scratch.
+     */
+    var uploadedChunks = realmListOf<Int>()
+
+    private var _uploadStatus: String = UploadStatus.AWAITING.name
+
+    val uploadStatus: UploadStatus
+        get() = enumValueOf<UploadStatus>(_uploadStatus)
+
+    enum class UploadStatus {
+        AWAITING,
+        ONGOING,
+        FINISHED,
+        ERROR,
+    }
 }

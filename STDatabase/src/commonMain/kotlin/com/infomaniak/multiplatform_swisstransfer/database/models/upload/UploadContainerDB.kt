@@ -17,18 +17,21 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
-import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.RealmUUID
-import io.realm.kotlin.types.annotations.PrimaryKey
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
+import io.realm.kotlin.types.EmbeddedRealmObject
 
-/**
- * Class representing files to be uploaded
- */
-class Upload : RealmObject {
-    @PrimaryKey
-    var uuid: RealmUUID = RealmUUID.random()
-    var container: UploadContainerDB? = null
-    var uploadHost: String = ""
-    var files = realmListOf<UploadFile>()
+class UploadContainerDB : UploadContainer, EmbeddedRealmObject {
+    override var uuid: String = ""
+    override var duration: String = ""
+    override var downloadLimit: Long = 0
+    override var language: String = ""
+    override var source: String = ""
+    override var wsUser: String? = null
+    override var authorIP: String = ""
+    override var swiftVersion: String = ""
+    // var createdDate: String // TODO: Why a complex date instead of a simple date ? May be Custom serial this
+    override var expiredDateTimestamp: Long = 0
+    override var needPassword: Boolean = false
+    override var message: String = ""
+    override var numberOfFiles: Int = 0
 }

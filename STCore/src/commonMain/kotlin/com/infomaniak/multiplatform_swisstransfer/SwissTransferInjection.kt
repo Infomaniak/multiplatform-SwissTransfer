@@ -19,12 +19,14 @@ package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadController
+import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
-import com.infomaniak.multiplatform_swisstransfer.utils.Constants
 
 /**
  * SwissTransferInjection is a class responsible for initializing all the classes needed
@@ -46,19 +48,15 @@ class SwissTransferInjection {
     private val transferRepository by lazy { TransferRepository(apiClientProvider) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
-
-    /**
-     * Loads the default user account and initializes Realm transfers for the default user ID defined in the constants.
-     */
-    @Throws(IllegalArgumentException::class, IllegalStateException::class)
-    suspend fun loadDefaultAccount() {
-        appSettingsController.initAppSettings()
-        realmProvider.loadRealmTransfers(Constants.DEFAULT_USER_ID)
-    }
+    private val uploadController by lazy { UploadController(realmProvider) }
+    private val transfersController by lazy { TransfersController(realmProvider) }
 
     /** A manager used to orchestrate transfer operations. */
     val transferManager by lazy { TransferManager(realmProvider, apiClientProvider) }
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
+
+    /** A manager used to orchestrate Accounts operations. */
+    val accountManager by lazy { AccountManager(appSettingsController, uploadController, transfersController, realmProvider) }
 }
