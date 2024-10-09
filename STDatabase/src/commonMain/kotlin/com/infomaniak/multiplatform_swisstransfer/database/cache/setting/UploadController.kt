@@ -21,16 +21,22 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.Upload
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.RealmResults
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.coroutines.cancellation.CancellationException
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class UploadController(private val realmProvider: RealmProvider) {
 
     private val realm by lazy { realmProvider.realmUploads }
 
+    //region Queries
+    private fun getUploadsQuery() = realm.query<Upload>()
+    //endregion
+
     //region Get data
-    fun getUploads(): RealmResults<Upload> = realm.query<Upload>().find()
+    @Throws(IllegalArgumentException::class, CancellationException::class)
+    fun getUploads(): RealmResults<Upload> = getUploadsQuery().find()
+
+    @Throws(IllegalArgumentException::class, CancellationException::class)
+    fun getUploadsCount(): Long = getUploadsQuery().count().find()
     //endregion
 
     //region Update data

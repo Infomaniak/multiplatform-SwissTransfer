@@ -21,15 +21,14 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.RealmResults
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.coroutines.cancellation.CancellationException
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class TransfersController(private val realmProvider: RealmProvider) {
 
     private val realm by lazy { realmProvider.realmTransfers }
 
     //region Get data
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     fun getTransfers(): RealmResults<TransferDB>? = realm?.query<TransferDB>()?.find()
     //endregion
 
