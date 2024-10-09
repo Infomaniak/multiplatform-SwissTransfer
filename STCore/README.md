@@ -33,11 +33,11 @@ centralized access point to orchestrate transfer operations.
 
 ### Table of Public Properties and Methods
 
-| Type     | Name               | Description                                                                   |
-|----------|--------------------|-------------------------------------------------------------------------------|
-| Property | appSettingsManager | A manager used to orchestrate AppSettings operations.                         |
-| Property | transferManager    | A manager used to orchestrate transfer operations.                            |
-| Method   | loadDefaultAccount | Loads the default user account and initializes Realm transfers for this user. |
+| Type     | Name               | Description                                           |
+|----------|--------------------|-------------------------------------------------------|
+| Property | appSettingsManager | A manager used to orchestrate AppSettings operations. |
+| Property | transferManager    | A manager used to orchestrate Transfers operations.   |
+| Property | accountManager     | A manager used to orchestrate Accounts operations.    |
 
 ### Details of Properties and Methods
 
@@ -52,7 +52,7 @@ centralized access point to orchestrate transfer operations.
   ```kotlin
   val core = SwissTransferInjection()
   val appSettingsManager = core.appSettingsManager
-  // Use the appSettingsManager to orchestrate AppSettings related operations
+  // Use the appSettingsManager to orchestrate AppSettings
   ```
 
 #### Property: `transferManager`
@@ -60,28 +60,28 @@ centralized access point to orchestrate transfer operations.
 - **Type**: `TransferManager`
 - **Description**:
     - `transferManager` is a lazily initialized property that provides a manager to orchestrate all transfer operations. It
-      uses `realmProvider` and `apiClientProvider` to configure and manage transfers efficiently.
+      uses `realmProvider` and `apiClientProvider` to configure and manage Transfers efficiently.
 
 - **Usage Example**:
   ```kotlin
   val core = SwissTransferInjection()
   val transferManager = core.transferManager
-  // Use the transferManager to orchestrate transfers
+  // Use the transferManager to orchestrate Transfers
   ```
 
-#### Method: `loadDefaultAccount`
+#### Property: `accountManager`
 
-- **Signature**: `fun loadDefaultAccount()`
+- **Type**: `AccountManager`
 - **Description**:
-    - `loadDefaultAccount` is a method that loads the default user account and initializes Realm transfers for the default user ID
-      defined in the constants. This method is essential to ensure the application is correctly set up for the default user from
-      the start.
+    - `accountManager` is a lazily initialized property that provides a manager to orchestrate all Accounts operations. It uses
+      `appSettingsController`, `uploadController`, `transfersController` and `realmProvider` to configure and manage Accounts
+      efficiently.
 
 - **Usage Example**:
   ```kotlin
   val core = SwissTransferInjection()
-  core.loadDefaultAccount()
-  // The default user account is now loaded and ready to use
+  val accountManager = core.accountManager
+  // Use the accountManager to orchestrate Accounts
   ```
 
 ## Contributing

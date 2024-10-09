@@ -37,6 +37,7 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
 
     private val appSettingsQuery get() = realm.query<AppSettingsDB>().first()
 
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     suspend fun initAppSettings() {
         if (appSettingsQuery.find() == null) {
             realm.write {
@@ -46,6 +47,7 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     }
 
     //region Get data
+    @Throws(IllegalArgumentException::class, CancellationException::class)
     fun getAppSettingsFlow(): Flow<AppSettingsDB?> {
         return appSettingsQuery.asFlow().mapLatest { it.obj }
     }
@@ -89,6 +91,11 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.emailLanguage = emailLanguage
         }
+    }
+
+    @Throws(IllegalArgumentException::class, CancellationException::class)
+    suspend fun removeData() {
+        realm.write { deleteAll() }
     }
     //endregion
 }
