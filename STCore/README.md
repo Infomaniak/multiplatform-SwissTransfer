@@ -59,8 +59,7 @@ centralized access point to orchestrate transfer operations.
 
 - **Type**: `TransferManager`
 - **Description**:
-    - `transferManager` is a lazily initialized property that provides a manager to orchestrate all transfer operations. It
-      uses `realmProvider` and `apiClientProvider` to configure and manage Transfers efficiently.
+    - `transferManager` is a lazily initialized property that provides a manager to orchestrate all transfer operations.
 
 - **Usage Example**:
   ```kotlin
