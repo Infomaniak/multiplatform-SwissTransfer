@@ -23,6 +23,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.Tran
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.RealmResults
+import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -36,7 +37,9 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Get data
     @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getTransfers(): RealmResults<TransferDB>? = realm?.query<TransferDB>()?.find()
+    fun getTransfers(): RealmResults<TransferDB>? {
+        return realm?.query<TransferDB>()?.sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)?.find()
+    }
 
     @Throws(IllegalArgumentException::class, CancellationException::class)
     fun getTransfersFlow(): Flow<List<TransferDB>> = getTransfers()?.asFlow()?.mapLatest { it.list } ?: emptyFlow()
