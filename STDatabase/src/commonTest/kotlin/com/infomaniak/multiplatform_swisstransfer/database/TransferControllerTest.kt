@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database
 
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
 class TransferControllerTest {
@@ -34,13 +34,13 @@ class TransferControllerTest {
     }
 
     @AfterTest
-    fun tearDown() = runBlocking {
+    fun tearDown() = runTest {
         transferController.removeData()
         realmProvider.closeRealmTransfers()
     }
 
     @Test
-    fun canCreateTransfer() = runBlocking {
+    fun canCreateTransfer() = runTest {
         val transfer = DummyTransfer.transfer
         transferController.upsert(transfer)
         val realmTransfer = transferController.getTransfer(transfer.linkUuid)
@@ -55,7 +55,7 @@ class TransferControllerTest {
     }
 
     @Test
-    fun canGetTransfers() = runBlocking {
+    fun canGetTransfers() = runTest {
         val transfer = DummyTransfer.transfer
         transferController.upsert(transfer)
         val transfers = transferController.getTransfers()
