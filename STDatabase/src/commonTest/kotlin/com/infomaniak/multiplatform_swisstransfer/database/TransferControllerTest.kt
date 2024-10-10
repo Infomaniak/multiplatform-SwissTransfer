@@ -48,7 +48,7 @@ class TransferControllerTest {
     }
 
     @Test
-    fun canGetFrom() = runBlocking {
+    fun canGetTransfers() = runBlocking {
         val transfer = DummyTransfer.transfer
         transferController.upsert(transfer)
         val transfers = transferController.getTransfers()
