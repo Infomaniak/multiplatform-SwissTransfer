@@ -18,12 +18,13 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class ContainerDB : Container<RealmList<FileDB>>, RealmObject {
+class ContainerDB() : Container<RealmList<FileDB>>, RealmObject {
     @PrimaryKey
     override var uuid: String = ""
     override var duration: Long = 0L
@@ -41,4 +42,21 @@ class ContainerDB : Container<RealmList<FileDB>>, RealmObject {
     // @SerialName("WSUser") // TODO: What's this ?
     // val wsUser: JsonElement?
     override var files: RealmList<FileDB> = realmListOf()
+
+    constructor(container: Container<List<File>>) : this() {
+        this.uuid = container.uuid
+        this.duration = container.duration
+        this.createdDateTimestamp = container.createdDateTimestamp
+        this.expiredDateTimestamp = container.expiredDateTimestamp
+        this.numberOfFiles = container.numberOfFiles
+        this.message = container.message
+        this.needPassword = container.needPassword
+        this.language = container.language
+        this.sizeUploaded = container.sizeUploaded
+        this.deletedDateTimestamp = container.deletedDateTimestamp
+        this.swiftVersion = container.swiftVersion
+        this.downloadLimit = container.downloadLimit
+        this.source = container.source
+        this.files = container.files.mapTo(realmListOf()) { FileDB(it) }
+    }
 }
