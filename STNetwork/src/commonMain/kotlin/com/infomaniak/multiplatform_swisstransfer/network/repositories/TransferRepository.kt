@@ -25,6 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnknownApiE
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.requests.TransferRequest
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
@@ -45,5 +46,16 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun getTransfer(linkUuid: String): ApiResponse<TransferApi> = transferRequest.getTransfer(linkUuid)
+    suspend fun getTransferByLinkUuid(linkUuid: String): ApiResponse<TransferApi> = transferRequest.getTransfer(linkUuid)
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnknownApiException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun getTransferByUrl(url: String): ApiResponse<TransferApi> {
+        return transferRequest.getTransfer(url.substringAfter(ApiRoutes.baseUrl))
+    }
 }
