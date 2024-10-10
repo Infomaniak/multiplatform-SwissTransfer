@@ -50,6 +50,13 @@ class TransferControllerTest {
     }
 
     @Test
+    fun canRemoveTransfers() = runTest {
+        transferController.upsert(DummyTransfer.transfer)
+        transferController.removeData()
+        assertEquals(0, transferController.getTransfers()?.count())
+    }
+
+    @Test
     fun realmTransferListIsEmpty() {
         assertTrue(transferController.getTransfers()?.isEmpty() == true)
     }
