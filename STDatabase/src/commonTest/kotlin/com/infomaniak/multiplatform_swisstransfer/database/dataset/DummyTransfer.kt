@@ -25,14 +25,14 @@ object DummyTransfer {
 
     private val containerTest = object : Container<List<File>> {
         override var uuid: String = "transfer1Container"
-        override var duration: Long = 0
-        override var createdDateTimestamp: Long = 0
-        override var expiredDateTimestamp: Long = 0
+        override var duration: Long = 0L
+        override var createdDateTimestamp: Long = 0L
+        override var expiredDateTimestamp: Long = 0L
         override var numberOfFiles: Int = 0
         override var message: String? = null
         override var needPassword: Boolean = false
         override var language: String = "language"
-        override var sizeUploaded: Long = 0
+        override var sizeUploaded: Long = 0L
         override var deletedDateTimestamp: Long? = null
         override var swiftVersion: Int = 0
         override var downloadLimit: Int = 0
@@ -44,8 +44,8 @@ object DummyTransfer {
         override var linkUuid: String = "transferLinkUuid1"
         override var containerUuid: String = "containerUuid"
         override var downloadCounterCredit: Int = 0
-        override var createdDateTimestamp: Long = 0
-        override var expiredDateTimestamp: Long = 0
+        override var createdDateTimestamp: Long = 0L
+        override var expiredDateTimestamp: Long = 0L
         override var hasBeenDownloadedOneTime: Boolean = false
         override var isMailSent: Boolean = true
         override var downloadHost: String = "url"
