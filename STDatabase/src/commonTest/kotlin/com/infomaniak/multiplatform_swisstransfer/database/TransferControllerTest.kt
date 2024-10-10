@@ -24,12 +24,19 @@ import kotlin.test.*
 
 class TransferControllerTest {
 
-    private val realmProvider = RealmProvider().apply { openRealmTransfers(userId = 0, inMemory = true) }
-    private val transferController = TransferController(realmProvider)
+    private lateinit var realmProvider: RealmProvider
+    private lateinit var transferController: TransferController
+
+    @BeforeTest
+    fun setup() {
+        realmProvider = RealmProvider().apply { openRealmTransfers(userId = 0, inMemory = true) }
+        transferController = TransferController(realmProvider)
+    }
 
     @AfterTest
-    fun removeData() {
-        runBlocking { transferController.removeData() }
+    fun tearDown() = runBlocking {
+        transferController.removeData()
+        realmProvider.closeRealmTransfers()
     }
 
     @Test
@@ -37,7 +44,7 @@ class TransferControllerTest {
         val transfer = DummyTransfer.transfer
         transferController.upsert(transfer)
         val realmTransfer = transferController.getTransfer(transfer.linkUuid)
-        assertNotNull(realmTransfer)
+        assertNotNull(realmTransfer, "The transfer cannot be null")
         assertEquals(transfer.container.uuid, realmTransfer.container?.uuid)
         assertEquals(transfer.container.files.count(), realmTransfer.container?.files?.count())
     }
