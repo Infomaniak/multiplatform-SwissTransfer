@@ -17,8 +17,19 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
-import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnknownApiException
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.flowOn
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * TransferManager is responsible for orchestrating data transfer operations
@@ -32,8 +43,40 @@ import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
  * @property clientProvider The provider for creating and configuring HTTP clients for API communication.
  */
 class TransferManager internal constructor(
-    private val realmProvider: RealmProvider,
     private val clientProvider: ApiClientProvider,
+    private val transfersController: TransfersController,
+    private val transferRepository: TransferRepository,
 ) {
-    // TODO: Implement here
+
+    val transfers get() = transfersController.getTransfersFlow().flowOn(Dispatchers.IO)
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnknownApiException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun addTransferByLinkUuid(linkUuid: String) {
+        addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data)
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnknownApiException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun addTransferByUrl(url: String) {
+        addTransfer(transferRepository.getTransferByUrl(url).data)
+    }
+
+    private suspend fun addTransfer(transferApi: TransferApi?) {
+        runCatching {
+            transfersController.upsert(transferApi as Transfer<*>)
+        }.onFailure {
+            throw UnknownException(it)
+        }
+    }
 }

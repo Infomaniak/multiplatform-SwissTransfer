@@ -52,7 +52,7 @@ class SwissTransferInjection {
     private val transfersController by lazy { TransfersController(realmProvider) }
 
     /** A manager used to orchestrate Transfers operations. */
-    val transferManager by lazy { TransferManager(realmProvider, apiClientProvider) }
+    val transferManager by lazy { TransferManager(apiClientProvider, transfersController, transferRepository) }
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
