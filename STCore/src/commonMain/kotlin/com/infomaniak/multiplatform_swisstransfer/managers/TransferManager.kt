@@ -50,8 +50,29 @@ class TransferManager internal constructor(
     private val transferRepository: TransferRepository,
 ) {
 
+    /**
+     * The `Flow` of [transfers] is used to receive updates for new transfers added in database.
+     * @see addTransferByLinkUuid
+     * @see addTransferByUrl
+     */
     val transfers get() = transferController.getTransfersFlow().flowOn(Dispatchers.IO)
 
+    /**
+     * Retrieves a transfer using the provided link UUID and saves it to the database.
+     *
+     * This function is typically used after a transfer has been uploaded. Once the upload is complete,
+     * a `linkUuid` is returned, which must be passed to this function to retrieve the corresponding transfer.
+     * After retrieving the transfer, it is saved to the database.
+     *
+     * @see transfers
+     *
+     * @param linkUuid The UUID corresponding to the uploaded transfer link.
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is an error related to the API during transfer retrieval.
+     * @throws UnknownApiException If an unknown error occurs while interacting with the API.
+     * @throws NetworkException If there is a network issue during the transfer retrieval.
+     * @throws UnknownException For any other unexpected errors that occur during the process.
+     */
     @Throws(
         CancellationException::class,
         ApiException::class,
@@ -63,6 +84,22 @@ class TransferManager internal constructor(
         addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data)
     }
 
+    /**
+     * Retrieves a transfer using the provided URL and saves it to the database.
+     *
+     * This function is used when a transfer URL is available. The provided `url` is used to retrieve
+     * the corresponding transfer, and after the transfer is successfully retrieved, it is saved to
+     * the database.
+     *
+     * @see transfers
+     *
+     * @param url The URL associated with the transfer to retrieve.
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is an error related to the API during transfer retrieval.
+     * @throws UnknownApiException If an unknown error occurs while interacting with the API.
+     * @throws NetworkException If there is a network issue during the transfer retrieval.
+     * @throws UnknownException For any other unexpected errors that occur during the process.
+     */
     @Throws(
         CancellationException::class,
         ApiException::class,
