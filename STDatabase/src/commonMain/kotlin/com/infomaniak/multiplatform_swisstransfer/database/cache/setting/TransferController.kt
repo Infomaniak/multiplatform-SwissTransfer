@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TransfersController(private val realmProvider: RealmProvider) {
+class TransferController(private val realmProvider: RealmProvider) {
 
     private val realm by lazy { realmProvider.realmTransfers }
 

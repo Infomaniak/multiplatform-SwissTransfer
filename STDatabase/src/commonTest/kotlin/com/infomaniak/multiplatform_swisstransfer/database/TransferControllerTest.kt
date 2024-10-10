@@ -17,7 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
 import kotlinx.coroutines.runBlocking
 import kotlin.test.*
@@ -25,7 +25,7 @@ import kotlin.test.*
 class TransferControllerTest {
 
     private val realmProvider = RealmProvider().apply { openRealmTransfers(userId = 0, inMemory = true) }
-    private val transferController = TransfersController(realmProvider)
+    private val transferController = TransferController(realmProvider)
 
     @AfterTest
     fun removeData() {

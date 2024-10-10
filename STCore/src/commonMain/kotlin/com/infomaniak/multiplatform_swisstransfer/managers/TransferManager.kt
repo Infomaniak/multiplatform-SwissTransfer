@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -44,11 +44,11 @@ import kotlin.coroutines.cancellation.CancellationException
  */
 class TransferManager internal constructor(
     private val clientProvider: ApiClientProvider,
-    private val transfersController: TransfersController,
+    private val transferController: TransferController,
     private val transferRepository: TransferRepository,
 ) {
 
-    val transfers get() = transfersController.getTransfersFlow().flowOn(Dispatchers.IO)
+    val transfers get() = transferController.getTransfersFlow().flowOn(Dispatchers.IO)
 
     @Throws(
         CancellationException::class,
@@ -74,7 +74,7 @@ class TransferManager internal constructor(
 
     private suspend fun addTransfer(transferApi: TransferApi?) {
         runCatching {
-            transfersController.upsert(transferApi as Transfer<*>)
+            transferController.upsert(transferApi as Transfer<*>)
         }.onFailure {
             throw UnknownException(it)
         }
