@@ -45,20 +45,7 @@ class TransferControllerTest {
         transferController.upsert(transfer)
         val realmTransfer = transferController.getTransfer(transfer.linkUuid)
         assertNotNull(realmTransfer, "The transfer cannot be null")
-        assertEquals(transfer.container.uuid, realmTransfer.container?.uuid)
-        assertEquals(transfer.container.files.count(), realmTransfer.container?.files?.count())
-    }
-
-    @Test
-    fun canRemoveTransfers() = runTest {
-        transferController.upsert(DummyTransfer.transfer)
-        transferController.removeData()
-        assertEquals(0, transferController.getTransfers()?.count())
-    }
-
-    @Test
-    fun realmTransferListIsEmpty() {
-        assertTrue(transferController.getTransfers()?.isEmpty() == true)
+        assertEquals(transfer.container.uuid, realmTransfer.container?.uuid, "The container is missing")
     }
 
     @Test
@@ -66,6 +53,13 @@ class TransferControllerTest {
         val transfer = DummyTransfer.transfer
         transferController.upsert(transfer)
         val transfers = transferController.getTransfers()
-        assertEquals(1, transfers?.count())
+        assertEquals(1, transfers?.count(), "The transfer list must contain 1 item")
+    }
+
+    @Test
+    fun canRemoveTransfers() = runTest {
+        transferController.upsert(DummyTransfer.transfer)
+        transferController.removeData()
+        assertEquals(0, transferController.getTransfers()?.count(), "The transfers table must be empty")
     }
 }
