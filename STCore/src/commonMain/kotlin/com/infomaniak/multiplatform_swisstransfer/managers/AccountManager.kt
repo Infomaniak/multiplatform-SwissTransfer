@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadController
 
 /**
@@ -27,13 +27,13 @@ import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadC
  *
  * @property appSettingsController The controller for managing AppSettings operations.
  * @property uploadController The controller for managing Upload operations.
- * @property transfersController The controller for managing Transfers operation.
+ * @property transferController The controller for managing Transfers operation.
  * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
     private val appSettingsController: AppSettingsController,
     private val uploadController: UploadController,
-    private val transfersController: TransfersController,
+    private val transferController: TransferController,
     private val realmProvider: RealmProvider,
 ) {
 
@@ -54,7 +54,7 @@ class AccountManager internal constructor(
 
         appSettingsController.removeData()
         uploadController.removeData()
-        transfersController.removeData()
+        transferController.removeData()
 
         realmProvider.closeAllRealms()
     }

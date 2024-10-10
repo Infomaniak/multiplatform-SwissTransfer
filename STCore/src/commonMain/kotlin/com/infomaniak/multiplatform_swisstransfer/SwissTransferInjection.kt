@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransfersController
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadController
 import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
@@ -49,14 +49,14 @@ class SwissTransferInjection {
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val uploadController by lazy { UploadController(realmProvider) }
-    private val transfersController by lazy { TransfersController(realmProvider) }
+    private val transferController by lazy { TransferController(realmProvider) }
 
     /** A manager used to orchestrate Transfers operations. */
-    val transferManager by lazy { TransferManager(realmProvider, apiClientProvider) }
+    val transferManager by lazy { TransferManager(apiClientProvider, transferController, transferRepository) }
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
 
     /** A manager used to orchestrate Accounts operations. */
-    val accountManager by lazy { AccountManager(appSettingsController, uploadController, transfersController, realmProvider) }
+    val accountManager by lazy { AccountManager(appSettingsController, uploadController, transferController, realmProvider) }
 }

@@ -32,8 +32,8 @@ class RealmProvider {
     var realmTransfers: Realm? = null
         private set
 
-    fun openRealmTransfers(userId: Int) {
-        realmTransfers = Realm.open(realmTransfersConfiguration(userId))
+    fun openRealmTransfers(userId: Int, inMemory: Boolean = false) {
+        realmTransfers = Realm.open(realmTransfersConfiguration(userId, inMemory))
     }
 
     fun closeRealmAppSettings() {
@@ -64,9 +64,10 @@ class RealmProvider {
         .name("Uploads")
         .build()
 
-    private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
+    private fun realmTransfersConfiguration(userId: Int, inMemory: Boolean) = RealmConfiguration
         .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class))
         .name(transferRealmName(userId))
+        .apply { if (inMemory) inMemory() }
         .build()
 
     private fun transferRealmName(userId: Int) = "Transfers-$userId"

@@ -21,7 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Fi
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class FileDB : File, RealmObject {
+class FileDB() : File, RealmObject {
     @PrimaryKey
     override var containerUuid: String = ""
     override var uuid: String = ""
@@ -36,4 +36,20 @@ class FileDB : File, RealmObject {
     override var receivedSizeInBytes: Long = 0L
     override var path: String? = ""
     override var thumbnailPath: String? = ""
+
+    constructor(file: File) : this() {
+        this.containerUuid = file.containerUuid
+        this.uuid = file.uuid
+        this.fileName = file.fileName
+        this.fileSizeInBytes = file.fileSizeInBytes
+        this.downloadCounter = file.downloadCounter
+        this.createdDateTimestamp = file.createdDateTimestamp
+        this.expiredDateTimestamp = file.expiredDateTimestamp
+        this.eVirus = file.eVirus
+        this.deletedDate = file.deletedDate
+        this.mimeType = file.mimeType
+        this.receivedSizeInBytes = file.receivedSizeInBytes
+        this.path = file.path
+        this.thumbnailPath = file.thumbnailPath
+    }
 }

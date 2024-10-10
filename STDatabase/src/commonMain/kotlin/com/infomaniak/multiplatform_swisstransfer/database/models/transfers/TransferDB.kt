@@ -17,11 +17,13 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class TransferDB : Transfer<ContainerDB?>, RealmObject {
+class TransferDB() : Transfer<ContainerDB?>, RealmObject {
     @PrimaryKey
     override var linkUuid: String = ""
     override var containerUuid: String = ""
@@ -32,4 +34,17 @@ class TransferDB : Transfer<ContainerDB?>, RealmObject {
     override var isMailSent: Boolean = false
     override var downloadHost: String = ""
     override var container: ContainerDB? = null
+
+    @Suppress("UNCHECKED_CAST")
+    constructor(transfer: Transfer<*>) : this() {
+        this.linkUuid = transfer.linkUuid
+        this.containerUuid = transfer.containerUuid
+        this.downloadCounterCredit = transfer.downloadCounterCredit
+        this.createdDateTimestamp = transfer.createdDateTimestamp
+        this.expiredDateTimestamp = transfer.expiredDateTimestamp
+        this.hasBeenDownloadedOneTime = transfer.hasBeenDownloadedOneTime
+        this.isMailSent = transfer.isMailSent
+        this.downloadHost = transfer.downloadHost
+        this.container = ContainerDB(transfer.container as Container<List<File>>)
+    }
 }
