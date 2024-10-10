@@ -29,6 +29,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -39,8 +40,9 @@ import kotlin.coroutines.cancellation.CancellationException
  * smooth and efficient data transfers, providing a centralized management point
  * for transfer-related activities.
  *
- * @property realmProvider The provider for managing Realm database operations.
  * @property clientProvider The provider for creating and configuring HTTP clients for API communication.
+ * @property transferController The provider for transfer data from database.
+ * @property transferRepository The provider for transfer data from api.
  */
 class TransferManager internal constructor(
     private val clientProvider: ApiClientProvider,
@@ -57,7 +59,7 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun addTransferByLinkUuid(linkUuid: String) {
+    suspend fun addTransferByLinkUuid(linkUuid: String) = withContext(Dispatchers.IO) {
         addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data)
     }
 
@@ -68,7 +70,7 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun addTransferByUrl(url: String) {
+    suspend fun addTransferByUrl(url: String) = withContext(Dispatchers.IO) {
         addTransfer(transferRepository.getTransferByUrl(url).data)
     }
 
