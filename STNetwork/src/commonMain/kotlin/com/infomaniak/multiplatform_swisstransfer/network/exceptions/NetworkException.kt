@@ -19,4 +19,12 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
 import io.ktor.utils.io.errors.IOException
 
+/**
+ * Thrown when a network-related error occurs, such as connectivity issues or timeouts.
+ *
+ * This exception is used to represent errors that occur during network operations,
+ * typically indicating problems with the connection, DNS resolution, or other network failures.
+ *
+ * @param message A detailed message describing the network error.
+ */
 class NetworkException(message: String) : IOException(message)
