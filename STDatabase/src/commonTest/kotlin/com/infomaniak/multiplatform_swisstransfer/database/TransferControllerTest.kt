@@ -17,6 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
 import kotlinx.coroutines.test.runTest
@@ -54,6 +57,25 @@ class TransferControllerTest {
         transferController.upsert(transfer)
         val transfers = transferController.getTransfers()
         assertEquals(1, transfers?.count(), "The transfer list must contain 1 item")
+    }
+
+    @Test
+    fun canUpdateAnExistingTransfer() = runTest {
+        // Insert a transfer
+        val transfer1 = DummyTransfer.transfer
+        transferController.upsert(transfer1)
+        val realmTransfer1 = transferController.getTransfer(transfer1.linkUuid)
+        assertNotNull(realmTransfer1)
+
+        // Update the transfer
+        val transfer2 = object : Transfer<Container<List<File>>> by transfer1 {
+            override var containerUuid: String = "transfer2"
+        }
+        transferController.upsert(transfer2)
+        val realmTransfers = transferController.getTransfers()
+        assertNotNull(realmTransfers)
+        assertEquals(1, realmTransfers.count())
+        assertEquals(transfer2.containerUuid, realmTransfers.first().containerUuid)
     }
 
     @Test
