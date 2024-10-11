@@ -56,6 +56,8 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         UnknownException::class,
     )
     suspend fun getTransferByUrl(url: String): ApiResponse<TransferApi> {
-        return transferRequest.getTransfer(url.substringAfter(ApiRoutes.baseUrl))
+        return transferRequest.getTransfer(extractUuid(url))
     }
+
+    private fun extractUuid(url: String) = url.substringAfter(ApiRoutes.baseUrl)
 }
