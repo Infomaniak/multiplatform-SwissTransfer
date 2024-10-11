@@ -17,4 +17,13 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
+/**
+ * Thrown when an API call returns an error in an unexpected format that cannot be parsed.
+ *
+ * This exception indicates that the API response format is different from what was expected,
+ * preventing proper parsing of the error details.
+ *
+ * @param statusCode The HTTP status code returned by the API.
+ * @param bodyResponse The raw response body from the API that could not be parsed.
+ */
 class UnexpectedApiErrorFormatException(val statusCode: Int, val bodyResponse: String) : Exception(bodyResponse)
