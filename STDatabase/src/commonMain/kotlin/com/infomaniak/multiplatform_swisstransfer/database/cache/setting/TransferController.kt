@@ -38,7 +38,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Get data
     @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getTransfers(): RealmResults<TransferDB>? {
+    internal fun getTransfers(): RealmResults<TransferDB>? {
         return realm?.query<TransferDB>()?.sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)?.find()
     }
 
