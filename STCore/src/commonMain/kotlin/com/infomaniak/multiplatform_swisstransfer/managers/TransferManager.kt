@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
@@ -81,7 +82,7 @@ class TransferManager internal constructor(
         UnknownException::class,
     )
     suspend fun addTransferByLinkUuid(linkUuid: String) = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data)
+        addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data, TransferDirection.SENT)
     }
 
     /**
@@ -108,12 +109,12 @@ class TransferManager internal constructor(
         UnknownException::class,
     )
     suspend fun addTransferByUrl(url: String) = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByUrl(url).data)
+        addTransfer(transferRepository.getTransferByUrl(url).data, TransferDirection.RECEIVED)
     }
 
-    private suspend fun addTransfer(transferApi: TransferApi?) {
+    private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection) {
         runCatching {
-            transferController.upsert(transferApi as Transfer<*>)
+            transferController.upsert(transferApi as Transfer<*>, transferDirection)
         }.onFailure {
             throw UnknownException(it)
         }
