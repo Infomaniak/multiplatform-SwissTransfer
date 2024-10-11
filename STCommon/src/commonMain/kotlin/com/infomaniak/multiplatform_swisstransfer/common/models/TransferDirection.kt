@@ -15,20 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
+package com.infomaniak.multiplatform_swisstransfer.common.models
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
-
-interface Transfer<ContainerType> {
-    val linkUuid: String
-    val containerUuid: String
-    val downloadCounterCredit: Int
-    val createdDateTimestamp: Long
-    val expiredDateTimestamp: Long
-    val hasBeenDownloadedOneTime: Boolean
-    val isMailSent: Boolean
-    val downloadHost: String
-    val container: ContainerType
-
-    fun transferDirection(): TransferDirection? = null
+enum class TransferDirection {
+    SENT, RECEIVED
 }
