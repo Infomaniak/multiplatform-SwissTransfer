@@ -18,13 +18,13 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 interface Transfer<ContainerType> {
-    var linkUuid: String
-    var containerUuid: String
-    var downloadCounterCredit: Int
-    var createdDateTimestamp: Long
-    var expiredDateTimestamp: Long
-    var hasBeenDownloadedOneTime: Boolean
-    var isMailSent: Boolean
-    var downloadHost: String
-    var container: ContainerType
+    val linkUuid: String
+    val containerUuid: String
+    val downloadCounterCredit: Int
+    val createdDateTimestamp: Long
+    val expiredDateTimestamp: Long
+    val hasBeenDownloadedOneTime: Boolean
+    val isMailSent: Boolean
+    val downloadHost: String
+    val container: ContainerType
 }

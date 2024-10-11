@@ -18,17 +18,17 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 interface File {
-    var containerUuid: String
-    var uuid: String
-    var fileName: String
-    var fileSizeInBytes: Long
-    var downloadCounter: Int
-    var createdDateTimestamp: Long
-    var expiredDateTimestamp: Long
-    var eVirus: String
-    var deletedDate: String?
-    var mimeType: String
-    var receivedSizeInBytes: Long
-    var path: String?
-    var thumbnailPath: String?
+    val containerUuid: String
+    val uuid: String
+    val fileName: String
+    val fileSizeInBytes: Long
+    val downloadCounter: Int
+    val createdDateTimestamp: Long
+    val expiredDateTimestamp: Long
+    val eVirus: String
+    val deletedDate: String?
+    val mimeType: String
+    val receivedSizeInBytes: Long
+    val path: String?
+    val thumbnailPath: String?
 }
