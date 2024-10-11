@@ -48,14 +48,14 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         ContainerErrorsException::class,
         ApiException::class,
         NetworkException::class,
-        UnknownApiException::class,
+        UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
     suspend fun initUpload(initUploadBody: InitUploadBody): InitUploadResponseApi {
         return runCatching {
             uploadRequest.initUpload(initUploadBody)
         }.getOrElse { exception ->
-            if (exception is UnknownApiException) {
+            if (exception is UnexpectedApiErrorFormatException) {
                 throw exception.toContainerErrorsException()
             } else {
                 throw exception
@@ -68,14 +68,14 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         EmailValidationException::class,
         ApiException::class,
         NetworkException::class,
-        UnknownApiException::class,
+        UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
     suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {
         return runCatching {
             uploadRequest.verifyEmailCode(verifyEmailCodeBody)
         }.getOrElse { exception ->
-            if (exception is UnknownApiException) {
+            if (exception is UnexpectedApiErrorFormatException) {
                 throw exception.toEmailValidationException()
             } else {
                 throw exception
@@ -87,7 +87,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         CancellationException::class,
         ApiException::class,
         NetworkException::class,
-        UnknownApiException::class,
+        UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
     suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody): Boolean {
@@ -97,7 +97,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
     @Throws(
         CancellationException::class,
         ApiException::class,
-        UnknownApiException::class,
+        UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
     )
@@ -115,7 +115,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
     @Throws(
         CancellationException::class,
         ApiException::class,
-        UnknownApiException::class,
+        UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
     )

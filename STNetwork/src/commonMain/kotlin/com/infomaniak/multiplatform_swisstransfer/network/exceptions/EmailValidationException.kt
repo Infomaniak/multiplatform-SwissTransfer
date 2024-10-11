@@ -36,18 +36,18 @@ sealed class EmailValidationException(statusCode: Int) : ApiException(statusCode
 
     internal companion object {
         /**
-         * Extension function to convert an instance of [UnknownApiException] to a specific
+         * Extension function to convert an instance of [UnexpectedApiErrorFormatException] to a specific
          * [EmailValidationException] based on its HTTP status code.
          *
          * This function maps the status codes to specific exceptions as follows:
          * - 401: [InvalidPasswordException]
-         * - Other status codes: The original [UnknownApiException] instance
+         * - Other status codes: The original [UnexpectedApiErrorFormatException] instance
          *
-         * @receiver An instance of [UnknownApiException].
+         * @receiver An instance of [UnexpectedApiErrorFormatException].
          * @return An instance of [EmailValidationException] which can be [InvalidPasswordException]
-         * or the original [UnknownApiException] if the status code does not match any predefined values.
+         * or the original [UnexpectedApiErrorFormatException] if the status code does not match any predefined values.
          */
-        fun UnknownApiException.toEmailValidationException() = when (statusCode) {
+        fun UnexpectedApiErrorFormatException.toEmailValidationException() = when (statusCode) {
             401 -> InvalidPasswordException()
             else -> this
         }

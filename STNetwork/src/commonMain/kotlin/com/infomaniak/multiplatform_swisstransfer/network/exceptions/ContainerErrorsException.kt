@@ -61,7 +61,7 @@ sealed class ContainerErrorsException(val statusCode: Int, errorMessage: String)
 
     internal companion object {
         /**
-         * Extension function to convert an instance of [UnknownApiException] to a more specific exception
+         * Extension function to convert an instance of [UnexpectedApiErrorFormatException] to a more specific exception
          * based on its HTTP status code.
          *
          * This function maps the status codes to specific exceptions as follows:
@@ -70,13 +70,13 @@ sealed class ContainerErrorsException(val statusCode: Int, errorMessage: String)
          * - 404: [DailyTransferLimitReachedException]
          * - 422: [CaptchaNotValidException]
          * - 429: [TooManyCodesGeneratedException]
-         * - Other status codes: The original [UnknownApiException] instance
+         * - Other status codes: The original [UnexpectedApiErrorFormatException] instance
          *
-         * @receiver An instance of [UnknownApiException].
+         * @receiver An instance of [UnexpectedApiErrorFormatException].
          * @return An instance of [Exception] which can be one of the specific exceptions mentioned above,
-         * or the original [UnknownApiException] if the status code does not match any predefined values.
+         * or the original [UnexpectedApiErrorFormatException] if the status code does not match any predefined values.
          */
-        fun UnknownApiException.toContainerErrorsException(): Exception {
+        fun UnexpectedApiErrorFormatException.toContainerErrorsException(): Exception {
             return when (statusCode) {
                 401 -> EmailValidationRequired()
                 403 -> DomainBlockedException()
