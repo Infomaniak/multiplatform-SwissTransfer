@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.database.cache.setting
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import io.realm.kotlin.UpdatePolicy
@@ -50,9 +51,9 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Upsert data
-    suspend fun upsert(transfer: Transfer<*>) {
+    suspend fun upsert(transfer: Transfer<*>, transferDirection: TransferDirection) {
         realm?.write {
-            this.copyToRealm(TransferDB(transfer), UpdatePolicy.ALL)
+            this.copyToRealm(TransferDB(transfer, transferDirection), UpdatePolicy.ALL)
         }
     }
     //endregion
