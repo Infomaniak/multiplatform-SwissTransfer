@@ -53,16 +53,17 @@ class TransferControllerTest {
 
     @Test
     fun canGetTransfers() = runTest {
-        val transfer = DummyTransfer.transfer
-        transferController.upsert(transfer, TransferDirection.SENT)
+        DummyTransfer.transfers.take(2).forEach { transfer ->
+            transferController.upsert(transfer, TransferDirection.SENT)
+        }
         val transfers = transferController.getTransfers()
-        assertEquals(1, transfers?.count(), "The transfer list must contain 1 item")
+        assertEquals(2, transfers?.count(), "The transfer list must contain 2 items")
     }
 
     @Test
     fun canUpdateAnExistingTransfer() = runTest {
         // Insert a transfer
-        val transfer1 = DummyTransfer.transfer
+        val transfer1 = DummyTransfer.transfer1
         transferController.upsert(transfer1, TransferDirection.SENT)
         val realmTransfer1 = transferController.getTransfer(transfer1.linkUuid)
         assertNotNull(realmTransfer1)
@@ -80,13 +81,13 @@ class TransferControllerTest {
 
     @Test
     fun canRemoveTransfers() = runTest {
-        transferController.upsert(DummyTransfer.transfer, TransferDirection.SENT)
+        transferController.upsert(DummyTransfer.transfer1, TransferDirection.SENT)
         transferController.removeData()
         assertEquals(0, transferController.getTransfers()?.count(), "The transfers table must be empty")
     }
 
     private suspend fun canCreateTransfer(sent: TransferDirection) {
-        val transfer = DummyTransfer.transfer
+        val transfer = DummyTransfer.transfer1
         transferController.upsert(transfer, sent)
         val realmTransfer = transferController.getTransfer(transfer.linkUuid)
         assertNotNull(realmTransfer, "The transfer cannot be null")
