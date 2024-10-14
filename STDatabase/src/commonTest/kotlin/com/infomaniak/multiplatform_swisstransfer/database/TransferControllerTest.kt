@@ -53,11 +53,19 @@ class TransferControllerTest {
 
     @Test
     fun canGetTransfers() = runTest {
-        DummyTransfer.transfers.take(2).forEach { transfer ->
-            transferController.upsert(transfer, TransferDirection.SENT)
-        }
+        addTwoRandomTransfersInDatabase()
         val transfers = transferController.getTransfers()
         assertEquals(2, transfers?.count(), "The transfer list must contain 2 items")
+    }
+
+    @Test
+    fun canGetSentTransfers() = runTest {
+        canGetTransfersByDirection(TransferDirection.SENT)
+    }
+
+    @Test
+    fun canGetReceivedTransfers() = runTest {
+        canGetTransfersByDirection(TransferDirection.RECEIVED)
     }
 
     @Test
@@ -93,5 +101,20 @@ class TransferControllerTest {
         assertNotNull(realmTransfer, "The transfer cannot be null")
         assertEquals(sent, realmTransfer.transferDirection())
         assertEquals(transfer.container?.uuid, realmTransfer.container?.uuid, "The container is missing")
+    }
+
+    private suspend fun addTwoRandomTransfersInDatabase() {
+        DummyTransfer.transfers.take(2).forEachIndexed { index, transfer ->
+            val transferDirection = if (index == 0) TransferDirection.SENT else TransferDirection.RECEIVED
+            transferController.upsert(transfer, transferDirection)
+        }
+    }
+
+    private suspend fun canGetTransfersByDirection(transferDirection: TransferDirection) {
+        addTwoRandomTransfersInDatabase()
+        val transfers = transferController.getTransfers(transferDirection)
+        assertNotNull(transfers)
+        assertEquals(1, transfers.count(), "The transfer list must contain 1 item")
+        assertEquals(transferDirection, transfers.first().transferDirection())
     }
 }
