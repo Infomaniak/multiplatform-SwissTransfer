@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 
-interface Transfer<ContainerType> {
+interface Transfer {
     val linkUuid: String
     val containerUuid: String
     val downloadCounterCredit: Int
@@ -28,7 +28,7 @@ interface Transfer<ContainerType> {
     val hasBeenDownloadedOneTime: Boolean
     val isMailSent: Boolean
     val downloadHost: String
-    val container: ContainerType
+    val container: Container?
 
     fun transferDirection(): TransferDirection? = null
 }

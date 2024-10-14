@@ -43,7 +43,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getTransfersFlow(): Flow<List<TransferDB>> = getTransfers()?.asFlow()?.mapLatest { it.list } ?: emptyFlow()
+    fun getTransfersFlow(): Flow<List<Transfer>> = getTransfers()?.asFlow()?.mapLatest { it.list } ?: emptyFlow()
 
     fun getTransfer(linkUuid: String): TransferDB? {
         return realm?.query<TransferDB>("${TransferDB::linkUuid.name} == '$linkUuid'")?.first()?.find()
@@ -51,7 +51,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Upsert data
-    suspend fun upsert(transfer: Transfer<*>, transferDirection: TransferDirection) {
+    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) {
         realm?.write {
             this.copyToRealm(TransferDB(transfer, transferDirection), UpdatePolicy.ALL)
         }

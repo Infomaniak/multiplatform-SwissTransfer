@@ -18,13 +18,12 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class ContainerDB() : Container<RealmList<FileDB>>, RealmObject {
+class ContainerDB() : Container, RealmObject {
     @PrimaryKey
     override var uuid: String = ""
     override var duration: Long = 0L
@@ -43,7 +42,7 @@ class ContainerDB() : Container<RealmList<FileDB>>, RealmObject {
     // val wsUser: JsonElement?
     override var files: RealmList<FileDB> = realmListOf()
 
-    constructor(container: Container<List<File>>) : this() {
+    constructor(container: Container) : this() {
         this.uuid = container.uuid
         this.duration = container.duration
         this.createdDateTimestamp = container.createdDateTimestamp

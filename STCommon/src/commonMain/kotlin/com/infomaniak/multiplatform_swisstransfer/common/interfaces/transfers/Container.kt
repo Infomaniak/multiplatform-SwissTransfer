@@ -17,7 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
-interface Container<F : List<File>> {
+interface Container {
     val uuid: String
     val duration: Long
     val createdDateTimestamp: Long
@@ -33,5 +33,5 @@ interface Container<F : List<File>> {
     val source: String
     // @SerialName("WSUser") // TODO: What's this ?
     // val wsUser: JsonElement?
-    val files: F
+    val files: List<File>
 }

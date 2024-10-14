@@ -24,7 +24,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ContainerApi : Container<List<FileApi>> {
+class ContainerApi : Container {
     @SerialName("UUID")
     override var uuid: String = ""
     override var duration: Long = 0L

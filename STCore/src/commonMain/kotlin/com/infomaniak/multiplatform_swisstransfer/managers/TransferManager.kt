@@ -114,7 +114,7 @@ class TransferManager internal constructor(
 
     private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection) {
         runCatching {
-            transferController.upsert(transferApi as Transfer<*>, transferDirection)
+            transferController.upsert(transferApi as Transfer, transferDirection)
         }.onFailure {
             throw UnknownException(it)
         }

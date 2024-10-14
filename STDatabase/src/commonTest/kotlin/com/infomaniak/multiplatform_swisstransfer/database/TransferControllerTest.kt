@@ -17,8 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
@@ -70,7 +68,7 @@ class TransferControllerTest {
         assertNotNull(realmTransfer1)
 
         // Update the transfer
-        val transfer2 = object : Transfer<Container<List<File>>> by transfer1 {
+        val transfer2 = object : Transfer by transfer1 {
             override var containerUuid: String = "transfer2"
         }
         transferController.upsert(transfer2, TransferDirection.SENT)
@@ -93,6 +91,6 @@ class TransferControllerTest {
         val realmTransfer = transferController.getTransfer(transfer.linkUuid)
         assertNotNull(realmTransfer, "The transfer cannot be null")
         assertEquals(sent, realmTransfer.transferDirection())
-        assertEquals(transfer.container.uuid, realmTransfer.container?.uuid, "The container is missing")
+        assertEquals(transfer.container?.uuid, realmTransfer.container?.uuid, "The container is missing")
     }
 }

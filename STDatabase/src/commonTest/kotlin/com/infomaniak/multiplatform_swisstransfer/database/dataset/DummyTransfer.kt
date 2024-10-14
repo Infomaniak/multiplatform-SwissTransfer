@@ -23,7 +23,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Tr
 
 object DummyTransfer {
 
-    private val containerTest = object : Container<List<File>> {
+    private val containerTest = object : Container {
         override var uuid: String = "transfer1Container"
         override var duration: Long = 0L
         override var createdDateTimestamp: Long = 0L
@@ -40,7 +40,7 @@ object DummyTransfer {
         override var files: List<File> = emptyList()
     }
 
-    val transfer = object : Transfer<Container<List<File>>> {
+    val transfer = object : Transfer {
         override var linkUuid: String = "transferLinkUuid1"
         override var containerUuid: String = "containerUuid"
         override var downloadCounterCredit: Int = 0
@@ -49,7 +49,7 @@ object DummyTransfer {
         override var hasBeenDownloadedOneTime: Boolean = false
         override var isMailSent: Boolean = true
         override var downloadHost: String = "url"
-        override var container: Container<List<File>> = containerTest
+        override var container: Container = containerTest
     }
 
 }

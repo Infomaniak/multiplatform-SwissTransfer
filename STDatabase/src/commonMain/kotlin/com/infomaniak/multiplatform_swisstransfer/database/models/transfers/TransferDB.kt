@@ -17,14 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class TransferDB() : Transfer<ContainerDB?>, RealmObject {
+class TransferDB() : Transfer, RealmObject {
     @PrimaryKey
     override var linkUuid: String = ""
     override var containerUuid: String = ""
@@ -38,8 +36,7 @@ class TransferDB() : Transfer<ContainerDB?>, RealmObject {
 
     private var transferDirectionValue: String = ""
 
-    @Suppress("UNCHECKED_CAST")
-    constructor(transfer: Transfer<*>, transferDirection: TransferDirection) : this() {
+    constructor(transfer: Transfer, transferDirection: TransferDirection) : this() {
         this.linkUuid = transfer.linkUuid
         this.containerUuid = transfer.containerUuid
         this.downloadCounterCredit = transfer.downloadCounterCredit
@@ -48,7 +45,7 @@ class TransferDB() : Transfer<ContainerDB?>, RealmObject {
         this.hasBeenDownloadedOneTime = transfer.hasBeenDownloadedOneTime
         this.isMailSent = transfer.isMailSent
         this.downloadHost = transfer.downloadHost
-        this.container = ContainerDB(transfer.container as Container<List<File>>)
+        this.container = transfer.container?.let(::ContainerDB)
 
         this.transferDirectionValue = transferDirection.name
     }
