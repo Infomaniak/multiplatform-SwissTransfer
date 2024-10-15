@@ -31,7 +31,7 @@ class TransferControllerTest {
 
     @BeforeTest
     fun setup() {
-        realmProvider = RealmProvider().apply { openRealmTransfers(userId = 0, inMemory = true) }
+        realmProvider = RealmProvider(loadDataInMemory = true).apply { openRealmTransfers(userId = 0) }
         transferController = TransferController(realmProvider)
     }
 

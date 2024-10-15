@@ -25,15 +25,15 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.upload.Upload
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
-class RealmProvider {
+class RealmProvider(private val loadDataInMemory: Boolean = false) {
 
     val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
     val realmUploads by lazy { Realm.open(realmUploadConfiguration) }
     var realmTransfers: Realm? = null
         private set
 
-    fun openRealmTransfers(userId: Int, inMemory: Boolean = false) {
-        realmTransfers = Realm.open(realmTransfersConfiguration(userId, inMemory))
+    fun openRealmTransfers(userId: Int) {
+        realmTransfers = Realm.open(realmTransfersConfiguration(userId))
     }
 
     fun closeRealmAppSettings() {
@@ -57,18 +57,24 @@ class RealmProvider {
     private val realmAppSettingsConfiguration = RealmConfiguration
         .Builder(schema = setOf(AppSettingsDB::class))
         .name("AppSettings")
+        .loadDataInMemoryIfNeeded()
         .build()
 
     private val realmUploadConfiguration = RealmConfiguration
         .Builder(schema = setOf(Upload::class))
         .name("Uploads")
+        .loadDataInMemoryIfNeeded()
         .build()
 
-    private fun realmTransfersConfiguration(userId: Int, inMemory: Boolean) = RealmConfiguration
+    private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
         .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class))
         .name(transferRealmName(userId))
-        .apply { if (inMemory) inMemory() }
+        .loadDataInMemoryIfNeeded()
         .build()
 
     private fun transferRealmName(userId: Int) = "Transfers-$userId"
+
+    private fun RealmConfiguration.Builder.loadDataInMemoryIfNeeded(): RealmConfiguration.Builder {
+        return apply { if (loadDataInMemory) inMemory() }
+    }
 }
