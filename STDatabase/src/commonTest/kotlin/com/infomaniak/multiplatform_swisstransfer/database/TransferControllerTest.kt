@@ -17,9 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
 import kotlinx.coroutines.test.runTest
@@ -32,7 +31,7 @@ class TransferControllerTest {
 
     @BeforeTest
     fun setup() {
-        realmProvider = RealmProvider().apply { openRealmTransfers(userId = 0, inMemory = true) }
+        realmProvider = RealmProvider(loadDataInMemory = true).apply { openRealmTransfers(userId = 0) }
         transferController = TransferController(realmProvider)
     }
 
@@ -43,35 +42,45 @@ class TransferControllerTest {
     }
 
     @Test
-    fun canCreateTransfer() = runTest {
-        val transfer = DummyTransfer.transfer
-        transferController.upsert(transfer)
-        val realmTransfer = transferController.getTransfer(transfer.linkUuid)
-        assertNotNull(realmTransfer, "The transfer cannot be null")
-        assertEquals(transfer.container.uuid, realmTransfer.container?.uuid, "The container is missing")
+    fun canCreateSentTransfer() = runTest {
+        canCreateTransfer(TransferDirection.SENT)
+    }
+
+    @Test
+    fun canCreateReceivedTransfer() = runTest {
+        canCreateTransfer(TransferDirection.RECEIVED)
     }
 
     @Test
     fun canGetTransfers() = runTest {
-        val transfer = DummyTransfer.transfer
-        transferController.upsert(transfer)
+        addTwoRandomTransfersInDatabase()
         val transfers = transferController.getTransfers()
-        assertEquals(1, transfers?.count(), "The transfer list must contain 1 item")
+        assertEquals(2, transfers?.count(), "The transfer list must contain 2 items")
+    }
+
+    @Test
+    fun canGetSentTransfers() = runTest {
+        canGetTransfersByDirection(TransferDirection.SENT)
+    }
+
+    @Test
+    fun canGetReceivedTransfers() = runTest {
+        canGetTransfersByDirection(TransferDirection.RECEIVED)
     }
 
     @Test
     fun canUpdateAnExistingTransfer() = runTest {
         // Insert a transfer
-        val transfer1 = DummyTransfer.transfer
-        transferController.upsert(transfer1)
+        val transfer1 = DummyTransfer.transfer1
+        transferController.upsert(transfer1, TransferDirection.SENT)
         val realmTransfer1 = transferController.getTransfer(transfer1.linkUuid)
         assertNotNull(realmTransfer1)
 
         // Update the transfer
-        val transfer2 = object : Transfer<Container<List<File>>> by transfer1 {
+        val transfer2 = object : Transfer by transfer1 {
             override var containerUuid: String = "transfer2"
         }
-        transferController.upsert(transfer2)
+        transferController.upsert(transfer2, TransferDirection.SENT)
         val realmTransfers = transferController.getTransfers()
         assertNotNull(realmTransfers)
         assertEquals(1, realmTransfers.count())
@@ -80,8 +89,32 @@ class TransferControllerTest {
 
     @Test
     fun canRemoveTransfers() = runTest {
-        transferController.upsert(DummyTransfer.transfer)
+        transferController.upsert(DummyTransfer.transfer1, TransferDirection.SENT)
         transferController.removeData()
         assertEquals(0, transferController.getTransfers()?.count(), "The transfers table must be empty")
+    }
+
+    private suspend fun canCreateTransfer(sent: TransferDirection) {
+        val transfer = DummyTransfer.transfer1
+        transferController.upsert(transfer, sent)
+        val realmTransfer = transferController.getTransfer(transfer.linkUuid)
+        assertNotNull(realmTransfer, "The transfer cannot be null")
+        assertEquals(sent, realmTransfer.transferDirection())
+        assertEquals(transfer.container?.uuid, realmTransfer.container?.uuid, "The container is missing")
+    }
+
+    private suspend fun addTwoRandomTransfersInDatabase() {
+        DummyTransfer.transfers.take(2).forEachIndexed { index, transfer ->
+            val transferDirection = if (index == 0) TransferDirection.SENT else TransferDirection.RECEIVED
+            transferController.upsert(transfer, transferDirection)
+        }
+    }
+
+    private suspend fun canGetTransfersByDirection(transferDirection: TransferDirection) {
+        addTwoRandomTransfersInDatabase()
+        val transfers = transferController.getTransfers(transferDirection)
+        assertNotNull(transfers)
+        assertEquals(1, transfers.count(), "The transfer list must contain 1 item")
+        assertEquals(transferDirection, transfers.first().transferDirection())
     }
 }

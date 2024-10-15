@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
@@ -28,6 +29,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.Transf
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -51,11 +53,17 @@ class TransferManager internal constructor(
 ) {
 
     /**
-     * The `Flow` of [transfers] is used to receive updates for new transfers added in database.
-     * @see addTransferByLinkUuid
+     * Retrieves a flow of transfers based on the specified transfer direction.
+     *
      * @see addTransferByUrl
+     * @see addTransferByLinkUuid
+     *
+     * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
+     * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
-    val transfers get() = transferController.getTransfersFlow().flowOn(Dispatchers.IO)
+    fun getTransfers(transferDirection: TransferDirection): Flow<List<Transfer>> {
+        return transferController.getTransfersFlow(transferDirection).flowOn(Dispatchers.IO)
+    }
 
     /**
      * Retrieves a transfer using the provided link UUID and saves it to the database.
@@ -64,7 +72,7 @@ class TransferManager internal constructor(
      * a `linkUuid` is returned, which must be passed to this function to retrieve the corresponding transfer.
      * After retrieving the transfer, it is saved to the database.
      *
-     * @see transfers
+     * @see getTransfers
      *
      * @param linkUuid The UUID corresponding to the uploaded transfer link.
      * @throws CancellationException If the operation is cancelled.
@@ -81,7 +89,7 @@ class TransferManager internal constructor(
         UnknownException::class,
     )
     suspend fun addTransferByLinkUuid(linkUuid: String) = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data)
+        addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data, TransferDirection.SENT)
     }
 
     /**
@@ -91,7 +99,7 @@ class TransferManager internal constructor(
      * the corresponding transfer, and after the transfer is successfully retrieved, it is saved to
      * the database.
      *
-     * @see transfers
+     * @see getTransfers
      *
      * @param url The URL associated with the transfer to retrieve.
      * @throws CancellationException If the operation is cancelled.
@@ -108,12 +116,12 @@ class TransferManager internal constructor(
         UnknownException::class,
     )
     suspend fun addTransferByUrl(url: String) = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByUrl(url).data)
+        addTransfer(transferRepository.getTransferByUrl(url).data, TransferDirection.RECEIVED)
     }
 
-    private suspend fun addTransfer(transferApi: TransferApi?) {
+    private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection) {
         runCatching {
-            transferController.upsert(transferApi as Transfer<*>)
+            transferController.upsert(transferApi as Transfer, transferDirection)
         }.onFailure {
             throw UnknownException(it)
         }

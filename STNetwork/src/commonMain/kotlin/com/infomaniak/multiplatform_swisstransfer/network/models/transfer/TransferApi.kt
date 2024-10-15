@@ -24,7 +24,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class TransferApi : Transfer<ContainerApi> {
+class TransferApi : Transfer {
     override var linkUuid: String = ""
     override var containerUuid: String = ""
     override var downloadCounterCredit: Int = 0
