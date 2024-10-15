@@ -22,7 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
