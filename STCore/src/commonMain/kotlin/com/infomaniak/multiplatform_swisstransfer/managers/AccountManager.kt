@@ -18,9 +18,9 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 
 /**
  * AccountManager is responsible for orchestrating Accounts operations using Realm for local data management.

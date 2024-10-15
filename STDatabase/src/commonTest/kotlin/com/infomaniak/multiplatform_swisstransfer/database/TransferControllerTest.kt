@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*

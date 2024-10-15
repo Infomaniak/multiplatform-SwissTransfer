@@ -18,9 +18,9 @@
 package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.AppSettingsController
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.UploadController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
