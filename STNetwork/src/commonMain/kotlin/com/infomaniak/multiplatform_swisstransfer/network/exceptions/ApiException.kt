@@ -17,4 +17,13 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
+/**
+ * Thrown when an API call fails due to an error identified by a specific error code.
+ *
+ * This exception is used to represent errors returned by an API, with an associated error code
+ * and message describing the problem.
+ *
+ * @param errorCode The specific error code returned by the API.
+ * @param errorMessage The detailed error message explaining the cause of the failure.
+ */
 open class ApiException(val errorCode: Int, errorMessage: String) : Exception(errorMessage)

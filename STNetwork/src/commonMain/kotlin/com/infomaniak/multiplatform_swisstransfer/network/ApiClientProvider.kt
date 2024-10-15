@@ -20,7 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.network
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnknownApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -79,14 +79,14 @@ class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>?
                             val apiError = json.decodeFromString<ApiError>(bodyResponse)
                             throw ApiException(apiError.errorCode, apiError.message)
                         }.onFailure {
-                            throw UnknownApiException(statusCode, bodyResponse)
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse)
                         }
                     }
                 }
                 handleResponseExceptionWithRequest { cause, _ ->
                     when (cause) {
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
-                        is ApiException, is UnknownApiException -> throw cause
+                        is ApiException, is UnexpectedApiErrorFormatException -> throw cause
                         else -> throw UnknownException(cause)
                     }
                 }

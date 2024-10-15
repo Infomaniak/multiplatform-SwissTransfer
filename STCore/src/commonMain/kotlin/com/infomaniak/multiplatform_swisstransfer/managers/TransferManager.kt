@@ -17,8 +17,20 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
-import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.database.cache.setting.TransferController
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * TransferManager is responsible for orchestrating data transfer operations
@@ -28,12 +40,82 @@ import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
  * smooth and efficient data transfers, providing a centralized management point
  * for transfer-related activities.
  *
- * @property realmProvider The provider for managing Realm database operations.
  * @property clientProvider The provider for creating and configuring HTTP clients for API communication.
+ * @property transferController The provider for transfer data from database.
+ * @property transferRepository The provider for transfer data from api.
  */
 class TransferManager internal constructor(
-    private val realmProvider: RealmProvider,
     private val clientProvider: ApiClientProvider,
+    private val transferController: TransferController,
+    private val transferRepository: TransferRepository,
 ) {
-    // TODO: Implement here
+
+    /**
+     * The `Flow` of [transfers] is used to receive updates for new transfers added in database.
+     * @see addTransferByLinkUuid
+     * @see addTransferByUrl
+     */
+    val transfers get() = transferController.getTransfersFlow().flowOn(Dispatchers.IO)
+
+    /**
+     * Retrieves a transfer using the provided link UUID and saves it to the database.
+     *
+     * This function is typically used after a transfer has been uploaded. Once the upload is complete,
+     * a `linkUuid` is returned, which must be passed to this function to retrieve the corresponding transfer.
+     * After retrieving the transfer, it is saved to the database.
+     *
+     * @see transfers
+     *
+     * @param linkUuid The UUID corresponding to the uploaded transfer link.
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is an error related to the API during transfer retrieval.
+     * @throws UnexpectedApiErrorFormatException Unparsable api error response.
+     * @throws NetworkException If there is a network issue during the transfer retrieval.
+     * @throws UnknownException Any error not already handled by the above ones.
+     */
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun addTransferByLinkUuid(linkUuid: String) = withContext(Dispatchers.IO) {
+        addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data)
+    }
+
+    /**
+     * Retrieves a transfer using the provided URL and saves it to the database.
+     *
+     * This function is used when a transfer URL is available. The provided `url` is used to retrieve
+     * the corresponding transfer, and after the transfer is successfully retrieved, it is saved to
+     * the database.
+     *
+     * @see transfers
+     *
+     * @param url The URL associated with the transfer to retrieve.
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is an error related to the API during transfer retrieval.
+     * @throws UnexpectedApiErrorFormatException Unparsable api error response.
+     * @throws NetworkException If there is a network issue during the transfer retrieval.
+     * @throws UnknownException Any error not already handled by the above ones.
+     */
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun addTransferByUrl(url: String) = withContext(Dispatchers.IO) {
+        addTransfer(transferRepository.getTransferByUrl(url).data)
+    }
+
+    private suspend fun addTransfer(transferApi: TransferApi?) {
+        runCatching {
+            transferController.upsert(transferApi as Transfer<*>)
+        }.onFailure {
+            throw UnknownException(it)
+        }
+    }
 }
