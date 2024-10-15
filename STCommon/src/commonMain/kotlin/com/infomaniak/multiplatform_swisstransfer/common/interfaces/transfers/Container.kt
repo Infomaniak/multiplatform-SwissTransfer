@@ -18,20 +18,20 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 interface Container<F : List<File>> {
-    var uuid: String
-    var duration: Long
-    var createdDateTimestamp: Long
-    var expiredDateTimestamp: Long
-    var numberOfFiles: Int
-    var message: String?
-    var needPassword: Boolean
-    var language: String
-    var sizeUploaded: Long
-    var deletedDateTimestamp: Long?
-    var swiftVersion: Int
-    var downloadLimit: Int
-    var source: String
+    val uuid: String
+    val duration: Long
+    val createdDateTimestamp: Long
+    val expiredDateTimestamp: Long
+    val numberOfFiles: Int
+    val message: String?
+    val needPassword: Boolean
+    val language: String
+    val sizeUploaded: Long
+    val deletedDateTimestamp: Long?
+    val swiftVersion: Int
+    val downloadLimit: Int
+    val source: String
     // @SerialName("WSUser") // TODO: What's this ?
     // val wsUser: JsonElement?
-    var files: F
+    val files: F
 }
