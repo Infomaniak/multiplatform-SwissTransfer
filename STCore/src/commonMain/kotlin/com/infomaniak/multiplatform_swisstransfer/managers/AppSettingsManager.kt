@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
@@ -43,6 +44,7 @@ class AppSettingsManager internal constructor(
      * A [Flow] that emits the current [AppSettings] object whenever it changes. This flow operates
      * on the [Dispatchers.IO] context to avoid blocking the main thread.
      */
+    @get:Throws(RealmException::class)
     val appSettings: Flow<AppSettings?>
         get() = appSettingsController.getAppSettingsFlow().flowOn(Dispatchers.IO)
 
@@ -51,10 +53,10 @@ class AppSettingsManager internal constructor(
      *
      * @param theme The new theme to apply.
      *
-     * @throws IllegalArgumentException If the provided theme is invalid.
+     * @throws RealmException If the provided theme is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(IllegalArgumentException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun setTheme(theme: Theme) = withContext(Dispatchers.IO) {
         appSettingsController.setTheme(theme)
     }
@@ -64,10 +66,10 @@ class AppSettingsManager internal constructor(
      *
      * @param validityPeriod The new validity period.
      *
-     * @throws IllegalArgumentException If the provided validity period is invalid.
+     * @throws RealmException If the provided validity period is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(IllegalArgumentException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) = withContext(Dispatchers.IO) {
         appSettingsController.setValidityPeriod(validityPeriod)
     }
@@ -77,10 +79,10 @@ class AppSettingsManager internal constructor(
      *
      * @param downloadLimit The new download limit.
      *
-     * @throws IllegalArgumentException If the provided download limit is invalid.
+     * @throws RealmException If the provided download limit is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(IllegalArgumentException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun setDownloadLimit(downloadLimit: DownloadLimit) = withContext(Dispatchers.IO) {
         appSettingsController.setDownloadLimit(downloadLimit)
     }
@@ -90,10 +92,10 @@ class AppSettingsManager internal constructor(
      *
      * @param emailLanguage The new email language.
      *
-     * @throws IllegalArgumentException If the provided email language is invalid.
+     * @throws RealmException If the provided email language is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(IllegalArgumentException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = withContext(Dispatchers.IO) {
         appSettingsController.setEmailLanguage(emailLanguage)
     }
