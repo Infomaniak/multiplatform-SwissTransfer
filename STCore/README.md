@@ -33,11 +33,12 @@ centralized access point to orchestrate transfer operations.
 
 ### Table of Public Properties and Methods
 
-| Type     | Name               | Description                                           |
-|----------|--------------------|-------------------------------------------------------|
-| Property | appSettingsManager | A manager used to orchestrate AppSettings operations. |
-| Property | transferManager    | A manager used to orchestrate Transfers operations.   |
-| Property | accountManager     | A manager used to orchestrate Accounts operations.    |
+| Type     | Name                | Description                                           |
+|----------|---------------------|-------------------------------------------------------|
+| Property | appSettingsManager  | A manager used to orchestrate AppSettings operations. |
+| Property | transferManager     | A manager used to orchestrate Transfers operations.   |
+| Property | accountManager      | A manager used to orchestrate Accounts operations.    |
+| Property | sharedApiUrlCreator | An utils to help use shared routes                    |
 
 ### Details of Properties and Methods
 
@@ -81,6 +82,18 @@ centralized access point to orchestrate transfer operations.
   val core = SwissTransferInjection()
   val accountManager = core.accountManager
   // Use the accountManager to orchestrate Accounts
+  ```
+
+#### Property: `sharedApiUrlCreator`
+
+- **Type**: `SharedApiUrlCreator`
+- **Description**:
+    - `sharedApiUrlCreator` is an utility class responsible for creating API URLs for shared routes.
+
+- **Usage Example**:
+  ```kotlin
+  val core = SwissTransferInjection()
+  val accountManager = core.sharedApiUrlCreator
   ```
 
 ## Contributing
