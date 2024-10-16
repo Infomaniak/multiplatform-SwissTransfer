@@ -44,7 +44,6 @@ class AppSettingsManager internal constructor(
      * A [Flow] that emits the current [AppSettings] object whenever it changes. This flow operates
      * on the [Dispatchers.IO] context to avoid blocking the main thread.
      */
-    @get:Throws(RealmException::class)
     val appSettings: Flow<AppSettings?>
         get() = appSettingsController.getAppSettingsFlow().flowOn(Dispatchers.IO)
 
