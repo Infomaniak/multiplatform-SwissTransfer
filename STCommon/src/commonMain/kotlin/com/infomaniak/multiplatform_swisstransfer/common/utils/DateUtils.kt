@@ -20,5 +20,5 @@ package com.infomaniak.multiplatform_swisstransfer.common.utils
 internal object DateUtils {
     private const val MILLIS_IN_DAY = 24 * 3600 * 1000
 
-    inline fun timesTampToDays(timestamp: Long) = timestamp / MILLIS_IN_DAY
+    inline fun timestampToDays(timestamp: Long) = timestamp / MILLIS_IN_DAY
 }
