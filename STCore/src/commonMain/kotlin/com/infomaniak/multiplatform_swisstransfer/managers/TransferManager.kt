@@ -56,7 +56,7 @@ class TransferManager internal constructor(
      * Retrieves a flow of transfers based on the specified transfer direction.
      *
      * @see addTransferByUrl
-     * @see addTransferByLinkUuid
+     * @see addTransferByUuid
      *
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
      * @return A `Flow` that emits a list of transfers matching the specified direction.
@@ -74,7 +74,7 @@ class TransferManager internal constructor(
      *
      * @see getTransfers
      *
-     * @param linkUuid The UUID corresponding to the uploaded transfer link.
+     * @param transferUuid The UUID corresponding to the uploaded transfer link.
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is an error related to the API during transfer retrieval.
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
@@ -88,8 +88,8 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun addTransferByLinkUuid(linkUuid: String) = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByLinkUuid(linkUuid).data, TransferDirection.SENT)
+    suspend fun addTransferByUuid(transferUuid: String) = withContext(Dispatchers.IO) {
+        addTransfer(transferRepository.getTransferByLinkUuid(transferUuid).data, TransferDirection.SENT)
     }
 
     /**
