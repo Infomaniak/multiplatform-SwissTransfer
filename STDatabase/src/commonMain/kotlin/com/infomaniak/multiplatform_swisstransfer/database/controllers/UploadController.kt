@@ -17,9 +17,11 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Upload
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.ext.query
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -32,21 +34,25 @@ class UploadController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Get data
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getUploads(): List<Upload> = getUploadsQuery().find()
+    @Throws(RealmException::class)
+    fun getUploads(): List<Upload> = runThrowingRealm {
+        getUploadsQuery().find()
+    }
 
-    @Throws(IllegalArgumentException::class)
-    fun getUploadByUuid(uuid: String): Upload? {
+    @Throws(RealmException::class)
+    fun getUploadByUuid(uuid: String): Upload? = runThrowingRealm {
         return realm.query<UploadDB>("${UploadDB::uuid.name} == '$uuid'").first().find()
     }
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getUploadsCount(): Long = getUploadsQuery().count().find()
+    @Throws(RealmException::class)
+    fun getUploadsCount(): Long = runThrowingRealm {
+        getUploadsQuery().count().find()
+    }
     //endregion
 
     //region Insert
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun insert(upload: Upload) {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun insert(upload: Upload) = runThrowingRealm {
         realm.write {
             this.copyToRealm(UploadDB(upload))
         }
@@ -54,8 +60,8 @@ class UploadController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Update data
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun removeData() {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }
     //endregion
