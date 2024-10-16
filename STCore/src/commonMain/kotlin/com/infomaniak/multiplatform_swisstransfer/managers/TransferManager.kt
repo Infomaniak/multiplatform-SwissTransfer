@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
@@ -31,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -61,8 +63,10 @@ class TransferManager internal constructor(
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
-    fun getTransfers(transferDirection: TransferDirection): Flow<List<Transfer>> {
-        return transferController.getTransfersFlow(transferDirection).flowOn(Dispatchers.IO)
+    fun getTransfers(transferDirection: TransferDirection): Flow<List<TransferUi>> {
+        return transferController.getTransfersFlow(transferDirection)
+            .map { it.mapTo(mutableListOf()) { transfer -> TransferUi(transfer) } }
+            .flowOn(Dispatchers.IO)
     }
 
     /**

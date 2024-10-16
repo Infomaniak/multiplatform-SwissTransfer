@@ -15,21 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
+package com.infomaniak.multiplatform_swisstransfer.network.serializers
 
-interface File {
-    val containerUuid: String
-    val uuid: String
-    val fileName: String
-    val fileSizeInBytes: Long
-    val downloadCounter: Int
-    val createdDateTimestamp: Long
-    val expiredDateTimestamp: Long
-    val eVirus: String
-    val deletedDate: String?
-    val mimeType: String?
-    val receivedSizeInBytes: Long
-    val path: String?
-    val thumbnailPath: String?
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonTransformingSerializer
+import kotlinx.serialization.json.jsonPrimitive
+
+internal object EmptyStringAsNullSerializer : JsonTransformingSerializer<String>(String.serializer()) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        return runCatching {
+            if (element.jsonPrimitive.content.isBlank()) JsonNull else element
+        }.getOrDefault(element)
+    }
 }
-

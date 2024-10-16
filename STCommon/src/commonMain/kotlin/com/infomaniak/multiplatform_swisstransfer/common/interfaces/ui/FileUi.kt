@@ -15,21 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
-interface File {
-    val containerUuid: String
-    val uuid: String
-    val fileName: String
-    val fileSizeInBytes: Long
-    val downloadCounter: Int
-    val createdDateTimestamp: Long
-    val expiredDateTimestamp: Long
-    val eVirus: String
-    val deletedDate: String?
-    val mimeType: String?
-    val receivedSizeInBytes: Long
-    val path: String?
-    val thumbnailPath: String?
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
+
+data class FileUi(
+    val uid: String,
+    val fileName: String,
+    val fileSize: Long,
+    val mimeType: String?,
+    val localPath: String?,
+) {
+
+    constructor(file: File) : this(
+        uid = file.uuid,
+        fileName = file.fileName,
+        fileSize = file.receivedSizeInBytes,
+        mimeType = file.mimeType,
+        localPath = null,
+    )
 }
-

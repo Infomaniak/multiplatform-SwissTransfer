@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.models.transfer
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
+import com.infomaniak.multiplatform_swisstransfer.network.serializers.EmptyStringAsNullSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -40,8 +41,9 @@ class FileApi : File {
     override var expiredDateTimestamp: Long = 0L
     override var eVirus: String = ""
     override var deletedDate: String? = null
-    override var mimeType: String = ""
-    override var receivedSizeInBytes: Long = 0L
+    @Serializable(EmptyStringAsNullSerializer::class)
+    override var mimeType: String? = null
+    override var receivedSizeInBytes: Long = 0
     override var path: String? = null
     @Transient
     override var thumbnailPath: String? = null

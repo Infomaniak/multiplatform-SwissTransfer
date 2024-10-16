@@ -32,8 +32,8 @@ class FileDB() : File, RealmObject {
     override var expiredDateTimestamp: Long = 0L
     override var eVirus: String = ""
     override var deletedDate: String? = null
-    override var mimeType: String = ""
-    override var receivedSizeInBytes: Long = 0L
+    override var mimeType: String? = null
+    override var receivedSizeInBytes: Long = 0
     override var path: String? = ""
     override var thumbnailPath: String? = ""
 

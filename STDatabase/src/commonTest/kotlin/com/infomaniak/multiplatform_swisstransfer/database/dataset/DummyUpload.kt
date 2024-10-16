@@ -49,6 +49,7 @@ object DummyUpload {
 
     private val upload2 = object : Upload by upload1 {
         override val uuid: String = "upload2"
+        override val container: UploadContainer = container2
     }
 
     val uploads = listOf(upload1, upload2)

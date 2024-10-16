@@ -15,21 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
+package com.infomaniak.multiplatform_swisstransfer.common.utils
 
-interface File {
-    val containerUuid: String
-    val uuid: String
-    val fileName: String
-    val fileSizeInBytes: Long
-    val downloadCounter: Int
-    val createdDateTimestamp: Long
-    val expiredDateTimestamp: Long
-    val eVirus: String
-    val deletedDate: String?
-    val mimeType: String?
-    val receivedSizeInBytes: Long
-    val path: String?
-    val thumbnailPath: String?
+internal object DateUtils {
+    private const val MILLIS_IN_DAY = 24 * 3600 * 1000
+
+    inline fun timestampToDays(timestamp: Long) = timestamp / MILLIS_IN_DAY
 }
-
