@@ -33,10 +33,24 @@ class UploadController(private val realmProvider: RealmProvider) {
 
     //region Get data
     @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getUploads(): RealmResults<Upload> = getUploadsQuery().find()
+    fun getUploads(): List<Upload> = getUploadsQuery().find()
+
+    @Throws(IllegalArgumentException::class)
+    fun getUploadByUuid(uuid: String): Upload? {
+        return realm.query<UploadDB>("${UploadDB::uuid.name} == '$uuid'").first().find()
+    }
 
     @Throws(IllegalArgumentException::class, CancellationException::class)
     fun getUploadsCount(): Long = getUploadsQuery().count().find()
+    //endregion
+
+    //region Insert
+    @Throws(IllegalArgumentException::class, CancellationException::class)
+    suspend fun insert(upload: Upload) {
+        realm.write {
+            this.copyToRealm(UploadDB(upload))
+        }
+    }
     //endregion
 
     //region Update data
