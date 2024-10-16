@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
@@ -29,16 +30,19 @@ class SharedApiUrlCreator internal constructor(
     private val uploadController: UploadController,
 ) {
 
+    @Throws(RealmException::class)
     fun downloadFilesUrl(transferUuid: String): String? {
         val transfer = transferController.getTransfer(transferUuid) ?: return null
         return SharedApiRoutes.downloadFiles(transfer.downloadHost, transfer.linkUuid)
     }
 
+    @Throws(RealmException::class)
     fun downloadFileUrl(transferUuid: String, fileUuid: String?): String? {
         val transfer = transferController.getTransfer(transferUuid) ?: return null
         return SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUuid, fileUuid)
     }
 
+    @Throws(RealmException::class)
     fun uploadChunkUrl(uploadUuid: String, fileUuid: String, chunkIndex: Int, isLastChunk: Boolean): String? {
         val upload = uploadController.getUploadByUuid(uploadUuid) ?: return null
         val containerUuid = upload.container?.uuid ?: return null
