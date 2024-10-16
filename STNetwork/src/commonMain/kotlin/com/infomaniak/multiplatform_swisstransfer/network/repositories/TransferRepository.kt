@@ -32,6 +32,8 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class TransferRepository internal constructor(private val transferRequest: TransferRequest) {
 
+    // for Obj-C https://youtrack.jetbrains.com/issue/KT-68288/KMP-Support-Kotlin-default-parameters-into-Swift-default-parameters-and-Objective-C-somehow-possibly-a-JvmOverloads-like
+    constructor() : this(ApiClientProvider())
     constructor(apiClientProvider: ApiClientProvider = ApiClientProvider()) : this(
         json = apiClientProvider.json,
         httpClient = apiClientProvider.httpClient,
