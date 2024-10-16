@@ -15,20 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.database.models.upload
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
-import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.RealmUUID
-import io.realm.kotlin.types.annotations.PrimaryKey
-
-/**
- * Class representing files to be uploaded
- */
-class Upload : RealmObject {
-    @PrimaryKey
-    var uuid: RealmUUID = RealmUUID.random()
-    var container: UploadContainerDB? = null
-    var uploadHost: String = ""
-    var files = realmListOf<UploadFile>()
+interface UploadFile {
+    val uuid: String
+    val path: String
+    val uploadedChunks: List<Int>
+    val uploadStatus: UploadStatus
 }

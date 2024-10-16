@@ -20,7 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import io.realm.kotlin.types.EmbeddedRealmObject
 
-class UploadContainerDB : UploadContainer, EmbeddedRealmObject {
+class UploadContainerDB() : UploadContainer, EmbeddedRealmObject {
     override var uuid: String = ""
     override var duration: String = ""
     override var downloadLimit: Long = 0
@@ -34,4 +34,19 @@ class UploadContainerDB : UploadContainer, EmbeddedRealmObject {
     override var needPassword: Boolean = false
     override var message: String = ""
     override var numberOfFiles: Int = 0
+
+    constructor(uploadContainer: UploadContainer) : this() {
+        this.uuid = uploadContainer.uuid
+        this.duration = uploadContainer.duration
+        this.downloadLimit = uploadContainer.downloadLimit
+        this.language = uploadContainer.language
+        this.source = uploadContainer.source
+        this.wsUser = uploadContainer.wsUser
+        this.authorIP = uploadContainer.authorIP
+        this.swiftVersion = uploadContainer.swiftVersion
+        this.expiredDateTimestamp = uploadContainer.expiredDateTimestamp
+        this.needPassword = uploadContainer.needPassword
+        this.message = uploadContainer.message
+        this.numberOfFiles = uploadContainer.numberOfFiles
+    }
 }

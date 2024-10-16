@@ -17,29 +17,31 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFile
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadStatus
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.EmbeddedRealmObject
 
-class UploadFile : EmbeddedRealmObject {
+class UploadFileDB() : UploadFile, EmbeddedRealmObject {
 
-    var uuid: String = ""
-    var path: String = ""
+    override var uuid: String = ""
+    override var path: String = ""
 
     /**
      * We always try to resume upload, and we check at the end if it went ok.
      * Otherwise, we restart from scratch.
      */
-    var uploadedChunks = realmListOf<Int>()
+    override var uploadedChunks = realmListOf<Int>()
 
     private var _uploadStatus: String = UploadStatus.AWAITING.name
 
-    val uploadStatus: UploadStatus
+    override val uploadStatus: UploadStatus
         get() = enumValueOf<UploadStatus>(_uploadStatus)
 
-    enum class UploadStatus {
-        AWAITING,
-        ONGOING,
-        FINISHED,
-        ERROR,
+    constructor(uploadFile: UploadFile) : this() {
+        this.uuid = uploadFile.uuid
+        this.path = uploadFile.path
+        this._uploadStatus = uploadFile.uploadStatus.name
+        this.uploadedChunks = uploadFile.uploadedChunks.mapTo(realmListOf()) { it }
     }
 }
