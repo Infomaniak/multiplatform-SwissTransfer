@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Upload
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmUUID
@@ -25,10 +26,21 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 /**
  * Class representing files to be uploaded
  */
-class Upload : RealmObject {
+class UploadDB() : Upload, RealmObject {
     @PrimaryKey
-    var uuid: RealmUUID = RealmUUID.random()
-    var container: UploadContainerDB? = null
-    var uploadHost: String = ""
-    var files = realmListOf<UploadFile>()
+    override var uuid: String = ""
+    override var container: UploadContainerDB? = null
+    override var uploadHost: String = ""
+    override var files = realmListOf<UploadFileDB>()
+
+    init {
+        uuid = container?.uuid ?: RealmUUID.random().toString()
+    }
+
+    constructor(upload: Upload) : this() {
+        this.uuid = upload.uuid
+        this.container = upload.container?.let { UploadContainerDB(it) }
+        this.uploadHost = upload.uploadHost
+        this.files = upload.files.mapTo(realmListOf()) { UploadFileDB(it) }
+    }
 }

@@ -17,10 +17,10 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Upload
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.Upload
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadDB
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.query.RealmResults
 import kotlin.coroutines.cancellation.CancellationException
 
 class UploadController(private val realmProvider: RealmProvider) {
@@ -28,7 +28,7 @@ class UploadController(private val realmProvider: RealmProvider) {
     private val realm by lazy { realmProvider.realmUploads }
 
     //region Queries
-    private fun getUploadsQuery() = realm.query<Upload>()
+    private fun getUploadsQuery() = realm.query<UploadDB>()
     //endregion
 
     //region Get data

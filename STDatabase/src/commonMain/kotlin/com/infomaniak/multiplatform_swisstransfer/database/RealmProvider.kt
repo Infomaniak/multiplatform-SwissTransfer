@@ -21,14 +21,16 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.Ap
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.Upload
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileDB
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
 class RealmProvider(private val loadDataInMemory: Boolean = false) {
 
     val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
-    val realmUploads by lazy { Realm.open(realmUploadConfiguration) }
+    val realmUploads by lazy { Realm.open(realmUploadDBConfiguration) }
     var realmTransfers: Realm? = null
         private set
 
@@ -60,8 +62,8 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
         .loadDataInMemoryIfNeeded()
         .build()
 
-    private val realmUploadConfiguration = RealmConfiguration
-        .Builder(schema = setOf(Upload::class))
+    private val realmUploadDBConfiguration = RealmConfiguration
+        .Builder(schema = setOf(UploadDB::class, UploadContainerDB::class, UploadFileDB::class))
         .name("Uploads")
         .loadDataInMemoryIfNeeded()
         .build()
