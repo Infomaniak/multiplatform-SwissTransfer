@@ -27,8 +27,9 @@ interface File {
     val expiredDateTimestamp: Long
     val eVirus: String
     val deletedDate: String?
-    val mimeType: String
+    val mimeType: String?
     val receivedSizeInBytes: Long
     val path: String?
     val thumbnailPath: String?
 }
+
