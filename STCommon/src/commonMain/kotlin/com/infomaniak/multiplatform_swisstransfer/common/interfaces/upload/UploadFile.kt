@@ -19,7 +19,6 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
 interface UploadFile {
     val uuid: String
-    val path: String
     val uploadedChunks: List<Int>
     val uploadStatus: UploadStatus
 }
