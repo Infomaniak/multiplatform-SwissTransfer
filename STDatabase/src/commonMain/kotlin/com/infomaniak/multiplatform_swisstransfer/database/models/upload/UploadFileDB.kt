@@ -25,8 +25,6 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 class UploadFileDB() : UploadFile, EmbeddedRealmObject {
 
     override var uuid: String = ""
-    override var path: String = ""
-
     /**
      * We always try to resume upload, and we check at the end if it went ok.
      * Otherwise, we restart from scratch.
@@ -38,9 +36,11 @@ class UploadFileDB() : UploadFile, EmbeddedRealmObject {
     override val uploadStatus: UploadStatus
         get() = enumValueOf<UploadStatus>(_uploadStatus)
 
-    constructor(uploadFile: UploadFile) : this() {
-        this.uuid = uploadFile.uuid
-        this.path = uploadFile.path
+    constructor(uuid: String) : this() {
+        this.uuid = uuid
+    }
+
+    constructor(uploadFile: UploadFile) : this(uploadFile.uuid) {
         this._uploadStatus = uploadFile.uploadStatus.name
         this.uploadedChunks = uploadFile.uploadedChunks.mapTo(realmListOf()) { it }
     }
