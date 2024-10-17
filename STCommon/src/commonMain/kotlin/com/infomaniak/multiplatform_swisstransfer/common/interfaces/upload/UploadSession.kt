@@ -15,23 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+interface UploadSession {
+    val uuid: String
+    val duration: String
+    val authorEmail: String
+    val password: String
+    val message: String
+    val numberOfDownload: Int
+    val language: String
+    val recipientsEmails: List<String>
+    val files: List<UploadFileSession>
 
-@Serializable
-data class UploadFileRequest(
-    val name: String = "",
-    val size: Long = 0L,
-    @SerialName("type")
-    val mimeType: String = "",
-) {
-    constructor(uploadFileSession: UploadFileSession) : this(
-        name = uploadFileSession.name,
-        size = uploadFileSession.size,
-        mimeType = uploadFileSession.mimeType,
-    )
-
+    // Remote
+    val remoteContainer: UploadContainer?
+    val remoteUploadHost: String?
 }
