@@ -17,10 +17,10 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class EmailLanguage(val value: String) {
-    ENGLISH("english"),
-    FRENCH("french"),
-    GERMAN("german"),
-    ITALIAN("italian"),
-    SPANISH("spanish"),
+enum class EmailLanguage(val value: String, val code: String) {
+    ENGLISH("english", "en_GB"),
+    FRENCH("french", "fr_FR"),
+    GERMAN("german", "de_DE"),
+    ITALIAN("italian", "it_IT"),
+    SPANISH("spanish", "es_ES"),
 }
