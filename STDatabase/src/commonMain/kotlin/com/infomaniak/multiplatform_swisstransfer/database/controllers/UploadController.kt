@@ -66,8 +66,34 @@ class UploadController(private val realmProvider: RealmProvider) {
 
     //region Update data
     @Throws(RealmException::class, CancellationException::class)
+    suspend fun updateUploadSession(
+        uuid: String,
+        remoteContainer: UploadContainer,
+        remoteUploadHost: String,
+        remoteFilesUuid: List<String>,
+    ) = runThrowingRealm {
+        realm.write {
+            getUploadSessionQuery(uuid).find()?.apply {
+                this.remoteContainer = UploadContainerDB(remoteContainer)
+                this.remoteUploadHost = remoteUploadHost
+                this.files.forEachIndexed { index, file ->
+                    file.remoteUploadFile = UploadFileDB(remoteFilesUuid[index])
+                }
+            }
+        }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }
     //endregion
+
+    private companion object {
+        //region Query
+        private fun TypedRealm.getUploadSessionQuery(uuid: String): RealmSingleQuery<UploadSessionDB> {
+            return query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first()
+        }
+        //endregion
+    }
 }
