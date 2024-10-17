@@ -45,7 +45,7 @@ class UploadController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getUploadByUuid(uuid: String): UploadSessionDB? = runThrowingRealm {
+    fun getUploadByUuid(uuid: String): UploadSession? = runThrowingRealm {
         return realm.query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first().find()
     }
 
@@ -57,7 +57,7 @@ class UploadController(private val realmProvider: RealmProvider) {
 
     //region Insert
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun insert(uploadSession: UploadSession) {
+    suspend fun insert(uploadSession: UploadSession) = runThrowingRealm {
         realm.write {
             this.copyToRealm(UploadSessionDB(uploadSession))
         }
