@@ -71,4 +71,20 @@ class UploadControllerTest {
         assertFails { uploadController.insert(dummyUpload) }
     }
 
+    @Test
+    fun canUpdateSessionContainer() = runTest {
+        val dummyContainer = DummyUpload.container
+        val dummyUpload = DummyUpload.uploads.first()
+        uploadController.insert(dummyUpload)
+
+        val realmUpload1 = uploadController.getUploadByUuid(dummyUpload.uuid)
+        assertNotNull(realmUpload1)
+        assertNull(realmUpload1.remoteContainer)
+
+        uploadController.updateUploadSession(dummyUpload.uuid, dummyContainer, "remoteHost", listOf("dhsd"))
+        val realmUpload2 = uploadController.getUploadByUuid(dummyUpload.uuid)
+        assertNotNull(realmUpload2)
+        assertNotNull(realmUpload2.remoteContainer)
+    }
+
 }
