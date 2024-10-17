@@ -123,7 +123,7 @@ Here’s a brief example of how to use the `SwissTransferInjection` class from t
 
 ```kotlin
 val core = SwissTransferInjection()
-core.loadDefaultAccount()
+core.loadUser(userId)
 
 val manager = core.transferManager
 // Use the manager to perform actions
