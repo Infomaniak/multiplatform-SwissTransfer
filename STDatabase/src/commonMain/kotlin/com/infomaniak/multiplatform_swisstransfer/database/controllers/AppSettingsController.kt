@@ -17,12 +17,14 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,8 +39,8 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
 
     private val appSettingsQuery get() = realm.query<AppSettingsDB>().first()
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun initAppSettings() {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun initAppSettings() = runThrowingRealm {
         if (appSettingsQuery.find() == null) {
             realm.write {
                 copyToRealm(AppSettingsDB(), UpdatePolicy.ALL)
@@ -47,16 +49,16 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     }
 
     //region Get data
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getAppSettingsFlow(): Flow<AppSettingsDB?> {
+    @Throws(RealmException::class)
+    fun getAppSettingsFlow(): Flow<AppSettingsDB?> = runThrowingRealm {
         return appSettingsQuery.asFlow().mapLatest { it.obj }
     }
     //endregion
 
     //region Update data
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    private suspend fun updateAppSettings(onUpdate: (AppSettingsDB) -> Unit) {
-        val appSettings = appSettingsQuery.find() ?: return
+    @Throws(RealmException::class, CancellationException::class)
+    private suspend fun updateAppSettings(onUpdate: (AppSettingsDB) -> Unit) = runThrowingRealm {
+        val appSettings = appSettingsQuery.find() ?: return@runThrowingRealm
 
         realm.write {
             findLatest(appSettings)?.let { mutableAppSettings ->
@@ -65,36 +67,36 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
         }
     }
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun setTheme(theme: Theme) {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setTheme(theme: Theme) = runThrowingRealm {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.theme = theme
         }
     }
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) = runThrowingRealm {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.validityPeriod = validityPeriod
         }
     }
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun setDownloadLimit(downloadLimit: DownloadLimit) {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setDownloadLimit(downloadLimit: DownloadLimit) = runThrowingRealm {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.downloadLimit = downloadLimit
         }
     }
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun setEmailLanguage(emailLanguage: EmailLanguage) {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = runThrowingRealm {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.emailLanguage = emailLanguage
         }
     }
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun removeData() {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }
     //endregion

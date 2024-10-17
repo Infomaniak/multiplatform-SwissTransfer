@@ -17,10 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * AccountManager is responsible for orchestrating Accounts operations using Realm for local data management.
@@ -40,7 +42,7 @@ class AccountManager internal constructor(
     /**
      * Loads the default User account and initializes Realm Transfers for the default UserID defined in Constants.
      */
-    @Throws(IllegalArgumentException::class, IllegalStateException::class)
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(userId: Int) {
         appSettingsController.initAppSettings()
         realmProvider.openRealmTransfers(userId)
@@ -49,7 +51,7 @@ class AccountManager internal constructor(
     /**
      * Delete specified User data
      */
-    @Throws(IllegalArgumentException::class, IllegalStateException::class)
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun removeUser(userId: Int) {
 
         appSettingsController.removeData()

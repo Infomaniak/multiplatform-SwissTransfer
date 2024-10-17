@@ -17,10 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.RealmResults
@@ -38,8 +40,8 @@ class TransferController(private val realmProvider: RealmProvider) {
     private val realm by lazy { realmProvider.realmTransfers }
 
     //region Get data
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    internal fun getTransfers(transferDirection: TransferDirection? = null): RealmResults<TransferDB>? {
+    @Throws(RealmException::class)
+    internal fun getTransfers(transferDirection: TransferDirection? = null): RealmResults<TransferDB>? = runThrowingRealm {
         val sentFilterQuery = when (transferDirection) {
             null -> TRUE_PREDICATE
             else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
@@ -47,18 +49,20 @@ class TransferController(private val realmProvider: RealmProvider) {
         return realm?.query<TransferDB>(sentFilterQuery)?.sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)?.find()
     }
 
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> {
+    @Throws(RealmException::class)
+    fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = runThrowingRealm {
         return getTransfers(transferDirection)?.asFlow()?.mapLatest { it.list } ?: emptyFlow()
     }
 
-    fun getTransfer(linkUuid: String): Transfer? {
+    @Throws(RealmException::class)
+    fun getTransfer(linkUuid: String): Transfer? = runThrowingRealm {
         return realm?.query<TransferDB>("${TransferDB::linkUuid.name} == '$linkUuid'")?.first()?.find()
     }
     //endregion
 
     //region Upsert data
-    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) = runThrowingRealm {
         realm?.write {
             this.copyToRealm(TransferDB(transfer, transferDirection), UpdatePolicy.ALL)
         }
@@ -66,8 +70,8 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Update data
-    @Throws(IllegalArgumentException::class, CancellationException::class)
-    suspend fun removeData() {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun removeData() = runThrowingRealm {
         realm?.write { deleteAll() }
     }
     //endregion

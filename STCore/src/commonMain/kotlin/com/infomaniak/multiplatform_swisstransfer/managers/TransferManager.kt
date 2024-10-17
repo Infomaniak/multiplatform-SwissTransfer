@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
@@ -63,6 +64,7 @@ class TransferManager internal constructor(
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
+    @Throws(RealmException::class)
     fun getTransfers(transferDirection: TransferDirection): Flow<List<TransferUi>> {
         return transferController.getTransfersFlow(transferDirection)
             .map { it.mapTo(mutableListOf()) { transfer -> TransferUi(transfer) } }
@@ -91,6 +93,7 @@ class TransferManager internal constructor(
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
+        RealmException::class,
     )
     suspend fun addTransferByUuid(transferUuid: String) = withContext(Dispatchers.IO) {
         addTransfer(transferRepository.getTransferByLinkUuid(transferUuid).data, TransferDirection.SENT)
@@ -118,6 +121,7 @@ class TransferManager internal constructor(
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
+        RealmException::class,
     )
     suspend fun addTransferByUrl(url: String) = withContext(Dispatchers.IO) {
         addTransfer(transferRepository.getTransferByUrl(url).data, TransferDirection.RECEIVED)
