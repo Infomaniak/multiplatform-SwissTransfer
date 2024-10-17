@@ -36,8 +36,8 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var recipientsEmails: RealmList<String> = realmListOf()
     override var files: RealmList<UploadFileSessionDB> = realmListOf()
     // Remote
-    var remoteContainer: UploadContainerDB? = null
-    var remoteUploadHost: String? = null
+    override var remoteContainer: UploadContainerDB? = null
+    override var remoteUploadHost: String? = null
 
     constructor(uploadSession: UploadSession) : this() {
         this.uuid = uploadSession.uuid
