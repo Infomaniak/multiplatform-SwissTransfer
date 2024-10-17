@@ -27,4 +27,8 @@ interface UploadSession {
     val language: String
     val recipientsEmails: List<String>
     val files: List<UploadFileSession>
+
+    // Remote
+    val remoteContainer: UploadContainer?
+    val remoteUploadHost: String?
 }

@@ -47,6 +47,8 @@ object DummyUpload {
         override val language: String = ""
         override val recipientsEmails: List<String> = emptyList()
         override val files: List<UploadFileSession> = emptyList()
+        override val remoteContainer: UploadContainer? = null
+        override val remoteUploadHost: String? = null
     }
 
     private val upload2 = object : UploadSession by upload1 {
