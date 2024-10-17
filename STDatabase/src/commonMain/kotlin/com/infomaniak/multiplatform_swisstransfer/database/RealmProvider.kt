@@ -59,18 +59,21 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
     private val realmAppSettingsConfiguration = RealmConfiguration
         .Builder(schema = setOf(AppSettingsDB::class))
         .name("AppSettings")
+        .deleteRealmDataIfNeeded() // TODO: Remove before going to production !
         .loadDataInMemoryIfNeeded()
         .build()
 
     private val realmUploadDBConfiguration = RealmConfiguration
         .Builder(schema = setOf(UploadDB::class, UploadContainerDB::class, UploadFileDB::class))
         .name("Uploads")
+        .deleteRealmDataIfNeeded() // TODO: Remove before going to production !
         .loadDataInMemoryIfNeeded()
         .build()
 
     private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
         .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class))
         .name(transferRealmName(userId))
+        .deleteRealmDataIfNeeded() // TODO: Remove before going to production !
         .loadDataInMemoryIfNeeded()
         .build()
 
@@ -78,5 +81,9 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
 
     private fun RealmConfiguration.Builder.loadDataInMemoryIfNeeded(): RealmConfiguration.Builder {
         return apply { if (loadDataInMemory) inMemory() }
+    }
+
+    private fun RealmConfiguration.Builder.deleteRealmDataIfNeeded(): RealmConfiguration.Builder {
+        return apply { if (!loadDataInMemory) deleteRealmIfMigrationNeeded() }
     }
 }
