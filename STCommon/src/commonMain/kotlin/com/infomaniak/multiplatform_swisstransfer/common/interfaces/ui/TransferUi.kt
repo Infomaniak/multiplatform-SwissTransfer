@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
+import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 
 data class TransferUi(
     val uuid: String,
@@ -40,6 +41,6 @@ data class TransferUi(
         downloadLimit = transfer.container?.downloadLimit ?: 0,
         downloadLeft = transfer.downloadCounterCredit,
         message = transfer.container?.message,
-        files = transfer.container?.files?.mapTo(mutableListOf()) { FileUi(it) } ?: emptyList()
+        files = transfer.container?.files?.mapToList { FileUi(it) } ?: emptyList()
     )
 }
