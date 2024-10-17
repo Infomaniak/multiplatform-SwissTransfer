@@ -17,11 +17,21 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class UploadFileRequest(
     val name: String = "",
     val size: Long = 0L,
-    val type: String = "",
-)
+    @SerialName("type")
+    val mimeType: String = "",
+) {
+    constructor(uploadFileSession: UploadFileSession) : this(
+        name = uploadFileSession.name,
+        size = uploadFileSession.size,
+        mimeType = uploadFileSession.mimeType,
+    )
+
+}

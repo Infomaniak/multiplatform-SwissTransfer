@@ -17,8 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Serializable
 class InitUploadBody(
@@ -30,9 +34,23 @@ class InitUploadBody(
     val numberOfDownload: Int = 0,
     val numberOfFile: Int = 0,
     val recaptcha: String = "",
-    val recaptchaVersion: Long = 0L,
+    val recaptchaVersion: Int = 3,
     @SerialName("lang")
     val language: String = "",
-    val files: List<UploadFileRequest> = emptyList(),
+    val files: String = "", // List<UploadFileRequest>
     val recipientsEmails: String = "",
-)
+) {
+    constructor(uploadSession: UploadSession, recaptcha: String) : this(
+        duration = uploadSession.duration,
+        authorEmail = uploadSession.authorEmail,
+        password = uploadSession.password,
+        message = uploadSession.message,
+        sizeOfUpload = uploadSession.files.sumOf { it.size },
+        numberOfDownload = uploadSession.numberOfDownload,
+        numberOfFile = uploadSession.files.count(),
+        recaptcha = recaptcha,
+        language = uploadSession.language,
+        files = Json.encodeToString(uploadSession.files.mapToList { UploadFileRequest(it) }),
+        recipientsEmails = uploadSession.recipientsEmails.joinToString(prefix = "[", postfix = "]"),
+    )
+}
