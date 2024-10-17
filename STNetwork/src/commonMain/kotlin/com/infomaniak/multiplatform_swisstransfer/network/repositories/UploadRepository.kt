@@ -22,13 +22,13 @@ import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
@@ -36,6 +36,8 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class UploadRepository internal constructor(private val uploadRequest: UploadRequest) {
 
+    // for Obj-C https://youtrack.jetbrains.com/issue/KT-68288/KMP-Support-Kotlin-default-parameters-into-Swift-default-parameters-and-Objective-C-somehow-possibly-a-JvmOverloads-like
+    constructor() : this(ApiClientProvider())
     constructor(apiClientProvider: ApiClientProvider = ApiClientProvider()) : this(
         apiClientProvider.json,
         apiClientProvider.httpClient,
