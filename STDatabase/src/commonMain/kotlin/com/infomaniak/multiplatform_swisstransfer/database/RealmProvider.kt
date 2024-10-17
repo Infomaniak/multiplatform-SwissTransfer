@@ -22,8 +22,9 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.Cont
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileSessionDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 
@@ -64,7 +65,14 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
         .build()
 
     private val realmUploadDBConfiguration = RealmConfiguration
-        .Builder(schema = setOf(UploadDB::class, UploadContainerDB::class, UploadFileDB::class))
+        .Builder(
+            schema = setOf(
+                UploadSessionDB::class,
+                UploadFileSessionDB::class,
+                UploadContainerDB::class,
+                UploadFileDB::class,
+            )
+        )
         .name("Uploads")
         .deleteRealmDataIfNeeded() // TODO: Remove before going to production !
         .loadDataInMemoryIfNeeded()
