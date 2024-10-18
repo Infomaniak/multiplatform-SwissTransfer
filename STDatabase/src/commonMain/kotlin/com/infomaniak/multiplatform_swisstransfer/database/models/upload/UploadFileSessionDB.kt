@@ -25,7 +25,7 @@ class UploadFileSessionDB() : UploadFileSession, EmbeddedRealmObject {
     override var size: Long = 0L
     override var mimeType: String = ""
     override var localPath: String = ""
-    var remoteUploadFile: UploadFileDB? = null
+    override var remoteUploadFile: UploadFileDB? = null
 
     constructor(uploadFileSession: UploadFileSession) : this() {
         this.name = uploadFileSession.name
