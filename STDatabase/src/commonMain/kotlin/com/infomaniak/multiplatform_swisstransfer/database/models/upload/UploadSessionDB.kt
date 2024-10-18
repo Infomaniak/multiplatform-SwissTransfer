@@ -40,6 +40,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var remoteUploadHost: String? = null
 
     constructor(uploadSession: UploadSession) : this() {
+        this.uuid = uploadSession.uuid
         this.duration = uploadSession.duration
         this.authorEmail = uploadSession.authorEmail
         this.password = uploadSession.password
