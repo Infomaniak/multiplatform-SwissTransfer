@@ -22,8 +22,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
 
 internal open class BaseRequest(protected val json: Json, protected val httpClient: HttpClient) {
@@ -40,11 +42,17 @@ internal open class BaseRequest(protected val json: Json, protected val httpClie
     }
 
     protected suspend inline fun <reified R> post(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
-        return httpClient.post(url) { setBody(data) }.decode<R>()
+        return httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            setBody(data)
+        }.decode<R>()
     }
 
     protected suspend inline fun <reified R> put(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
-        return httpClient.put(url) { setBody(data) }.decode<R>()
+        return httpClient.put(url) {
+            contentType(ContentType.Application.Json)
+            setBody(data)
+        }.decode<R>()
     }
 
     protected suspend inline fun <reified R> delete(url: Url, httpClient: HttpClient = this.httpClient): R {
