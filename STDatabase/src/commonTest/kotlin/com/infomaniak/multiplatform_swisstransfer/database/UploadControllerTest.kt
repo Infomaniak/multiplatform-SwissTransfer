@@ -36,7 +36,7 @@ class UploadControllerTest {
     @AfterTest
     fun tearDown() = runTest {
         uploadController.removeData()
-        realmProvider.closeRealmTransfers()
+        realmProvider.closeRealmUploads()
     }
 
     @Test
