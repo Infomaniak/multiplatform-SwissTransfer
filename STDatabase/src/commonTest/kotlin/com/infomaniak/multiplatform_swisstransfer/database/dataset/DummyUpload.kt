@@ -17,12 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.dataset
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Upload
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFile
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 
 object DummyUpload {
-    private val container1 = object : UploadContainer {
+    val container = object : UploadContainer {
         override val uuid: String = "uploadContainer1"
         override val duration: String = "30"
         override val downloadLimit: Long = 1
@@ -36,20 +36,23 @@ object DummyUpload {
         override val message: String = ""
         override val numberOfFiles: Int = 0
     }
-    private val container2 = object : UploadContainer by container1 {
-        override val uuid: String = "container2"
-    }
 
-    private val upload1 = object : Upload {
+    private val upload1 = object : UploadSession {
         override val uuid: String = "upload1"
-        override val container: UploadContainer = container1
-        override val uploadHost: String = ""
-        override val files: List<UploadFile> = emptyList()
+        override val duration: String = "30"
+        override val authorEmail: String = ""
+        override val password: String = ""
+        override val message: String = ""
+        override val numberOfDownload: Int = 0
+        override val language: String = ""
+        override val recipientsEmails: List<String> = emptyList()
+        override val files: List<UploadFileSession> = emptyList()
+        override val remoteContainer: UploadContainer? = null
+        override val remoteUploadHost: String? = null
     }
 
-    private val upload2 = object : Upload by upload1 {
+    private val upload2 = object : UploadSession by upload1 {
         override val uuid: String = "upload2"
-        override val container: UploadContainer = container2
     }
 
     val uploads = listOf(upload1, upload2)
