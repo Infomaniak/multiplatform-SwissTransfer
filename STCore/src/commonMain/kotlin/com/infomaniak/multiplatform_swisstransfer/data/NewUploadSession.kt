@@ -34,5 +34,4 @@ data class NewUploadSession(
     override val uuid: String = ""
     override val remoteContainer: UploadContainer? = null
     override val remoteUploadHost: String? = null
-
 }
