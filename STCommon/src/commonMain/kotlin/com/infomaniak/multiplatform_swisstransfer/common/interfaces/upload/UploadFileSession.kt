@@ -17,12 +17,10 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
-/**
- * Class representing files to be uploaded
- */
-interface Upload {
-    val uuid: String
-    val container: UploadContainer?
-    val uploadHost: String
-    val files: List<UploadFile>
+interface UploadFileSession {
+    val name: String
+    val size: Long
+    val mimeType: String
+    val localPath: String
+    val remoteUploadFile: UploadFile?
 }

@@ -15,23 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
+package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import io.realm.kotlin.types.EmbeddedRealmObject
 
-@Serializable
-data class UploadFileRequest(
-    val name: String = "",
-    val size: Long = 0L,
-    @SerialName("type")
-    val mimeType: String = "",
-) {
-    constructor(uploadFileSession: UploadFileSession) : this(
-        name = uploadFileSession.name,
-        size = uploadFileSession.size,
-        mimeType = uploadFileSession.mimeType,
-    )
+class UploadFileSessionDB() : UploadFileSession, EmbeddedRealmObject {
+    override var name: String = ""
+    override var size: Long = 0L
+    override var mimeType: String = ""
+    override var localPath: String = ""
+    override var remoteUploadFile: UploadFileDB? = null
 
+    constructor(uploadFileSession: UploadFileSession) : this() {
+        this.name = uploadFileSession.name
+        this.size = uploadFileSession.size
+        this.mimeType = uploadFileSession.mimeType
+        this.localPath = uploadFileSession.localPath
+    }
 }
