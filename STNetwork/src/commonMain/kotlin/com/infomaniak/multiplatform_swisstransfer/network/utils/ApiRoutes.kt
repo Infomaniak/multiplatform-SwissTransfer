@@ -19,7 +19,9 @@ package com.infomaniak.multiplatform_swisstransfer.network.utils
 
 internal object ApiRoutes {
 
-    const val baseUrl = "https://www.swisstransfer.com/api/"
+    private const val prodUrl = "https://www.swisstransfer.com/api/"
+    private const val preprodBaseUrl = "https://swisstransfer.preprod.dev.infomaniak.ch/api/"
+    const val baseUrl = preprodBaseUrl
 
     //region Transfer
     fun getTransfer(linkUuid: String): String = "links/$linkUuid"
