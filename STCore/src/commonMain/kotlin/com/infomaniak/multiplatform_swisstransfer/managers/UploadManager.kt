@@ -40,13 +40,6 @@ class UploadManager(
 ) {
 
     /**
-     * Retrieves a list of upload sessions.
-     *
-     * @return A list of [UploadSession] objects.
-     */
-    fun getUploads() = uploadController.getUploads()
-
-    /**
      * Initializes an upload session.
      *
      * This method retrieves an upload session from the database using the provided `containerUuid`.
@@ -74,24 +67,11 @@ class UploadManager(
     }
 
     /**
-     * Finishes an upload session.
+     * Retrieves a list of upload sessions.
      *
-     * This method sends a completion request to the SwissTransfer API
-     * and removes the upload session from the database.
-     *
-     * @param containerUuid The UUID of the upload container.
+     * @return A list of [UploadSession] objects.
      */
-    suspend fun finishUploadSession(containerUuid: String) {
-        uploadController.getUploadByUuid(containerUuid)?.let { uploadSession ->
-            val finishUploadBody = FinishUploadBody(
-                containerUuid = containerUuid,
-                language = uploadSession.language,
-                recipientsEmails = uploadSession.recipientsEmails,
-            )
-            uploadRepository.finishUpload(finishUploadBody)
-            uploadController.removeUploadSession(containerUuid)
-        }
-    }
+    fun getUploads() = uploadController.getUploads()
 
     /**
      * Uploads a chunk of data for a file in an upload session.
@@ -131,4 +111,24 @@ class UploadManager(
      * @return The number of uploads.
      */
     fun getUploadsCount() = uploadController.getUploadsCount()
+
+    /**
+     * Finishes an upload session.
+     *
+     * This method sends a completion request to the SwissTransfer API
+     * and removes the upload session from the database.
+     *
+     * @param containerUuid The UUID of the upload container.
+     */
+    suspend fun finishUploadSession(containerUuid: String) {
+        uploadController.getUploadByUuid(containerUuid)?.let { uploadSession ->
+            val finishUploadBody = FinishUploadBody(
+                containerUuid = containerUuid,
+                language = uploadSession.language,
+                recipientsEmails = uploadSession.recipientsEmails,
+            )
+            uploadRepository.finishUpload(finishUploadBody)
+            uploadController.removeUploadSession(containerUuid)
+        }
+    }
 }
