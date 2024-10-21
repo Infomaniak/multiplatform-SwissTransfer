@@ -18,8 +18,13 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
@@ -40,6 +45,13 @@ class UploadManager(
 ) {
 
     /**
+     * Retrieves a list of upload sessions.
+     *
+     * @return A list of [UploadSession] objects.
+     */
+    fun getUploads() = uploadController.getUploads()
+
+    /**
      * Initializes an upload session.
      *
      * This method retrieves an upload session from the database using the provided `containerUuid`.
@@ -51,8 +63,21 @@ class UploadManager(
      * @param recaptcha The reCAPTCHA token.
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
+     * @throws ContainerErrorsException If there is an error with the container.
+     * @throws ApiException If there is a general API error.
+     * @throws NetworkException If there is a network error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws UnknownException If an unknown error occurs.
      */
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(
+        RealmException::class,
+        CancellationException::class,
+        ContainerErrorsException::class,
+        ApiException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+    )
     suspend fun initUploadSession(containerUuid: String, recaptcha: String) {
         uploadController.getUploadByUuid(containerUuid)?.let { uploadSession ->
             val initUploadBody = InitUploadBody(uploadSession, recaptcha)
@@ -65,13 +90,6 @@ class UploadManager(
             )
         }
     }
-
-    /**
-     * Retrieves a list of upload sessions.
-     *
-     * @return A list of [UploadSession] objects.
-     */
-    fun getUploads() = uploadController.getUploads()
 
     /**
      * Uploads a chunk of data for a file in an upload session.
