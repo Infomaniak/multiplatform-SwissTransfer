@@ -73,7 +73,7 @@ class UploadManager(
      * It then calls the `initUpload()` method of the `uploadRepository` to initiate the upload session on the server.
      * Finally, it updates the upload session in the database with the response received from the server.
      *
-     * @param containerUuid The UUID of the upload container.
+     * @param uuid The UUID of the upload.
      * @param recaptcha The reCAPTCHA token.
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
@@ -92,12 +92,12 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun initUploadSession(containerUuid: String, recaptcha: String) {
-        uploadController.getUploadByUuid(containerUuid)?.let { uploadSession ->
+    suspend fun initUploadSession(uuid: String, recaptcha: String) {
+        uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
             val initUploadBody = InitUploadBody(uploadSession, recaptcha)
             val initUploadResponse = uploadRepository.initUpload(initUploadBody)
             uploadController.updateUploadSession(
-                uuid = containerUuid,
+                uuid = uuid,
                 remoteContainer = initUploadResponse.container,
                 remoteUploadHost = initUploadResponse.uploadHost,
                 remoteFilesUuid = initUploadResponse.filesUuid,
