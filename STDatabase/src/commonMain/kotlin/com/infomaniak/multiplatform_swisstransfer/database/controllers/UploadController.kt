@@ -18,11 +18,16 @@
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Upload
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
+import io.realm.kotlin.TypedRealm
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.RealmSingleQuery
 import kotlin.coroutines.cancellation.CancellationException
 
 class UploadController(private val realmProvider: RealmProvider) {
@@ -30,18 +35,18 @@ class UploadController(private val realmProvider: RealmProvider) {
     private val realm by lazy { realmProvider.realmUploads }
 
     //region Queries
-    private fun getUploadsQuery() = realm.query<UploadDB>()
+    private fun getUploadsQuery() = realm.query<UploadSessionDB>()
     //endregion
 
     //region Get data
     @Throws(RealmException::class)
-    fun getUploads(): List<Upload> = runThrowingRealm {
+    fun getUploads(): List<UploadSessionDB> = runThrowingRealm {
         getUploadsQuery().find()
     }
 
     @Throws(RealmException::class)
-    fun getUploadByUuid(uuid: String): Upload? = runThrowingRealm {
-        return realm.query<UploadDB>("${UploadDB::uuid.name} == '$uuid'").first().find()
+    fun getUploadByUuid(uuid: String): UploadSession? = runThrowingRealm {
+        return realm.query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first().find()
     }
 
     @Throws(RealmException::class)
@@ -52,17 +57,43 @@ class UploadController(private val realmProvider: RealmProvider) {
 
     //region Insert
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun insert(upload: Upload) = runThrowingRealm {
+    suspend fun insert(uploadSession: UploadSession) = runThrowingRealm {
         realm.write {
-            this.copyToRealm(UploadDB(upload))
+            this.copyToRealm(UploadSessionDB(uploadSession))
         }
     }
     //endregion
 
     //region Update data
     @Throws(RealmException::class, CancellationException::class)
+    suspend fun updateUploadSession(
+        uuid: String,
+        remoteContainer: UploadContainer,
+        remoteUploadHost: String,
+        remoteFilesUuid: List<String>,
+    ) = runThrowingRealm {
+        realm.write {
+            getUploadSessionQuery(uuid).find()?.apply {
+                this.remoteContainer = UploadContainerDB(remoteContainer)
+                this.remoteUploadHost = remoteUploadHost
+                this.files.forEachIndexed { index, file ->
+                    file.remoteUploadFile = UploadFileDB(remoteFilesUuid[index])
+                }
+            }
+        }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }
     //endregion
+
+    private companion object {
+        //region Query
+        private fun TypedRealm.getUploadSessionQuery(uuid: String): RealmSingleQuery<UploadSessionDB> {
+            return query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first()
+        }
+        //endregion
+    }
 }

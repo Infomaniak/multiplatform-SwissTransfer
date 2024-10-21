@@ -15,22 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.utils
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
-internal object ApiRoutes {
-
-    private const val prodUrl = "https://www.swisstransfer.com/api/"
-    private const val preprodBaseUrl = "https://swisstransfer.preprod.dev.infomaniak.ch/api/"
-    const val baseUrl = preprodBaseUrl
-
-    //region Transfer
-    fun getTransfer(linkUuid: String): String = "links/$linkUuid"
-    //endRegion
-
-    //region Upload
-    const val initUpload = "containers"
-    const val verifyEmailCode = "emails-validation"
-    const val resendEmailCode = "$verifyEmailCode/resend"
-    const val finishUpload = "uploadComplete"
-    //endregion
+interface UploadFileSession {
+    val name: String
+    val size: Long
+    val mimeType: String
+    val localPath: String
 }
