@@ -32,5 +32,12 @@ jobs:
         run: ./gradlew clean
 
       # Run tests
-      - name: Run Unit tests
-        run: ./gradlew allTests --stacktrace
+      # We run each test independently instead of `allTests` because we have a concurrency problem on Realm
+      - name: Run Android Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Run iOS Unit tests
+        run: ./gradlew iosSimulatorArm64Test --stacktrace
+
+#      - name: Run Unit tests
+#        run: ./gradlew allTests --stacktrace
