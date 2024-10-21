@@ -17,11 +17,13 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Manages upload operations for SwissTransfer.
@@ -40,38 +42,34 @@ class UploadManager(
     /**
      * Retrieves a list of upload sessions.
      *
-     * @param hasBeenInitialized If true, only returns uploads that have been initialized.
-     *                           If false, only returns uploads that have not been initialized.
-     *                           If null, returns all uploads.
      * @return A list of [UploadSession] objects.
      */
-    fun getUploads(hasBeenInitialized: Boolean?): List<UploadSession> {
-        return hasBeenInitialized?.let {
-            uploadController.getUploads(hasBeenInitialized)
-        } ?: uploadController.getAllUploads()
-    }
+    fun getUploads() = uploadController.getUploads()
 
     /**
      * Initializes an upload session.
      *
-     * This method sends an initialization request to the SwissTransfer API
-     * and updates the upload session in the database with the response.
+     * This method retrieves an upload session from the database using the provided `containerUuid`.
+     * If the session is found, it creates an `InitUploadBody` object with the session data and the `recaptcha` token.
+     * It then calls the `initUpload()` method of the `uploadRepository` to initiate the upload session on the server.
+     * Finally, it updates the upload session in the database with the response received from the server.
      *
      * @param containerUuid The UUID of the upload container.
      * @param recaptcha The reCAPTCHA token.
+     * @throws RealmException If an error occurs during database access.
+     * @throws CancellationException If the operation is cancelled.
      */
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun initUploadSession(containerUuid: String, recaptcha: String) {
         uploadController.getUploadByUuid(containerUuid)?.let { uploadSession ->
             val initUploadBody = InitUploadBody(uploadSession, recaptcha)
             val initUploadResponse = uploadRepository.initUpload(initUploadBody)
-            runCatching {
-                uploadController.updateUploadSession(
-                    uuid = containerUuid,
-                    remoteContainer = initUploadResponse.container,
-                    remoteUploadHost = initUploadResponse.uploadHost,
-                    remoteFilesUuid = initUploadResponse.filesUuid,
-                )
-            }
+            uploadController.updateUploadSession(
+                uuid = containerUuid,
+                remoteContainer = initUploadResponse.container,
+                remoteUploadHost = initUploadResponse.uploadHost,
+                remoteFilesUuid = initUploadResponse.filesUuid,
+            )
         }
     }
 
@@ -126,4 +124,11 @@ class UploadManager(
             )
         }
     }
+
+    /**
+     * Retrieves the total number of uploads in the database.
+     *
+     * @return The number of uploads.
+     */
+    fun getUploadsCount() = uploadController.getUploadsCount()
 }
