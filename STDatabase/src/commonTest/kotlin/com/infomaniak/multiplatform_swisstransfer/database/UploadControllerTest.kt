@@ -52,7 +52,7 @@ class UploadControllerTest {
         DummyUpload.uploads.take(2).forEach { dummyUpload ->
             uploadController.insert(dummyUpload)
         }
-        val realmUploads = uploadController.getAllUploads()
+        val realmUploads = uploadController.getUploads()
         assertEquals(2, realmUploads.count())
     }
 
@@ -60,7 +60,7 @@ class UploadControllerTest {
     fun canRemoveData() = runTest {
         uploadController.insert(DummyUpload.uploads.first())
         uploadController.removeData()
-        val realmUploads = uploadController.getAllUploads()
+        val realmUploads = uploadController.getUploads()
         assertEquals(0, realmUploads.count())
     }
 
