@@ -87,6 +87,14 @@ class UploadController(private val realmProvider: RealmProvider) {
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun removeUploadSession(uuid: String) = runThrowingRealm {
+        realm.write {
+            val finishedUploadSession = getUploadSessionQuery(uuid)
+            delete(finishedUploadSession)
+        }
+    }
     //endregion
 
     private companion object {
