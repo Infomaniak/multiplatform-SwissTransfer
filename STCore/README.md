@@ -78,8 +78,6 @@ centralized access point to orchestrate transfer operations.
       `appSettingsController`, `uploadController`, `transfersController` and `realmProvider` to configure and manage Accounts
       efficiently.
 
-#### Property: `accountManager`
-
 - **Usage Example**:
   ```kotlin
   val core = SwissTransferInjection()
