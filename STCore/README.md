@@ -38,6 +38,7 @@ centralized access point to orchestrate transfer operations.
 | Property | appSettingsManager  | A manager used to orchestrate AppSettings operations. |
 | Property | transferManager     | A manager used to orchestrate Transfers operations.   |
 | Property | accountManager      | A manager used to orchestrate Accounts operations.    |
+| Property | uploadManager       | A manager used to orchestrate Uploads operations.     |
 | Property | sharedApiUrlCreator | An utils to help use shared routes                    |
 
 ### Details of Properties and Methods
@@ -77,11 +78,26 @@ centralized access point to orchestrate transfer operations.
       `appSettingsController`, `uploadController`, `transfersController` and `realmProvider` to configure and manage Accounts
       efficiently.
 
+#### Property: `accountManager`
+
 - **Usage Example**:
   ```kotlin
   val core = SwissTransferInjection()
   val accountManager = core.accountManager
   // Use the accountManager to orchestrate Accounts
+  ```
+
+- **Type**: `UploadManager`
+- **Description**:
+    - `uploadManager` is a lazily initialized property that provides a manager to orchestrate all Uploads operations. It uses
+      `uploadController` and `uploadRepository` to configure and manage Uploads
+      efficiently.
+
+- **Usage Example**:
+  ```kotlin
+  val core = SwissTransferInjection()
+  val uploadManager = core.uploadManager
+  // Use the uploadManager to orchestrate Uploads
   ```
 
 #### Property: `sharedApiUrlCreator`
