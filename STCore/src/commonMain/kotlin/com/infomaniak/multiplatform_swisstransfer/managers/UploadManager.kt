@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
@@ -50,6 +51,19 @@ class UploadManager(
      * @return A list of [UploadSession] objects.
      */
     fun getUploads() = uploadController.getUploads()
+
+    /**
+     * Creates a new upload session in the database.
+     *
+     * This method inserts a new upload session into the database using the provided `newUploadSession` data.
+     *
+     * @param newUploadSession The data for the new upload session.
+     * @return The newly created upload session.
+     * @throws RealmException If an error occurs during database access.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun createUpload(newUploadSession: NewUploadSession) = uploadController.insert(newUploadSession)
 
     /**
      * Initializes an upload session.
