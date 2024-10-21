@@ -46,10 +46,12 @@ class UploadManager(
 ) {
 
     /**
-     * Retrieves a list of upload sessions.
+     * Retrieves all upload sessions from the database.
      *
-     * @return A list of [UploadSession] objects.
+     * @return A list of all upload sessions.
+     * @throws RealmException If an error occurs during database access.
      */
+    @Throws(RealmException::class)
     fun getUploads() = uploadController.getUploads()
 
     /**
@@ -68,12 +70,12 @@ class UploadManager(
     /**
      * Initializes an upload session.
      *
-     * This method retrieves an upload session from the database using the provided `containerUuid`.
+     * This method retrieves an upload session from the database using the provided `uuid`.
      * If the session is found, it creates an `InitUploadBody` object with the session data and the `recaptcha` token.
      * It then calls the `initUpload()` method of the `uploadRepository` to initiate the upload session on the server.
      * Finally, it updates the upload session in the database with the response received from the server.
      *
-     * @param uuid The UUID of the upload.
+     * @param uuid The UUID of the upload session.
      * @param recaptcha The reCAPTCHA token.
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
@@ -108,27 +110,43 @@ class UploadManager(
     /**
      * Uploads a chunk of data for a file in an upload session.
      *
-     * This method sends a chunk of data to the SwissTransfer API for upload.
+     * This method retrieves an upload session from the database using the provided `uuid`.
+     * If the session is found and has a remote upload host and remote container, it calls the `uploadChunk()` method of the
+     * `uploadRepository` to send the chunk data to the server.
      *
-     * @param containerUuid The UUID of the upload container.
+     * @param uuid The UUID of the upload session.
      * @param fileUuid The UUID of the file being uploaded.
      * @param chunkIndex The index of the chunk being uploaded.
      * @param isLastChunk True if this is the last chunk of the file, false otherwise.
      * @param data The chunk data to upload.
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws NetworkException If there is a network error.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws RealmException If an error occurs during database access.
      */
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+        RealmException::class,
+    )
     suspend fun uploadChunk(
-        containerUuid: String,
+        uuid: String,
         fileUuid: String,
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
     ) {
-        uploadController.getUploadByUuid(containerUuid)?.let { uploadSession ->
-            if (uploadSession.remoteUploadHost == null) return@let
+        uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
+            if (uploadSession.remoteUploadHost == null || uploadSession.remoteContainer == null) return@let
 
             uploadRepository.uploadChunk(
                 uploadHost = uploadSession.remoteUploadHost!!,
-                containerUuid = containerUuid,
+                containerUuid = uploadSession.remoteContainer!!.uuid,
                 fileUuid = fileUuid,
                 chunkIndex = chunkIndex,
                 isLastChunk = isLastChunk,
@@ -141,26 +159,47 @@ class UploadManager(
      * Retrieves the total number of uploads in the database.
      *
      * @return The number of uploads.
+     * @throws RealmException If an error occurs during database access.
      */
+    @Throws(RealmException::class)
     fun getUploadsCount() = uploadController.getUploadsCount()
 
     /**
      * Finishes an upload session.
      *
-     * This method sends a completion request to the SwissTransfer API
-     * and removes the upload session from the database.
+     * This method retrieves an upload session from the database using the provided `uuid`.
+     * If the session is found and has a remote container UUID, it creates a `FinishUploadBody` object
+     * with the necessary data and calls the `finishUpload()` method of the `uploadRepository` to
+     * finalize the upload session on the server.
+     * Finally, it removes the upload session from the database.
      *
-     * @param containerUuid The UUID of the upload container.
+     * @param uuid The UUID of the upload session.
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws NetworkException If there is a network error.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws RealmException If an error occurs during database access.
      */
-    suspend fun finishUploadSession(containerUuid: String) {
-        uploadController.getUploadByUuid(containerUuid)?.let { uploadSession ->
-            val finishUploadBody = FinishUploadBody(
-                containerUuid = containerUuid,
-                language = uploadSession.language,
-                recipientsEmails = uploadSession.recipientsEmails,
-            )
-            uploadRepository.finishUpload(finishUploadBody)
-            uploadController.removeUploadSession(containerUuid)
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+        RealmException::class,
+    )
+    suspend fun finishUploadSession(uuid: String) {
+        uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
+            uploadSession.remoteContainer?.uuid?.let { containerUuid ->
+                val finishUploadBody = FinishUploadBody(
+                    containerUuid = containerUuid,
+                    language = uploadSession.language,
+                    recipientsEmails = uploadSession.recipientsEmails,
+                )
+                uploadRepository.finishUpload(finishUploadBody)
+                uploadController.removeUploadSession(containerUuid)
+            }
         }
     }
 }
