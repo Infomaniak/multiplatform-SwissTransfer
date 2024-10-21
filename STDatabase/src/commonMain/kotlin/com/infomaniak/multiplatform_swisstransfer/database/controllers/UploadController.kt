@@ -26,11 +26,9 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadF
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.TypedRealm
-import io.realm.kotlin.delete
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.RealmSingleQuery
-import io.realm.kotlin.query.find
 import kotlin.coroutines.cancellation.CancellationException
 
 class UploadController(private val realmProvider: RealmProvider) {
@@ -113,7 +111,9 @@ class UploadController(private val realmProvider: RealmProvider) {
         private fun TypedRealm.getUploadSessionQuery(uuid: String): RealmSingleQuery<UploadSessionDB> {
             return query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first()
         }
+        //endregion
 
+        //region Result
         private fun TypedRealm.getUploadSessionResult(uuid: String): RealmResults<UploadSessionDB> {
             return query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").find()
         }
