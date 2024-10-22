@@ -22,7 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.Cont
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.RemoteUploadFileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileSessionDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import io.realm.kotlin.Realm
@@ -70,7 +70,7 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
                 UploadSessionDB::class,
                 UploadFileSessionDB::class,
                 UploadContainerDB::class,
-                UploadFileDB::class,
+                RemoteUploadFileDB::class,
             )
         )
         .name("Uploads")

@@ -17,12 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFile
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadStatus
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.EmbeddedRealmObject
 
-class UploadFileDB() : UploadFile, EmbeddedRealmObject {
+class RemoteUploadFileDB() : RemoteUploadFile, EmbeddedRealmObject {
 
     override var uuid: String = ""
     /**
@@ -40,8 +40,8 @@ class UploadFileDB() : UploadFile, EmbeddedRealmObject {
         this.uuid = uuid
     }
 
-    constructor(uploadFile: UploadFile) : this(uploadFile.uuid) {
-        this._uploadStatus = uploadFile.uploadStatus.name
-        this.uploadedChunks = uploadFile.uploadedChunks.mapTo(realmListOf()) { it }
+    constructor(remoteUploadFile: RemoteUploadFile) : this(remoteUploadFile.uuid) {
+        this._uploadStatus = remoteUploadFile.uploadStatus.name
+        this.uploadedChunks = remoteUploadFile.uploadedChunks.mapTo(realmListOf()) { it }
     }
 }

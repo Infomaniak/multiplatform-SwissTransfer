@@ -22,7 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.RemoteUploadFileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.TypedRealm
@@ -77,7 +77,7 @@ class UploadController(private val realmProvider: RealmProvider) {
                 this.remoteContainer = UploadContainerDB(remoteContainer)
                 this.remoteUploadHost = remoteUploadHost
                 this.files.forEachIndexed { index, file ->
-                    file.remoteUploadFile = UploadFileDB(remoteFilesUUID[index])
+                    file.remoteUploadFile = RemoteUploadFileDB(remoteFilesUUID[index])
                 }
             }
         }
