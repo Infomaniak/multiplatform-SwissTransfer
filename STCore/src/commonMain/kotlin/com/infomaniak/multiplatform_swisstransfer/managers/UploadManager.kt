@@ -75,7 +75,7 @@ class UploadManager(
      * Finally, it updates the upload session in the database with the response received from the server.
      *
      * @param uuid The UUID of the upload session.
-     * @param recaptcha The reCAPTCHA token.
+     * @param recaptcha The reCAPTCHA token or an empty string in any.
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      * @throws ContainerErrorsException If there is an error with the container.
@@ -93,7 +93,7 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun initUploadSession(uuid: String, recaptcha: String) {
+    suspend fun initUploadSession(uuid: String, recaptcha: String = "") {
         uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
             val initUploadBody = InitUploadBody(uploadSession, recaptcha)
             val initUploadResponse = uploadRepository.initUpload(initUploadBody)
