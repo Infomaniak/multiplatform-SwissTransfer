@@ -19,7 +19,6 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
@@ -141,18 +140,18 @@ class UploadManager(
         isLastChunk: Boolean,
         data: ByteArray,
     ) {
-        uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
-            if (uploadSession.remoteUploadHost == null || uploadSession.remoteContainer == null) return@let
+        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return
+        val remoteUploadHost = uploadSession.remoteUploadHost ?: return
+        val remoteContainer = uploadSession.remoteContainer ?: return
 
-            uploadRepository.uploadChunk(
-                uploadHost = uploadSession.remoteUploadHost!!,
-                containerUuid = uploadSession.remoteContainer!!.uuid,
-                fileUuid = fileUuid,
-                chunkIndex = chunkIndex,
-                isLastChunk = isLastChunk,
-                data = data,
-            )
-        }
+        uploadRepository.uploadChunk(
+            uploadHost = remoteUploadHost,
+            containerUuid = remoteContainer.uuid,
+            fileUuid = fileUuid,
+            chunkIndex = chunkIndex,
+            isLastChunk = isLastChunk,
+            data = data,
+        )
     }
 
     /**
@@ -190,16 +189,15 @@ class UploadManager(
         RealmException::class,
     )
     suspend fun finishUploadSession(uuid: String) {
-        uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
-            uploadSession.remoteContainer?.uuid?.let { containerUuid ->
-                val finishUploadBody = FinishUploadBody(
-                    containerUuid = containerUuid,
-                    language = uploadSession.language,
-                    recipientsEmails = uploadSession.recipientsEmails,
-                )
-                uploadRepository.finishUpload(finishUploadBody)
-                uploadController.removeUploadSession(containerUuid)
-            }
-        }
+        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return
+        val containerUuid = uploadSession.remoteContainer?.uuid ?: return
+
+        val finishUploadBody = FinishUploadBody(
+            containerUuid = containerUuid,
+            language = uploadSession.language,
+            recipientsEmails = uploadSession.recipientsEmails,
+        )
+        uploadRepository.finishUpload(finishUploadBody)
+        uploadController.removeUploadSession(containerUuid)
     }
 }
