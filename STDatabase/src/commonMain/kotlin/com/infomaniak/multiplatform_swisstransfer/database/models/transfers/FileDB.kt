@@ -23,7 +23,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 
 class FileDB() : File, RealmObject {
     @PrimaryKey
-    override var containerUuid: String = ""
+    override var containerUUID: String = ""
     override var uuid: String = ""
     override var fileName: String = ""
     override var fileSizeInBytes: Long = 0L
@@ -38,7 +38,7 @@ class FileDB() : File, RealmObject {
     override var thumbnailPath: String? = ""
 
     constructor(file: File) : this() {
-        this.containerUuid = file.containerUuid
+        this.containerUUID = file.containerUUID
         this.uuid = file.uuid
         this.fileName = file.fileName
         this.fileSizeInBytes = file.fileSizeInBytes

@@ -73,18 +73,18 @@ class TransferControllerTest {
         // Insert a transfer
         val transfer1 = DummyTransfer.transfer1
         transferController.upsert(transfer1, TransferDirection.SENT)
-        val realmTransfer1 = transferController.getTransfer(transfer1.linkUuid)
+        val realmTransfer1 = transferController.getTransfer(transfer1.linkUUID)
         assertNotNull(realmTransfer1)
 
         // Update the transfer
         val transfer2 = object : Transfer by transfer1 {
-            override var containerUuid: String = "transfer2"
+            override var containerUUID: String = "transfer2"
         }
         transferController.upsert(transfer2, TransferDirection.SENT)
         val realmTransfers = transferController.getTransfers()
         assertNotNull(realmTransfers)
         assertEquals(1, realmTransfers.count())
-        assertEquals(transfer2.containerUuid, realmTransfers.first().containerUuid)
+        assertEquals(transfer2.containerUUID, realmTransfers.first().containerUUID)
     }
 
     @Test
@@ -97,7 +97,7 @@ class TransferControllerTest {
     private suspend fun canCreateTransfer(sent: TransferDirection) {
         val transfer = DummyTransfer.transfer1
         transferController.upsert(transfer, sent)
-        val realmTransfer = transferController.getTransfer(transfer.linkUuid)
+        val realmTransfer = transferController.getTransfer(transfer.linkUUID)
         assertNotNull(realmTransfer, "The transfer cannot be null")
         assertEquals(sent, realmTransfer.transferDirection())
         assertEquals(transfer.container?.uuid, realmTransfer.container?.uuid, "The container is missing")

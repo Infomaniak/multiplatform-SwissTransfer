@@ -24,8 +24,8 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 
 class TransferDB() : Transfer, RealmObject {
     @PrimaryKey
-    override var linkUuid: String = ""
-    override var containerUuid: String = ""
+    override var linkUUID: String = ""
+    override var containerUUID: String = ""
     override var downloadCounterCredit: Int = 0
     override var createdDateTimestamp: Long = 0L
     override var expiredDateTimestamp: Long = 0L
@@ -37,8 +37,8 @@ class TransferDB() : Transfer, RealmObject {
     private var transferDirectionValue: String = ""
 
     constructor(transfer: Transfer, transferDirection: TransferDirection) : this() {
-        this.linkUuid = transfer.linkUuid
-        this.containerUuid = transfer.containerUuid
+        this.linkUUID = transfer.linkUUID
+        this.containerUUID = transfer.containerUUID
         this.downloadCounterCredit = transfer.downloadCounterCredit
         this.createdDateTimestamp = transfer.createdDateTimestamp
         this.expiredDateTimestamp = transfer.expiredDateTimestamp

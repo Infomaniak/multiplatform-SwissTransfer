@@ -45,7 +45,7 @@ class UploadController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getUploadByUuid(uuid: String): UploadSession? = runThrowingRealm {
+    fun getUploadByUUID(uuid: String): UploadSession? = runThrowingRealm {
         return realm.query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first().find()
     }
 
@@ -70,14 +70,14 @@ class UploadController(private val realmProvider: RealmProvider) {
         uuid: String,
         remoteContainer: UploadContainer,
         remoteUploadHost: String,
-        remoteFilesUuid: List<String>,
+        remoteFilesUUID: List<String>,
     ) = runThrowingRealm {
         realm.write {
             getUploadSessionQuery(uuid).find()?.apply {
                 this.remoteContainer = UploadContainerDB(remoteContainer)
                 this.remoteUploadHost = remoteUploadHost
                 this.files.forEachIndexed { index, file ->
-                    file.remoteUploadFile = UploadFileDB(remoteFilesUuid[index])
+                    file.remoteUploadFile = UploadFileDB(remoteFilesUUID[index])
                 }
             }
         }

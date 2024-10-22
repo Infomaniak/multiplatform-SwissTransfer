@@ -119,7 +119,7 @@ class UploadManager(
                 uuid = uuid,
                 remoteContainer = initUploadResponse.container,
                 remoteUploadHost = initUploadResponse.uploadHost,
-                remoteFilesUuid = initUploadResponse.filesUuid,
+                remoteFilesUUID = initUploadResponse.filesUUID,
             )
         }
     }
@@ -132,7 +132,7 @@ class UploadManager(
      * `uploadRepository` to send the chunk data to the server.
      *
      * @param uuid The UUID of the upload session.
-     * @param fileUuid The UUID of the file being uploaded.
+     * @param fileUUID The UUID of the file being uploaded.
      * @param chunkIndex The index of the chunk being uploaded.
      * @param isLastChunk True if this is the last chunk of the file, false otherwise.
      * @param data The chunk data to upload.
@@ -153,7 +153,7 @@ class UploadManager(
     )
     suspend fun uploadChunk(
         uuid: String,
-        fileUuid: String,
+        fileUUID: String,
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
@@ -164,8 +164,8 @@ class UploadManager(
 
         uploadRepository.uploadChunk(
             uploadHost = remoteUploadHost,
-            containerUuid = remoteContainer.uuid,
-            fileUuid = fileUuid,
+            containerUUID = remoteContainer.uuid,
+            fileUUID = fileUUID,
             chunkIndex = chunkIndex,
             isLastChunk = isLastChunk,
             data = data,
@@ -202,11 +202,11 @@ class UploadManager(
         val containerUuid = uploadSession.remoteContainer?.uuid ?: return@withContext
 
         val finishUploadBody = FinishUploadBody(
-            containerUuid = containerUuid,
+            containerUUID = containerUUID,
             language = uploadSession.language.code,
             recipientsEmails = uploadSession.recipientsEmails,
         )
         uploadRepository.finishUpload(finishUploadBody)
-        uploadController.removeUploadSession(containerUuid)
+        uploadController.removeUploadSession(containerUUID)
     }
 }

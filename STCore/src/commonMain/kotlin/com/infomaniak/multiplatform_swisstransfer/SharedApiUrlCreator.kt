@@ -31,22 +31,22 @@ class SharedApiUrlCreator internal constructor(
 ) {
 
     @Throws(RealmException::class)
-    fun downloadFilesUrl(transferUuid: String): String? {
-        val transfer = transferController.getTransfer(transferUuid) ?: return null
-        return SharedApiRoutes.downloadFiles(transfer.downloadHost, transfer.linkUuid)
+    fun downloadFilesUrl(transferUUID: String): String? {
+        val transfer = transferController.getTransfer(transferUUID) ?: return null
+        return SharedApiRoutes.downloadFiles(transfer.downloadHost, transfer.linkUUID)
     }
 
     @Throws(RealmException::class)
-    fun downloadFileUrl(transferUuid: String, fileUuid: String?): String? {
-        val transfer = transferController.getTransfer(transferUuid) ?: return null
-        return SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUuid, fileUuid)
+    fun downloadFileUrl(transferUUID: String, fileUUID: String?): String? {
+        val transfer = transferController.getTransfer(transferUUID) ?: return null
+        return SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUUID, fileUUID)
     }
 
     @Throws(RealmException::class)
-    fun uploadChunkUrl(uploadUuid: String, fileUuid: String, chunkIndex: Int, isLastChunk: Boolean): String? {
-        val upload = uploadController.getUploadByUuid(uploadUuid) ?: return null
-        val containerUuid = upload.remoteContainer?.uuid ?: return null
+    fun uploadChunkUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String? {
+        val upload = uploadController.getUploadByUUID(uploadUUID) ?: return null
+        val containerUUID = upload.remoteContainer?.uuid ?: return null
         val uploadHost = upload.remoteUploadHost ?: return null
-        return SharedApiRoutes.uploadChunk(uploadHost, containerUuid, fileUuid, chunkIndex, isLastChunk)
+        return SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
     }
 }

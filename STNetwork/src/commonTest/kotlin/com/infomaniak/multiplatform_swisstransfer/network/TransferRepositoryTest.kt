@@ -26,9 +26,9 @@ class TransferRepositoryTest {
     private val transferRepository = TransferRepository(ApiClientProvider()) // TODO: Use mock client
 
     @Test
-    fun canExtractLinkUuidFromUrl() {
+    fun canExtractLinkUUIDFromUrl() {
         val url = "https://www.swisstransfer.com/d/fa7d299d-1001-4668-83a4-2a9b61aa59e8"
-        val result = transferRepository.extractUuid(url)
+        val result = transferRepository.extractUUID(url)
         assertEquals("fa7d299d-1001-4668-83a4-2a9b61aa59e8", result)
     }
 }

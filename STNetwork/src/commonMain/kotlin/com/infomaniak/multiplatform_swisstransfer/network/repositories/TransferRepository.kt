@@ -47,7 +47,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun getTransferByLinkUuid(linkUuid: String): ApiResponse<TransferApi> = transferRequest.getTransfer(linkUuid)
+    suspend fun getTransferByLinkUUID(linkUUID: String): ApiResponse<TransferApi> = transferRequest.getTransfer(linkUUID)
 
     @Throws(
         CancellationException::class,
@@ -57,8 +57,8 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         UnknownException::class,
     )
     suspend fun getTransferByUrl(url: String): ApiResponse<TransferApi> {
-        return transferRequest.getTransfer(extractUuid(url))
+        return transferRequest.getTransfer(extractUUID(url))
     }
 
-    internal fun extractUuid(url: String) = url.substringAfterLast("/")
+    internal fun extractUUID(url: String) = url.substringAfterLast("/")
 }
