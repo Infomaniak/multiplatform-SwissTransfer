@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
@@ -50,7 +51,7 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
 
     //region Get data
     @Throws(RealmException::class)
-    fun getAppSettingsFlow(): Flow<AppSettingsDB?> = runThrowingRealm {
+    fun getAppSettingsFlow(): Flow<AppSettings?> = runThrowingRealm {
         return appSettingsQuery.asFlow().mapLatest { it.obj }
     }
     //endregion
