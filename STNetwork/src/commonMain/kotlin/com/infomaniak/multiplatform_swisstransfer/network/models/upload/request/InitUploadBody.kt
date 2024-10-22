@@ -33,7 +33,7 @@ class InitUploadBody(
     val sizeOfUpload: Long = 0L,
     val numberOfDownload: Int = 0,
     val numberOfFile: Int = 0,
-    val recaptcha: String = "",
+    val recaptcha: String = "recaptcha",
     val recaptchaVersion: Int = 3,
     @SerialName("lang")
     val language: String = "",
