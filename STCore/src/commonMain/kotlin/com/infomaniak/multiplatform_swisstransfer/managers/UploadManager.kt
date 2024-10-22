@@ -60,6 +60,17 @@ class UploadManager(
     }
 
     /**
+     * Retrieves the last upload session from the database.
+     *
+     * @return Last upload session.
+     * @throws RealmException If an error occurs during database access.
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getLastUpload(): UploadSession? = withContext(Dispatchers.IO) {
+        return@withContext uploadController.getLastUpload()
+    }
+
+    /**
      * Retrieves the total number of uploads in the database.
      *
      * @return The number of uploads.
