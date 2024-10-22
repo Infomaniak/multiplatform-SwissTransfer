@@ -37,10 +37,10 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRep
  *
  * This class serves as the main access point.
  *
+ * @property transferManager A manager used to orchestrate transfer operations.
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
  * @property uploadManager A manager used to orchestrate Uploads operations.
- * @property transferManager A manager used to orchestrate transfer operations.
  * @property sharedApiUrlCreator An utils to help use shared routes.
  */
 class SwissTransferInjection {
