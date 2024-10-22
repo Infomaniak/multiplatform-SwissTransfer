@@ -22,6 +22,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
+import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -112,6 +114,7 @@ class UploadManager(
      * @throws NetworkException If there is a network error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
+     * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
      */
     @Throws(
         RealmException::class,
@@ -121,18 +124,20 @@ class UploadManager(
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        NotFoundException::class,
     )
     suspend fun initUploadSession(uuid: String, recaptcha: String = ""): Unit = withContext(Dispatchers.IO) {
-        uploadController.getUploadByUUID(uuid)?.let { uploadSession ->
-            val initUploadBody = InitUploadBody(uploadSession, recaptcha)
-            val initUploadResponse = uploadRepository.initUpload(initUploadBody)
-            uploadController.updateUploadSession(
-                uuid = uuid,
-                remoteContainer = initUploadResponse.container,
-                remoteUploadHost = initUploadResponse.uploadHost,
-                remoteFilesUUID = initUploadResponse.filesUUID,
-            )
-        }
+        val uploadSession = uploadController.getUploadByUUID(uuid)
+            ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")
+
+        val initUploadBody = InitUploadBody(uploadSession, recaptcha)
+        val initUploadResponse = uploadRepository.initUpload(initUploadBody)
+        uploadController.updateUploadSession(
+            uuid = uuid,
+            remoteContainer = initUploadResponse.container,
+            remoteUploadHost = initUploadResponse.uploadHost,
+            remoteFilesUUID = initUploadResponse.filesUUID,
+        )
     }
 
     /**
@@ -153,6 +158,8 @@ class UploadManager(
      * @throws NetworkException If there is a network error.
      * @throws UnknownException If an unknown error occurs.
      * @throws RealmException If an error occurs during database access.
+     * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
+     * @throws NullPropertyException If remoteUploadHost or remoteContainer is null.
      */
     @Throws(
         CancellationException::class,
@@ -161,6 +168,8 @@ class UploadManager(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
+        NotFoundException::class,
+        NullPropertyException::class,
     )
     suspend fun uploadChunk(
         uuid: String,
@@ -169,9 +178,10 @@ class UploadManager(
         isLastChunk: Boolean,
         data: ByteArray,
     ): Unit = withContext(Dispatchers.IO) {
-        val uploadSession = uploadController.getUploadByUUID(uuid) ?: return@withContext
-        val remoteUploadHost = uploadSession.remoteUploadHost ?: return@withContext
-        val remoteContainer = uploadSession.remoteContainer ?: return@withContext
+        val uploadSession = uploadController.getUploadByUUID(uuid)
+            ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")
+        val remoteUploadHost = uploadSession.remoteUploadHost ?: throw NullPropertyException("Remote upload host cannot be null")
+        val remoteContainer = uploadSession.remoteContainer ?: throw NullPropertyException("Remote container cannot be null")
 
         uploadRepository.uploadChunk(
             uploadHost = remoteUploadHost,
@@ -199,6 +209,8 @@ class UploadManager(
      * @throws NetworkException If there is a network error.
      * @throws UnknownException If an unknown error occurs.
      * @throws RealmException If an error occurs during database access.
+     * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
+     * @throws NullPropertyException If remoteUploadHost or remoteContainer is null.
      */
     @Throws(
         CancellationException::class,
@@ -207,10 +219,14 @@ class UploadManager(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
+        NotFoundException::class,
+        NullPropertyException::class,
     )
     suspend fun finishUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
-        val uploadSession = uploadController.getUploadByUUID(uuid) ?: return@withContext
-        val containerUUID = uploadSession.remoteContainer?.uuid ?: return@withContext
+        val uploadSession = uploadController.getUploadByUUID(uuid)
+            ?: throw NotFoundException("Unknown upload session with uuid = $uuid")
+        val containerUUID = uploadSession.remoteContainer?.uuid
+            ?: throw NullPropertyException("Remote container cannot be null")
 
         val finishUploadBody = FinishUploadBody(
             containerUUID = containerUUID,
