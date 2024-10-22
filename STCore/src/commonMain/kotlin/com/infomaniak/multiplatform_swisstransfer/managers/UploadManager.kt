@@ -56,7 +56,7 @@ class UploadManager(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getUploads(): List<UploadSession> = withContext(Dispatchers.IO) {
-        return@withContext uploadController.getUploads()
+        return@withContext uploadController.getAllUploads()
     }
 
     /**
