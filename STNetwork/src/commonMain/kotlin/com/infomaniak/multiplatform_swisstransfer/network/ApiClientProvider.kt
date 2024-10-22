@@ -73,8 +73,8 @@ class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>?
             HttpResponseValidator {
                 validateResponse { response: HttpResponse ->
                     val statusCode = response.status.value
-                    val bodyResponse = response.bodyAsText()
                     if (statusCode >= 300) {
+                        val bodyResponse = response.bodyAsText()
                         runCatching {
                             val apiError = json.decodeFromString<ApiError>(bodyResponse)
                             throw ApiException(apiError.errorCode, apiError.message)

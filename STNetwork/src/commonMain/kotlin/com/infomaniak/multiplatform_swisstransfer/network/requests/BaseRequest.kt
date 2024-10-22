@@ -17,11 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
@@ -60,6 +61,6 @@ internal open class BaseRequest(protected val json: Json, protected val httpClie
     }
 
     protected suspend inline fun <reified R> HttpResponse.decode(): R {
-        return json.decodeFromString<R>(bodyAsText())
+        return runCatching { body<R>() }.getOrElse { throw UnknownException(it) }
     }
 }

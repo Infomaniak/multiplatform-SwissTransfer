@@ -40,7 +40,7 @@ class UploadController(private val realmProvider: RealmProvider) {
 
     //region Get data
     @Throws(RealmException::class)
-    fun getUploads(): List<UploadSessionDB> = runThrowingRealm {
+    fun getUploads(): List<UploadSession> = runThrowingRealm {
         getUploadsQuery().find()
     }
 
