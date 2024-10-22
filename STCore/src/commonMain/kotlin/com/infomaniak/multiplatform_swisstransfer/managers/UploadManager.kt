@@ -22,7 +22,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
