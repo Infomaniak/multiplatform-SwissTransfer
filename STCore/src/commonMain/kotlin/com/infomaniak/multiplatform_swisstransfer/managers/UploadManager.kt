@@ -112,7 +112,7 @@ class UploadManager(
         UnknownException::class,
     )
     suspend fun initUploadSession(uuid: String, recaptcha: String = ""): Unit = withContext(Dispatchers.IO) {
-        uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
+        uploadController.getUploadByUUID(uuid)?.let { uploadSession ->
             val initUploadBody = InitUploadBody(uploadSession, recaptcha)
             val initUploadResponse = uploadRepository.initUpload(initUploadBody)
             uploadController.updateUploadSession(
@@ -158,7 +158,7 @@ class UploadManager(
         isLastChunk: Boolean,
         data: ByteArray,
     ): Unit = withContext(Dispatchers.IO) {
-        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return@withContext
+        val uploadSession = uploadController.getUploadByUUID(uuid) ?: return@withContext
         val remoteUploadHost = uploadSession.remoteUploadHost ?: return@withContext
         val remoteContainer = uploadSession.remoteContainer ?: return@withContext
 
@@ -198,8 +198,8 @@ class UploadManager(
         RealmException::class,
     )
     suspend fun finishUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
-        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return@withContext
-        val containerUuid = uploadSession.remoteContainer?.uuid ?: return@withContext
+        val uploadSession = uploadController.getUploadByUUID(uuid) ?: return@withContext
+        val containerUUID = uploadSession.remoteContainer?.uuid ?: return@withContext
 
         val finishUploadBody = FinishUploadBody(
             containerUUID = containerUUID,
