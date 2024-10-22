@@ -68,12 +68,13 @@ class UploadManager(
      * This method inserts a new upload session into the database using the provided `newUploadSession` data.
      *
      * @param newUploadSession The data for the new upload session.
-     * @return The newly created upload session.
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun createUpload(newUploadSession: NewUploadSession) = uploadController.insert(newUploadSession)
+    suspend fun createUpload(newUploadSession: NewUploadSession) {
+        uploadController.insert(newUploadSession)
+    }
 
     /**
      * Initializes an upload session.
