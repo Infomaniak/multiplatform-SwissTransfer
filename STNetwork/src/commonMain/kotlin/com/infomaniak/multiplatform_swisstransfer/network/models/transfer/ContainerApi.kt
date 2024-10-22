@@ -34,6 +34,7 @@ class ContainerApi : Container {
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
     override var expiredDateTimestamp: Long = 0L
+    @SerialName("numberOfFile")
     override var numberOfFiles: Int = 0
     override var message: String? = null
     @Serializable(with = IntToBooleanSerializer::class)

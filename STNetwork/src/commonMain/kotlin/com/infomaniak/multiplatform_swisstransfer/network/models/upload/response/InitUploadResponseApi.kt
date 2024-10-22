@@ -18,11 +18,13 @@
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.InitUploadResponse
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 class InitUploadResponseApi : InitUploadResponse<UploadContainerApi> {
     override var container: UploadContainerApi = UploadContainerApi()
     override var uploadHost: String = ""
+    @SerialName("filesUUID")
     override var filesUuid: List<String> = emptyList()
 }
