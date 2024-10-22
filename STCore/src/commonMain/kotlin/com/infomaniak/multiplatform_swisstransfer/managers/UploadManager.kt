@@ -44,10 +44,12 @@ import kotlin.coroutines.cancellation.CancellationException
  *
  * @property uploadController The controller for managing upload data in the database.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
+ * @property transferManager Transfer operations
  */
 class UploadManager(
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
+    private val transferManager: TransferManager,
 ) {
 
     /**
@@ -194,7 +196,7 @@ class UploadManager(
     }
 
     /**
-     * Finishes an upload session.
+     * Finishes an upload session and add the transfer to the database .
      *
      * This method retrieves an upload session from the database using the provided `uuid`.
      * If the session is found and has a remote container UUID, it creates a `FinishUploadBody` object
@@ -233,7 +235,12 @@ class UploadManager(
             language = uploadSession.language.code,
             recipientsEmails = uploadSession.recipientsEmails,
         )
-        uploadRepository.finishUpload(finishUploadBody)
-        uploadController.removeUploadSession(containerUUID)
+        val finishUploadResponse = runCatching {
+            uploadRepository.finishUpload(finishUploadBody).first()
+        }.getOrElse { throw UnknownException(it) }
+        uploadController.removeUploadSession(uploadSession.uuid)
+
+        transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID)
+        // TODO: If we can't retrieve the transfer cause of the Internet, we should put it in Realm and try again later.
     }
 }
