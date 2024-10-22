@@ -11,3 +11,5 @@ captures
 local.properties
 xcuserdata
 /release/
+*.mx
+*.lock
