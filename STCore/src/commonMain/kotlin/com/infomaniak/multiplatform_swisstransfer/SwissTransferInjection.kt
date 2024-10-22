@@ -24,6 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadCon
 import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
+import com.infomaniak.multiplatform_swisstransfer.managers.UploadManager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
@@ -59,6 +60,9 @@ class SwissTransferInjection {
 
     /** A manager used to orchestrate Accounts operations. */
     val accountManager by lazy { AccountManager(appSettingsController, uploadController, transferController, realmProvider) }
+
+    /** A manager used to orchestrate Uploads operations. */
+    val uploadManager by lazy { UploadManager(uploadController, uploadRepository) }
 
     /** An utils to help use shared routes  */
     val sharedApiUrlCreator by lazy { SharedApiUrlCreator(transferController, uploadController) }
