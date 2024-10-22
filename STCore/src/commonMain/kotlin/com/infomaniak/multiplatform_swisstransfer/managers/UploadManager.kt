@@ -19,8 +19,10 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -28,6 +30,9 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedA
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -50,8 +55,10 @@ class UploadManager(
      * @return A list of all upload sessions.
      * @throws RealmException If an error occurs during database access.
      */
-    @Throws(RealmException::class)
-    fun getUploads() = uploadController.getUploads()
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getUploads(): List<UploadSession> = withContext(Dispatchers.IO) {
+        return@withContext uploadController.getUploads()
+    }
 
     /**
      * Retrieves the total number of uploads in the database.
@@ -59,8 +66,10 @@ class UploadManager(
      * @return The number of uploads.
      * @throws RealmException If an error occurs during database access.
      */
-    @Throws(RealmException::class)
-    fun getUploadsCount() = uploadController.getUploadsCount()
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getUploadsCount(): Long = withContext(Dispatchers.IO) {
+        return@withContext uploadController.getUploadsCount()
+    }
 
     /**
      * Creates a new upload session in the database.
@@ -72,7 +81,7 @@ class UploadManager(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun createUpload(newUploadSession: NewUploadSession) {
+    suspend fun createUpload(newUploadSession: NewUploadSession) = withContext(Dispatchers.IO) {
         uploadController.insert(newUploadSession)
     }
 
@@ -103,7 +112,7 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun initUploadSession(uuid: String, recaptcha: String = "") {
+    suspend fun initUploadSession(uuid: String, recaptcha: String = ""): Unit = withContext(Dispatchers.IO) {
         uploadController.getUploadByUuid(uuid)?.let { uploadSession ->
             val initUploadBody = InitUploadBody(uploadSession, recaptcha)
             val initUploadResponse = uploadRepository.initUpload(initUploadBody)
@@ -149,10 +158,10 @@ class UploadManager(
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
-    ) {
-        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return
-        val remoteUploadHost = uploadSession.remoteUploadHost ?: return
-        val remoteContainer = uploadSession.remoteContainer ?: return
+    ): Unit = withContext(Dispatchers.IO) {
+        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return@withContext
+        val remoteUploadHost = uploadSession.remoteUploadHost ?: return@withContext
+        val remoteContainer = uploadSession.remoteContainer ?: return@withContext
 
         uploadRepository.uploadChunk(
             uploadHost = remoteUploadHost,
@@ -189,9 +198,9 @@ class UploadManager(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun finishUploadSession(uuid: String) {
-        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return
-        val containerUuid = uploadSession.remoteContainer?.uuid ?: return
+    suspend fun finishUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
+        val uploadSession = uploadController.getUploadByUuid(uuid) ?: return@withContext
+        val containerUuid = uploadSession.remoteContainer?.uuid ?: return@withContext
 
         val finishUploadBody = FinishUploadBody(
             containerUuid = containerUuid,
