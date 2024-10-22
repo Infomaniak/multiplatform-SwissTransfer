@@ -49,7 +49,7 @@ class InitUploadBody(
         numberOfDownload = uploadSession.numberOfDownload,
         numberOfFile = uploadSession.files.count(),
         recaptcha = recaptcha,
-        language = uploadSession.language,
+        language = uploadSession.language.code,
         files = Json.encodeToString(uploadSession.files.mapToList { UploadFileRequest(it) }),
         recipientsEmails = uploadSession.recipientsEmails.joinToString(prefix = "[", postfix = "]"),
     )
