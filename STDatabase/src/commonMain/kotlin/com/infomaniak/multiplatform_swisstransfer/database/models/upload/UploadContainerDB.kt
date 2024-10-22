@@ -23,7 +23,7 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 class UploadContainerDB() : UploadContainer, EmbeddedRealmObject {
     override var uuid: String = ""
     override var duration: String = ""
-    override var downloadLimit: Long = 0
+    override var downloadLimit: Int = 0
     override var language: String = ""
     override var source: String = ""
     override var wsUser: String? = null

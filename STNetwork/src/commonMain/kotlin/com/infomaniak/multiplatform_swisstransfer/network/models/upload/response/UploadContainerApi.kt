@@ -19,7 +19,6 @@ package com.infomaniak.multiplatform_swisstransfer.network.models.upload.respons
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
-import com.infomaniak.multiplatform_swisstransfer.network.serializers.IntToBooleanSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -28,7 +27,7 @@ class UploadContainerApi : UploadContainer {
     @SerialName("UUID")
     override var uuid: String = ""
     override var duration: String = ""
-    override var downloadLimit: Long = 0L
+    override var downloadLimit: Int = 0
     @SerialName("lang")
     override var language: String = ""
     override var source: String = ""
@@ -40,7 +39,6 @@ class UploadContainerApi : UploadContainer {
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
     override var expiredDateTimestamp: Long = 0L
-    @Serializable(with = IntToBooleanSerializer::class)
     override var needPassword: Boolean = false
     override var message: String = ""
     @SerialName("numberOfFile")
