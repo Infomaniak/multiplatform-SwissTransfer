@@ -194,7 +194,7 @@ class UploadManager(
 
         val finishUploadBody = FinishUploadBody(
             containerUuid = containerUuid,
-            language = uploadSession.language,
+            language = uploadSession.language.code,
             recipientsEmails = uploadSession.recipientsEmails,
         )
         uploadRepository.finishUpload(finishUploadBody)

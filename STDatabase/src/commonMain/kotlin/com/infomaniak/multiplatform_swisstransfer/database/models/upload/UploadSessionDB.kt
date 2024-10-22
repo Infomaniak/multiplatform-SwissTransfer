@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
@@ -32,12 +33,19 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var password: String = ""
     override var message: String = ""
     override var numberOfDownload: Int = 0
-    override var language: String = ""
     override var recipientsEmails: RealmList<String> = realmListOf()
     override var files: RealmList<UploadFileSessionDB> = realmListOf()
+    private var _language: String = ""
+
     // Remote
     override var remoteContainer: UploadContainerDB? = null
     override var remoteUploadHost: String? = null
+
+    override var language: EmailLanguage
+        get() = EmailLanguage.entries.first { it.code == _language }
+        set(value) {
+            _language = value.code
+        }
 
     constructor(uploadSession: UploadSession) : this() {
         if (uploadSession.uuid.isNotEmpty()) this.uuid = uploadSession.uuid
