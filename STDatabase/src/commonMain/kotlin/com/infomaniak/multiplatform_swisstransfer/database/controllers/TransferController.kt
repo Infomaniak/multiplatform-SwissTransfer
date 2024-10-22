@@ -55,8 +55,8 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getTransfer(linkUuid: String): Transfer? = runThrowingRealm {
-        return realm?.query<TransferDB>("${TransferDB::linkUuid.name} == '$linkUuid'")?.first()?.find()
+    fun getTransfer(linkUUID: String): Transfer? = runThrowingRealm {
+        return realm?.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'")?.first()?.find()
     }
     //endregion
 

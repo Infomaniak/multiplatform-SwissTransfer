@@ -18,7 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 interface File {
-    val containerUuid: String
+    val containerUUID: String
     val uuid: String
     val fileName: String
     val fileSizeInBytes: Long

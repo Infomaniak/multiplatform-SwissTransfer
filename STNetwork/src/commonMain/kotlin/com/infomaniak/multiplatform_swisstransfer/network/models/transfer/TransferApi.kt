@@ -26,9 +26,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 class TransferApi : Transfer {
     @SerialName("linkUUID")
-    override var linkUuid: String = ""
+    override var linkUUID: String = ""
     @SerialName("containerUUID")
-    override var containerUuid: String = ""
+    override var containerUUID: String = ""
     override var downloadCounterCredit: Int = 0
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)

@@ -34,7 +34,7 @@ data class TransferUi(
     val expiresInDays: Int = DateUtils.timestampToDays(expirationDateTimestamp).toInt()
 
     constructor(transfer: Transfer) : this(
-        uuid = transfer.linkUuid,
+        uuid = transfer.linkUUID,
         createdDateTimestamp = transfer.createdDateTimestamp,
         expirationDateTimestamp = transfer.expiredDateTimestamp,
         sizeUploaded = transfer.container?.sizeUploaded ?: 0,

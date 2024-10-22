@@ -20,8 +20,8 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 
 interface Transfer {
-    val linkUuid: String
-    val containerUuid: String
+    val linkUUID: String
+    val containerUUID: String
     val downloadCounterCredit: Int
     val createdDateTimestamp: Long
     val expiredDateTimestamp: Long

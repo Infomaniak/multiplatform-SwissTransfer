@@ -26,5 +26,5 @@ class InitUploadResponseApi : InitUploadResponse<UploadContainerApi> {
     override var container: UploadContainerApi = UploadContainerApi()
     override var uploadHost: String = ""
     @SerialName("filesUUID")
-    override var filesUuid: List<String> = emptyList()
+    override var filesUUID: List<String> = emptyList()
 }

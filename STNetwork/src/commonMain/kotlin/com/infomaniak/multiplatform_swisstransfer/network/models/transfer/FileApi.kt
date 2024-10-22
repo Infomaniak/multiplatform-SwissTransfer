@@ -29,7 +29,7 @@ class FileApi : File {
     @SerialName("UUID")
     override var uuid: String = ""
     @SerialName("containerUUID")
-    override var containerUuid: String = ""
+    override var containerUUID: String = ""
     override var fileName: String = ""
     override var fileSizeInBytes: Long = 0L
     override var downloadCounter: Int = 0

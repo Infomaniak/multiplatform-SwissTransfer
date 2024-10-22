@@ -45,8 +45,8 @@ object DummyTransfer {
     }
 
     val transfer1 = object : Transfer {
-        override var linkUuid: String = "transferLinkUuid1"
-        override var containerUuid: String = "containerUuid"
+        override var linkUUID: String = "transferLinkUUID1"
+        override var containerUUID: String = "containerUUID"
         override var downloadCounterCredit: Int = 0
         override var createdDateTimestamp: Long = 0L
         override var expiredDateTimestamp: Long = 0L
@@ -57,8 +57,8 @@ object DummyTransfer {
     }
 
     val transfer2 = object : Transfer by transfer1 {
-        override val linkUuid: String = "transfer2"
-        override val containerUuid: String = "container2"
+        override val linkUUID: String = "transfer2"
+        override val containerUUID: String = "container2"
         override val container: Container = container2
     }
 

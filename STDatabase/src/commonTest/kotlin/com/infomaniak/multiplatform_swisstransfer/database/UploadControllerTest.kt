@@ -44,7 +44,7 @@ class UploadControllerTest {
     fun canCreateAndGetAnUpload() = runTest {
         val dummyUpload = DummyUpload.uploads.first()
         uploadController.insert(dummyUpload)
-        val realmUpload = uploadController.getUploadByUuid(dummyUpload.uuid)
+        val realmUpload = uploadController.getUploadByUUID(dummyUpload.uuid)
         assertNotNull(realmUpload)
         assertEquals(realmUpload.language, EmailLanguage.ITALIAN)
     }
@@ -79,12 +79,12 @@ class UploadControllerTest {
         val dummyUpload = DummyUpload.uploads.first()
         uploadController.insert(dummyUpload)
 
-        val realmUpload1 = uploadController.getUploadByUuid(dummyUpload.uuid)
+        val realmUpload1 = uploadController.getUploadByUUID(dummyUpload.uuid)
         assertNotNull(realmUpload1)
         assertNull(realmUpload1.remoteContainer)
 
         uploadController.updateUploadSession(dummyUpload.uuid, dummyContainer, "remoteHost", listOf("dhsd"))
-        val realmUpload2 = uploadController.getUploadByUuid(dummyUpload.uuid)
+        val realmUpload2 = uploadController.getUploadByUUID(dummyUpload.uuid)
         assertNotNull(realmUpload2)
         assertNotNull(realmUpload2.remoteContainer)
     }

@@ -24,7 +24,7 @@ internal object ApiRoutes {
     const val baseUrl = preprodBaseUrl
 
     //region Transfer
-    fun getTransfer(linkUuid: String): String = "links/$linkUuid"
+    fun getTransfer(linkUUID: String): String = "links/$linkUUID"
     //endRegion
 
     //region Upload
