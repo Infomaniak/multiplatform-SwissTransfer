@@ -54,6 +54,15 @@ class UploadManager(
     fun getUploads() = uploadController.getUploads()
 
     /**
+     * Retrieves the total number of uploads in the database.
+     *
+     * @return The number of uploads.
+     * @throws RealmException If an error occurs during database access.
+     */
+    @Throws(RealmException::class)
+    fun getUploadsCount() = uploadController.getUploadsCount()
+
+    /**
      * Creates a new upload session in the database.
      *
      * This method inserts a new upload session into the database using the provided `newUploadSession` data.
@@ -153,15 +162,6 @@ class UploadManager(
             data = data,
         )
     }
-
-    /**
-     * Retrieves the total number of uploads in the database.
-     *
-     * @return The number of uploads.
-     * @throws RealmException If an error occurs during database access.
-     */
-    @Throws(RealmException::class)
-    fun getUploadsCount() = uploadController.getUploadsCount()
 
     /**
      * Finishes an upload session.
