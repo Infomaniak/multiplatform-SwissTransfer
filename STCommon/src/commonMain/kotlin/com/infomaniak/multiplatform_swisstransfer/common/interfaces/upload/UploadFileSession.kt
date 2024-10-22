@@ -22,5 +22,5 @@ interface UploadFileSession {
     val size: Long
     val mimeType: String
     val localPath: String
-    val remoteUploadFile: UploadFile?
+    val remoteUploadFile: RemoteUploadFile?
 }
