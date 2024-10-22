@@ -88,8 +88,7 @@ centralized access point to orchestrate transfer operations.
 - **Type**: `UploadManager`
 - **Description**:
     - `uploadManager` is a lazily initialized property that provides a manager to orchestrate all Uploads operations. It uses
-      `uploadController` and `uploadRepository` to configure and manage Uploads
-      efficiently.
+      `uploadController` and `uploadRepository` to configure and manage Uploads efficiently.
 
 - **Usage Example**:
   ```kotlin
