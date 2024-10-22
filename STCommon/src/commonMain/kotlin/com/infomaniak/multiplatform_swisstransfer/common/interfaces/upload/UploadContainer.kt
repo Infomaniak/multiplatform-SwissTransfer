@@ -20,7 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 interface UploadContainer {
     val uuid: String
     val duration: String
-    val downloadLimit: Long
+    val downloadLimit: Int
     val language: String
     val source: String
     val wsUser: String?
