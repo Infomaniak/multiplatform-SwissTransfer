@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.dataset
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 
 object DummyUpload {
     val container = object : UploadContainer {
@@ -44,7 +45,7 @@ object DummyUpload {
         override val password: String = ""
         override val message: String = ""
         override val numberOfDownload: Int = 0
-        override val language: String = ""
+        override val language: EmailLanguage = EmailLanguage.ITALIAN
         override val recipientsEmails: List<String> = emptyList()
         override val files: List<UploadFileSession> = emptyList()
         override val remoteContainer: UploadContainer? = null

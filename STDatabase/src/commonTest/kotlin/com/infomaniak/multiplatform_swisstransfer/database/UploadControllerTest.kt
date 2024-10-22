@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyUpload
 import kotlinx.coroutines.test.runTest
@@ -45,6 +46,7 @@ class UploadControllerTest {
         uploadController.insert(dummyUpload)
         val realmUpload = uploadController.getUploadByUuid(dummyUpload.uuid)
         assertNotNull(realmUpload)
+        assertEquals(realmUpload.language, EmailLanguage.ITALIAN)
     }
 
     @Test

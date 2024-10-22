@@ -17,6 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+
 interface UploadSession {
     val uuid: String
     val duration: String
@@ -24,7 +26,7 @@ interface UploadSession {
     val password: String
     val message: String
     val numberOfDownload: Int
-    val language: String
+    val language: EmailLanguage
     val recipientsEmails: List<String>
     val files: List<UploadFileSession>
 
