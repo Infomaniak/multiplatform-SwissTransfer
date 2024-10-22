@@ -26,7 +26,7 @@ object DummyUpload {
     val container = object : UploadContainer {
         override val uuid: String = "uploadContainer1"
         override val duration: String = "30"
-        override val downloadLimit: Long = 1
+        override val downloadLimit: Int = 1
         override val language: String = "Fr-fr"
         override val source: String = "ST"
         override val wsUser: String? = null
