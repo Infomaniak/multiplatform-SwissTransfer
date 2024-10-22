@@ -25,7 +25,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedA
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.requests.TransferRequest
-import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
@@ -61,5 +60,5 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         return transferRequest.getTransfer(extractUuid(url))
     }
 
-    private fun extractUuid(url: String) = url.substringAfter(ApiRoutes.baseUrl)
+    internal fun extractUuid(url: String) = url.substringAfterLast("/")
 }
