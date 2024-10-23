@@ -152,6 +152,7 @@ class UploadManager(
      * @param chunkIndex The index of the chunk being uploaded.
      * @param isLastChunk True if this is the last chunk of the file, false otherwise.
      * @param data The chunk data to upload.
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
@@ -199,6 +200,7 @@ class UploadManager(
      * Finishes an upload session and add the transfer to the database .
      *
      * @param uuid The UUID of the upload session.
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
