@@ -22,8 +22,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
-import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
+import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -171,8 +171,10 @@ class UploadManager(
     ): Unit = withContext(Dispatchers.IO) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
             ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")
-        val remoteUploadHost = uploadSession.remoteUploadHost ?: throw NullPropertyException("Remote upload host cannot be null")
-        val remoteContainer = uploadSession.remoteContainer ?: throw NullPropertyException("Remote container cannot be null")
+        val remoteUploadHost = uploadSession.remoteUploadHost
+            ?: throw NullPropertyException("Remote upload host cannot be null")
+        val remoteContainer = uploadSession.remoteContainer
+            ?: throw NullPropertyException("Remote container cannot be null")
 
         uploadRepository.uploadChunk(
             uploadHost = remoteUploadHost,
