@@ -100,8 +100,11 @@ class UploadManager(
     /**
      * Initializes an upload session and update it in database with the remote data.
      *
-     * @param uuid The UUID of the upload session.
+     * @param uuid The UUID of the upload session or null to use the last upload session.
      * @param recaptcha The reCAPTCHA token or an empty string in any.
+     *
+     * @return The upload session that has been updated or null if it no longer exists after the update.
+     *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      * @throws ContainerErrorsException If there is an error with the container.
@@ -121,18 +124,24 @@ class UploadManager(
         UnknownException::class,
         NotFoundException::class,
     )
-    suspend fun initUploadSession(uuid: String, recaptcha: String = ""): Unit = withContext(Dispatchers.IO) {
-        val uploadSession = uploadController.getUploadByUUID(uuid)
-            ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")
+    suspend fun initUploadSession(uuid: String? = null, recaptcha: String = ""): UploadSession? = withContext(Dispatchers.IO) {
+
+        val uploadSession = when (uuid) {
+            null -> uploadController.getLastUpload() ?: throw NotFoundException("No uploadSession found in DB")
+            else -> uploadController.getUploadByUUID(uuid)
+                ?: throw NotFoundException("No uploadSession found in DB with uuid = $uuid")
+        }
 
         val initUploadBody = InitUploadBody(uploadSession, recaptcha)
         val initUploadResponse = uploadRepository.initUpload(initUploadBody)
         uploadController.updateUploadSession(
-            uuid = uuid,
+            uuid = uploadSession.uuid,
             remoteContainer = initUploadResponse.container,
             remoteUploadHost = initUploadResponse.uploadHost,
             remoteFilesUUID = initUploadResponse.filesUUID,
         )
+
+        return@withContext uploadController.getUploadByUUID(uploadSession.uuid)
     }
 
     /**
@@ -143,6 +152,7 @@ class UploadManager(
      * @param chunkIndex The index of the chunk being uploaded.
      * @param isLastChunk True if this is the last chunk of the file, false otherwise.
      * @param data The chunk data to upload.
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
@@ -190,6 +200,7 @@ class UploadManager(
      * Finishes an upload session and add the transfer to the database .
      *
      * @param uuid The UUID of the upload session.
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
