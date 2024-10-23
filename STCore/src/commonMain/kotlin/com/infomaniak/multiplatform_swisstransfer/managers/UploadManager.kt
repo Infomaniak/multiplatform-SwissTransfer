@@ -22,8 +22,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
-import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
+import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -44,10 +44,12 @@ import kotlin.coroutines.cancellation.CancellationException
  *
  * @property uploadController The controller for managing upload data in the database.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
+ * @property transferManager Transfer operations
  */
 class UploadManager(
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
+    private val transferManager: TransferManager,
 ) {
 
     /**
@@ -86,8 +88,6 @@ class UploadManager(
     /**
      * Creates a new upload session in the database.
      *
-     * This method inserts a new upload session into the database using the provided `newUploadSession` data.
-     *
      * @param newUploadSession The data for the new upload session.
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
@@ -98,12 +98,7 @@ class UploadManager(
     }
 
     /**
-     * Initializes an upload session.
-     *
-     * This method retrieves an upload session from the database using the provided `uuid`.
-     * If the session is found, it creates an `InitUploadBody` object with the session data and the `recaptcha` token.
-     * It then calls the `initUpload()` method of the `uploadRepository` to initiate the upload session on the server.
-     * Finally, it updates the upload session in the database with the response received from the server.
+     * Initializes an upload session and update it in database with the remote data.
      *
      * @param uuid The UUID of the upload session.
      * @param recaptcha The reCAPTCHA token or an empty string in any.
@@ -143,10 +138,6 @@ class UploadManager(
     /**
      * Uploads a chunk of data for a file in an upload session.
      *
-     * This method retrieves an upload session from the database using the provided `uuid`.
-     * If the session is found and has a remote upload host and remote container, it calls the `uploadChunk()` method of the
-     * `uploadRepository` to send the chunk data to the server.
-     *
      * @param uuid The UUID of the upload session.
      * @param fileUUID The UUID of the file being uploaded.
      * @param chunkIndex The index of the chunk being uploaded.
@@ -180,8 +171,10 @@ class UploadManager(
     ): Unit = withContext(Dispatchers.IO) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
             ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")
-        val remoteUploadHost = uploadSession.remoteUploadHost ?: throw NullPropertyException("Remote upload host cannot be null")
-        val remoteContainer = uploadSession.remoteContainer ?: throw NullPropertyException("Remote container cannot be null")
+        val remoteUploadHost = uploadSession.remoteUploadHost
+            ?: throw NullPropertyException("Remote upload host cannot be null")
+        val remoteContainer = uploadSession.remoteContainer
+            ?: throw NullPropertyException("Remote container cannot be null")
 
         uploadRepository.uploadChunk(
             uploadHost = remoteUploadHost,
@@ -194,13 +187,7 @@ class UploadManager(
     }
 
     /**
-     * Finishes an upload session.
-     *
-     * This method retrieves an upload session from the database using the provided `uuid`.
-     * If the session is found and has a remote container UUID, it creates a `FinishUploadBody` object
-     * with the necessary data and calls the `finishUpload()` method of the `uploadRepository` to
-     * finalize the upload session on the server.
-     * Finally, it removes the upload session from the database.
+     * Finishes an upload session and add the transfer to the database .
      *
      * @param uuid The UUID of the upload session.
      * @throws CancellationException If the operation is cancelled.
@@ -233,7 +220,12 @@ class UploadManager(
             language = uploadSession.language.code,
             recipientsEmails = uploadSession.recipientsEmails,
         )
-        uploadRepository.finishUpload(finishUploadBody)
-        uploadController.removeUploadSession(containerUUID)
+        val finishUploadResponse = runCatching {
+            uploadRepository.finishUpload(finishUploadBody).first()
+        }.getOrElse { throw UnknownException(it) }
+        uploadController.removeUploadSession(uploadSession.uuid)
+
+        transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID)
+        // TODO: If we can't retrieve the transfer cause of the Internet, we should put it in Realm and try again later.
     }
 }

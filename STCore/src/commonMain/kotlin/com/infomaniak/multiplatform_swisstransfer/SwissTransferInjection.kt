@@ -65,7 +65,7 @@ class SwissTransferInjection {
     val accountManager by lazy { AccountManager(appSettingsController, uploadController, transferController, realmProvider) }
 
     /** A manager used to orchestrate Uploads operations. */
-    val uploadManager by lazy { UploadManager(uploadController, uploadRepository) }
+    val uploadManager by lazy { UploadManager(uploadController, uploadRepository, transferManager) }
 
     /** An utils to help use shared routes  */
     val sharedApiUrlCreator by lazy { SharedApiUrlCreator(transferController, uploadController) }
