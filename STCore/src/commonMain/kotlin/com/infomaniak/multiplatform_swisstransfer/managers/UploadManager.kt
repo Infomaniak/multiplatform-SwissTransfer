@@ -88,8 +88,6 @@ class UploadManager(
     /**
      * Creates a new upload session in the database.
      *
-     * This method inserts a new upload session into the database using the provided `newUploadSession` data.
-     *
      * @param newUploadSession The data for the new upload session.
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
@@ -100,12 +98,7 @@ class UploadManager(
     }
 
     /**
-     * Initializes an upload session.
-     *
-     * This method retrieves an upload session from the database using the provided `uuid`.
-     * If the session is found, it creates an `InitUploadBody` object with the session data and the `recaptcha` token.
-     * It then calls the `initUpload()` method of the `uploadRepository` to initiate the upload session on the server.
-     * Finally, it updates the upload session in the database with the response received from the server.
+     * Initializes an upload session and update it in database with the remote data.
      *
      * @param uuid The UUID of the upload session.
      * @param recaptcha The reCAPTCHA token or an empty string in any.
@@ -144,10 +137,6 @@ class UploadManager(
 
     /**
      * Uploads a chunk of data for a file in an upload session.
-     *
-     * This method retrieves an upload session from the database using the provided `uuid`.
-     * If the session is found and has a remote upload host and remote container, it calls the `uploadChunk()` method of the
-     * `uploadRepository` to send the chunk data to the server.
      *
      * @param uuid The UUID of the upload session.
      * @param fileUUID The UUID of the file being uploaded.
@@ -197,12 +186,6 @@ class UploadManager(
 
     /**
      * Finishes an upload session and add the transfer to the database .
-     *
-     * This method retrieves an upload session from the database using the provided `uuid`.
-     * If the session is found and has a remote container UUID, it creates a `FinishUploadBody` object
-     * with the necessary data and calls the `finishUpload()` method of the `uploadRepository` to
-     * finalize the upload session on the server.
-     * Finally, it removes the upload session from the database.
      *
      * @param uuid The UUID of the upload session.
      * @throws CancellationException If the operation is cancelled.
