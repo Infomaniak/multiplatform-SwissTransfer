@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
+import kotlinx.datetime.Clock
 
 data class TransferUi(
     val uuid: String,
@@ -31,7 +32,8 @@ data class TransferUi(
     val message: String?,
     val files: List<FileUi>,
 ) {
-    val expiresInDays: Int = DateUtils.timestampToDays(expirationDateTimestamp).toInt()
+
+    val expiresInDays: Int = DateUtils.timestampToDays(expirationDateTimestamp - Clock.System.now().toEpochMilliseconds()).toInt()
 
     constructor(transfer: Transfer) : this(
         uuid = transfer.linkUUID,
