@@ -201,6 +201,8 @@ class UploadManager(
      *
      * @param uuid The UUID of the upload session.
      *
+     * @return The transfer UUID of the uploaded transfer.
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
@@ -220,7 +222,7 @@ class UploadManager(
         NotFoundException::class,
         NullPropertyException::class,
     )
-    suspend fun finishUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
+    suspend fun finishUploadSession(uuid: String): String = withContext(Dispatchers.IO) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
             ?: throw NotFoundException("Unknown upload session with uuid = $uuid")
         val containerUUID = uploadSession.remoteContainer?.uuid
@@ -238,5 +240,7 @@ class UploadManager(
 
         transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID)
         // TODO: If we can't retrieve the transfer cause of the Internet, we should put it in Realm and try again later.
+
+        return@withContext finishUploadResponse.linkUUID // Here the linkUUID correspond to the transferUUID of a transferUI
     }
 }

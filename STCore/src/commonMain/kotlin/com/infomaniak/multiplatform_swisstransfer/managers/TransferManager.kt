@@ -73,6 +73,17 @@ class TransferManager internal constructor(
     }
 
     /**
+     * Retrieves a transfer by linkUUID.
+     *
+     * @param transferUUID The UUID of an existing transfer in the database.
+     *
+     * @return A transfer matching the specified transferUUID or null.
+     */
+    fun getTransferByUUID(transferUUID: String): Transfer? {
+        return transferController.getTransfer(transferUUID)
+    }
+
+    /**
      * Retrieves a transfer using the provided link UUID and saves it to the database.
      *
      * This function is typically used after a transfer has been uploaded. Once the upload is complete,
