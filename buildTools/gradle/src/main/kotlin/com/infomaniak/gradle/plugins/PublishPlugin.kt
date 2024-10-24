@@ -33,6 +33,7 @@ class PublishPlugin : Plugin<Project> {
         // Create the PublishExtension and add it to the project
         val extension = target.extensions.create<PublishExtension>(PublishExtension.EXTENSION_NAME)
 
+        // target.group = "com.github.Infomaniak.multiplatform-SwissTransfer" // TODO Do not put this in production
         target.group = "com.github.infomaniak.multiplatform_swisstransfer"
         target.version = Versions.mavenVersionName
 
