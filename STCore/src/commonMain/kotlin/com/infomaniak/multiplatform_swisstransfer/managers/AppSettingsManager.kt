@@ -56,7 +56,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setTheme(theme: Theme) = withContext(Dispatchers.IO) {
+    suspend fun setTheme(theme: Theme): Unit = withContext(Dispatchers.IO) {
         appSettingsController.setTheme(theme)
     }
 
@@ -69,7 +69,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) = withContext(Dispatchers.IO) {
+    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod): Unit = withContext(Dispatchers.IO) {
         appSettingsController.setValidityPeriod(validityPeriod)
     }
 
@@ -82,7 +82,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setDownloadLimit(downloadLimit: DownloadLimit) = withContext(Dispatchers.IO) {
+    suspend fun setDownloadLimit(downloadLimit: DownloadLimit): Unit = withContext(Dispatchers.IO) {
         appSettingsController.setDownloadLimit(downloadLimit)
     }
 
@@ -95,7 +95,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = withContext(Dispatchers.IO) {
+    suspend fun setEmailLanguage(emailLanguage: EmailLanguage): Unit = withContext(Dispatchers.IO) {
         appSettingsController.setEmailLanguage(emailLanguage)
     }
 }
