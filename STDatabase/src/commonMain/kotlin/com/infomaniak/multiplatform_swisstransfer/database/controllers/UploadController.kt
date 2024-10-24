@@ -21,8 +21,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.RemoteUploadFileDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.TypedRealm
@@ -62,7 +62,7 @@ class UploadController(private val realmProvider: RealmProvider) {
 
     //region Insert
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun insert(uploadSession: UploadSession) = runThrowingRealm {
+    suspend fun insertAndGet(uploadSession: UploadSession): UploadSession = runThrowingRealm {
         realm.write {
             this.copyToRealm(UploadSessionDB(uploadSession))
         }
