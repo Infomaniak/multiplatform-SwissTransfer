@@ -73,14 +73,14 @@ class TransferManager internal constructor(
     }
 
     /**
-     * Retrieves a transfer by linkUUID.
+     * Retrieves a [TransferUi] by linkUUID.
      *
      * @param transferUUID The UUID of an existing transfer in the database.
      *
      * @return A transfer matching the specified transferUUID or null.
      */
-    fun getTransferByUUID(transferUUID: String): Transfer? {
-        return transferController.getTransfer(transferUUID)
+    fun getTransferByUUID(transferUUID: String): TransferUi? {
+        return transferController.getTransfer(transferUUID)?.let { TransferUi(it) }
     }
 
     /**
