@@ -236,11 +236,26 @@ class UploadManager(
         val finishUploadResponse = runCatching {
             uploadRepository.finishUpload(finishUploadBody).first()
         }.getOrElse { throw UnknownException(it) }
-        uploadController.removeUploadSession(uploadSession.uuid)
 
         transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID)
         // TODO: If we can't retrieve the transfer cause of the Internet, we should put it in Realm and try again later.
 
         return@withContext finishUploadResponse.linkUUID // Here the linkUUID correspond to the transferUUID of a transferUI
+    }
+
+    /**
+     * Deletes an upload session from the database.
+     *
+     * @param uuid The UUID of the upload session to delete.
+     *
+     * @throws RealmException If an error occurs during database access.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(
+        RealmException::class,
+        CancellationException::class,
+    )
+    suspend fun deleteUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
+        uploadController.removeUploadSession(uuid)
     }
 }
