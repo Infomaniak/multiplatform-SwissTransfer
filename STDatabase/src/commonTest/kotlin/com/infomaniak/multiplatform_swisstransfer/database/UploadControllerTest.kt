@@ -43,8 +43,7 @@ class UploadControllerTest {
     @Test
     fun canCreateAndGetAnUpload() = runTest {
         val dummyUpload = DummyUpload.uploads.first()
-        uploadController.insertAndGet(dummyUpload)
-        val realmUpload = uploadController.getUploadByUUID(dummyUpload.uuid)
+        val realmUpload = uploadController.insertAndGet(dummyUpload)
         assertNotNull(realmUpload)
         assertEquals(realmUpload.language, EmailLanguage.ITALIAN)
     }
