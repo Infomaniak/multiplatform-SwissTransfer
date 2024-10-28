@@ -18,6 +18,8 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 
 data class FileUi(
     val uid: String,
@@ -34,4 +36,14 @@ data class FileUi(
         mimeType = file.mimeType,
         localPath = null,
     )
+
+    fun toUploadFileSession(): UploadFileSession {
+        return object : UploadFileSession {
+            override val name: String = fileName
+            override val size: Long = fileSize
+            override val mimeType: String = this@FileUi.mimeType ?: ""
+            override val localPath: String = this@FileUi.localPath ?: ""
+            override val remoteUploadFile: RemoteUploadFile? = null
+        }
+    }
 }
