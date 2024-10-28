@@ -107,7 +107,7 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByLinkUUID(linkUUID: String) = withContext(Dispatchers.IO) {
+    suspend fun addTransferByLinkUUID(linkUUID: String): Unit = withContext(Dispatchers.IO) {
         addTransfer(transferRepository.getTransferByLinkUUID(linkUUID).data, TransferDirection.SENT)
     }
 
@@ -135,7 +135,7 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByUrl(url: String) = withContext(Dispatchers.IO) {
+    suspend fun addTransferByUrl(url: String): Unit = withContext(Dispatchers.IO) {
         addTransfer(transferRepository.getTransferByUrl(url).data, TransferDirection.RECEIVED)
     }
 

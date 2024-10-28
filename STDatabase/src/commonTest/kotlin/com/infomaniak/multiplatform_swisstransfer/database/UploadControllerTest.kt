@@ -43,8 +43,7 @@ class UploadControllerTest {
     @Test
     fun canCreateAndGetAnUpload() = runTest {
         val dummyUpload = DummyUpload.uploads.first()
-        uploadController.insert(dummyUpload)
-        val realmUpload = uploadController.getUploadByUUID(dummyUpload.uuid)
+        val realmUpload = uploadController.insertAndGet(dummyUpload)
         assertNotNull(realmUpload)
         assertEquals(realmUpload.language, EmailLanguage.ITALIAN)
     }
@@ -52,7 +51,7 @@ class UploadControllerTest {
     @Test
     fun canGetUploads() = runTest {
         DummyUpload.uploads.take(2).forEach { dummyUpload ->
-            uploadController.insert(dummyUpload)
+            uploadController.insertAndGet(dummyUpload)
         }
         val realmUploads = uploadController.getAllUploads()
         assertEquals(2, realmUploads.count())
@@ -60,7 +59,7 @@ class UploadControllerTest {
 
     @Test
     fun canRemoveData() = runTest {
-        uploadController.insert(DummyUpload.uploads.first())
+        uploadController.insertAndGet(DummyUpload.uploads.first())
         uploadController.removeData()
         val realmUploads = uploadController.getAllUploads()
         assertEquals(0, realmUploads.count())
@@ -69,15 +68,15 @@ class UploadControllerTest {
     @Test
     fun cannotInsertExistingUpload() = runTest {
         val dummyUpload = DummyUpload.uploads.first()
-        uploadController.insert(dummyUpload)
-        assertFails { uploadController.insert(dummyUpload) }
+        uploadController.insertAndGet(dummyUpload)
+        assertFails { uploadController.insertAndGet(dummyUpload) }
     }
 
     @Test
     fun canUpdateSessionContainer() = runTest {
         val dummyContainer = DummyUpload.container
         val dummyUpload = DummyUpload.uploads.first()
-        uploadController.insert(dummyUpload)
+        uploadController.insertAndGet(dummyUpload)
 
         val realmUpload1 = uploadController.getUploadByUUID(dummyUpload.uuid)
         assertNotNull(realmUpload1)
