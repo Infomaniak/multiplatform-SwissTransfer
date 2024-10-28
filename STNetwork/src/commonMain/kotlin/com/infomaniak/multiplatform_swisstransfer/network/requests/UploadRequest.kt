@@ -17,16 +17,17 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.isSuccess
@@ -56,11 +57,13 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
+        onUpload: (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): Boolean {
         val httpResponse = httpClient.post(
             urlString = SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
         ) {
             setBody(data)
+            onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength) }
         }
         return httpResponse.status.isSuccess()
     }
