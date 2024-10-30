@@ -51,6 +51,7 @@ class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>?
 
     fun createHttpClient(engine: HttpClientEngineFactory<*>?): HttpClient {
         val block: HttpClientConfig<*>.() -> Unit = {
+            expectSuccess = true
             install(ContentNegotiation) {
                 json(this@ApiClientProvider.json)
             }
@@ -98,8 +99,9 @@ class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>?
 
     private fun Throwable.isNetworkException() = this is IOException
 
-    private companion object {
-        const val REQUEST_TIMEOUT = 10_000L
-        const val MAX_RETRY = 3
+    companion object {
+        private const val REQUEST_TIMEOUT = 10_000L
+        private const val MAX_RETRY = 3
+        const val REQUEST_LONG_TIMEOUT = 60_000L
     }
 }

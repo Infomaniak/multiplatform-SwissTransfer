@@ -26,6 +26,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
+import com.infomaniak.multiplatform_swisstransfer.network.utils.longTimeout
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.post
@@ -62,6 +63,7 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
         val httpResponse = httpClient.post(
             urlString = SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
         ) {
+            longTimeout()
             setBody(data)
             onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength) }
         }
