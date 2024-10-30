@@ -242,6 +242,7 @@ class UploadManager(
             uploadRepository.finishUpload(finishUploadBody).first()
         }.getOrElse { throw UnknownException(it) }
 
+        uploadController.removeUploadSession(uuid)
         transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID)
         // TODO: If we can't retrieve the transfer cause of the Internet, we should put it in Realm and try again later.
 
