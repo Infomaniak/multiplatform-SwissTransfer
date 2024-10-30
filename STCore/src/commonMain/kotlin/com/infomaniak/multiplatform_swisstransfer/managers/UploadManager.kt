@@ -202,7 +202,7 @@ class UploadManager(
     }
 
     /**
-     * Finishes an upload session and add the transfer to the database .
+     * Finishes an upload session and add the transfer to the database.
      *
      * @param uuid The UUID of the upload session.
      *
