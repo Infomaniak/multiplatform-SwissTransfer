@@ -202,7 +202,7 @@ class UploadManager(
     }
 
     /**
-     * Finishes an upload session and add the transfer to the database .
+     * Finishes an upload session and add the transfer to the database.
      *
      * @param uuid The UUID of the upload session.
      *
@@ -242,6 +242,7 @@ class UploadManager(
             uploadRepository.finishUpload(finishUploadBody).first()
         }.getOrElse { throw UnknownException(it) }
 
+        uploadController.removeUploadSession(uuid)
         transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID)
         // TODO: If we can't retrieve the transfer cause of the Internet, we should put it in Realm and try again later.
 
