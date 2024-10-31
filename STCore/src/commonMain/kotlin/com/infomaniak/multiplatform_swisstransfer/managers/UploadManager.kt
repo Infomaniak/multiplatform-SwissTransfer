@@ -181,7 +181,7 @@ class UploadManager(
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
-        onUpload: (bytesSentTotal: Long, chunkSize: Long) -> Unit,
+        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): Unit = withContext(Dispatchers.IO) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
             ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")

@@ -110,7 +110,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
-        onUpload: (bytesSentTotal: Long, chunkSize: Long) -> Unit,
+        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): Boolean {
         return uploadRequest.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk, data, onUpload)
     }

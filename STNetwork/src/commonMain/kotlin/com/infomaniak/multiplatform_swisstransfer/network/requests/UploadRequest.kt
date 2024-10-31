@@ -58,7 +58,7 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
         chunkIndex: Int,
         isLastChunk: Boolean,
         data: ByteArray,
-        onUpload: (bytesSentTotal: Long, chunkSize: Long) -> Unit,
+        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): Boolean {
         val httpResponse = httpClient.post(
             urlString = SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
