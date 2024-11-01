@@ -50,7 +50,7 @@ class InitUploadBody(
         numberOfFile = uploadSession.files.count(),
         recaptcha = recaptcha,
         language = uploadSession.language.code,
-        files = Json.encodeToString(uploadSession.files.mapToList { UploadFileRequest(it) }),
+        files = Json.encodeToString(uploadSession.files.mapToList(::UploadFileRequest)),
         recipientsEmails = uploadSession.recipientsEmails.joinToString(prefix = "[", postfix = "]"),
     )
 }

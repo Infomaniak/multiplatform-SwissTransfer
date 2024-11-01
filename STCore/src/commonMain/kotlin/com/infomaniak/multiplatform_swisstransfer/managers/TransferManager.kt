@@ -80,7 +80,7 @@ class TransferManager internal constructor(
      * @return A transfer matching the specified transferUUID or null.
      */
     fun getTransferByUUID(transferUUID: String): TransferUi? {
-        return transferController.getTransfer(transferUUID)?.let { TransferUi(it) }
+        return transferController.getTransfer(transferUUID)?.let(::TransferUi)
     }
 
     /**
