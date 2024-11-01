@@ -32,7 +32,7 @@ import kotlinx.serialization.json.Json
 internal open class BaseRequest(protected val json: Json, protected val httpClient: HttpClient) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
-        val baseUrl = Url(ApiRoutes.baseUrl + path)
+        val baseUrl = Url(ApiRoutes.API_BASE_URL + path)
         return URLBuilder(baseUrl).apply {
             queries.forEach { parameters.append(it.first, it.second) }
         }.build()

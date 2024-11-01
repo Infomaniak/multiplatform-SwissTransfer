@@ -96,7 +96,7 @@ class UploadManager(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun createAnGetUpload(newUploadSession: NewUploadSession): UploadSession = withContext(Dispatchers.IO) {
+    suspend fun createAndGetUpload(newUploadSession: NewUploadSession): UploadSession = withContext(Dispatchers.IO) {
         uploadController.insertAndGet(newUploadSession)
     }
 

@@ -30,6 +30,8 @@ class SharedApiUrlCreator internal constructor(
     private val uploadController: UploadController,
 ) {
 
+    fun shareTransferUrl(transferUUID: String) = SharedApiRoutes.shareTransfer(transferUUID)
+
     @Throws(RealmException::class)
     fun downloadFilesUrl(transferUUID: String): String? {
         val transfer = transferController.getTransfer(transferUUID) ?: return null
