@@ -121,6 +121,9 @@ class TransferManager internal constructor(
      * @see getTransfers
      *
      * @param url The URL associated with the transfer to retrieve.
+     *
+     * @return The transferUUID of the added transfer, otherwise null if the api doesn't return the transfer
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is an error related to the API during transfer retrieval.
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
@@ -135,8 +138,10 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByUrl(url: String): Unit = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByUrl(url).data, TransferDirection.RECEIVED)
+    suspend fun addTransferByUrl(url: String): String? = withContext(Dispatchers.IO) {
+        val transferApi = transferRepository.getTransferByUrl(url).data ?: return@withContext null
+        addTransfer(transferApi, TransferDirection.RECEIVED)
+        return@withContext transferApi.linkUUID
     }
 
     private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection) {
