@@ -56,6 +56,6 @@ class ContainerDB() : Container, RealmObject {
         this.swiftVersion = container.swiftVersion
         this.downloadLimit = container.downloadLimit
         this.source = container.source
-        this.files = container.files.mapTo(realmListOf()) { FileDB(it) }
+        this.files = container.files.mapTo(realmListOf(), ::FileDB)
     }
 }

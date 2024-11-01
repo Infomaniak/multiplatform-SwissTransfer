@@ -43,6 +43,6 @@ data class TransferUi(
         downloadLimit = transfer.container?.downloadLimit ?: 0,
         downloadLeft = transfer.downloadCounterCredit,
         message = transfer.container?.message,
-        files = transfer.container?.files?.mapToList { FileUi(it) } ?: emptyList()
+        files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList()
     )
 }
