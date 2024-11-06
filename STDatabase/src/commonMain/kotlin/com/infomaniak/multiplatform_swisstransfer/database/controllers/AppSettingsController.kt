@@ -54,6 +54,11 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     fun getAppSettingsFlow(): Flow<AppSettings?> = runThrowingRealm {
         return appSettingsQuery.asFlow().mapLatest { it.obj }
     }
+
+    @Throws(RealmException::class)
+    fun getAppSettings(): AppSettings? = runThrowingRealm {
+        return appSettingsQuery.find()
+    }
     //endregion
 
     //region Update data

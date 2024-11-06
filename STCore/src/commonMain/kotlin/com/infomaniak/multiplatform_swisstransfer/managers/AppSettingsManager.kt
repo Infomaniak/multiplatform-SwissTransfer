@@ -47,6 +47,8 @@ class AppSettingsManager internal constructor(
     val appSettings: Flow<AppSettings?>
         get() = appSettingsController.getAppSettingsFlow().flowOn(Dispatchers.IO)
 
+    fun getAppSettings(): AppSettings? = appSettingsController.getAppSettings()
+
     /**
      * Asynchronously sets the application theme.
      *
