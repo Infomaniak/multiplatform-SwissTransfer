@@ -65,7 +65,7 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
         ) {
             longTimeout()
             setBody(data)
-            onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength) }
+            onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength ?: 0) }
         }
         return httpResponse.status.isSuccess()
     }

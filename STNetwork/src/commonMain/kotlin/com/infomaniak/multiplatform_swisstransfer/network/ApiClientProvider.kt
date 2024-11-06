@@ -33,7 +33,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.utils.io.errors.IOException
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>? = null) {

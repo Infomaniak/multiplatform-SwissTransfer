@@ -1,12 +1,12 @@
 [versions]
-agp = "8.4.2"
+agp = "8.6.1"
 coroutines = "1.9.0"
-kotlin = "2.0.20"
-kotlinxDatetime = "0.6.0"
-kotlinxSerializationJson = "1.7.1"
-ktor = "2.3.12"
+kotlin = "2.0.21"
+kotlinxDatetime = "0.6.1"
+kotlinxSerializationJson = "1.7.3"
+ktor = "3.0.1"
 realm = "3.0.0"
-skie = "0.9.2"
+skie = "0.9.3"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
