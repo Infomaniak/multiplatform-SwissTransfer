@@ -32,6 +32,8 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
 
 class UploadRepository internal constructor(private val uploadRequest: UploadRequest) {
@@ -124,5 +126,20 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
     )
     suspend fun finishUpload(finishUploadBody: FinishUploadBody): List<UploadCompleteResponse> {
         return uploadRequest.finishUpload(finishUploadBody)
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun cancelUpload(containerUUID: String): Boolean {
+        val bodyMap = mapOf(
+            "UUID" to JsonPrimitive(containerUUID),
+            "message" to JsonPrimitive("Cancel by Android User")
+        )
+        return uploadRequest.cancelUpload(JsonObject(bodyMap))
     }
 }

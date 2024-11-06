@@ -33,5 +33,6 @@ internal object ApiRoutes {
     const val verifyEmailCode = "emails-validation"
     const val resendEmailCode = "$verifyEmailCode/resend"
     const val finishUpload = "uploadComplete"
+    const val cancelUpload = "cancelUpload"
     //endregion
 }
