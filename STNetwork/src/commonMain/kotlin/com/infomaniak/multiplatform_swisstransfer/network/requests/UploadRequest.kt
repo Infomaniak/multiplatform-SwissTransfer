@@ -33,6 +33,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 
 internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
@@ -72,5 +73,12 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
 
     suspend fun finishUpload(finishUploadBody: FinishUploadBody): List<UploadCompleteResponse> {
         return post(createUrl(ApiRoutes.finishUpload), finishUploadBody)
+    }
+
+    suspend fun cancelUpload(jsonBody: JsonObject): Boolean {
+        val httpResponse = httpClient.post(url = createUrl(ApiRoutes.cancelUpload)) {
+            setBody(jsonBody)
+        }
+        return httpResponse.status.isSuccess()
     }
 }

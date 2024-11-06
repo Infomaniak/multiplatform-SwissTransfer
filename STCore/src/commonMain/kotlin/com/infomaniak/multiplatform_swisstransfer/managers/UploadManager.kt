@@ -250,6 +250,40 @@ class UploadManager(
     }
 
     /**
+     * Cancel an upload session from api and delete it.
+     *
+     * @param uuid The UUID of the upload session to cancel.
+     *
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws NetworkException If there is a network error.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws RealmException If an error occurs during database access.
+     * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
+     * @throws NullPropertyException If remoteUploadHost or remoteContainer is null.
+     */
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+        RealmException::class,
+        NotFoundException::class,
+        NullPropertyException::class,
+    )
+    suspend fun cancelUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
+        val uploadSession = uploadController.getUploadByUUID(uuid)
+            ?: throw NotFoundException("Unknown upload session with uuid = $uuid")
+        val containerUUID = uploadSession.remoteContainer?.uuid
+            ?: throw NullPropertyException("Remote container cannot be null")
+
+        uploadController.removeUploadSession(uuid)
+        uploadRepository.cancelUpload(containerUUID)
+    }
+
+    /**
      * Deletes an upload session from the database.
      *
      * @param uuid The UUID of the upload session to delete.
