@@ -20,6 +20,18 @@ package com.infomaniak.multiplatform_swisstransfer.common.models.files
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+/**
+ * Represents a file or folder for display in a tree structure.
+ *
+ * @property id The unique ID of the file or folder. This is generated using `UUID.random()`
+ * and is marked with `@OptIn(ExperimentalUuidApi::class)` as it uses an experimental API.
+ * @property name The name of the file or folder.
+ * @property isFolder A boolean indicating whether this is a folder or a file.
+ * @property children A mutable list of child [DisplayableFile] objects, if this is a folder.
+ * @property parent The parent [DisplayableFile] object, if this is not the root.
+ * @property url The URL of the file, if this is a file.
+ * @property size The size of the file in bytes, if this is a file.
+ */
 @OptIn(ExperimentalUuidApi::class)
 data class DisplayableFile(
     val id: String = Uuid.random().toString(),

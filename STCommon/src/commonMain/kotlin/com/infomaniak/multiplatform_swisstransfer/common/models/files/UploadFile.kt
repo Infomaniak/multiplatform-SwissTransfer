@@ -17,4 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models.files
 
+/**
+ * Represents a file that has been uploaded.
+ *
+ * This data class holds information about an uploaded file, including its URL and path.
+ *
+ * @property url The URL of the uploaded file.
+ * @property path The path of the uploaded file.
+ */
 data class UploadFile(val url: String, var path: String)
