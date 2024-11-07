@@ -17,8 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.utils
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.files.DisplayableFile
-import com.infomaniak.multiplatform_swisstransfer.common.models.files.UploadFile
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.UploadFile
 
 object FileUtils {
 
@@ -26,30 +26,30 @@ object FileUtils {
      * Prepares a list of [UploadFile] objects for display in a hierarchical structure.
      *
      * This function takes a list of [UploadFile] objects and transforms them into a list of
-     * [DisplayableFile] objects, organizing them into a tree-like structure based on their file paths.
+     * [FileUi] objects, organizing them into a tree-like structure based on their file paths.
      *
-     * Each [DisplayableFile] represents a file or folder in the hierarchy. The function iterates
-     * through the input [uploadFiles] and creates a corresponding [DisplayableFile] for each.
+     * Each [FileUi] represents a file or folder in the hierarchy. The function iterates
+     * through the input [uploadFiles] and creates a corresponding [FileUi] for each.
      * It then determines the parent folder for each file based on its path and adds it to the
      * parent's children list. If a parent folder is not found, the file is added as a top-level
      * item in the tree.
      *
      * @param uploadFiles The list of [UploadFile] objects to prepare for display.
-     * @return A list of [DisplayableFile] objects representing the hierarchical structure of the files.
+     * @return A list of [FileUi] objects representing the hierarchical structure of the files.
      */
-    fun prepareForDisplay(uploadFiles: List<UploadFile>): List<DisplayableFile> {
-        var tree = mutableListOf<DisplayableFile>()
+    fun getFileUiTree(uploadFiles: List<UploadFile>): List<FileUi> {
+        var tree = mutableListOf<FileUi>()
         for (file in uploadFiles) {
-            val displayableFile = DisplayableFile(uploadFile = file)
+            val fileUi = FileUi(uploadFile = file)
 
             if (file.path.isEmpty()) {
-                tree.add(displayableFile)
+                tree.add(fileUi)
             } else {
                 val pathComponents = file.path.split("/").toMutableList()
                 val result = findFolder(pathComponents = pathComponents, tree = tree)
                 val parent = result.second
-                displayableFile.parent = parent
-                parent.children.add(displayableFile)
+                fileUi.parent = parent
+                parent.children.add(fileUi)
                 tree = result.first.toMutableList()
             }
         }
@@ -58,10 +58,10 @@ object FileUtils {
     }
 
     /**
-     * Finds a folder within a hierarchical structure of [DisplayableFile] objects.
+     * Finds a folder within a hierarchical structure of [FileUi] objects.
      *
      * This function searches for a folder with a given path within a tree-like structure
-     * represented by a list of [DisplayableFile] objects. The path is specified as a list
+     * represented by a list of [FileUi] objects. The path is specified as a list
      * of path components (e.g., ["folder1", "folder2", "file.txt"]).
      *
      * The function starts at the root of the tree and iteratively searches for each path
@@ -69,28 +69,28 @@ object FileUtils {
      * becomes the current folder for the next iteration. If a matching folder is not found,
      * a new folder is created with the current path component name and added to the tree.
      *
-     * The function returns the [DisplayableFile] object representing the folder that matches
+     * The function returns the [FileUi] object representing the folder that matches
      * the given path, or null if no such folder is found.
      *
      * @param pathComponents A mutable list of strings representing the path components of the folder to find.
-     * @param tree A mutable list of [DisplayableFile] objects representing the hierarchical structure to search within.
-     * @return The [DisplayableFile] object representing the found folder, or null if not found.
+     * @param tree A mutable list of [FileUi] objects representing the hierarchical structure to search within.
+     * @return The [FileUi] object representing the found folder, or null if not found.
      */
-    fun findFolder(pathComponents: List<String>, tree: List<DisplayableFile>): Pair<List<DisplayableFile>, DisplayableFile> {
-        var result: DisplayableFile? = null
+    fun findFolder(pathComponents: List<String>, tree: List<FileUi>): Pair<List<FileUi>, FileUi> {
+        var result: FileUi? = null
         var modifiedTree = tree.toMutableList()
 
-        val fakeFirstParent = DisplayableFile(folderName = "")
+        val fakeFirstParent = FileUi(folderName = "")
         fakeFirstParent.children = modifiedTree
         var currentParent = fakeFirstParent
 
         pathComponents.forEach {
             val currentName = it
 
-            currentParent.children.firstOrNull { it.name == currentName && it.isFolder }?.let { branch ->
+            currentParent.children.firstOrNull { it.fileName == currentName && it.isFolder }?.let { branch ->
                 result = branch
             } ?: run {
-                val newFolder = DisplayableFile(folderName = currentName)
+                val newFolder = FileUi(folderName = currentName)
                 newFolder.parent = currentParent
                 currentParent.children.add(newFolder)
 

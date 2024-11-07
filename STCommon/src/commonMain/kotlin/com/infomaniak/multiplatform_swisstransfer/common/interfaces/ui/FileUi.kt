@@ -20,21 +20,47 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 data class FileUi(
     val uid: String,
     val fileName: String,
+    val isFolder: Boolean,
     val fileSize: Long,
     val mimeType: String?,
-    val localPath: String?,
+    val localPath: String?, //url
+    var parent: FileUi? = null,
+    var children: MutableList<FileUi> = mutableListOf(),
 ) {
 
     constructor(file: File) : this(
         uid = file.uuid,
         fileName = file.fileName,
+        isFolder = false,
         fileSize = file.receivedSizeInBytes,
         mimeType = file.mimeType,
         localPath = null,
+    )
+
+    // Init for folder
+    constructor(folderName: String) : this(
+        uid = Uuid.random().toString(),
+        fileName = folderName,
+        isFolder = true,
+        fileSize = 0L,
+        mimeType = null,
+        localPath = null,
+    )
+
+    constructor(uploadFile: UploadFile) : this(
+        uid = uploadFile.url,
+        fileName = uploadFile.url.substringAfterLast("/"),
+        isFolder = false,
+        fileSize = 0L,
+        mimeType = null,
+        localPath = uploadFile.url,
     )
 
     fun toUploadFileSession(): UploadFileSession {
@@ -46,4 +72,32 @@ data class FileUi(
             override val remoteUploadFile: RemoteUploadFile? = null
         }
     }
+
+    /**
+     * Recursively searches for a child with the given name.
+     *
+     * @param targetName The name of the child to search for.
+     * @return The [FileUi] object representing the found child, or null if not found.
+     */
+    fun findChildByName(targetName: String): FileUi? {
+        if (fileName == targetName) return this
+
+        children.forEach { child ->
+            child.findChildByName(targetName)?.let {
+                return it
+            }
+        }
+
+        return null
+    }
+
+    private fun treeLines(): List<String> {
+        return listOf(fileName) + children.flatMap { it.treeLines() }.map { "        $it" }
+    }
+
+    fun printTree() {
+        println(treeLines().joinToString("\n"))
+    }
+
+    override fun toString() = "$fileName -> children: ${children.map { it.fileName }}"
 }

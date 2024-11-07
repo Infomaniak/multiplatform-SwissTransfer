@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.models.files
+package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
 /**
  * Represents a file that has been uploaded.

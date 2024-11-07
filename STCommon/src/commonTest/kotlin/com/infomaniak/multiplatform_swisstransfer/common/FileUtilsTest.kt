@@ -17,10 +17,10 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.files.DisplayableFile
-import com.infomaniak.multiplatform_swisstransfer.common.models.files.UploadFile
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.UploadFile
 import com.infomaniak.multiplatform_swisstransfer.common.utils.FileUtils
-import kotlin.test.BeforeTest
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -30,32 +30,34 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class)
 class FileUtilsTest {
 
-    private val tree = mutableListOf<DisplayableFile>()
+    private val tree = mutableListOf<FileUi>()
 
-    @BeforeTest
-    fun setup() {
+    @AfterTest
+    fun clean() {
         tree.clear()
     }
 
     @Test
     fun basicTest() {
-        val textFile1 = DisplayableFile(
-            id = Uuid.random().toString(),
-            name = "file1.txt",
+        val textFile1 = FileUi(
+            uid = Uuid.random().toString(),
+            fileName = "file1.txt",
             isFolder = false,
             children = mutableListOf(),
             parent = null,
-            url = "/file1.txt",
-            size = 10L,
+            localPath = "/file1.txt",
+            fileSize = 10L,
+            mimeType = null,
         )
-        val folder1 = DisplayableFile(
-            id = Uuid.random().toString(),
-            name = "folder1",
+        val folder1 = FileUi(
+            uid = Uuid.random().toString(),
+            fileName = "folder1",
             isFolder = true,
             children = mutableListOf(),
             parent = null,
-            url = "/folder1",
-            size = 10L,
+            localPath = "/folder1",
+            fileSize = 10L,
+            mimeType = null,
         )
         val folder = FileUtils.findFolder(listOf("folder1", "folder2"), listOf(textFile1, folder1))
         println(folder)
@@ -67,14 +69,14 @@ class FileUtilsTest {
             UploadFile(url = "file1.txt", path = ""),
             UploadFile(url = "file2.txt", path = ""),
         )
-        tree.addAll(FileUtils.prepareForDisplay(filesList))
+        tree.addAll(FileUtils.getFileUiTree(filesList))
 
         // Files at the root of the tree
-        tree.getDisplayableFile("file1.txt")?.let { file1 ->
+        tree.getFileUi("file1.txt")?.let { file1 ->
             assertTrue(file1.children.isEmpty())
             assertTrue(!file1.isFolder)
         }
-        tree.getDisplayableFile("file2.txt")?.let { file2 ->
+        tree.getFileUi("file2.txt")?.let { file2 ->
             assertTrue(file2.children.isEmpty())
             assertTrue(!file2.isFolder)
         }
@@ -89,7 +91,7 @@ class FileUtilsTest {
             UploadFile(url = "file5.txt", path = "folder2"),
             UploadFile(url = "file6.txt", path = "folder2"),
         )
-        tree.addAll(FileUtils.prepareForDisplay(filesList))
+        tree.addAll(FileUtils.getFileUiTree(filesList))
 
         // Files in folder1
         findFirstChildByNameInList(tree, "folder1")?.let { folder1 ->
@@ -103,11 +105,11 @@ class FileUtilsTest {
                 message = "Children of folder1 should contain two files",
             )
             assertTrue(
-                actual = innerFiles.find { it.name == "file3.txt" } != null,
+                actual = innerFiles.find { it.fileName == "file3.txt" } != null,
                 message = "Children of folder1 should contain two files",
             )
             assertTrue(
-                actual = innerFiles.find { it.name == "file4.txt" } != null,
+                actual = innerFiles.find { it.fileName == "file4.txt" } != null,
                 message = "Children of folder1 should contain two files",
             )
         } ?: fail("folder1 doesn't exist")
@@ -125,11 +127,11 @@ class FileUtilsTest {
             )
             val innerFiles = folder2.children.filter { !it.isFolder }
             assertTrue(
-                actual = innerFiles.find { it.name == "file5.txt" } != null,
+                actual = innerFiles.find { it.fileName == "file5.txt" } != null,
                 message = "file4.txt in folder2 does not exist",
             )
             assertTrue(
-                actual = innerFiles.find { it.name == "file6.txt" } != null,
+                actual = innerFiles.find { it.fileName == "file6.txt" } != null,
                 message = "file5.txt in folder2 does not exist",
             )
         } ?: fail("folder2 doesn't exist")
@@ -138,12 +140,12 @@ class FileUtilsTest {
     @Test
     fun fileContainedIn2NestedFolders() {
         val filesList = listOf(UploadFile(url = "file_in_folder1_folder2.txt", path = "folder1/folder2"))
-        tree.addAll(FileUtils.prepareForDisplay(filesList))
+        tree.addAll(FileUtils.getFileUiTree(filesList))
 
         // File contained in one folder contained in another folder
         findFirstChildByNameInList(tree, "folder2")?.let { folder2InFolder1 ->
             assertTrue(
-                actual = folder2InFolder1.children.find { it.name == "file_in_folder1_folder2.txt" } != null,
+                actual = folder2InFolder1.children.find { it.fileName == "file_in_folder1_folder2.txt" } != null,
                 message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
             )
         } ?: fail("folder2 in folder1 doesn't exist")
@@ -157,7 +159,7 @@ class FileUtilsTest {
                 path = "folder1/folder2/folder3/folder4/folder5"
             )
         )
-        tree.addAll(FileUtils.prepareForDisplay(filesList))
+        tree.addAll(FileUtils.getFileUiTree(filesList))
 
         findFirstChildByNameInList(tree, "folder5")?.let { folder5 ->
             assertTrue(
@@ -165,19 +167,19 @@ class FileUtilsTest {
                 message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
             )
             assertTrue(
-                actual = folder5.parent!!.name == "folder4",
+                actual = folder5.parent!!.fileName == "folder4",
                 message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
             )
             assertTrue(
-                actual = folder5.children.find { it.name == "file_in_folder1_folder2_folder3_folder4_folder5.txt" } != null,
+                actual = folder5.children.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" } != null,
                 message = "file_in_folder1_folder2_folder3_folder4_folder5.txt does not exist in folder1/folder2/folder3/folder4/folder5",
             )
         } ?: fail("folder5 doesn't exist")
     }
 
-    private fun List<DisplayableFile>.getDisplayableFile(name: String) = find { it.name == name }
+    private fun List<FileUi>.getFileUi(name: String) = find { it.fileName == name }
 
-    private fun findFirstChildByNameInList(tree: List<DisplayableFile>, targetName: String): DisplayableFile? {
+    private fun findFirstChildByNameInList(tree: List<FileUi>, targetName: String): FileUi? {
         tree.forEach { file ->
             val foundChild = file.findChildByName(targetName)
             if (foundChild != null) {
