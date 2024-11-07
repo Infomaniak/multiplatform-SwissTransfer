@@ -25,9 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 class FileUtilsTest {
 
     private val tree = mutableListOf<FileUi>()
@@ -35,32 +33,6 @@ class FileUtilsTest {
     @AfterTest
     fun clean() {
         tree.clear()
-    }
-
-    @Test
-    fun basicTest() {
-        val textFile1 = FileUi(
-            uid = Uuid.random().toString(),
-            fileName = "file1.txt",
-            isFolder = false,
-            children = mutableListOf(),
-            parent = null,
-            localPath = "/file1.txt",
-            fileSize = 10L,
-            mimeType = null,
-        )
-        val folder1 = FileUi(
-            uid = Uuid.random().toString(),
-            fileName = "folder1",
-            isFolder = true,
-            children = mutableListOf(),
-            parent = null,
-            localPath = "/folder1",
-            fileSize = 10L,
-            mimeType = null,
-        )
-        val folder = FileUtils.findFolder(listOf("folder1", "folder2"), listOf(textFile1, folder1))
-        println(folder)
     }
 
     @Test
