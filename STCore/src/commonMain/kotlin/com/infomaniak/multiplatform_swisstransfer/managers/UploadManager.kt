@@ -298,4 +298,12 @@ class UploadManager(
     suspend fun removeUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
         uploadController.removeUploadSession(uuid)
     }
+
+    @Throws(
+        RealmException::class,
+        CancellationException::class,
+    )
+    suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.IO) {
+        uploadController.removeData()
+    }
 }
