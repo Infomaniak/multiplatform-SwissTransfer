@@ -22,4 +22,4 @@ package com.infomaniak.multiplatform_swisstransfer.exceptions
  *
  * @param message A message explaining what we couldn't find
  */
-class NotFoundException(message: String) : Exception()
+class NotFoundException(message: String) : Exception(message)
