@@ -250,7 +250,7 @@ class UploadManager(
     }
 
     /**
-     * Cancel an upload session from api and delete it.
+     * Cancel an upload session from api and remove it.
      *
      * @param uuid The UUID of the upload session to cancel.
      *
@@ -284,9 +284,9 @@ class UploadManager(
     }
 
     /**
-     * Deletes an upload session from the database.
+     * Remove an upload session from the database.
      *
-     * @param uuid The UUID of the upload session to delete.
+     * @param uuid The UUID of the upload session to remove.
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
@@ -295,7 +295,15 @@ class UploadManager(
         RealmException::class,
         CancellationException::class,
     )
-    suspend fun deleteUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
+    suspend fun removeUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
         uploadController.removeUploadSession(uuid)
+    }
+
+    @Throws(
+        RealmException::class,
+        CancellationException::class,
+    )
+    suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.IO) {
+        uploadController.removeData()
     }
 }
