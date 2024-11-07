@@ -22,4 +22,4 @@ package com.infomaniak.multiplatform_swisstransfer.exceptions
  *
  * @param message The message to explain which property is null
  */
-class NullPropertyException(message: String) : Exception()
+class NullPropertyException(message: String) : Exception(message)
