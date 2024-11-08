@@ -61,7 +61,7 @@ class ContainerDB() : Container, RealmObject {
         this.downloadLimit = container.downloadLimit
         this.source = container.source
         this.files = getFileDBTree(container.files).mapTo(realmListOf(), ::FileDB)
-    // Retourner une liste de FileDb, rajouter children et isFolder dans FileDb et FileUi, enlever parent, déplacer FileUtils et les tests dans Database
+        // Retourner une liste de FileDb, rajouter children et isFolder dans FileDb et FileUi, enlever parent, déplacer FileUtils et les tests dans Database
     }
 
     constructor(uploadContainer: UploadContainer, uploadFileSessionList: List<UploadFileSession>) : this() {
