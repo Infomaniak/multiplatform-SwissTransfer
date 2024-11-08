@@ -33,6 +33,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -51,6 +52,8 @@ class UploadManager(
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
 ) {
+
+    val lastUploadFlow get() = uploadController.getLastUploadFlow().flowOn(Dispatchers.IO)
 
     /**
      * Retrieves all upload sessions from the database.
