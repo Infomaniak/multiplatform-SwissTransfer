@@ -15,11 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.utils
+package com.infomaniak.multiplatform_swisstransfer.common.ext
 
-internal object DateUtils {
+import java.util.Date
 
-    private const val SECONDS_IN_A_DAY = 24 * 60 * 60
-
-    fun timestampToDays(timestamp: Long) = timestamp / SECONDS_IN_A_DAY
-}
+fun Long.toDateFromSeconds() = Date(this * 1000)

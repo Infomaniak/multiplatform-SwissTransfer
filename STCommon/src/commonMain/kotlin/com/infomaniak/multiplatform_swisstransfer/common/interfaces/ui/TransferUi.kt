@@ -33,7 +33,7 @@ data class TransferUi(
     val files: List<FileUi>,
 ) {
 
-    val expiresInDays: Int = DateUtils.timestampToDays(expirationDateTimestamp - Clock.System.now().toEpochMilliseconds()).toInt()
+    val expiresInDays: Int = DateUtils.timestampToDays(expirationDateTimestamp - Clock.System.now().epochSeconds).toInt()
 
     constructor(transfer: Transfer) : this(
         uuid = transfer.linkUUID,

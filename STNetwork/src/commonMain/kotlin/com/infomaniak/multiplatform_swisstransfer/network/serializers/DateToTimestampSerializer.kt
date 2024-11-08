@@ -38,7 +38,7 @@ internal object DateToTimestampSerializer : JsonTransformingSerializer<Long>(Lon
         }
 
         val localDateTime = LocalDateTime.parse(dateString, formatter)
-        val timestamp = localDateTime.toInstant(TimeZone.UTC).toEpochMilliseconds()
+        val timestamp = localDateTime.toInstant(TimeZone.UTC).epochSeconds
 
         return runCatching { JsonPrimitive(timestamp) }.getOrDefault(element)
     }
