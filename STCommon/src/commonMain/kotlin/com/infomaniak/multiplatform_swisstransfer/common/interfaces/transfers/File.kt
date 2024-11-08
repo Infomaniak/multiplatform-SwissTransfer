@@ -17,10 +17,13 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
+
 interface File {
     val containerUUID: String
     val uuid: String
     val fileName: String
+    val isFolder: Boolean
     val fileSizeInBytes: Long
     val downloadCounter: Int
     val createdDateTimestamp: Long
@@ -31,4 +34,29 @@ interface File {
     val receivedSizeInBytes: Long
     val path: String?
     val thumbnailPath: String?
+    val parent: File?
+    val children: List<File>
+
+
+    /**
+     * Recursively searches for a child with the given name.
+     *
+     * @param targetName The name of the child to search for.
+     * @return The [File] object representing the found child, or null if not found.
+     */
+    fun findChildByName(targetName: String): File? {
+        if (fileName == targetName) return this
+
+        children.forEach { child ->
+            child.findChildByName(targetName)?.let {
+                return it
+            }
+        }
+
+        return null
+    }
+
+    fun treeLines(): List<String> {
+        return listOf(fileName) + children.flatMap { it.treeLines() }.map { "        $it" }
+    }
 }

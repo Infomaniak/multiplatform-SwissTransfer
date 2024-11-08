@@ -18,17 +18,23 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import kotlinx.datetime.Clock
 
+@OptIn(ExperimentalUuidApi::class)
 class FileDB() : File, RealmObject {
     @PrimaryKey
     override var uuid: String = ""
     override var containerUUID: String = ""
     override var fileName: String = ""
+    override var isFolder: Boolean = false
     override var fileSizeInBytes: Long = 0L
     override var downloadCounter: Int = 0
     override var createdDateTimestamp: Long = 0L
@@ -39,11 +45,14 @@ class FileDB() : File, RealmObject {
     override var receivedSizeInBytes: Long = 0
     override var path: String? = ""
     override var thumbnailPath: String? = ""
+    override var parent: FileDB? = null
+    override var children: RealmList<FileDB> = realmListOf()
 
     constructor(file: File) : this() {
         this.containerUUID = file.containerUUID
         this.uuid = file.uuid
         this.fileName = file.fileName
+        this.isFolder = file.isFolder
         this.fileSizeInBytes = file.fileSizeInBytes
         this.downloadCounter = file.downloadCounter
         this.createdDateTimestamp = file.createdDateTimestamp
@@ -70,5 +79,18 @@ class FileDB() : File, RealmObject {
         this.receivedSizeInBytes = uploadFileSession.size
         this.path = null
         this.thumbnailPath = ""
+    }
+
+    // Init for folder
+    constructor(folderName: String) : this() {
+        uuid = Uuid.random().toString()
+        fileName = folderName
+        isFolder = true
+        mimeType = null
+    }
+
+    constructor(fileName: String, path: String) : this() {
+        this.fileName = fileName
+        this.path = path
     }
 }

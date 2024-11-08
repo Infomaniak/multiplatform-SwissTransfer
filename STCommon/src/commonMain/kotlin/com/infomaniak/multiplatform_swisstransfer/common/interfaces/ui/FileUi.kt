@@ -30,9 +30,9 @@ data class FileUi(
     val isFolder: Boolean,
     val fileSize: Long,
     val mimeType: String?,
-    val localPath: String?, //url
-    var parent: FileUi? = null,
-    var children: MutableList<FileUi> = mutableListOf(),
+    val localPath: String?,
+    var parent: File? = null,
+    var children: MutableList<File> = mutableListOf(),
 ) {
 
     constructor(file: File) : this(
@@ -71,32 +71,6 @@ data class FileUi(
             override val localPath: String = this@FileUi.localPath ?: ""
             override val remoteUploadFile: RemoteUploadFile? = null
         }
-    }
-
-    /**
-     * Recursively searches for a child with the given name.
-     *
-     * @param targetName The name of the child to search for.
-     * @return The [FileUi] object representing the found child, or null if not found.
-     */
-    fun findChildByName(targetName: String): FileUi? {
-        if (fileName == targetName) return this
-
-        children.forEach { child ->
-            child.findChildByName(targetName)?.let {
-                return it
-            }
-        }
-
-        return null
-    }
-
-    private fun treeLines(): List<String> {
-        return listOf(fileName) + children.flatMap { it.treeLines() }.map { "        $it" }
-    }
-
-    fun printTree() {
-        println(treeLines().joinToString("\n"))
     }
 
     override fun toString() = "$fileName -> children: ${children.map { it.fileName }}"

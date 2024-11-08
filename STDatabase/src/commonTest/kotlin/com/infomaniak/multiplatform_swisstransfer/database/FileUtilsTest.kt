@@ -15,20 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common
+package com.infomaniak.multiplatform_swisstransfer.database
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.UploadFile
-import com.infomaniak.multiplatform_swisstransfer.common.utils.FileUtils
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.fail
-import kotlin.uuid.ExperimentalUuidApi
 
 class FileUtilsTest {
 
-    private val tree = mutableListOf<FileUi>()
+    private val tree = mutableListOf<FileDB>()
 
     @AfterTest
     fun clean() {
@@ -38,17 +37,17 @@ class FileUtilsTest {
     @Test
     fun filesInRoot() {
         val filesList = listOf(
-            UploadFile(url = "file1.txt", path = ""),
-            UploadFile(url = "file2.txt", path = ""),
+            FileDB(fileName = "file1.txt", path = ""),
+            FileDB(fileName = "file2.txt", path = ""),
         )
-        tree.addAll(FileUtils.getFileUiTree(filesList))
+        tree.addAll(FileUtils.getFileDBTree(filesList))
 
         // Files at the root of the tree
-        tree.getFileUi("file1.txt")?.let { file1 ->
+        tree.getFileDB("file1.txt")?.let { file1 ->
             assertTrue(file1.children.isEmpty())
             assertTrue(!file1.isFolder)
         }
-        tree.getFileUi("file2.txt")?.let { file2 ->
+        tree.getFileDB("file2.txt")?.let { file2 ->
             assertTrue(file2.children.isEmpty())
             assertTrue(!file2.isFolder)
         }
@@ -57,13 +56,13 @@ class FileUtilsTest {
     @Test
     fun filesInFolder() {
         val filesList = listOf(
-            UploadFile(url = "file3.txt", path = "folder1"),
-            UploadFile(url = "file4.txt", path = "folder1"),
-            UploadFile(url = "empty_file.txt", path = "folder1/randomFolder"),
-            UploadFile(url = "file5.txt", path = "folder2"),
-            UploadFile(url = "file6.txt", path = "folder2"),
+            FileDB(fileName = "file3.txt", path = "folder1"),
+            FileDB(fileName = "file4.txt", path = "folder1"),
+            FileDB(fileName = "empty_file.txt", path = "folder1/randomFolder"),
+            FileDB(fileName = "file5.txt", path = "folder2"),
+            FileDB(fileName = "file6.txt", path = "folder2"),
         )
-        tree.addAll(FileUtils.getFileUiTree(filesList))
+        tree.addAll(FileUtils.getFileDBTree(filesList))
 
         // Files in folder1
         findFirstChildByNameInList(tree, "folder1")?.let { folder1 ->
@@ -111,8 +110,8 @@ class FileUtilsTest {
 
     @Test
     fun fileContainedIn2NestedFolders() {
-        val filesList = listOf(UploadFile(url = "file_in_folder1_folder2.txt", path = "folder1/folder2"))
-        tree.addAll(FileUtils.getFileUiTree(filesList))
+        val filesList = listOf(FileDB(fileName = "file_in_folder1_folder2.txt", path = "folder1/folder2"))
+        tree.addAll(FileUtils.getFileDBTree(filesList))
 
         // File contained in one folder contained in another folder
         findFirstChildByNameInList(tree, "folder2")?.let { folder2InFolder1 ->
@@ -126,12 +125,12 @@ class FileUtilsTest {
     @Test
     fun fileContainedIn5NestedFolders() {
         val filesList = listOf(
-            UploadFile(
-                url = "file_in_folder1_folder2_folder3_folder4_folder5.txt",
+            FileDB(
+                fileName = "file_in_folder1_folder2_folder3_folder4_folder5.txt",
                 path = "folder1/folder2/folder3/folder4/folder5"
             )
         )
-        tree.addAll(FileUtils.getFileUiTree(filesList))
+        tree.addAll(FileUtils.getFileDBTree(filesList))
 
         findFirstChildByNameInList(tree, "folder5")?.let { folder5 ->
             assertTrue(
@@ -149,9 +148,9 @@ class FileUtilsTest {
         } ?: fail("folder5 doesn't exist")
     }
 
-    private fun List<FileUi>.getFileUi(name: String) = find { it.fileName == name }
+    private fun List<FileDB>.getFileDB(name: String) = find { it.fileName == name }
 
-    private fun findFirstChildByNameInList(tree: List<FileUi>, targetName: String): FileUi? {
+    private fun findFirstChildByNameInList(tree: List<FileDB>, targetName: String): File? {
         tree.forEach { file ->
             val foundChild = file.findChildByName(targetName)
             if (foundChild != null) {
