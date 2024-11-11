@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 
 class TransferDB() : Transfer, RealmObject {
@@ -35,6 +36,9 @@ class TransferDB() : Transfer, RealmObject {
     override var container: ContainerDB? = null
 
     private var transferDirectionValue: String = ""
+
+    @Ignore
+    override val transferDirection: TransferDirection get() = TransferDirection.valueOf(transferDirectionValue)
 
     constructor(transfer: Transfer, transferDirection: TransferDirection) : this() {
         this.linkUUID = transfer.linkUUID

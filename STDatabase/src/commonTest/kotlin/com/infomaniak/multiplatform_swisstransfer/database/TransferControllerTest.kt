@@ -99,7 +99,7 @@ class TransferControllerTest {
         transferController.upsert(transfer, sent)
         val realmTransfer = transferController.getTransfer(transfer.linkUUID)
         assertNotNull(realmTransfer, "The transfer cannot be null")
-        assertEquals(sent, realmTransfer.transferDirection())
+        assertEquals(sent, realmTransfer.transferDirection)
         assertEquals(transfer.container?.uuid, realmTransfer.container?.uuid, "The container is missing")
     }
 

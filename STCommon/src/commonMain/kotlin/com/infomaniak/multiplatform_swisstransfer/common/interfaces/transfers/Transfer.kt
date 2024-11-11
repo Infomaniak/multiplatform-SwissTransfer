@@ -30,5 +30,5 @@ interface Transfer {
     val downloadHost: String
     val container: Container?
 
-    fun transferDirection(): TransferDirection? = null
+    val transferDirection: TransferDirection? get() = null
 }
