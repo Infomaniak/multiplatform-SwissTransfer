@@ -115,6 +115,6 @@ class TransferControllerTest {
         val transfers = transferController.getTransfers(transferDirection)
         assertNotNull(transfers)
         assertEquals(1, transfers.count(), "The transfer list must contain 1 item")
-        assertEquals(transferDirection, transfers.first().transferDirection())
+        assertEquals(transferDirection, transfers.first().transferDirection)
     }
 }
