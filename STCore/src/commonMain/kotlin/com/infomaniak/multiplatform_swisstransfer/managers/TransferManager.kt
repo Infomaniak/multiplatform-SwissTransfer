@@ -21,7 +21,9 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
@@ -107,8 +109,17 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByLinkUUID(linkUUID: String): Unit = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByLinkUUID(linkUUID).data, TransferDirection.SENT)
+    suspend fun addTransferByLinkUUID(linkUUID: String, uploadSession: UploadSession): Unit = withContext(Dispatchers.IO) {
+        runCatching {
+            addTransfer(transferRepository.getTransferByLinkUUID(linkUUID).data, TransferDirection.SENT)
+        }.onFailure { exception ->
+            when {
+                exception is UnexpectedApiErrorFormatException && exception.bodyResponse.contains("wait_virus_check") -> {
+                    createTransferLocally(linkUUID, uploadSession)
+                }
+                else -> throw exception
+            }
+        }
     }
 
     /**
@@ -147,6 +158,14 @@ class TransferManager internal constructor(
     private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection) {
         runCatching {
             transferController.upsert(transferApi as Transfer, transferDirection)
+        }.onFailure {
+            throw UnknownException(it)
+        }
+    }
+
+    private suspend fun createTransferLocally(linkUUID: String, uploadSession: UploadSession) {
+        runCatching {
+            transferController.generateAndInsert(linkUUID, uploadSession, TransferStatus.WAIT_VIRUS_CHECK)
         }.onFailure {
             throw UnknownException(it)
         }
