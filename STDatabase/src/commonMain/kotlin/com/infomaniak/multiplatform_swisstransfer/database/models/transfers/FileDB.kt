@@ -18,8 +18,11 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.datetime.Clock
 
 class FileDB() : File, RealmObject {
     @PrimaryKey
@@ -51,5 +54,21 @@ class FileDB() : File, RealmObject {
         this.receivedSizeInBytes = file.receivedSizeInBytes
         this.path = file.path
         this.thumbnailPath = file.thumbnailPath
+    }
+
+    constructor(uploadContainer: UploadContainer, uploadFileSession: UploadFileSession) : this() {
+        this.containerUUID = uploadContainer.uuid
+        this.uuid = uploadFileSession.remoteUploadFile!!.uuid
+        this.fileName = uploadFileSession.name
+        this.fileSizeInBytes = uploadFileSession.size
+        this.downloadCounter = 0
+        this.createdDateTimestamp = Clock.System.now().epochSeconds
+        this.expiredDateTimestamp = uploadContainer.expiredDateTimestamp
+        this.eVirus = "NOT_VIRUS_CHECKED"
+        this.deletedDate = null
+        this.mimeType = uploadFileSession.mimeType
+        this.receivedSizeInBytes = uploadFileSession.size
+        this.path = null
+        this.thumbnailPath = ""
     }
 }

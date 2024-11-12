@@ -19,7 +19,9 @@ package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
@@ -65,6 +67,17 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) = runThrowingRealm {
         realm?.write {
             this.copyToRealm(TransferDB(transfer, transferDirection), UpdatePolicy.ALL)
+        }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun generateAndInsert(
+        linkUUID: String,
+        uploadSession: UploadSession,
+        transferStatus: TransferStatus,
+    ) = runThrowingRealm {
+        realm?.write {
+            this.copyToRealm(TransferDB(linkUUID, uploadSession, transferStatus), UpdatePolicy.ALL)
         }
     }
     //endregion

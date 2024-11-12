@@ -15,22 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
+package com.infomaniak.multiplatform_swisstransfer.common.models
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
-import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
-
-interface Transfer {
-    val linkUUID: String
-    val containerUUID: String
-    val downloadCounterCredit: Int
-    val createdDateTimestamp: Long
-    val expiredDateTimestamp: Long
-    val hasBeenDownloadedOneTime: Boolean
-    val isMailSent: Boolean
-    val downloadHost: String
-    val container: Container?
-
-    val transferDirection: TransferDirection? get() = null
-    val transferStatus: TransferStatus? get() = null
+enum class TransferStatus {
+    UNKNOWN, WAIT_VIRUS_CHECK, READY
 }

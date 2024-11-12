@@ -18,9 +18,13 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.datetime.Clock
 
 class TransferDB() : Transfer, RealmObject {
     @PrimaryKey
@@ -35,6 +39,12 @@ class TransferDB() : Transfer, RealmObject {
     override var container: ContainerDB? = null
 
     private var transferDirectionValue: String = ""
+    private var transferStatusValue: String = TransferStatus.UNKNOWN.name
+
+    @Ignore
+    override val transferDirection: TransferDirection get() = TransferDirection.valueOf(transferDirectionValue)
+    @Ignore
+    override val transferStatus: TransferStatus get() = TransferStatus.valueOf(transferStatusValue)
 
     constructor(transfer: Transfer, transferDirection: TransferDirection) : this() {
         this.linkUUID = transfer.linkUUID
@@ -48,9 +58,23 @@ class TransferDB() : Transfer, RealmObject {
         this.container = transfer.container?.let(::ContainerDB)
 
         this.transferDirectionValue = transferDirection.name
+        this.transferStatusValue = TransferStatus.READY.name
     }
 
-    override fun transferDirection(): TransferDirection = TransferDirection.valueOf(transferDirectionValue)
+    constructor(linkUUID: String, uploadSession: UploadSession, transferStatus: TransferStatus) : this() {
+        this.linkUUID = linkUUID
+        this.containerUUID = uploadSession.remoteContainer!!.uuid
+        this.downloadCounterCredit = uploadSession.remoteContainer!!.downloadLimit
+        this.createdDateTimestamp = Clock.System.now().epochSeconds
+        this.expiredDateTimestamp = uploadSession.remoteContainer!!.expiredDateTimestamp
+        this.hasBeenDownloadedOneTime = false
+        this.isMailSent = false
+        this.downloadHost = ""
+        this.container = ContainerDB(uploadSession.remoteContainer!!, uploadSession.files)
+
+        this.transferDirectionValue = TransferDirection.SENT.name
+        this.transferStatusValue = transferStatus.name
+    }
 
     internal companion object {
         val transferDirectionPropertyName = TransferDB::transferDirectionValue.name
