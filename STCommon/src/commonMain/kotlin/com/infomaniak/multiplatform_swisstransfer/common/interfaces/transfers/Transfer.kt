@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 
 interface Transfer {
     val linkUUID: String
@@ -31,4 +32,5 @@ interface Transfer {
     val container: Container?
 
     val transferDirection: TransferDirection? get() = null
+    val transferStatus: TransferStatus? get() = null
 }
