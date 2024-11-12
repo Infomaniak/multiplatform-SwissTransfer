@@ -20,14 +20,11 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 data class FileUi(
     val uid: String,
     val fileName: String,
-    val isFolder: Boolean,
+    val isFolder: Boolean? = false,
     val fileSize: Long,
     val mimeType: String?,
     val localPath: String?,
@@ -38,7 +35,7 @@ data class FileUi(
     constructor(file: File) : this(
         uid = file.uuid,
         fileName = file.fileName,
-        isFolder = false,
+        isFolder = file.isFolder,
         fileSize = file.receivedSizeInBytes,
         mimeType = file.mimeType,
         localPath = null,
@@ -46,7 +43,7 @@ data class FileUi(
 
     // Init for folder
     constructor(folderName: String) : this(
-        uid = Uuid.random().toString(),
+        uid = folderName,
         fileName = folderName,
         isFolder = true,
         fileSize = 0L,

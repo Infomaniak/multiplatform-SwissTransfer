@@ -18,22 +18,28 @@
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File.Companion.findFirstChildByUuid
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.RealmSingleQuery
 import io.realm.kotlin.query.Sort
 import io.realm.kotlin.query.TRUE_PREDICATE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -72,13 +78,24 @@ class TransferController(private val realmProvider: RealmProvider) {
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
         return realm.query<TransferDB>(query).find()
     }
+
+    @Throws(RealmException::class)
+    fun getFilesFromTransfer(linkUUID: String, folderUuid: String): Flow<List<FileUi>?> = runThrowingRealm {
+        return flow {
+            getTransfer(linkUUID)?.container?.files?.let { transferFiles ->
+                emit(transferFiles.findFirstChildByUuid(folderUuid)?.children?.map(::FileUi))
+            }
+        }
+    }
     //endregion
 
     //region Upsert data
     @Throws(RealmException::class, CancellationException::class)
     suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) = runThrowingRealm {
         realm.write {
-            this.copyToRealm(TransferDB(transfer, transferDirection), UpdatePolicy.ALL)
+            val transferDB = TransferDB(transfer, transferDirection)
+            transferDB.container?.files?.let { transferDB.container?.files = FileUtils.getFileDBTree(it).toRealmList() }
+            this.copyToRealm(transferDB, UpdatePolicy.ALL)
         }
     }
 

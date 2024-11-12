@@ -150,9 +150,9 @@ class FileUtilsTest {
 
     private fun List<FileDB>.getFileDB(name: String) = find { it.fileName == name }
 
-    private fun findFirstChildByNameInList(tree: List<FileDB>, targetName: String): File? {
+    private fun findFirstChildByNameInList(tree: List<FileDB>, fileName: String): File? {
         tree.forEach { file ->
-            val foundChild = file.findChildByName(targetName)
+            val foundChild = file.findChildByName(fileName)
             if (foundChild != null) {
                 return foundChild
             }

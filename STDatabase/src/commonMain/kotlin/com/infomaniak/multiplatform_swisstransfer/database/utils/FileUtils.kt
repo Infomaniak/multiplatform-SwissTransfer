@@ -36,6 +36,9 @@ object FileUtils {
                 val parent = result.second
                 fileDB.parent = parent
                 parent?.children?.add(fileDB)
+                parent?.fileSizeInBytes = parent?.children?.sumOf { it.fileSizeInBytes } ?: 0L
+                parent?.receivedSizeInBytes = parent?.children?.sumOf { it.receivedSizeInBytes } ?: 0L
+
                 tree = result.first.toMutableList()
             }
         }
@@ -43,7 +46,7 @@ object FileUtils {
         return tree
     }
 
-    fun findFolder(pathComponents: List<String>, tree: List<FileDB>): Pair<List<FileDB>, FileDB?> {
+    private fun findFolder(pathComponents: List<String>, tree: List<FileDB>): Pair<List<FileDB>, FileDB?> {
         var result: FileDB? = null
         var modifiedTree = tree.toMutableList()
 

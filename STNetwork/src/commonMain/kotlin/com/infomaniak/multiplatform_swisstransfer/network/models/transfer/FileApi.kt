@@ -31,6 +31,8 @@ class FileApi : File {
     @SerialName("containerUUID")
     override var containerUUID: String = ""
     override var fileName: String = ""
+    @Transient
+    override var isFolder: Boolean = false
     override var fileSizeInBytes: Long = 0L
     override var downloadCounter: Int = 0
     @SerialName("createdDate")
@@ -47,4 +49,8 @@ class FileApi : File {
     override var path: String? = null
     @Transient
     override var thumbnailPath: String? = null
+    @Transient
+    override var parent: File? = null
+    @Transient
+    override var children: List<File> = emptyList()
 }

@@ -17,8 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
-
 interface File {
     val containerUUID: String
     val uuid: String
@@ -37,18 +35,17 @@ interface File {
     val parent: File?
     val children: List<File>
 
-
     /**
      * Recursively searches for a child with the given name.
      *
-     * @param targetName The name of the child to search for.
+     * @param fileName The name of the child to search for.
      * @return The [File] object representing the found child, or null if not found.
      */
-    fun findChildByName(targetName: String): File? {
-        if (fileName == targetName) return this
+    fun findChildByName(fileName: String): File? {
+        if (this.fileName == fileName) return this
 
         children.forEach { child ->
-            child.findChildByName(targetName)?.let {
+            child.findChildByName(fileName)?.let {
                 return it
             }
         }
@@ -56,7 +53,35 @@ interface File {
         return null
     }
 
-    fun treeLines(): List<String> {
-        return listOf(fileName) + children.flatMap { it.treeLines() }.map { "        $it" }
+    /**
+     * Recursively searches for a child with the given UUID.
+     *
+     * @param uuid The UUID of the child to search for.
+     * @return The [File] object representing the found child, or null if not found.
+     */
+    fun findChildByUuid(uuid: String): File? {
+        if (this.uuid == uuid) return this
+
+        children.forEach { child ->
+            child.findChildByUuid(uuid)?.let {
+                return it
+            }
+        }
+
+        return null
+    }
+
+    companion object {
+
+        fun List<File>.findFirstChildByUuid(uuid: String): File? {
+            forEach { file ->
+                val foundChild = file.findChildByUuid(uuid)
+                if (foundChild != null) {
+                    foundChild.children.forEach { child -> println("children ${child.fileName}") }
+                    return foundChild
+                }
+            }
+            return null
+        }
     }
 }

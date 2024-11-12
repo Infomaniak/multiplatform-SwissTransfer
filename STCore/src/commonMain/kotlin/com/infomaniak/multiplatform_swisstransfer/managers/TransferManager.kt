@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
@@ -124,6 +125,17 @@ class TransferManager internal constructor(
      */
     fun getTransferByUUID(transferUUID: String): TransferUi? {
         return transferController.getTransfer(transferUUID)?.let(::TransferUi)
+    }
+
+    /**
+     * Retrieves a flow of files from a transfer, filtered by link UUID and folder UUID.
+     *
+     * @param linkUUID The UUID of the transfer link.
+     * @param folderUuid The UUID of the folder within the transfer.
+     * @return A flow of lists of [FileUi] objects representing the files in the transfer.
+     */
+    fun getFilesFromTransfer(linkUUID: String, folderUuid: String): Flow<List<FileUi>?> {
+        return transferController.getFilesFromTransfer(linkUUID, folderUuid)
     }
 
     /**

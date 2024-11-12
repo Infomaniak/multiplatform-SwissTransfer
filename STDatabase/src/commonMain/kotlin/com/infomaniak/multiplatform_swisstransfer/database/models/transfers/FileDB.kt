@@ -18,15 +18,15 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
+import kotlinx.datetime.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
-import kotlinx.datetime.Clock
 
 @OptIn(ExperimentalUuidApi::class)
 class FileDB() : File, RealmObject {

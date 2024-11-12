@@ -18,7 +18,6 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
-import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils.getFileDBTree
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import io.realm.kotlin.ext.realmListOf
@@ -60,8 +59,7 @@ class ContainerDB() : Container, RealmObject {
         this.swiftVersion = container.swiftVersion
         this.downloadLimit = container.downloadLimit
         this.source = container.source
-        this.files = getFileDBTree(container.files).mapTo(realmListOf(), ::FileDB)
-        // Retourner une liste de FileDb, rajouter children et isFolder dans FileDb et FileUi, enlever parent, déplacer FileUtils et les tests dans Database
+        this.files = container.files.mapTo(realmListOf(), ::FileDB)
     }
 
     constructor(uploadContainer: UploadContainer, uploadFileSessionList: List<UploadFileSession>) : this() {
