@@ -19,10 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
-import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
-import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
-import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
-import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -99,5 +96,18 @@ class AppSettingsManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage): Unit = withContext(Dispatchers.IO) {
         appSettingsController.setEmailLanguage(emailLanguage)
+    }
+
+    /**
+     * Asynchronously sets the last type of transfer selected by the user.
+     *
+     * @param transferType The last type of transfer selected.
+     *
+     * @throws RealmException If the provided type of transfer is invalid.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setLastTransferType(transferType: TransferType): Unit = withContext(Dispatchers.IO) {
+        appSettingsController.setLastTransferType(transferType)
     }
 }
