@@ -39,6 +39,8 @@ import kotlinx.serialization.json.Json
 
 class ApiClientProvider internal constructor(
     engine: HttpClientEngineFactory<*>? = null,
+    // When you don't use SwissTransferInjection, you don't have an userAgent, so we're currently setting a default value.
+    // See later how to improve it.
     private val userAgent: String = "Ktor client",
 ) {
 
