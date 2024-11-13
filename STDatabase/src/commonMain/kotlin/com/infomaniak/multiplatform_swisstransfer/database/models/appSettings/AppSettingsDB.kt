@@ -30,7 +30,7 @@ class AppSettingsDB : RealmObject, AppSettings {
             _theme = value.value
         }
 
-    private var _validityPeriod: String = ValidityPeriod.THIRTY.value
+    private var _validityPeriod: Int = ValidityPeriod.THIRTY.value
     override var validityPeriod: ValidityPeriod
         get() = ValidityPeriod.entries.find { it.value == _validityPeriod } ?: DEFAULT_VALIDITY_PERIOD
         set(value) {
