@@ -122,7 +122,7 @@ platform (Android or iOS).
 Here’s a brief example of how to use the `SwissTransferInjection` class from the Core module:
 
 ```kotlin
-val core = SwissTransferInjection()
+val core = SwissTransferInjection(userAgent = "app_user_agent")
 core.loadUser(userId)
 
 val manager = core.transferManager
