@@ -76,6 +76,11 @@ class TransferManager internal constructor(
             .flowOn(Dispatchers.IO)
     }
 
+    @Throws(RealmException::class)
+    fun getTransferFlow(transferUUID: String): Flow<Transfer?> {
+        return transferController.getTransferFlow(transferUUID)
+    }
+
     /**
      * Update all pending transfers in database, most transfers are in [TransferStatus.WAIT_VIRUS_CHECK] status.
      */
