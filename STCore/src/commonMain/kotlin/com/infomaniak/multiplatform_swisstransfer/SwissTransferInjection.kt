@@ -37,16 +37,19 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRep
  *
  * This class serves as the main access point.
  *
+ * @property userAgent Customize client api userAgent.
  * @property transferManager A manager used to orchestrate transfer operations.
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
  * @property uploadManager A manager used to orchestrate Uploads operations.
  * @property sharedApiUrlCreator An utils to help use shared routes.
  */
-class SwissTransferInjection {
+class SwissTransferInjection(
+    private val userAgent: String,
+) {
 
     private val realmProvider by lazy { RealmProvider() }
-    private val apiClientProvider by lazy { ApiClientProvider() }
+    private val apiClientProvider by lazy { ApiClientProvider(userAgent) }
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider) }
