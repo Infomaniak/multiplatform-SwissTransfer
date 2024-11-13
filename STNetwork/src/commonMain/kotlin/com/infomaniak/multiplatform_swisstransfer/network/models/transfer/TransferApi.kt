@@ -18,10 +18,12 @@
 package com.infomaniak.multiplatform_swisstransfer.network.models.transfer
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.DateToTimestampSerializer
 import com.infomaniak.multiplatform_swisstransfer.network.serializers.IntToBooleanSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 class TransferApi : Transfer {
@@ -45,4 +47,7 @@ class TransferApi : Transfer {
     val downloadUrl get() = "https://$downloadHost/api/download/??QuoiFeur " // TODO: Add download method url
     // https://dl-j5769qrh.swisstransfer.com/api/download/ec6bc7ac-96b3-4a6e-8d30-8e12e379d11a/97a742c9-b0f5-4fa5-b6bf-cb2c2d6bbe94
     override var container: ContainerApi = ContainerApi()
+
+    @Transient
+    override val transferStatus: TransferStatus = TransferStatus.READY
 }

@@ -26,6 +26,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
+import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
+import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -75,6 +77,38 @@ class TransferManager internal constructor(
     }
 
     /**
+     * Update all pending transfers in database, most transfers are in [TransferStatus.WAIT_VIRUS_CHECK] status.
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.IO) {
+        transferController.getNotReadyTransfers().forEach { transfer ->
+            runCatching {
+                addTransferByLinkUUID(transfer.linkUUID, null)
+            }
+        }
+    }
+
+    /**
+     * Update the local transfer with remote api
+     *
+     * @throws RealmException An error has occurred with realm database
+     * @throws NotFoundException Any transfer with [transferUUID] has been found
+     * @throws NullPropertyException The transferDirection of the transfer found is null
+     */
+    @Throws(RealmException::class, NotFoundException::class, NullPropertyException::class, CancellationException::class)
+    suspend fun fetchTransfer(transferUUID: String): Unit {
+        val localTransfer = transferController.getTransfer(transferUUID)
+            ?: throw NotFoundException("No transfer found in DB with uuid = $transferUUID")
+        val transferDirection = localTransfer.transferDirection
+            ?: throw NullPropertyException("the transferDirection property cannot be null")
+
+        runCatching {
+            val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID).data ?: return
+            transferController.upsert(remoteTransfer, transferDirection)
+        }
+    }
+
+    /**
      * Retrieves a [TransferUi] by linkUUID.
      *
      * @param transferUUID The UUID of an existing transfer in the database.
@@ -109,11 +143,12 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByLinkUUID(linkUUID: String, uploadSession: UploadSession): Unit = withContext(Dispatchers.IO) {
+    suspend fun addTransferByLinkUUID(linkUUID: String, uploadSession: UploadSession?): Unit = withContext(Dispatchers.IO) {
         runCatching {
             addTransfer(transferRepository.getTransferByLinkUUID(linkUUID).data, TransferDirection.SENT)
         }.onFailure { exception ->
             when {
+                uploadSession == null -> return@withContext
                 exception is UnexpectedApiErrorFormatException && exception.bodyResponse.contains("wait_virus_check") -> {
                     createTransferLocally(linkUUID, uploadSession)
                 }
