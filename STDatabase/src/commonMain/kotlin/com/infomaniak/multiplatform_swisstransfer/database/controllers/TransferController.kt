@@ -60,6 +60,12 @@ class TransferController(private val realmProvider: RealmProvider) {
     fun getTransfer(linkUUID: String): Transfer? = runThrowingRealm {
         return realm?.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'")?.first()?.find()
     }
+
+    @Throws(RealmException::class)
+    fun getNotReadyTransfers(): List<Transfer> = runThrowingRealm {
+        val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
+        return realm?.query<TransferDB>(query)?.find() ?: emptyList()
+    }
     //endregion
 
     //region Upsert data

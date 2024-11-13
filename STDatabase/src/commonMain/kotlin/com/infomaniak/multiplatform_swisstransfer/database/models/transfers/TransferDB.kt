@@ -58,7 +58,7 @@ class TransferDB() : Transfer, RealmObject {
         this.container = transfer.container?.let(::ContainerDB)
 
         this.transferDirectionValue = transferDirection.name
-        this.transferStatusValue = TransferStatus.READY.name
+        this.transferStatusValue = transfer.transferStatus?.name ?: TransferStatus.READY.name
     }
 
     constructor(linkUUID: String, uploadSession: UploadSession, transferStatus: TransferStatus) : this() {
@@ -78,5 +78,6 @@ class TransferDB() : Transfer, RealmObject {
 
     internal companion object {
         val transferDirectionPropertyName = TransferDB::transferDirectionValue.name
+        val transferStatusPropertyName = TransferDB::transferStatusValue.name
     }
 }
