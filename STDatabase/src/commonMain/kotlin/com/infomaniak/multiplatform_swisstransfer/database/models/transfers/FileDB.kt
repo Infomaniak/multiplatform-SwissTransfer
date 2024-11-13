@@ -26,8 +26,8 @@ import kotlinx.datetime.Clock
 
 class FileDB() : File, RealmObject {
     @PrimaryKey
-    override var containerUUID: String = ""
     override var uuid: String = ""
+    override var containerUUID: String = ""
     override var fileName: String = ""
     override var fileSizeInBytes: Long = 0L
     override var downloadCounter: Int = 0
