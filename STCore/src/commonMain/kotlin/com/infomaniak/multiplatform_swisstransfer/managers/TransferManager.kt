@@ -75,6 +75,18 @@ class TransferManager internal constructor(
     }
 
     /**
+     * Update all pending transfers in database, most transfers are in [TransferStatus.WAIT_VIRUS_CHECK] status.
+     */
+    suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.IO) {
+        val transfers = transferController.getNotReadyTransfers()
+        transfers.forEach { transfer ->
+            runCatching {
+                addTransferByLinkUUID(transfer.linkUUID, null)
+            }
+        }
+    }
+
+    /**
      * Retrieves a [TransferUi] by linkUUID.
      *
      * @param transferUUID The UUID of an existing transfer in the database.
@@ -109,11 +121,12 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByLinkUUID(linkUUID: String, uploadSession: UploadSession): Unit = withContext(Dispatchers.IO) {
+    suspend fun addTransferByLinkUUID(linkUUID: String, uploadSession: UploadSession?): Unit = withContext(Dispatchers.IO) {
         runCatching {
             addTransfer(transferRepository.getTransferByLinkUUID(linkUUID).data, TransferDirection.SENT)
         }.onFailure { exception ->
             when {
+                uploadSession == null -> return@withContext
                 exception is UnexpectedApiErrorFormatException && exception.bodyResponse.contains("wait_virus_check") -> {
                     createTransferLocally(linkUUID, uploadSession)
                 }
