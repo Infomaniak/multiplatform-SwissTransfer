@@ -51,11 +51,11 @@ class AppSettingsDB : RealmObject, AppSettings {
             _emailLanguage = value.value
         }
 
-    private var _lastTransferType: String = DEFAULT_TRANSFER_TYPE.value
+    private var _lastTransferType: String = DEFAULT_TRANSFER_TYPE.name
     override var lastTransferType: TransferType
-        get() = TransferType.entries.find { it.value == _lastTransferType } ?: DEFAULT_TRANSFER_TYPE
+        get() = TransferType.entries.find { it.name == _lastTransferType } ?: DEFAULT_TRANSFER_TYPE
         set(value) {
-            _lastTransferType = value.value
+            _lastTransferType = value.name
         }
 
     companion object {
