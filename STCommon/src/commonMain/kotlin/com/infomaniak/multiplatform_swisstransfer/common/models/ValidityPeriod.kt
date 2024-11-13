@@ -17,9 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class ValidityPeriod(val value: String) {
-    THIRTY("30"),
-    FIFTEEN("15"),
-    SEVEN("7"),
-    ONE("1"),
+enum class ValidityPeriod(val value: Int) {
+    THIRTY(30),
+    FIFTEEN(15),
+    SEVEN(7),
+    ONE(1),
 }

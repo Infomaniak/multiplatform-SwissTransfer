@@ -17,9 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class DownloadLimit(val value: String) {
-    TWO_HUNDRED_FIFTY("250"),
-    ONE_HUNDRED("100"),
-    TWENTY("20"),
-    ONE("1"),
+enum class DownloadLimit(val value: Int) {
+    TWO_HUNDRED_FIFTY(250),
+    ONE_HUNDRED(100),
+    TWENTY(20),
+    ONE(1),
 }
