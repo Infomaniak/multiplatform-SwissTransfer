@@ -106,6 +106,13 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class, CancellationException::class)
+    suspend fun setLastAuthorEmail(authorEmail: String?) = runThrowingRealm {
+        updateAppSettings { mutableAppSettings ->
+            mutableAppSettings.lastAuthorEmail = authorEmail
+        }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }
