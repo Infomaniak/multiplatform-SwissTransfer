@@ -25,4 +25,5 @@ interface AppSettings {
     val downloadLimit: DownloadLimit
     val emailLanguage: EmailLanguage
     val lastTransferType: TransferType
+    val lastAuthorEmail: String?
 }

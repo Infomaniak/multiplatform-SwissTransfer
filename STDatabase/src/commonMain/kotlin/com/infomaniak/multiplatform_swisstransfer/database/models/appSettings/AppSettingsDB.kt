@@ -58,6 +58,8 @@ class AppSettingsDB : RealmObject, AppSettings {
             _lastTransferType = value.name
         }
 
+    override var lastAuthorEmail: String? = null
+
     companion object {
         private val DEFAULT_THEME = Theme.SYSTEM
         private val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
