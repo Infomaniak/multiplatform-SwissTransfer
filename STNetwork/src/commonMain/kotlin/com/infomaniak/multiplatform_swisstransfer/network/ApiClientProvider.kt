@@ -28,6 +28,7 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.statement.HttpResponse
@@ -36,9 +37,15 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
-class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>? = null) {
+class ApiClientProvider internal constructor(
+    engine: HttpClientEngineFactory<*>? = null,
+    // When you don't use SwissTransferInjection, you don't have an userAgent, so we're currently setting a default value.
+    // See later how to improve it.
+    private val userAgent: String = "Ktor client",
+) {
 
     constructor() : this(null)
+    constructor(userAgent: String) : this(engine = null, userAgent)
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -52,6 +59,9 @@ class ApiClientProvider internal constructor(engine: HttpClientEngineFactory<*>?
     fun createHttpClient(engine: HttpClientEngineFactory<*>?): HttpClient {
         val block: HttpClientConfig<*>.() -> Unit = {
             expectSuccess = true
+            install(UserAgent) {
+                agent = userAgent
+            }
             install(ContentNegotiation) {
                 json(this@ApiClientProvider.json)
             }

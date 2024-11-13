@@ -35,6 +35,7 @@ centralized access point to orchestrate transfer operations.
 
 | Type     | Name                | Description                                           |
 |----------|---------------------|-------------------------------------------------------|
+| Property | userAgent           | Customize client api userAgent.                       |
 | Property | appSettingsManager  | A manager used to orchestrate AppSettings operations. |
 | Property | transferManager     | A manager used to orchestrate Transfers operations.   |
 | Property | accountManager      | A manager used to orchestrate Accounts operations.    |
@@ -52,7 +53,7 @@ centralized access point to orchestrate transfer operations.
 
 - **Usage Example**:
   ```kotlin
-  val core = SwissTransferInjection()
+  val core = SwissTransferInjection(userAgent = "user_agent")
   val appSettingsManager = core.appSettingsManager
   // Use the appSettingsManager to orchestrate AppSettings
   ```
@@ -65,7 +66,7 @@ centralized access point to orchestrate transfer operations.
 
 - **Usage Example**:
   ```kotlin
-  val core = SwissTransferInjection()
+  val core = SwissTransferInjection(userAgent = "user_agent")
   val transferManager = core.transferManager
   // Use the transferManager to orchestrate Transfers
   ```
@@ -80,7 +81,7 @@ centralized access point to orchestrate transfer operations.
 
 - **Usage Example**:
   ```kotlin
-  val core = SwissTransferInjection()
+  val core = SwissTransferInjection(userAgent = "user_agent")
   val accountManager = core.accountManager
   // Use the accountManager to orchestrate Accounts
   ```
@@ -92,7 +93,7 @@ centralized access point to orchestrate transfer operations.
 
 - **Usage Example**:
   ```kotlin
-  val core = SwissTransferInjection()
+  val core = SwissTransferInjection(userAgent = "user_agent")
   val uploadManager = core.uploadManager
   // Use the uploadManager to orchestrate Uploads
   ```
@@ -105,7 +106,7 @@ centralized access point to orchestrate transfer operations.
 
 - **Usage Example**:
   ```kotlin
-  val core = SwissTransferInjection()
+  val core = SwissTransferInjection(userAgent = "user_agent")
   val accountManager = core.sharedApiUrlCreator
   ```
 
