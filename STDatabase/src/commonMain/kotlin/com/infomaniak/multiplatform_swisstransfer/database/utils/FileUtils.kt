@@ -28,7 +28,7 @@ object FileUtils {
         for (file in files) {
             val fileDB = FileDB(file)
 
-            if (file.path?.isEmpty() == true) {
+            if (file.path == null || file.path?.isEmpty() == true) {
                 tree.add(fileDB)
             } else {
                 val pathComponents = file.path?.split("/")?.toMutableList() ?: emptyList()
