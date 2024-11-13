@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
 import kotlinx.coroutines.test.runTest
@@ -66,6 +67,14 @@ class TransferControllerTest {
     @Test
     fun canGetReceivedTransfers() = runTest {
         canGetTransfersByDirection(TransferDirection.RECEIVED)
+    }
+
+    @Test
+    fun canGetNotReadyTransfers() = runTest {
+        addTwoRandomTransfersInDatabase()
+        val transfers = transferController.getNotReadyTransfers()
+        assertEquals(transfers.count(), 1)
+        assertEquals(transfers.first().transferStatus, TransferStatus.WAIT_VIRUS_CHECK)
     }
 
     @Test
