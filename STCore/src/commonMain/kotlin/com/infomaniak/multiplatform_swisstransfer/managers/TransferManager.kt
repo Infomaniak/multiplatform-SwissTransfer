@@ -81,8 +81,7 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.IO) {
-        val transfers = transferController.getNotReadyTransfers()
-        transfers.forEach { transfer ->
+        transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
                 addTransferByLinkUUID(transfer.linkUUID, null)
             }
