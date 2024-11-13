@@ -32,33 +32,32 @@ import io.realm.kotlin.query.Sort
 import io.realm.kotlin.query.TRUE_PREDICATE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TransferController(private val realmProvider: RealmProvider) {
 
-    private val realm by lazy { realmProvider.realmTransfers }
+    private val realm by lazy { realmProvider.realmTransfers!! }
 
     //region Get data
     @Throws(RealmException::class)
-    internal fun getTransfers(transferDirection: TransferDirection? = null): RealmResults<TransferDB>? = runThrowingRealm {
+    internal fun getTransfers(transferDirection: TransferDirection? = null): RealmResults<TransferDB> = runThrowingRealm {
         val sentFilterQuery = when (transferDirection) {
             null -> TRUE_PREDICATE
             else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
         }
-        return realm?.query<TransferDB>(sentFilterQuery)?.sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)?.find()
+        return realm.query<TransferDB>(sentFilterQuery).sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING).find()
     }
 
     @Throws(RealmException::class)
     fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = runThrowingRealm {
-        return getTransfers(transferDirection)?.asFlow()?.mapLatest { it.list } ?: emptyFlow()
+        return getTransfers(transferDirection).asFlow().mapLatest { it.list }
     }
 
     @Throws(RealmException::class)
     fun getTransfer(linkUUID: String): Transfer? = runThrowingRealm {
-        return realm?.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'")?.first()?.find()
+        return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first().find()
     }
 
     @Throws(RealmException::class)
@@ -71,7 +70,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     //region Upsert data
     @Throws(RealmException::class, CancellationException::class)
     suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) = runThrowingRealm {
-        realm?.write {
+        realm.write {
             this.copyToRealm(TransferDB(transfer, transferDirection), UpdatePolicy.ALL)
         }
     }
@@ -82,7 +81,7 @@ class TransferController(private val realmProvider: RealmProvider) {
         uploadSession: UploadSession,
         transferStatus: TransferStatus,
     ) = runThrowingRealm {
-        realm?.write {
+        realm.write {
             this.copyToRealm(TransferDB(linkUUID, uploadSession, transferStatus), UpdatePolicy.ALL)
         }
     }
@@ -91,7 +90,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     //region Update data
     @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
-        realm?.write { deleteAll() }
+        realm.write { deleteAll() }
     }
     //endregion
 }

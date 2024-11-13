@@ -56,7 +56,7 @@ class TransferControllerTest {
     fun canGetTransfers() = runTest {
         addTwoRandomTransfersInDatabase()
         val transfers = transferController.getTransfers()
-        assertEquals(2, transfers?.count(), "The transfer list must contain 2 items")
+        assertEquals(2, transfers.count(), "The transfer list must contain 2 items")
     }
 
     @Test
@@ -100,7 +100,7 @@ class TransferControllerTest {
     fun canRemoveTransfers() = runTest {
         transferController.upsert(DummyTransfer.transfer1, TransferDirection.SENT)
         transferController.removeData()
-        assertEquals(0, transferController.getTransfers()?.count(), "The transfers table must be empty")
+        assertEquals(0, transferController.getTransfers().count(), "The transfers table must be empty")
     }
 
     private suspend fun canCreateTransfer(sent: TransferDirection) {
