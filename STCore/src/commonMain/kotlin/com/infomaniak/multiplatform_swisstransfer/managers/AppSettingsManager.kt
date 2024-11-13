@@ -110,4 +110,17 @@ class AppSettingsManager internal constructor(
     suspend fun setLastTransferType(transferType: TransferType): Unit = withContext(Dispatchers.IO) {
         appSettingsController.setLastTransferType(transferType)
     }
+
+    /**
+     * Asynchronously sets the last email of the transfer author entered by the user.
+     *
+     * @param authorEmail The last email of the transfer author entered.
+     *
+     * @throws RealmException If the provided email is invalid.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setLastAuthorEmail(authorEmail: String?): Unit = withContext(Dispatchers.IO) {
+        appSettingsController.setLastAuthorEmail(authorEmail)
+    }
 }
