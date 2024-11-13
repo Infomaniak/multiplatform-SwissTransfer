@@ -25,9 +25,11 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
+import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.RealmResults
+import io.realm.kotlin.query.RealmSingleQuery
 import io.realm.kotlin.query.Sort
 import io.realm.kotlin.query.TRUE_PREDICATE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,8 +58,13 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
+    fun getTransferFlow(linkUUID: String): Flow<TransferDB?> = runThrowingRealm {
+        return getTransferQuery(realm, linkUUID).asFlow().mapLatest { it.obj }
+    }
+
+    @Throws(RealmException::class)
     fun getTransfer(linkUUID: String): Transfer? = runThrowingRealm {
-        return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first().find()
+        return getTransferQuery(realm, linkUUID).find()
     }
 
     @Throws(RealmException::class)
@@ -93,4 +100,11 @@ class TransferController(private val realmProvider: RealmProvider) {
         realm.write { deleteAll() }
     }
     //endregion
+
+    private companion object {
+
+        private fun getTransferQuery(realm: Realm, linkUUID: String): RealmSingleQuery<TransferDB> {
+            return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()
+        }
+    }
 }
