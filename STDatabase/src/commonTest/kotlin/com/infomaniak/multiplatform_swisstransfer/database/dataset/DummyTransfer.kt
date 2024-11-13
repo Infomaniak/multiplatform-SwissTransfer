@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.dataset
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 
 object DummyTransfer {
 
@@ -54,12 +55,14 @@ object DummyTransfer {
         override var isMailSent: Boolean = true
         override var downloadHost: String = "url"
         override var container: Container = this@DummyTransfer.container1
+        override val transferStatus: TransferStatus = TransferStatus.READY
     }
 
     val transfer2 = object : Transfer by transfer1 {
         override val linkUUID: String = "transfer2"
         override val containerUUID: String = "container2"
         override val container: Container = container2
+        override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }
 
     val transfers = listOf(transfer1, transfer2)
