@@ -17,14 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
-import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
-import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
-import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import com.infomaniak.multiplatform_swisstransfer.common.models.*
 
 interface AppSettings {
     val theme: Theme
     val validityPeriod: ValidityPeriod
     val downloadLimit: DownloadLimit
     val emailLanguage: EmailLanguage
+    val lastTransferType: TransferType
 }
