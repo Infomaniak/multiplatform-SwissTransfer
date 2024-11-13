@@ -20,7 +20,9 @@ package com.infomaniak.multiplatform_swisstransfer.database.dataset
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 
 object DummyUpload {
     val container = object : UploadContainer {
@@ -40,11 +42,11 @@ object DummyUpload {
 
     private val upload1 = object : UploadSession {
         override val uuid: String = "upload1"
-        override val duration: String = "30"
+        override val duration: ValidityPeriod = ValidityPeriod.THIRTY
         override val authorEmail: String = ""
         override val password: String = ""
         override val message: String = ""
-        override val numberOfDownload: Int = 0
+        override val numberOfDownload: DownloadLimit = DownloadLimit.ONE
         override val language: EmailLanguage = EmailLanguage.ITALIAN
         override val recipientsEmails: List<String> = emptyList()
         override val files: List<UploadFileSession> = emptyList()

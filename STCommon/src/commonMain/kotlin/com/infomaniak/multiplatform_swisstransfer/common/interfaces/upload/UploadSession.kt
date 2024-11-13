@@ -17,15 +17,17 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
+import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 
 interface UploadSession {
     val uuid: String
-    val duration: String
+    val duration: ValidityPeriod get() = ValidityPeriod.THIRTY
     val authorEmail: String
     val password: String
     val message: String
-    val numberOfDownload: Int
+    val numberOfDownload: DownloadLimit get() = DownloadLimit.TWO_HUNDRED_FIFTY
     val language: EmailLanguage
     val recipientsEmails: List<String>
     val files: List<UploadFileSession>

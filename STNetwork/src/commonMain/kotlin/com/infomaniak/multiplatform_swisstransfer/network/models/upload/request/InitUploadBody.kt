@@ -41,12 +41,12 @@ class InitUploadBody(
     val recipientsEmails: String = "",
 ) {
     constructor(uploadSession: UploadSession, recaptcha: String) : this(
-        duration = uploadSession.duration,
+        duration = uploadSession.duration.value.toString(),
         authorEmail = uploadSession.authorEmail,
         password = uploadSession.password,
         message = uploadSession.message,
         sizeOfUpload = uploadSession.files.sumOf { it.size },
-        numberOfDownload = uploadSession.numberOfDownload,
+        numberOfDownload = uploadSession.numberOfDownload.value,
         numberOfFile = uploadSession.files.count(),
         recaptcha = recaptcha,
         language = uploadSession.language.code,
