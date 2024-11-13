@@ -20,14 +20,16 @@ package com.infomaniak.multiplatform_swisstransfer.data
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 
 data class NewUploadSession(
-    override val duration: String,
+    override val duration: ValidityPeriod,
     override val authorEmail: String,
     override val password: String,
     override val message: String,
-    override val numberOfDownload: Int,
+    override val numberOfDownload: DownloadLimit,
     override val language: EmailLanguage,
     override val recipientsEmails: List<String>,
     override val files: List<UploadFileSession>,

@@ -18,7 +18,10 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.upload
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
@@ -28,11 +31,11 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 class UploadSessionDB() : UploadSession, RealmObject {
     @PrimaryKey
     override var uuid: String = RealmUUID.random().toString()
-    override var duration: String = ""
+    private var _duration: Int = AppSettingsDB.DEFAULT_VALIDITY_PERIOD.value
     override var authorEmail: String = ""
     override var password: String = ""
     override var message: String = ""
-    override var numberOfDownload: Int = 0
+    private var _numberOfDownload: Int = AppSettingsDB.DEFAULT_DOWNLOAD_LIMIT.value
     override var recipientsEmails: RealmList<String> = realmListOf()
     override var files: RealmList<UploadFileSessionDB> = realmListOf()
     private var _language: String = ""
@@ -41,6 +44,8 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var remoteContainer: UploadContainerDB? = null
     override var remoteUploadHost: String? = null
 
+    override val duration: ValidityPeriod get() = ValidityPeriod.entries.first { it.value == _duration }
+    override val numberOfDownload: DownloadLimit get() = DownloadLimit.entries.first { it.value == _numberOfDownload }
     override var language: EmailLanguage
         get() = EmailLanguage.entries.first { it.code == _language }
         set(value) {
@@ -49,11 +54,11 @@ class UploadSessionDB() : UploadSession, RealmObject {
 
     constructor(uploadSession: UploadSession) : this() {
         if (uploadSession.uuid.isNotEmpty()) this.uuid = uploadSession.uuid
-        this.duration = uploadSession.duration
+        this._duration = uploadSession.duration.value
         this.authorEmail = uploadSession.authorEmail
         this.password = uploadSession.password
         this.message = uploadSession.message
-        this.numberOfDownload = uploadSession.numberOfDownload
+        this._numberOfDownload = uploadSession.numberOfDownload.value
         this.language = uploadSession.language
         this.recipientsEmails = realmListOf(*uploadSession.recipientsEmails.toTypedArray())
         this.files = uploadSession.files.mapTo(realmListOf(), ::UploadFileSessionDB)
