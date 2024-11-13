@@ -15,15 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings
+package com.infomaniak.multiplatform_swisstransfer.common.models
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.*
-
-interface AppSettings {
-    val theme: Theme
-    val validityPeriod: ValidityPeriod
-    val downloadLimit: DownloadLimit
-    val emailLanguage: EmailLanguage
-    val lastTransferType: TransferType
-    val lastAuthorEmail: String?
+enum class TransferType {
+    LINK,
+    QR_CODE,
+    PROXIMITY,
+    MAIL,
 }

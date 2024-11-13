@@ -19,10 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
-import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
-import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
-import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
-import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
@@ -98,6 +95,20 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = runThrowingRealm {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.emailLanguage = emailLanguage
+        }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setLastTransferType(transferType: TransferType) = runThrowingRealm {
+        updateAppSettings { mutableAppSettings ->
+            mutableAppSettings.lastTransferType = transferType
+        }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setLastAuthorEmail(authorEmail: String?) = runThrowingRealm {
+        updateAppSettings { mutableAppSettings ->
+            mutableAppSettings.lastAuthorEmail = authorEmail
         }
     }
 

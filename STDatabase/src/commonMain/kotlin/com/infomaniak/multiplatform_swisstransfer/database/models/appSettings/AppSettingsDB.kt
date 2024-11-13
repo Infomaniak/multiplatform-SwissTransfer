@@ -18,10 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.appSettings
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
-import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
-import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
-import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
-import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import io.realm.kotlin.types.RealmObject
 
 class AppSettingsDB : RealmObject, AppSettings {
@@ -54,10 +51,20 @@ class AppSettingsDB : RealmObject, AppSettings {
             _emailLanguage = value.value
         }
 
+    private var _lastTransferType: String = DEFAULT_TRANSFER_TYPE.name
+    override var lastTransferType: TransferType
+        get() = TransferType.entries.find { it.name == _lastTransferType } ?: DEFAULT_TRANSFER_TYPE
+        set(value) {
+            _lastTransferType = value.name
+        }
+
+    override var lastAuthorEmail: String? = null
+
     companion object {
         private val DEFAULT_THEME = Theme.SYSTEM
         private val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         private val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY
         private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
+        private val DEFAULT_TRANSFER_TYPE = TransferType.QR_CODE
     }
 }
