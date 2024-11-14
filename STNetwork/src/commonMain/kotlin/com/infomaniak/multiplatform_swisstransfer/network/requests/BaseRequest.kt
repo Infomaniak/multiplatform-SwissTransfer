@@ -18,6 +18,9 @@
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -61,6 +64,13 @@ internal open class BaseRequest(protected val json: Json, protected val httpClie
     }
 
     protected suspend inline fun <reified R> HttpResponse.decode(): R {
-        return runCatching { body<R>() }.getOrElse { throw UnknownException(it) }
+        return runCatching {
+            body<R>()
+        }.getOrElse { exception ->
+            when (exception) {
+                is ApiException, is NetworkException, is UnexpectedApiErrorFormatException -> throw exception
+                else -> throw UnknownException(exception)
+            }
+        }
     }
 }

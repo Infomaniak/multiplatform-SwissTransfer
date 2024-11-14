@@ -17,18 +17,42 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network
 
+import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.MissingFieldException
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class TransferRepositoryTest {
 
-    private val transferRepository = TransferRepository(ApiClientProvider()) // TODO: Use mock client
+    private val apiClientProvider = ApiClientProvider()
+    private val transferRepository = TransferRepository(apiClientProvider) // TODO: Use mock client
 
     @Test
     fun canExtractLinkUUIDFromUrl() {
         val url = "https://www.swisstransfer.com/d/fa7d299d-1001-4668-83a4-2a9b61aa59e8"
         val result = transferRepository.extractUUID(url)
         assertEquals("fa7d299d-1001-4668-83a4-2a9b61aa59e8", result)
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Test
+    fun throwWhenApiResponseWithError() {
+        val data = """
+            {
+              "result": "success",
+              "data": {
+                "type": "need_password",
+                "message": "Transfer need a password"
+              }
+            }
+        """.trimIndent()
+
+        assertFailsWith(MissingFieldException::class) {
+            apiClientProvider.json.decodeFromString<ApiResponse<TransferApi>>(data)
+        }
     }
 }

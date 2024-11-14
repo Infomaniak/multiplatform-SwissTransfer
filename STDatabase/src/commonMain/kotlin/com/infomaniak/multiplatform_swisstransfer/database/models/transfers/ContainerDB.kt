@@ -71,7 +71,7 @@ class ContainerDB() : Container, RealmObject {
         this.message = uploadContainer.message
         this.needPassword = uploadContainer.needPassword
         this.language = uploadContainer.language
-        this.sizeUploaded = 0
+        this.sizeUploaded = uploadFileSessionList.sumOf { it.size }
         this.deletedDateTimestamp = null
         this.swiftVersion = uploadContainer.swiftVersion.toInt()
         this.downloadLimit = uploadContainer.downloadLimit

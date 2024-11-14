@@ -24,31 +24,31 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ContainerApi : Container {
+data class ContainerApi(
     @SerialName("UUID")
-    override var uuid: String = ""
-    override var duration: Long = 0L
+    override var uuid: String,
+    override var duration: Long,
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var createdDateTimestamp: Long = 0L
+    override var createdDateTimestamp: Long = 0L,
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var expiredDateTimestamp: Long = 0L
+    override var expiredDateTimestamp: Long = 0L,
     @SerialName("numberOfFile")
-    override var numberOfFiles: Int = 0
-    override var message: String? = null
+    override var numberOfFiles: Int,
+    override var message: String? = null,
     @Serializable(with = IntToBooleanSerializer::class)
-    override var needPassword: Boolean = false
+    override var needPassword: Boolean = false,
     @SerialName("lang")
-    override var language: String = ""
-    override var sizeUploaded: Long = 0L
+    override var language: String,
+    override var sizeUploaded: Long,
     @SerialName("deletedDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var deletedDateTimestamp: Long? = null
-    override var swiftVersion: Int = 0
-    override var downloadLimit: Int = 0
-    override var source: String = "ST"
+    override var deletedDateTimestamp: Long? = null,
+    override var swiftVersion: Int = 0,
+    override var downloadLimit: Int,
+    override var source: String = "ST",
     // @SerialName("WSUser") // TODO: What's this ?
     // var wsUser: JsonElement? = null
-    override var files: List<FileApi> = emptyList()
-}
+    override var files: List<FileApi>,
+) : Container

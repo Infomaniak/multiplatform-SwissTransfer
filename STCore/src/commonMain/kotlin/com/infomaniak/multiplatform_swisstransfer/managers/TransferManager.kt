@@ -154,8 +154,12 @@ class TransferManager internal constructor(
         }.onFailure { exception ->
             when {
                 uploadSession == null -> return@withContext
-                exception is UnexpectedApiErrorFormatException && exception.bodyResponse.contains("wait_virus_check") -> {
-                    createTransferLocally(linkUUID, uploadSession)
+                exception is UnexpectedApiErrorFormatException -> {
+                    val transferStatus = when {
+                        exception.bodyResponse.contains("wait_virus_check") -> TransferStatus.WAIT_VIRUS_CHECK
+                        else -> TransferStatus.UNKNOWN
+                    }
+                    createTransferLocally(linkUUID, uploadSession, transferStatus)
                 }
                 else -> throw exception
             }
@@ -203,9 +207,9 @@ class TransferManager internal constructor(
         }
     }
 
-    private suspend fun createTransferLocally(linkUUID: String, uploadSession: UploadSession) {
+    private suspend fun createTransferLocally(linkUUID: String, uploadSession: UploadSession, transferStatus: TransferStatus) {
         runCatching {
-            transferController.generateAndInsert(linkUUID, uploadSession, TransferStatus.WAIT_VIRUS_CHECK)
+            transferController.generateAndInsert(linkUUID, uploadSession, transferStatus)
         }.onFailure {
             throw UnknownException(it)
         }
