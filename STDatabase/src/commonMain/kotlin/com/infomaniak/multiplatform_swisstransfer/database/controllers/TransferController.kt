@@ -58,7 +58,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getTransferFlow(linkUUID: String): Flow<TransferDB?> = runThrowingRealm {
+    fun getTransferFlow(linkUUID: String): Flow<Transfer?> = runThrowingRealm {
         return getTransferQuery(realm, linkUUID).asFlow().mapLatest { it.obj }
     }
 
