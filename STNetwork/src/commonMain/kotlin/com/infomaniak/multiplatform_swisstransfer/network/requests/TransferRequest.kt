@@ -21,11 +21,22 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
+import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.Json
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 internal class TransferRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
-    suspend fun getTransfer(linkUUID: String): ApiResponse<TransferApi> {
-        return get(url = createUrl(ApiRoutes.getTransfer(linkUUID)))
+    @OptIn(ExperimentalEncodingApi::class)
+    suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponse<TransferApi> {
+        return get(
+            url = createUrl(ApiRoutes.getTransfer(linkUUID)),
+            appendHeaders = {
+                if (password?.isNotEmpty() == true) {
+                    append(HttpHeaders.Authorization, Base64.Default.encode(password.encodeToByteArray()))
+                }
+            }
+        )
     }
 }

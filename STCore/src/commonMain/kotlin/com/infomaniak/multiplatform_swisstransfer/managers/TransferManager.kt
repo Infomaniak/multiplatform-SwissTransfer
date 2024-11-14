@@ -150,7 +150,7 @@ class TransferManager internal constructor(
     )
     suspend fun addTransferByLinkUUID(linkUUID: String, uploadSession: UploadSession?): Unit = withContext(Dispatchers.IO) {
         runCatching {
-            addTransfer(transferRepository.getTransferByLinkUUID(linkUUID).data, TransferDirection.SENT)
+            addTransfer(transferRepository.getTransferByLinkUUID(linkUUID, uploadSession?.password).data, TransferDirection.SENT)
         }.onFailure { exception ->
             when {
                 uploadSession == null -> return@withContext

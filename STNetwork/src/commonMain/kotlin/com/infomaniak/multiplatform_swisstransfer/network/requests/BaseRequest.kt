@@ -26,10 +26,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.URLBuilder
-import io.ktor.http.Url
-import io.ktor.http.contentType
+import io.ktor.http.*
 import kotlinx.serialization.json.Json
 
 internal open class BaseRequest(protected val json: Json, protected val httpClient: HttpClient) {
@@ -41,8 +38,14 @@ internal open class BaseRequest(protected val json: Json, protected val httpClie
         }.build()
     }
 
-    protected suspend inline fun <reified R> get(url: Url, httpClient: HttpClient = this.httpClient): R {
-        return httpClient.get(url) {}.decode<R>()
+    protected suspend inline fun <reified R> get(
+        url: Url,
+        crossinline appendHeaders: HeadersBuilder.() -> Unit = {},
+        httpClient: HttpClient = this.httpClient,
+    ): R {
+        return httpClient.get(url) {
+            headers { appendHeaders() }
+        }.decode<R>()
     }
 
     protected suspend inline fun <reified R> post(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
