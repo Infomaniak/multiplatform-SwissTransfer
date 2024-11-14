@@ -17,7 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network
 
-import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
@@ -90,15 +89,18 @@ class ApiClientProvider internal constructor(
                             val apiError = json.decodeFromString<ApiError>(bodyResponse)
                             throw ApiException(apiError.errorCode, apiError.message)
                         }.onFailure {
-                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse)
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null)
                         }
                     }
                 }
-                handleResponseExceptionWithRequest { cause, _ ->
+                handleResponseExceptionWithRequest { cause, request ->
+                    val response = request.call.response
+                    val bodyResponse = response.bodyAsText()
+                    val statusCode = response.status.value
                     when (cause) {
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
                         is ApiException, is UnexpectedApiErrorFormatException -> throw cause
-                        else -> throw UnknownException(cause)
+                        else -> throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause)
                     }
                 }
             }

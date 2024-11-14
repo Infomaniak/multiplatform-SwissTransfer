@@ -25,5 +25,10 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  *
  * @param statusCode The HTTP status code returned by the API.
  * @param bodyResponse The raw response body from the API that could not be parsed.
+ * @param cause The cause of the exception if exists otherwise null
  */
-class UnexpectedApiErrorFormatException(val statusCode: Int, val bodyResponse: String) : Exception(bodyResponse)
+class UnexpectedApiErrorFormatException(
+    val statusCode: Int,
+    val bodyResponse: String,
+    override val cause: Throwable?,
+) : Exception(bodyResponse, cause)
