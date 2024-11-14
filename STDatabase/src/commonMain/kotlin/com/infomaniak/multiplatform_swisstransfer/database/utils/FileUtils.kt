@@ -37,8 +37,8 @@ object FileUtils {
 
                 fileDB.parent = parent?.apply {
                     children.add(fileDB)
-                    fileSizeInBytes = children.sumOf { it.fileSizeInBytes } ?: 0L
-                    receivedSizeInBytes = children.sumOf { it.receivedSizeInBytes } ?: 0L
+                    fileSizeInBytes = children.sumOf { it.fileSizeInBytes }
+                    receivedSizeInBytes = children.sumOf { it.receivedSizeInBytes }
                 }
 
                 tree = modifiedTree.toMutableList()
@@ -49,34 +49,23 @@ object FileUtils {
     }
 
     private fun findFolder(pathComponents: List<String>, tree: List<FileDB>): Pair<List<FileDB>, FileDB?> {
-        var result: FileDB? = null
-        var modifiedTree = tree.toMutableList()
-
         val fakeFirstParent = FileDB(folderName = "")
-        fakeFirstParent.children = modifiedTree.toRealmList()
+        fakeFirstParent.children = tree.toRealmList()
         var currentParent = fakeFirstParent
-
         pathComponents.forEach { currentName ->
-            currentParent.children.firstOrNull { it.fileName == currentName && it.isFolder }?.let { branch ->
-                result = branch
-            } ?: run {
+            // Update the current parent to the folder we found/created
+            currentParent = currentParent.children.firstOrNull { it.fileName == currentName && it.isFolder } ?: run {
                 val newFolder = FileDB(folderName = currentName)
                 newFolder.parent = currentParent
                 currentParent.children.add(newFolder)
-
-                result = newFolder
+                newFolder
             }
-
-            // Update the current parent to the folder we found/created
-            currentParent = result!!
         }
-
         // Reassign the fake parent children to the tree and remove the fake parent link from the elements of the tree base
-        modifiedTree = fakeFirstParent.children
+        val modifiedTree: List<FileDB> = fakeFirstParent.children
         modifiedTree.forEach {
             it.parent = null
         }
-
-        return Pair(modifiedTree, result!!)
+        return Pair(modifiedTree, currentParent)
     }
 }
