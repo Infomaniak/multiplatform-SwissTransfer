@@ -27,19 +27,21 @@ object FileUtils {
         var tree = mutableListOf<FileDB>()
         for (file in files) {
             val fileDB = FileDB(file)
+            val filePath = file.path
 
-            if (file.path == null || file.path?.isEmpty() == true) {
+            if (filePath.isNullOrEmpty()) {
                 tree.add(fileDB)
             } else {
-                val pathComponents = file.path?.split("/")?.toMutableList() ?: emptyList()
-                val result = findFolder(pathComponents = pathComponents, tree = tree)
-                val parent = result.second
-                fileDB.parent = parent
-                parent?.children?.add(fileDB)
-                parent?.fileSizeInBytes = parent?.children?.sumOf { it.fileSizeInBytes } ?: 0L
-                parent?.receivedSizeInBytes = parent?.children?.sumOf { it.receivedSizeInBytes } ?: 0L
+                val pathComponents = filePath.split("/").toMutableList()
+                val (modifiedTree, parent) = findFolder(pathComponents = pathComponents, tree = tree)
 
-                tree = result.first.toMutableList()
+                fileDB.parent = parent?.apply {
+                    children.add(fileDB)
+                    fileSizeInBytes = children.sumOf { it.fileSizeInBytes } ?: 0L
+                    receivedSizeInBytes = children.sumOf { it.receivedSizeInBytes } ?: 0L
+                }
+
+                tree = modifiedTree.toMutableList()
             }
         }
 
@@ -54,9 +56,7 @@ object FileUtils {
         fakeFirstParent.children = modifiedTree.toRealmList()
         var currentParent = fakeFirstParent
 
-        pathComponents.forEach {
-            val currentName = it
-
+        pathComponents.forEach { currentName ->
             currentParent.children.firstOrNull { it.fileName == currentName && it.isFolder }?.let { branch ->
                 result = branch
             } ?: run {
