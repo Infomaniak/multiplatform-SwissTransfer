@@ -99,7 +99,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun deleteTransfer(transferUUID: String) = runThrowingRealm {
         realm.write {
             val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
-            this.delete(transferToDelete)
+            delete(transferToDelete)
         }
     }
 
