@@ -81,7 +81,7 @@ class FileUtilsTest {
             )
             assertTrue(
                 actual = innerFiles.find { it.fileName == "file4.txt" } != null,
-                message = "Children of folder1 should contain two files",
+                message = "file4.txt is missing from folder1",
             )
         } ?: fail("folder1 doesn't exist")
 
@@ -90,20 +90,21 @@ class FileUtilsTest {
         findFirstChildByNameInList(tree, "folder2")?.let { folder2 ->
             assertTrue(
                 actual = folder2.children.none { it.isFolder },
-                message = "Children of folder2 should contain one folder",
+                message = "Children of folder2 should not contain any folders",
             )
-            assertTrue(
-                actual = folder2.children.filter { !it.isFolder }.size == 2,
-                message = "Children of folder2 should contain two files",
-            )
+
             val innerFiles = folder2.children.filter { !it.isFolder }
             assertTrue(
+                actual = innerFiles.size == 2,
+                message = "Children of folder2 should contain two files",
+            )
+            assertTrue(
                 actual = innerFiles.find { it.fileName == "file5.txt" } != null,
-                message = "file4.txt in folder2 does not exist",
+                message = "file5.txt in folder2 does not exist",
             )
             assertTrue(
                 actual = innerFiles.find { it.fileName == "file6.txt" } != null,
-                message = "file5.txt in folder2 does not exist",
+                message = "file6.txt in folder2 does not exist",
             )
         } ?: fail("folder2 doesn't exist")
     }
@@ -135,11 +136,11 @@ class FileUtilsTest {
         findFirstChildByNameInList(tree, "folder5")?.let { folder5 ->
             assertTrue(
                 actual = folder5.parent != null,
-                message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
+                message = "Parent of folder5 should not be null",
             )
             assertTrue(
                 actual = folder5.parent!!.fileName == "folder4",
-                message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
+                message = "The parent of folder5 should be named folder4",
             )
             assertTrue(
                 actual = folder5.children.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" } != null,
