@@ -26,28 +26,30 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
-class TransferApi : Transfer {
+data class TransferApi(
     @SerialName("linkUUID")
-    override var linkUUID: String = ""
+    override var linkUUID: String,
     @SerialName("containerUUID")
-    override var containerUUID: String = ""
-    override var downloadCounterCredit: Int = 0
+    override var containerUUID: String,
+    override var downloadCounterCredit: Int,
     @SerialName("createdDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var createdDateTimestamp: Long = 0L
+    override var createdDateTimestamp: Long,
     @SerialName("expiredDate")
     @Serializable(DateToTimestampSerializer::class)
-    override var expiredDateTimestamp: Long = 0L
+    override var expiredDateTimestamp: Long = 0L,
     @SerialName("isDownloadOnetime")
     @Serializable(with = IntToBooleanSerializer::class)
-    override var hasBeenDownloadedOneTime: Boolean = false
+    override var hasBeenDownloadedOneTime: Boolean = false,
     @Serializable(with = IntToBooleanSerializer::class)
-    override var isMailSent: Boolean = false
-    override var downloadHost: String = ""
-    val downloadUrl get() = "https://$downloadHost/api/download/??QuoiFeur " // TODO: Add download method url
-    // https://dl-j5769qrh.swisstransfer.com/api/download/ec6bc7ac-96b3-4a6e-8d30-8e12e379d11a/97a742c9-b0f5-4fa5-b6bf-cb2c2d6bbe94
-    override var container: ContainerApi = ContainerApi()
+    override var isMailSent: Boolean = false,
+    override var downloadHost: String,
+    override var container: ContainerApi,
+) : Transfer {
 
     @Transient
     override val transferStatus: TransferStatus = TransferStatus.READY
+
+    val downloadUrl get() = "https://$downloadHost/api/download/??QuoiFeur " // TODO: Add download method url
+    // https://dl-j5769qrh.swisstransfer.com/api/download/ec6bc7ac-96b3-4a6e-8d30-8e12e379d11a/97a742c9-b0f5-4fa5-b6bf-cb2c2d6bbe94
 }
