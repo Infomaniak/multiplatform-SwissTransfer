@@ -77,7 +77,6 @@ interface File {
             forEach { file ->
                 val foundChild = file.findChildByUuid(uuid)
                 if (foundChild != null) {
-                    foundChild.children.forEach { child -> println("children ${child.fileName}") }
                     return foundChild
                 }
             }
