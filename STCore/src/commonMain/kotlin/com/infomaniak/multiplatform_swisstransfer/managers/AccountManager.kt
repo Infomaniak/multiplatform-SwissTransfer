@@ -22,6 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -34,6 +35,7 @@ import kotlin.coroutines.cancellation.CancellationException
  */
 class AccountManager internal constructor(
     private val appSettingsController: AppSettingsController,
+    private val emailLanguageUtils: EmailLanguageUtils,
     private val uploadController: UploadController,
     private val transferController: TransferController,
     private val realmProvider: RealmProvider,
