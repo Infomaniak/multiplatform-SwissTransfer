@@ -24,6 +24,8 @@ interface AppSettings {
     val validityPeriod: ValidityPeriod
     val downloadLimit: DownloadLimit
     val emailLanguage: EmailLanguage
+    val hasCustomEmailLanguage: Boolean
+
     val lastTransferType: TransferType
     val lastAuthorEmail: String?
 }

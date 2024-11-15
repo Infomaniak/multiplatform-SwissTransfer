@@ -23,6 +23,7 @@ import io.realm.kotlin.types.RealmObject
 
 class AppSettingsDB : RealmObject, AppSettings {
 
+    //region Options available in App Settings
     private var _theme: String = Theme.SYSTEM.value
     override var theme: Theme
         get() = Theme.entries.find { it.value == _theme } ?: DEFAULT_THEME
@@ -51,6 +52,9 @@ class AppSettingsDB : RealmObject, AppSettings {
             _emailLanguage = value.value
         }
 
+    override var hasCustomEmailLanguage: Boolean = false
+    //endregion
+
     private var _lastTransferType: String = DEFAULT_TRANSFER_TYPE.name
     override var lastTransferType: TransferType
         get() = TransferType.entries.find { it.name == _lastTransferType } ?: DEFAULT_TRANSFER_TYPE
@@ -61,10 +65,11 @@ class AppSettingsDB : RealmObject, AppSettings {
     override var lastAuthorEmail: String? = null
 
     companion object {
-        private val DEFAULT_THEME = Theme.SYSTEM
         val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY
+        private val DEFAULT_THEME = Theme.SYSTEM
         private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
+
         private val DEFAULT_TRANSFER_TYPE = TransferType.QR_CODE
     }
 }

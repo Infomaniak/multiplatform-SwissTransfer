@@ -95,6 +95,7 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     suspend fun setEmailLanguage(emailLanguage: EmailLanguage) = runThrowingRealm {
         updateAppSettings { mutableAppSettings ->
             mutableAppSettings.emailLanguage = emailLanguage
+            mutableAppSettings.hasCustomEmailLanguage = true
         }
     }
 
