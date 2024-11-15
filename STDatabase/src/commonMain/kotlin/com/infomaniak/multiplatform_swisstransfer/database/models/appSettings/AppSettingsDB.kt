@@ -20,9 +20,18 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.appSettings
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.Ignore
 
-class AppSettingsDB : RealmObject, AppSettings {
+class AppSettingsDB(): RealmObject, AppSettings {
 
+    @Ignore
+    private var defaultEmailLanguage = EmailLanguage.ENGLISH
+
+    constructor(defaultEmailLanguage: EmailLanguage): this() {
+        this.defaultEmailLanguage = defaultEmailLanguage
+    }
+
+    //region Options available in App Settings
     private var _theme: String = Theme.SYSTEM.value
     override var theme: Theme
         get() = Theme.entries.find { it.value == _theme } ?: DEFAULT_THEME
@@ -44,12 +53,13 @@ class AppSettingsDB : RealmObject, AppSettings {
             _downloadLimit = value.value
         }
 
-    private var _emailLanguage: String = DEFAULT_EMAIL_LANGUAGE.value
+    private var _emailLanguage: String = defaultEmailLanguage.value
     override var emailLanguage: EmailLanguage
-        get() = EmailLanguage.entries.find { it.value == _emailLanguage } ?: DEFAULT_EMAIL_LANGUAGE
+        get() = EmailLanguage.entries.find { it.value == _emailLanguage } ?: defaultEmailLanguage
         set(value) {
             _emailLanguage = value.value
         }
+    //endregion
 
     private var _lastTransferType: String = DEFAULT_TRANSFER_TYPE.name
     override var lastTransferType: TransferType
@@ -61,10 +71,10 @@ class AppSettingsDB : RealmObject, AppSettings {
     override var lastAuthorEmail: String? = null
 
     companion object {
-        private val DEFAULT_THEME = Theme.SYSTEM
         val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY
-        private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
+        private val DEFAULT_THEME = Theme.SYSTEM
+
         private val DEFAULT_TRANSFER_TYPE = TransferType.QR_CODE
     }
 }

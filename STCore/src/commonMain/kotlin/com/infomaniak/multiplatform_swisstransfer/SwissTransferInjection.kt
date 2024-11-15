@@ -28,6 +28,7 @@ import com.infomaniak.multiplatform_swisstransfer.managers.UploadManager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
+import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 
 /**
  * SwissTransferInjection is a class responsible for initializing all the classes needed
@@ -58,6 +59,8 @@ class SwissTransferInjection(
     private val uploadController by lazy { UploadController(realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
 
+    private val emailLanguageUtils by lazy { EmailLanguageUtils() }
+
     /** A manager used to orchestrate Transfers operations. */
     val transferManager by lazy { TransferManager(apiClientProvider, transferController, transferRepository) }
 
@@ -65,7 +68,15 @@ class SwissTransferInjection(
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
 
     /** A manager used to orchestrate Accounts operations. */
-    val accountManager by lazy { AccountManager(appSettingsController, uploadController, transferController, realmProvider) }
+    val accountManager by lazy {
+        AccountManager(
+            appSettingsController = appSettingsController,
+            emailLanguageUtils = emailLanguageUtils,
+            uploadController = uploadController,
+            transferController = transferController,
+            realmProvider = realmProvider,
+        )
+    }
 
     /** A manager used to orchestrate Uploads operations. */
     val uploadManager by lazy { UploadManager(uploadController, uploadRepository, transferManager) }

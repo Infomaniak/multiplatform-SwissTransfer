@@ -15,16 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings
+package com.infomaniak.multiplatform_swisstransfer.utils
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.*
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
+import platform.Foundation.languageCode
 
-interface AppSettings {
-    val theme: Theme
-    val validityPeriod: ValidityPeriod
-    val downloadLimit: DownloadLimit
-    val emailLanguage: EmailLanguage
-
-    val lastTransferType: TransferType
-    val lastAuthorEmail: String?
+actual class EmailLanguageUtils actual constructor() {
+    actual fun getEmailLanguageFromLocal(): EmailLanguage {
+        val currentLocale = NSLocale.currentLocale
+        return when (currentLocale.languageCode) {
+            "fr" -> EmailLanguage.FRENCH
+            "de" -> EmailLanguage.GERMAN
+            "es" -> EmailLanguage.SPANISH
+            "it" -> EmailLanguage.ITALIAN
+            else -> EmailLanguage.ENGLISH
+        }
+    }
 }

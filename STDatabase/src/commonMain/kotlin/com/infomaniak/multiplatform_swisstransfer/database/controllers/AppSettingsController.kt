@@ -38,10 +38,10 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     private val appSettingsQuery get() = realm.query<AppSettingsDB>().first()
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun initAppSettings() = runThrowingRealm {
+    suspend fun initAppSettings(defaultEmailLanguage: EmailLanguage) = runThrowingRealm {
         if (appSettingsQuery.find() == null) {
             realm.write {
-                copyToRealm(AppSettingsDB(), UpdatePolicy.ALL)
+                copyToRealm(AppSettingsDB(defaultEmailLanguage), UpdatePolicy.ALL)
             }
         }
     }
