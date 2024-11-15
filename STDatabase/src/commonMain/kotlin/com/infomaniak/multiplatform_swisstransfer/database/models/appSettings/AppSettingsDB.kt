@@ -20,8 +20,13 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.appSettings
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.Ignore
 
-class AppSettingsDB : RealmObject, AppSettings {
+class AppSettingsDB(): RealmObject, AppSettings {
+
+    constructor(defaultEmailLanguage: EmailLanguage): this() {
+        emailLanguage = defaultEmailLanguage
+    }
 
     //region Options available in App Settings
     private var _theme: String = Theme.SYSTEM.value
@@ -51,8 +56,6 @@ class AppSettingsDB : RealmObject, AppSettings {
         set(value) {
             _emailLanguage = value.value
         }
-
-    override var hasCustomEmailLanguage: Boolean = false
     //endregion
 
     private var _lastTransferType: String = DEFAULT_TRANSFER_TYPE.name

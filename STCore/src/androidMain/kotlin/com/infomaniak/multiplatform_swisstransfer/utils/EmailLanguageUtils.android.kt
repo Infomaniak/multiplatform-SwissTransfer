@@ -18,9 +18,17 @@
 package com.infomaniak.multiplatform_swisstransfer.utils
 
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import java.util.Locale
 
 actual class EmailLanguageUtils actual constructor() {
+
     actual fun getEmailLanguageFromLocal(): EmailLanguage {
-        TODO("Not yet implemented")
+        return when (Locale.getDefault().language) {
+            "fr" -> EmailLanguage.FRENCH
+            "de" -> EmailLanguage.GERMAN
+            "it" -> EmailLanguage.ITALIAN
+            "es" -> EmailLanguage.SPANISH
+            else -> EmailLanguage.ENGLISH
+        }
     }
 }
