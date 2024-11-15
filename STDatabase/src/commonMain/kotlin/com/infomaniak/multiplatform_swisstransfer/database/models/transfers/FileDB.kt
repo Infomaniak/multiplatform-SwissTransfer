@@ -23,6 +23,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
 import kotlin.uuid.ExperimentalUuidApi
@@ -45,7 +46,8 @@ class FileDB() : File, RealmObject {
     override var receivedSizeInBytes: Long = 0
     override var path: String? = ""
     override var thumbnailPath: String? = ""
-    override var parent: FileDB? = null
+    @Ignore
+    var parent: FileDB? = null
     override var children: RealmList<FileDB> = realmListOf()
 
     constructor(file: File) : this() {

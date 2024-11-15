@@ -32,7 +32,6 @@ interface File {
     val receivedSizeInBytes: Long
     val path: String?
     val thumbnailPath: String?
-    val parent: File?
     val children: List<File>
 
     /**

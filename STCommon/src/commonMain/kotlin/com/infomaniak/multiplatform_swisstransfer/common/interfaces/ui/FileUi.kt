@@ -43,26 +43,6 @@ data class FileUi(
         localPath = null,
     )
 
-    // Init for folder
-    @OptIn(ExperimentalUuidApi::class)
-    constructor(folderName: String) : this(
-        uid = Uuid.random().toString(),
-        fileName = folderName,
-        isFolder = true,
-        fileSize = 0L,
-        mimeType = null,
-        localPath = null,
-    )
-
-    constructor(uploadFile: UploadFile) : this(
-        uid = uploadFile.url,
-        fileName = uploadFile.url.substringAfterLast("/"),
-        isFolder = false,
-        fileSize = 0L,
-        mimeType = null,
-        localPath = uploadFile.url,
-    )
-
     fun toUploadFileSession(): UploadFileSession {
         return object : UploadFileSession {
             override val name: String = fileName

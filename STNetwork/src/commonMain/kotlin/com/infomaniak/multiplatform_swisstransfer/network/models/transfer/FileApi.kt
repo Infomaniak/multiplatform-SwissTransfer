@@ -50,7 +50,5 @@ class FileApi : File {
     @Transient
     override var thumbnailPath: String? = null
     @Transient
-    override var parent: File? = null
-    @Transient
     override var children: List<File> = emptyList()
 }
