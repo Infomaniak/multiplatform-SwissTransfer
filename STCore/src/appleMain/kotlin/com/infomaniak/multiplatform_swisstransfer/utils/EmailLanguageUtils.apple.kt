@@ -18,9 +18,19 @@
 package com.infomaniak.multiplatform_swisstransfer.utils
 
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
+import platform.Foundation.languageCode
 
 actual class EmailLanguageUtils actual constructor() {
     actual fun getEmailLanguageFromLocal(): EmailLanguage {
-        TODO("Not yet implemented")
+        val currentLocale = NSLocale.currentLocale
+        return when (currentLocale.languageCode) {
+            "fr" -> EmailLanguage.FRENCH
+            "de" -> EmailLanguage.GERMAN
+            "es" -> EmailLanguage.SPANISH
+            "it" -> EmailLanguage.ITALIAN
+            else -> EmailLanguage.ENGLISH
+        }
     }
 }
