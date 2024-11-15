@@ -24,8 +24,11 @@ import io.realm.kotlin.types.annotations.Ignore
 
 class AppSettingsDB(): RealmObject, AppSettings {
 
+    @Ignore
+    private var defaultEmailLanguage = EmailLanguage.ENGLISH
+
     constructor(defaultEmailLanguage: EmailLanguage): this() {
-        emailLanguage = defaultEmailLanguage
+        this.defaultEmailLanguage = defaultEmailLanguage
     }
 
     //region Options available in App Settings
@@ -50,9 +53,9 @@ class AppSettingsDB(): RealmObject, AppSettings {
             _downloadLimit = value.value
         }
 
-    private var _emailLanguage: String = DEFAULT_EMAIL_LANGUAGE.value
+    private var _emailLanguage: String = defaultEmailLanguage.value
     override var emailLanguage: EmailLanguage
-        get() = EmailLanguage.entries.find { it.value == _emailLanguage } ?: DEFAULT_EMAIL_LANGUAGE
+        get() = EmailLanguage.entries.find { it.value == _emailLanguage } ?: defaultEmailLanguage
         set(value) {
             _emailLanguage = value.value
         }
@@ -71,7 +74,6 @@ class AppSettingsDB(): RealmObject, AppSettings {
         val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY
         private val DEFAULT_THEME = Theme.SYSTEM
-        private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
 
         private val DEFAULT_TRANSFER_TYPE = TransferType.QR_CODE
     }
