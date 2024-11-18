@@ -128,14 +128,13 @@ class TransferManager internal constructor(
     }
 
     /**
-     * Retrieves a flow of files from a transfer, filtered by link UUID and folder UUID.
+     * Retrieves a flow of files contained in a folder with the specified folderUuid.
      *
-     * @param linkUUID The UUID of the transfer link.
      * @param folderUuid The UUID of the folder within the transfer.
      * @return A flow of lists of [FileUi] objects representing the files in the transfer.
      */
-    fun getFilesFromTransfer(linkUUID: String, folderUuid: String): Flow<List<FileUi>?> {
-        return transferController.getFilesFromTransfer(linkUUID, folderUuid)
+    fun getFilesFromTransfer(folderUuid: String): Flow<List<FileUi>?> {
+        return transferController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } }
     }
 
     /**

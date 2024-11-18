@@ -20,16 +20,16 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
+import io.realm.kotlin.ext.backlinks
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmUUID
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
-import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(ExperimentalUuidApi::class)
 class FileDB() : File, RealmObject {
     @PrimaryKey
     override var uuid: String = ""
@@ -49,6 +49,8 @@ class FileDB() : File, RealmObject {
     @Ignore
     var parent: FileDB? = null
     override var children: RealmList<FileDB> = realmListOf()
+
+    val folder: RealmResults<FileDB> by backlinks(FileDB::children)
 
     constructor(file: File) : this() {
         this.containerUUID = file.containerUUID
