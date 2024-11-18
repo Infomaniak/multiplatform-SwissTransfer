@@ -68,4 +68,51 @@ object FileUtils {
         }
         return Pair(modifiedTree, currentParent)
     }
+
+
+    /**
+     * Recursively searches for a child with the given name.
+     *
+     * @param fileName The name of the child to search for.
+     * @return The [File] object representing the found child, or null if not found.
+     */
+    fun FileDB.findChildByName(fileName: String): FileDB? {
+        if (this.fileName == fileName) return this
+
+        children.forEach { child ->
+            child.findChildByName(fileName)?.let {
+                return it
+            }
+        }
+
+        return null
+    }
+
+    /**
+     * Recursively searches for a child with the given UUID.
+     *
+     * @param uuid The UUID of the child to search for.
+     * @return The [File] object representing the found child, or null if not found.
+     */
+    private fun File.findChildByUuid(uuid: String): File? {
+        if (this.uuid == uuid) return this
+
+        children.forEach { child ->
+            child.findChildByUuid(uuid)?.let {
+                return it
+            }
+        }
+
+        return null
+    }
+
+    fun List<File>.findFirstChildByUuid(uuid: String): File? {
+        forEach { file ->
+            val foundChild = file.findChildByUuid(uuid)
+            if (foundChild != null) {
+                return foundChild
+            }
+        }
+        return null
+    }
 }

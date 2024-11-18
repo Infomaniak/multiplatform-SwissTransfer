@@ -18,7 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File.Companion.findFirstChildByUuid
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.TransferWithNoFilesException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
@@ -27,6 +27,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils.findFirstChildByUuid
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
@@ -38,7 +39,6 @@ import io.realm.kotlin.query.Sort
 import io.realm.kotlin.query.TRUE_PREDICATE
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlin.coroutines.cancellation.CancellationException
@@ -90,12 +90,14 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Upsert data
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class, TransferWithNoFilesException::class)
     suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) = runThrowingRealm {
         realm.write {
             val transferDB = TransferDB(transfer, transferDirection)
-            transferDB.container?.files?.let { transferDB.container?.files = FileUtils.getFileDBTree(it).toRealmList() }
-            this.copyToRealm(transferDB, UpdatePolicy.ALL)
+            transferDB.container?.files?.let { transferFiles ->
+                transferDB.container?.files = FileUtils.getFileDBTree(transferFiles).toRealmList()
+                this.copyToRealm(transferDB, UpdatePolicy.ALL)
+            } ?:  throw TransferWithNoFilesException()
         }
     }
 

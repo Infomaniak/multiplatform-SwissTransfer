@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.database
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils.findChildByName
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -151,7 +152,7 @@ class FileUtilsTest {
 
     private fun List<FileDB>.getFileDB(name: String) = find { it.fileName == name }
 
-    private fun findFirstChildByNameInList(tree: List<FileDB>, fileName: String): File? {
+    private fun findFirstChildByNameInList(tree: List<FileDB>, fileName: String): FileDB? {
         tree.forEach { file ->
             val foundChild = file.findChildByName(fileName)
             if (foundChild != null) {

@@ -23,11 +23,11 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.RealmUUID
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 class FileDB() : File, RealmObject {
@@ -85,7 +85,7 @@ class FileDB() : File, RealmObject {
 
     // Init for folder
     constructor(folderName: String) : this() {
-        uuid = Uuid.random().toString()
+        uuid = RealmUUID.random().toString()
         fileName = folderName
         isFolder = true
         mimeType = null
