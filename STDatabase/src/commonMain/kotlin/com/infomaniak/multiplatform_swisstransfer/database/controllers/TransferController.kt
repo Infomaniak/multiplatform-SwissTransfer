@@ -70,7 +70,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class)
     fun getNotReadyTransfers(): List<Transfer> = runThrowingRealm {
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
-        return realm?.query<TransferDB>(query)?.find() ?: emptyList()
+        return realm.query<TransferDB>(query).find()
     }
     //endregion
 

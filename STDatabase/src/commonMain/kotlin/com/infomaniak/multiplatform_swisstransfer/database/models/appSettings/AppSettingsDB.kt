@@ -22,12 +22,12 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.Ignore
 
-class AppSettingsDB(): RealmObject, AppSettings {
+class AppSettingsDB() : RealmObject, AppSettings {
 
     @Ignore
     private var defaultEmailLanguage = EmailLanguage.ENGLISH
 
-    constructor(defaultEmailLanguage: EmailLanguage): this() {
+    constructor(defaultEmailLanguage: EmailLanguage) : this() {
         this.defaultEmailLanguage = defaultEmailLanguage
     }
 
