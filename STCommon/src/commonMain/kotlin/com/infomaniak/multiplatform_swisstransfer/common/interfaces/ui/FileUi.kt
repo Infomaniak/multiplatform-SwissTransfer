@@ -20,8 +20,6 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 data class FileUi(
     val uid: String,
@@ -30,8 +28,6 @@ data class FileUi(
     val fileSize: Long,
     val mimeType: String?,
     val localPath: String?,
-    var parent: File? = null,
-    var children: MutableList<File> = mutableListOf(),
 ) {
 
     constructor(file: File) : this(
@@ -52,6 +48,4 @@ data class FileUi(
             override val remoteUploadFile: RemoteUploadFile? = null
         }
     }
-
-    override fun toString() = "$fileName -> children: ${children.map { it.fileName }}"
 }
