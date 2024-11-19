@@ -190,7 +190,7 @@ class TransferManager internal constructor(
     }
 
     /**
-     * Removes a transfer by its UUID.
+     * Delete a transfer by its UUID.
      *
      * @param transferUUID The UUID of the transfer to be removed.
      *
@@ -198,7 +198,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun removeTransfer(transferUUID: String) {
+    suspend fun deleteTransfer(transferUUID: String) {
         transferController.deleteTransfer(transferUUID)
     }
 
