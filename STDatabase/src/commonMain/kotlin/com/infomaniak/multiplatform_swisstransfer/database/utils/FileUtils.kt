@@ -23,7 +23,7 @@ import io.realm.kotlin.ext.toRealmList
 
 object FileUtils {
 
-    fun getFileDBTree(files: List<File>): List<FileDB> {
+    fun getFileDBTree(containerUUID: String, files: List<File>): List<FileDB> {
         var tree = mutableListOf<FileDB>()
         for (file in files) {
             val fileDB = FileDB(file)
@@ -33,7 +33,11 @@ object FileUtils {
                 tree.add(fileDB)
             } else {
                 val pathComponents = filePath.split("/").toMutableList()
-                val (modifiedTree, parent) = findFolder(pathComponents = pathComponents, tree = tree)
+                val (modifiedTree, parent) = findFolder(
+                    containerUUID = containerUUID,
+                    pathComponents = pathComponents,
+                    tree = tree
+                )
 
                 fileDB.parent = parent?.apply {
                     children.add(fileDB)
@@ -48,14 +52,14 @@ object FileUtils {
         return tree
     }
 
-    private fun findFolder(pathComponents: List<String>, tree: List<FileDB>): Pair<List<FileDB>, FileDB?> {
-        val fakeFirstParent = FileDB(folderName = "")
+    private fun findFolder(containerUUID: String, pathComponents: List<String>, tree: List<FileDB>): Pair<List<FileDB>, FileDB?> {
+        val fakeFirstParent = FileDB(FileDB.FolderInfo(folderName = "", containerUUID = containerUUID))
         fakeFirstParent.children = tree.toRealmList()
         var currentParent = fakeFirstParent
         pathComponents.forEach { currentName ->
             // Update the current parent to the folder we found/created
             currentParent = currentParent.children.firstOrNull { it.fileName == currentName && it.isFolder } ?: run {
-                val newFolder = FileDB(folderName = currentName)
+                val newFolder = FileDB(FileDB.FolderInfo(folderName = currentName, containerUUID = containerUUID))
                 newFolder.parent = currentParent
                 currentParent.children.add(newFolder)
                 newFolder

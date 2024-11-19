@@ -86,9 +86,10 @@ class FileDB() : File, RealmObject {
     }
 
     // Init for folder
-    constructor(folderName: String) : this() {
+    constructor(folderInfo: FolderInfo) : this() {
         uuid = RealmUUID.random().toString()
-        fileName = folderName
+        fileName = folderInfo.folderName
+        containerUUID = folderInfo.containerUUID
         isFolder = true
         mimeType = null
     }
@@ -97,4 +98,6 @@ class FileDB() : File, RealmObject {
         this.fileName = fileName
         this.path = path
     }
+
+    data class FolderInfo(val folderName: String, val containerUUID: String)
 }

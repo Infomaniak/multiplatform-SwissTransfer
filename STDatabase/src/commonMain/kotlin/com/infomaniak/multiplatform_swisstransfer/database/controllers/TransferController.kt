@@ -92,7 +92,7 @@ class TransferController(private val realmProvider: RealmProvider) {
         realm.write {
             val transferDB = TransferDB(transfer, transferDirection)
             transferDB.container?.files?.let { transferFiles ->
-                transferDB.container?.files = FileUtils.getFileDBTree(transferFiles).toRealmList()
+                transferDB.container?.files = FileUtils.getFileDBTree(transferDB.containerUUID, transferFiles).toRealmList()
                 this.copyToRealm(transferDB, UpdatePolicy.ALL)
             } ?: throw TransferWithNoFilesException()
         }

@@ -40,7 +40,7 @@ class FileUtilsTest {
             FileDB(fileName = "file1.txt", path = ""),
             FileDB(fileName = "file2.txt", path = ""),
         )
-        tree.addAll(FileUtils.getFileDBTree(filesList))
+        tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
         // Files at the root of the tree
         tree.getFileDB("file1.txt")?.let { file1 ->
@@ -62,7 +62,7 @@ class FileUtilsTest {
             FileDB(fileName = "file5.txt", path = "folder2"),
             FileDB(fileName = "file6.txt", path = "folder2"),
         )
-        tree.addAll(FileUtils.getFileDBTree(filesList))
+        tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
         // Files in folder1
         findFirstChildByNameInList(tree, "folder1")?.let { folder1 ->
@@ -112,7 +112,7 @@ class FileUtilsTest {
     @Test
     fun fileContainedIn2NestedFolders() {
         val filesList = listOf(FileDB(fileName = "file_in_folder1_folder2.txt", path = "folder1/folder2"))
-        tree.addAll(FileUtils.getFileDBTree(filesList))
+        tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
         // File contained in one folder contained in another folder
         findFirstChildByNameInList(tree, "folder2")?.let { folder2InFolder1 ->
@@ -131,7 +131,7 @@ class FileUtilsTest {
                 path = "folder1/folder2/folder3/folder4/folder5"
             )
         )
-        tree.addAll(FileUtils.getFileDBTree(filesList))
+        tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
         findFirstChildByNameInList(tree, "folder5")?.let { folder5 ->
             assertTrue(
