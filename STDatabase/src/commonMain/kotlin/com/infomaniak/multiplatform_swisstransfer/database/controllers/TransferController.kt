@@ -32,7 +32,6 @@ import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.RealmSingleQuery
 import io.realm.kotlin.query.Sort
 import io.realm.kotlin.query.TRUE_PREDICATE
-import io.realm.kotlin.types.RealmUUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
@@ -99,8 +98,8 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String) = runThrowingRealm {
         realm.write {
-            val transferToDelete = getTransferQuery(realm, transferUUID)
-            delete(transferToDelete)
+            val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
+            this.delete(transferToDelete)
         }
     }
 
