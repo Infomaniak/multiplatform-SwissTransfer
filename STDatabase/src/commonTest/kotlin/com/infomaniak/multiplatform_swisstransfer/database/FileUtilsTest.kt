@@ -167,7 +167,7 @@ class FileUtilsTest {
      * @param fileName The name of the child to search for.
      * @return The [File] object representing the found child, or null if not found.
      */
-    fun FileDB.findChildByName(fileName: String): FileDB? {
+    private fun FileDB.findChildByName(fileName: String): FileDB? {
         if (this.fileName == fileName) return this
 
         children.forEach { child ->
