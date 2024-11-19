@@ -17,7 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import kotlin.test.AfterTest
@@ -161,12 +160,6 @@ class FileUtilsTest {
         return null
     }
 
-    /**
-     * Recursively searches for a child with the given name.
-     *
-     * @param fileName The name of the child to search for.
-     * @return The [File] object representing the found child, or null if not found.
-     */
     private fun FileDB.findChildByName(fileName: String): FileDB? {
         if (this.fileName == fileName) return this
 

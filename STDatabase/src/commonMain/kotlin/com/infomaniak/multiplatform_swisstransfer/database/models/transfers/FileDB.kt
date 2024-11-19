@@ -48,7 +48,7 @@ class FileDB() : File, RealmObject {
     override var thumbnailPath: String? = ""
     @Ignore
     var parent: FileDB? = null
-    override var children: RealmList<FileDB> = realmListOf()
+    var children: RealmList<FileDB> = realmListOf()
 
     val folder: RealmResults<FileDB> by backlinks(FileDB::children)
 
