@@ -21,7 +21,7 @@ interface File {
     val containerUUID: String
     val uuid: String
     val fileName: String
-    val isFolder: Boolean
+    val isFolder: Boolean get() = false
     val fileSizeInBytes: Long
     val downloadCounter: Int
     val createdDateTimestamp: Long
