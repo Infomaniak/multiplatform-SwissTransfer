@@ -24,7 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 data class FileUi(
     val uid: String,
     val fileName: String,
-    val isFolder: Boolean? = false,
+    val isFolder: Boolean,
     val fileSize: Long,
     val mimeType: String?,
     val localPath: String?,
