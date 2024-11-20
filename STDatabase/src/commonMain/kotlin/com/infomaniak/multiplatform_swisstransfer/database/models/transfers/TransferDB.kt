@@ -38,6 +38,7 @@ class TransferDB() : Transfer, RealmObject {
     override var downloadHost: String = ""
     override var container: ContainerDB? = null
 
+    override var password: String? = null
     private var transferDirectionValue: String = ""
     private var transferStatusValue: String = TransferStatus.UNKNOWN.name
 
@@ -74,6 +75,8 @@ class TransferDB() : Transfer, RealmObject {
 
         this.transferDirectionValue = TransferDirection.SENT.name
         this.transferStatusValue = transferStatus.name
+
+        this.password = uploadSession.password.ifEmpty { null }
     }
 
     internal companion object {
