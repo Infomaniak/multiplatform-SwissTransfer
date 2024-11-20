@@ -30,6 +30,7 @@ data class TransferUi(
     val downloadLimit: Int,
     val downloadLeft: Int,
     val message: String?,
+    val password: String?,
     val files: List<FileUi>,
 ) {
 
@@ -43,6 +44,7 @@ data class TransferUi(
         downloadLimit = transfer.container?.downloadLimit ?: 0,
         downloadLeft = transfer.downloadCounterCredit,
         message = transfer.container?.message,
+        password = transfer.password,
         files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList()
     )
 }
