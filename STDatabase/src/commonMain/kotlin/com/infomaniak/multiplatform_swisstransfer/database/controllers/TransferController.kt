@@ -19,13 +19,11 @@ package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.TransferWithoutFilesException
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
@@ -76,12 +74,6 @@ class TransferController(private val realmProvider: RealmProvider) {
     fun getNotReadyTransfers(): List<Transfer> = runThrowingRealm {
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
         return realm.query<TransferDB>(query).find()
-    }
-
-    @Throws(RealmException::class)
-    fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = runThrowingRealm {
-        val query = "${FileDB::folder.name}.uuid == '$folderUuid'"
-        return realm.query<FileDB>(query).asFlow().mapLatest { it.list }
     }
     //endregion
 
