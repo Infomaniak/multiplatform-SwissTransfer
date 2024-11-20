@@ -20,4 +20,4 @@ package com.infomaniak.multiplatform_swisstransfer.common.exceptions
 /**
  * Thrown when a Transfer has no files, which should not happen.
  */
-class TransferWithNoFilesException : Exception()
+class TransferWithoutFilesException : Exception()

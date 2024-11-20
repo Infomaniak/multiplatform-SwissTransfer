@@ -18,14 +18,13 @@
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
-import com.infomaniak.multiplatform_swisstransfer.common.exceptions.TransferWithNoFilesException
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.TransferWithoutFilesException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
@@ -87,14 +86,14 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Upsert data
-    @Throws(RealmException::class, CancellationException::class, TransferWithNoFilesException::class)
+    @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
     suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) = runThrowingRealm {
         realm.write {
             val transferDB = TransferDB(transfer, transferDirection)
             transferDB.container?.files?.let { transferFiles ->
                 transferDB.container?.files = FileUtils.getFileDBTree(transferDB.containerUUID, transferFiles).toRealmList()
                 this.copyToRealm(transferDB, UpdatePolicy.ALL)
-            } ?: throw TransferWithNoFilesException()
+            } ?: throw TransferWithoutFilesException()
         }
     }
 
