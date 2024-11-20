@@ -31,6 +31,9 @@ interface Transfer {
     val downloadHost: String
     val container: Container?
 
+    //region Only local
+    val password: String? get() = null
     val transferDirection: TransferDirection? get() = null
     val transferStatus: TransferStatus? get() = null
+    //endregion
 }
