@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
@@ -30,6 +31,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -243,9 +245,11 @@ class UploadManager(
         )
         val finishUploadResponse = runCatching {
             uploadRepository.finishUpload(finishUploadBody).first()
-        }.getOrElse { throw UnknownException(it) }
+        }.getOrElse { exception ->
+            throw if (exception is NoSuchElementException) UnknownException(exception) else exception
+        }
 
-        transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID, uploadSession)
+        addTransferByLinkUUID(finishUploadResponse, uploadSession)
         uploadController.removeUploadSession(uuid)
 
         return@withContext finishUploadResponse.linkUUID // Here the linkUUID correspond to the transferUUID of a transferUI
@@ -307,5 +311,32 @@ class UploadManager(
     )
     suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.IO) {
         uploadController.removeData()
+    }
+
+    private suspend fun addTransferByLinkUUID(
+        finishUploadResponse: UploadCompleteResponse,
+        uploadSession: UploadSession,
+    ) {
+        runCatching {
+            transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID, uploadSession.password)
+        }.onFailure { exception ->
+            if (exception is UnexpectedApiErrorFormatException) {
+                createTransferLocally(exception, finishUploadResponse, uploadSession)
+            } else {
+                throw exception
+            }
+        }
+    }
+
+    private suspend fun createTransferLocally(
+        exception: UnexpectedApiErrorFormatException,
+        finishUploadResponse: UploadCompleteResponse,
+        uploadSession: UploadSession,
+    ) {
+        val transferStatus = when {
+            exception.bodyResponse.contains("wait_virus_check") -> TransferStatus.WAIT_VIRUS_CHECK
+            else -> TransferStatus.UNKNOWN
+        }
+        transferManager.createTransferLocally(finishUploadResponse.linkUUID, uploadSession, transferStatus)
     }
 }
