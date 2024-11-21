@@ -19,57 +19,62 @@ package com.infomaniak.multiplatform_swisstransfer.database.utils
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
-import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmList
 
 object FileUtils {
 
     fun getFileDBTree(containerUUID: String, files: List<File>): List<FileDB> {
-        var tree = mutableListOf<FileDB>()
-        for (file in files) {
+        val fileTree = realmListOf<FileDB>()
+
+        files.forEach { file ->
             val fileDB = FileDB(file)
             val filePath = file.path
 
+            // filePath is null, meaning we can add the file to the root of the file tree
             if (filePath.isNullOrEmpty()) {
-                tree.add(fileDB)
+                fileTree.add(fileDB)
             } else {
-                val pathComponents = filePath.split("/").toMutableList()
-                val (modifiedTree, parent) = findFolder(
+                fileTree.addFileToFolder(
                     containerUUID = containerUUID,
-                    pathComponents = pathComponents,
-                    tree = tree
+                    pathComponents = filePath.split("/").toMutableList(),
+                    file = fileDB,
                 )
-
-                fileDB.parent = parent?.apply {
-                    children.add(fileDB)
-                    fileSizeInBytes = children.sumOf { it.fileSizeInBytes }
-                    receivedSizeInBytes = children.sumOf { it.receivedSizeInBytes }
-                }
-
-                tree = modifiedTree.toMutableList()
             }
         }
 
-        return tree
+        return fileTree
     }
 
-    private fun findFolder(containerUUID: String, pathComponents: List<String>, tree: List<FileDB>): Pair<List<FileDB>, FileDB?> {
-        val fakeFirstParent = FileDB(FileDB.FolderInfo(folderName = "", containerUUID = containerUUID))
-        fakeFirstParent.children = tree.toRealmList()
-        var currentParent = fakeFirstParent
+    private fun RealmList<FileDB>.addFileToFolder(
+        containerUUID: String,
+        pathComponents: List<String>,
+        file: FileDB,
+    ) {
+        // Initializing folder with a file representing the root of the file tree
+        var parentFolder = FileDB.newFolder(folderName = "", containerUUID = containerUUID).apply {
+            children = this@addFileToFolder
+        }
+
+        // Iterating through pathComponents to create the folder to the right place
         pathComponents.forEach { currentName ->
-            // Update the current parent to the folder we found/created
-            currentParent = currentParent.children.firstOrNull { it.fileName == currentName && it.isFolder } ?: run {
-                val newFolder = FileDB(FileDB.FolderInfo(folderName = currentName, containerUUID = containerUUID))
-                newFolder.parent = currentParent
-                currentParent.children.add(newFolder)
-                newFolder
-            }
+            val existingFolder = parentFolder.children.find { it.fileName == currentName && it.isFolder }
+
+            parentFolder = existingFolder ?: createFolder(currentName, containerUUID).apply { parentFolder.children.add(this) }
         }
-        // Reassign the fake parent children to the tree and remove the fake parent link from the elements of the tree base
-        val modifiedTree: List<FileDB> = fakeFirstParent.children
-        modifiedTree.forEach {
-            it.parent = null
+
+        parentFolder.apply {
+            children.add(file)
+            computeFolderSize(file)
         }
-        return Pair(modifiedTree, currentParent)
+    }
+
+    private fun createFolder(folderName: String, containerUUID: String): FileDB {
+        return FileDB.newFolder(folderName = folderName, containerUUID = containerUUID)
+    }
+
+    private fun FileDB.computeFolderSize(fileToAdd: FileDB) {
+        fileSizeInBytes += fileToAdd.fileSizeInBytes
+        receivedSizeInBytes += fileToAdd.receivedSizeInBytes
     }
 }

@@ -26,7 +26,6 @@ import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmUUID
-import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
 
@@ -46,8 +45,6 @@ class FileDB() : File, RealmObject {
     override var receivedSizeInBytes: Long = 0
     override var path: String? = ""
     override var thumbnailPath: String? = ""
-    @Ignore
-    var parent: FileDB? = null
     var children: RealmList<FileDB> = realmListOf()
 
     val folder: RealmResults<FileDB> by backlinks(FileDB::children)
@@ -85,19 +82,19 @@ class FileDB() : File, RealmObject {
         this.thumbnailPath = ""
     }
 
-    // Init for folder
-    constructor(folderInfo: FolderInfo) : this() {
-        uuid = RealmUUID.random().toString()
-        fileName = folderInfo.folderName
-        containerUUID = folderInfo.containerUUID
-        isFolder = true
-        mimeType = null
-    }
-
     constructor(fileName: String, path: String) : this() {
         this.fileName = fileName
         this.path = path
     }
 
-    data class FolderInfo(val folderName: String, val containerUUID: String)
+    companion object {
+
+        fun newFolder(folderName: String, containerUUID: String) = FileDB().apply {
+            this.uuid = RealmUUID.random().toString()
+            this.fileName = folderName
+            this.containerUUID = containerUUID
+            this.isFolder = true
+            this.mimeType = null
+        }
+    }
 }

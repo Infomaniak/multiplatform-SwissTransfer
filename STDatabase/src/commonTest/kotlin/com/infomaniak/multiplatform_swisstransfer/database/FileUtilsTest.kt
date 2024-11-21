@@ -132,15 +132,13 @@ class FileUtilsTest {
         )
         tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
+        findFirstChildByNameInList(tree, "folder4")?.let { folder4 ->
+            assertTrue(
+                actual = folder4.children.find { it.fileName == "folder5" && it.isFolder } != null,
+                message = "folder4 should contain folder5",
+            )
+        } ?: fail("folder4 doesn't exist")
         findFirstChildByNameInList(tree, "folder5")?.let { folder5 ->
-            assertTrue(
-                actual = folder5.parent != null,
-                message = "Parent of folder5 should not be null",
-            )
-            assertTrue(
-                actual = folder5.parent!!.fileName == "folder4",
-                message = "The parent of folder5 should be named folder4",
-            )
             assertTrue(
                 actual = folder5.children.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" } != null,
                 message = "file_in_folder1_folder2_folder3_folder4_folder5.txt does not exist in folder1/folder2/folder3/folder4/folder5",
