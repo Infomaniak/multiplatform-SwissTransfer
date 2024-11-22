@@ -19,4 +19,4 @@ package com.infomaniak.multiplatform_swisstransfer.common.ext
 
 import java.util.Date
 
-fun Long.toDateFromSeconds() = Date(this * 1000)
+fun Long.toDateFromSeconds() = Date(this * 1_000L)

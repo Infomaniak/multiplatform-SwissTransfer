@@ -96,6 +96,14 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Update data
     @Throws(RealmException::class, CancellationException::class)
+    suspend fun deleteTransfer(transferUUID: String) = runThrowingRealm {
+        realm.write {
+            val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
+            delete(transferToDelete)
+        }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }

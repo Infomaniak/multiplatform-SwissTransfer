@@ -141,6 +141,7 @@ class TransferManager internal constructor(
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
+     * @throws RealmException An error has occurred with realm database
      */
     @Throws(
         CancellationException::class,
@@ -172,6 +173,7 @@ class TransferManager internal constructor(
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
+     * @throws RealmException An error has occurred with realm database
      */
     @Throws(
         CancellationException::class,
@@ -185,6 +187,19 @@ class TransferManager internal constructor(
         val transferApi = transferRepository.getTransferByUrl(url).data ?: return@withContext null
         addTransfer(transferApi, TransferDirection.RECEIVED)
         return@withContext transferApi.linkUUID
+    }
+
+    /**
+     * Delete a transfer by its UUID.
+     *
+     * @param transferUUID The UUID of the transfer to be removed.
+     *
+     * @throws CancellationException If the operation is cancelled.
+     * @throws RealmException An error has occurred with realm database
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun deleteTransfer(transferUUID: String) {
+        transferController.deleteTransfer(transferUUID)
     }
 
     private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection) {

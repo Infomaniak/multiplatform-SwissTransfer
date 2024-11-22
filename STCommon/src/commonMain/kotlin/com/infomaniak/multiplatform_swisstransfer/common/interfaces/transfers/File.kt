@@ -32,4 +32,3 @@ interface File {
     val path: String?
     val thumbnailPath: String?
 }
-
