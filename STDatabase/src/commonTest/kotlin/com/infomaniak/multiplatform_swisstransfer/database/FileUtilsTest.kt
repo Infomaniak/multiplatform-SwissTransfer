@@ -146,6 +146,30 @@ class FileUtilsTest {
         } ?: fail("folder5 doesn't exist")
     }
 
+    @Test
+    fun fileVeryDeepInFoldersTree() {
+        val filesList = listOf(
+            FileDB(
+                fileName = "hidden_file.txt",
+                path = "folder1/folder2/folder3/folder4/folder5/folder6/folder7/folder8/folder9/folder10/folder11/folder12/folder13/folder14/folder15/folder16/folder17/folder18/folder19/folder20/folder21/folder22/folder23/folder24/folder25"
+            )
+        )
+        tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
+        findFirstChildByNameInList(tree, "folder24")?.let { folder24 ->
+            assertTrue(
+                actual = folder24.children.find { it.fileName == "folder25" && it.isFolder } != null,
+                message = "folder24 should contain folder25",
+            )
+
+        } ?: fail("folder24 doesn't exist")
+        findFirstChildByNameInList(tree, "folder25")?.let { folder25 ->
+            assertTrue(
+                actual = folder25.children.find { it.fileName == "hidden_file.txt" } != null,
+                message = "folder25 should contain hidden_file.txt",
+            )
+        } ?: fail("folder25 doesn't exist")
+    }
+
     private fun List<FileDB>.getFileDB(name: String) = find { it.fileName == name }
 
     private fun findFirstChildByNameInList(tree: List<FileDB>, fileName: String): FileDB? {
