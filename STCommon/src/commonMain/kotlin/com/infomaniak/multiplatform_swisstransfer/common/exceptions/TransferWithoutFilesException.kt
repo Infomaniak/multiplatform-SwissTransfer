@@ -15,21 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers
+package com.infomaniak.multiplatform_swisstransfer.common.exceptions
 
-interface File {
-    val containerUUID: String
-    val uuid: String
-    val fileName: String
-    val isFolder: Boolean get() = false
-    val fileSizeInBytes: Long
-    val downloadCounter: Int
-    val createdDateTimestamp: Long
-    val expiredDateTimestamp: Long
-    val eVirus: String
-    val deletedDate: String?
-    val mimeType: String?
-    val receivedSizeInBytes: Long
-    val path: String?
-    val thumbnailPath: String?
-}
+/**
+ * Thrown when a Transfer has no files, which should not happen.
+ */
+class TransferWithoutFilesException : Exception()

@@ -18,16 +18,19 @@
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.TransferWithoutFilesException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.query.RealmResults
 import io.realm.kotlin.query.RealmSingleQuery
 import io.realm.kotlin.query.Sort
@@ -75,10 +78,14 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Upsert data
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
     suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection) = runThrowingRealm {
         realm.write {
-            this.copyToRealm(TransferDB(transfer, transferDirection), UpdatePolicy.ALL)
+            val transferDB = TransferDB(transfer, transferDirection)
+            transferDB.container?.files?.let { transferFiles ->
+                transferDB.container?.files = FileUtils.getFileDBTree(transferDB.containerUUID, transferFiles).toRealmList()
+                this.copyToRealm(transferDB, UpdatePolicy.ALL)
+            } ?: throw TransferWithoutFilesException()
         }
     }
 

@@ -24,6 +24,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 data class FileUi(
     val uid: String,
     val fileName: String,
+    val isFolder: Boolean,
+    //  Might be incorrect, especially if it's a folder and this one contain sub-folders
     val fileSize: Long,
     val mimeType: String?,
     val localPath: String?,
@@ -32,6 +34,7 @@ data class FileUi(
     constructor(file: File) : this(
         uid = file.uuid,
         fileName = file.fileName,
+        isFolder = file.isFolder,
         fileSize = file.receivedSizeInBytes,
         mimeType = file.mimeType,
         localPath = null,

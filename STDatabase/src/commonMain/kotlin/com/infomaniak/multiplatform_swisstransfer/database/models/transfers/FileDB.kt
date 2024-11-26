@@ -20,7 +20,12 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
+import io.realm.kotlin.ext.backlinks
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.query.RealmResults
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.RealmUUID
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
 
@@ -29,6 +34,7 @@ class FileDB() : File, RealmObject {
     override var uuid: String = ""
     override var containerUUID: String = ""
     override var fileName: String = ""
+    override var isFolder: Boolean = false
     override var fileSizeInBytes: Long = 0L
     override var downloadCounter: Int = 0
     override var createdDateTimestamp: Long = 0L
@@ -39,11 +45,15 @@ class FileDB() : File, RealmObject {
     override var receivedSizeInBytes: Long = 0
     override var path: String? = ""
     override var thumbnailPath: String? = ""
+    var children: RealmList<FileDB> = realmListOf()
+
+    val folder: RealmResults<FileDB> by backlinks(FileDB::children)
 
     constructor(file: File) : this() {
         this.containerUUID = file.containerUUID
         this.uuid = file.uuid
         this.fileName = file.fileName
+        this.isFolder = file.isFolder
         this.fileSizeInBytes = file.fileSizeInBytes
         this.downloadCounter = file.downloadCounter
         this.createdDateTimestamp = file.createdDateTimestamp
@@ -70,5 +80,21 @@ class FileDB() : File, RealmObject {
         this.receivedSizeInBytes = uploadFileSession.size
         this.path = null
         this.thumbnailPath = ""
+    }
+
+    constructor(fileName: String, path: String) : this() {
+        this.fileName = fileName
+        this.path = path
+    }
+
+    companion object {
+
+        fun newFolder(folderName: String, containerUUID: String) = FileDB().apply {
+            this.uuid = RealmUUID.random().toString()
+            this.fileName = folderName
+            this.containerUUID = containerUUID
+            this.isFolder = true
+            this.mimeType = null
+        }
     }
 }

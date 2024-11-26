@@ -19,12 +19,10 @@ package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
-import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
-import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
-import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
-import com.infomaniak.multiplatform_swisstransfer.managers.UploadManager
+import com.infomaniak.multiplatform_swisstransfer.managers.*
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
@@ -58,11 +56,15 @@ class SwissTransferInjection(
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val uploadController by lazy { UploadController(realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
+    private val fileController by lazy { FileController(realmProvider) }
 
     private val emailLanguageUtils by lazy { EmailLanguageUtils() }
 
     /** A manager used to orchestrate Transfers operations. */
     val transferManager by lazy { TransferManager(apiClientProvider, transferController, transferRepository) }
+
+    /** A manager used to orchestrate Files operations. */
+    val fileManager by lazy { FileManager(fileController) }
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
