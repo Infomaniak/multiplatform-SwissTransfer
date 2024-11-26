@@ -71,7 +71,7 @@ class FileUtilsTest {
         )
         assertTrue(
             actual = folder1Children.find { it.fileName == "file3.txt" } != null,
-            message = "Children of folder1 should contain two files",
+            message = "file3.txt is missing from folder1",
         )
         assertTrue(
             actual = folder1Children.find { it.fileName == "file4.txt" } != null,
