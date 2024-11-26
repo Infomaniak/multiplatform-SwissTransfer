@@ -94,13 +94,15 @@ class ApiClientProvider internal constructor(
                     }
                 }
                 handleResponseExceptionWithRequest { cause, request ->
-                    val response = request.call.response
-                    val bodyResponse = response.bodyAsText()
-                    val statusCode = response.status.value
                     when (cause) {
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
                         is ApiException, is UnexpectedApiErrorFormatException -> throw cause
-                        else -> throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause)
+                        else -> {
+                            val response = request.call.response
+                            val bodyResponse = response.bodyAsText()
+                            val statusCode = response.status.value
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause)
+                        }
                     }
                 }
             }
