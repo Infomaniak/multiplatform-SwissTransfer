@@ -31,7 +31,7 @@ class FileManager(private val fileController: FileController) {
      * @param folderUuid The UUID of the folder within the transfer.
      * @return A flow of lists of [FileUi] objects representing the files in the transfer.
      */
-    fun getFilesFromTransfer(folderUuid: String): Flow<List<FileUi>?> {
+    fun getFilesFromTransfer(folderUuid: String): Flow<List<FileUi>> {
         return fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } }
     }
 }
