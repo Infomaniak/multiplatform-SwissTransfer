@@ -106,8 +106,7 @@ class FileUtilsTest {
         checkFolders(path = path, files = tree)
 
         // File contained in one folder contained in another folder
-        val folder1 = tree.getFileDB("folder1")
-        val folder2InFolder1 = folder1?.children?.getFileDB("folder2")
+        val folder2InFolder1 = tree.getFileDB("folder1")?.children?.getFileDB("folder2")
         assertNotNull(
             actual = folder2InFolder1?.children?.find { it.fileName == "file_in_folder1_folder2.txt" },
             message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
