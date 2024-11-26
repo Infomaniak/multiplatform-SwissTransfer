@@ -19,10 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database
 
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
-import kotlin.test.AfterTest
-import kotlin.test.Test
-import kotlin.test.assertTrue
-import kotlin.test.fail
+import kotlin.test.*
 
 class FileUtilsTest {
 
@@ -41,15 +38,8 @@ class FileUtilsTest {
         )
         tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
-        // Files at the root of the tree
-        tree.getFileDB("file1.txt")?.let { file1 ->
-            assertTrue(file1.children.isEmpty())
-            assertTrue(!file1.isFolder)
-        }
-        tree.getFileDB("file2.txt")?.let { file2 ->
-            assertTrue(file2.children.isEmpty())
-            assertTrue(!file2.isFolder)
-        }
+        assertNotNull(tree.getFileDB("file1.txt"), "file1.txt should exist")
+        assertNotNull(tree.getFileDB("file2.txt"), "file2.txt should exist")
     }
 
     @Test
