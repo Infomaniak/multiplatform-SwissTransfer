@@ -56,25 +56,21 @@ class FileUtilsTest {
         )
         tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
+        checkFolders(path = "folder1/randomFolder", files = tree)
+
         // Files in folder1
         val folder1 = tree.getFileDB("folder1")
-        assertNotNull(folder1, "folder1 doesn't exist")
+        val folder1Children = folder1?.children?.filter { !it.isFolder }
         assertTrue(
-            actual = folder1.children.filter { it.isFolder }.size == 1,
-            message = "Children of folder1 should contain one folder",
-        )
-        
-        val folder1Children = folder1.children.filter { !it.isFolder }
-        assertTrue(
-            actual = folder1Children.size == 2,
+            actual = folder1Children?.size == 2,
             message = "Children of folder1 should contain two files",
         )
         assertNotNull(
-            actual = folder1Children.find { it.fileName == "file3.txt" },
+            actual = folder1Children?.find { it.fileName == "file3.txt" },
             message = "file3.txt is missing from folder1",
         )
         assertNotNull(
-            actual = folder1Children.find { it.fileName == "file4.txt" },
+            actual = folder1Children?.find { it.fileName == "file4.txt" },
             message = "file4.txt is missing from folder1",
         )
 
@@ -103,66 +99,81 @@ class FileUtilsTest {
 
     @Test
     fun fileContainedIn2NestedFolders() {
-        val filesList = listOf(FileDB(fileName = "file_in_folder1_folder2.txt", path = "folder1/folder2"))
+        val path = "folder1/folder2"
+        val filesList = listOf(FileDB(fileName = "file_in_folder1_folder2.txt", path = path))
         tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
+        checkFolders(path = path, files = tree)
+
         // File contained in one folder contained in another folder
-        val folder2InFolder1 = findFirstChildByNameInList(tree, "folder2")
-        assertNotNull(folder2InFolder1, "folder2 in folder1 doesn't exist")
+        val folder1 = tree.getFileDB("folder1")
+        val folder2InFolder1 = folder1?.children?.getFileDB("folder2")
         assertNotNull(
-            actual = folder2InFolder1.children.find { it.fileName == "file_in_folder1_folder2.txt" },
+            actual = folder2InFolder1?.children?.find { it.fileName == "file_in_folder1_folder2.txt" },
             message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
         )
     }
 
     @Test
     fun fileContainedIn5NestedFolders() {
+        val path = "folder1/folder2/folder3/folder4/folder5"
         val filesList = listOf(
             FileDB(
                 fileName = "file_in_folder1_folder2_folder3_folder4_folder5.txt",
-                path = "folder1/folder2/folder3/folder4/folder5"
+                path = path,
             )
         )
         tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
-        val folder4 = findFirstChildByNameInList(tree, "folder4")
-        assertNotNull(folder4, "folder4 doesn't exist")
-        assertNotNull(
-            actual = folder4.children.find { it.fileName == "folder5" && it.isFolder },
-            message = "folder4 should contain folder5",
-        )
+        checkFolders(path = path, files = tree)
 
         val folder5 = findFirstChildByNameInList(tree, "folder5")
-        assertNotNull(folder5, "folder5 doesn't exist")
         assertNotNull(
-            actual = folder5.children.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" },
-            message = "file_in_folder1_folder2_folder3_folder4_folder5.txt does not exist in folder1/folder2/folder3/folder4/folder5",
+            actual = folder5?.children?.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" },
+            message = "file_in_folder1_folder2_folder3_folder4_folder5.txt does not exist in $path",
         )
     }
 
     @Test
     fun fileVeryDeepInFoldersTree() {
+        val path =
+            "folder1/folder2/folder3/folder4/folder5/folder6/folder7/folder8/folder9/folder10/folder11/folder12/folder13/folder14/folder15/folder16/folder17/folder18/folder19/folder20/folder21/folder22/folder23/folder24/folder25"
         val filesList = listOf(
             FileDB(
                 fileName = "hidden_file.txt",
-                path = "folder1/folder2/folder3/folder4/folder5/folder6/folder7/folder8/folder9/folder10/folder11/folder12/folder13/folder14/folder15/folder16/folder17/folder18/folder19/folder20/folder21/folder22/folder23/folder24/folder25"
+                path = path
             )
         )
         tree.addAll(FileUtils.getFileDBTree("containerUUID", filesList))
 
-        val folder24 = findFirstChildByNameInList(tree, "folder24")
-        assertNotNull(folder24, "folder24 doesn't exist")
-        assertNotNull(
-            actual = folder24.children.find { it.fileName == "folder25" && it.isFolder },
-            message = "folder24 should contain folder25",
-        )
+        checkFolders(path = path, files = tree)
 
         val folder25 = findFirstChildByNameInList(tree, "folder25")
-        assertNotNull(folder25, "folder25 doesn't exist")
         assertNotNull(
-            actual = folder25.children.find { it.fileName == "hidden_file.txt" },
+            actual = folder25?.children?.find { it.fileName == "hidden_file.txt" },
             message = "folder25 should contain hidden_file.txt",
         )
+    }
+
+    private tailrec fun checkFolders(path: String, files: List<FileDB>) {
+        if (path.isEmpty()) return
+
+        val (folderName, remainingPath) = getInfoFromPath(path)
+        val foundFolder = files.getFileDB(folderName)
+        assertNotNull(foundFolder, "$folderName should not be null")
+
+        if (remainingPath.isEmpty()) return
+
+        checkFolders(path = remainingPath, files = foundFolder.children)
+    }
+
+    private fun getInfoFromPath(path: String): Pair<String, String> {
+        return if (path.contains("/")) {
+            val result = path.split("/", limit = 2)
+            result[0] to result[1]
+        } else {
+            Pair(path, "")
+        }
     }
 
     private fun List<FileDB>.getFileDB(name: String) = find { it.fileName == name }
