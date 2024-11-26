@@ -38,6 +38,7 @@ centralized access point to orchestrate transfer operations.
 | Property | userAgent           | Customize client api userAgent.                       |
 | Property | appSettingsManager  | A manager used to orchestrate AppSettings operations. |
 | Property | transferManager     | A manager used to orchestrate Transfers operations.   |
+| Property | fileManager         | A manager used to orchestrate Files operations.       |
 | Property | accountManager      | A manager used to orchestrate Accounts operations.    |
 | Property | uploadManager       | A manager used to orchestrate Uploads operations.     |
 | Property | sharedApiUrlCreator | An utils to help use shared routes                    |
@@ -69,6 +70,19 @@ centralized access point to orchestrate transfer operations.
   val core = SwissTransferInjection(userAgent = "user_agent")
   val transferManager = core.transferManager
   // Use the transferManager to orchestrate Transfers
+  ```
+
+#### Property: `fileManager`
+
+- **Type**: `FileManager`
+- **Description**:
+    - `fileManager` is a lazily initialized property that provides a manager to orchestrate all file operations.
+
+- **Usage Example**:
+  ```kotlin
+  val core = SwissTransferInjection(userAgent = "user_agent")
+  val fileManager = core.fileManager
+  // Use the fileManager to orchestrate Files
   ```
 
 #### Property: `accountManager`
