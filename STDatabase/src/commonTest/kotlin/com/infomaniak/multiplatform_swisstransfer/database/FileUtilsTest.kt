@@ -127,7 +127,7 @@ class FileUtilsTest {
 
         checkFolders(path = path, files = tree)
 
-        val folder5 = findFirstChildByNameInList(tree, "folder5")
+        val folder5 = getFolder(path, tree)
         assertNotNull(
             actual = folder5?.children?.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" },
             message = "file_in_folder1_folder2_folder3_folder4_folder5.txt does not exist in $path",
@@ -148,11 +148,24 @@ class FileUtilsTest {
 
         checkFolders(path = path, files = tree)
 
-        val folder25 = findFirstChildByNameInList(tree, "folder25")
+        val folder25 = getFolder(path, tree)
         assertNotNull(
             actual = folder25?.children?.find { it.fileName == "hidden_file.txt" },
             message = "folder25 should contain hidden_file.txt",
         )
+    }
+
+    private tailrec fun getFolder(folderPath: String, files: List<FileDB>): FileDB? {
+        if (folderPath.isEmpty()) return null
+
+        val (folderName, remainingPath) = getInfoFromPath(folderPath)
+        val currentFolder = files.getFileDB(folderName) ?: return null
+
+        return if (remainingPath.isNotEmpty()) {
+            getFolder(remainingPath, currentFolder.children)
+        } else {
+            currentFolder
+        }
     }
 
     private tailrec fun checkFolders(path: String, files: List<FileDB>) {
@@ -177,26 +190,4 @@ class FileUtilsTest {
     }
 
     private fun List<FileDB>.getFileDB(name: String) = find { it.fileName == name }
-
-    private fun findFirstChildByNameInList(tree: List<FileDB>, fileName: String): FileDB? {
-        tree.forEach { file ->
-            val foundChild = file.findChildByName(fileName)
-            if (foundChild != null) {
-                return foundChild
-            }
-        }
-        return null
-    }
-
-    private fun FileDB.findChildByName(fileName: String): FileDB? {
-        if (this.fileName == fileName) return this
-
-        children.forEach { child ->
-            child.findChildByName(fileName)?.let {
-                return it
-            }
-        }
-
-        return null
-    }
 }
