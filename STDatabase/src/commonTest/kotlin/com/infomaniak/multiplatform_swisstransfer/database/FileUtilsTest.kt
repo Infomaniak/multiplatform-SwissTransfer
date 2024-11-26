@@ -69,12 +69,12 @@ class FileUtilsTest {
             actual = folder1Children.size == 2,
             message = "Children of folder1 should contain two files",
         )
-        assertTrue(
-            actual = folder1Children.find { it.fileName == "file3.txt" } != null,
+        assertNotNull(
+            actual = folder1Children.find { it.fileName == "file3.txt" },
             message = "file3.txt is missing from folder1",
         )
-        assertTrue(
-            actual = folder1Children.find { it.fileName == "file4.txt" } != null,
+        assertNotNull(
+            actual = folder1Children.find { it.fileName == "file4.txt" },
             message = "file4.txt is missing from folder1",
         )
 
@@ -91,12 +91,12 @@ class FileUtilsTest {
             actual = folder2Children.size == 2,
             message = "Children of folder2 should contain two files",
         )
-        assertTrue(
-            actual = folder2Children.find { it.fileName == "file5.txt" } != null,
+        assertNotNull(
+            actual = folder2Children.find { it.fileName == "file5.txt" },
             message = "file5.txt in folder2 does not exist",
         )
-        assertTrue(
-            actual = folder2Children.find { it.fileName == "file6.txt" } != null,
+        assertNotNull(
+            actual = folder2Children.find { it.fileName == "file6.txt" },
             message = "file6.txt in folder2 does not exist",
         )
     }
@@ -109,8 +109,8 @@ class FileUtilsTest {
         // File contained in one folder contained in another folder
         val folder2InFolder1 = findFirstChildByNameInList(tree, "folder2")
         assertNotNull(folder2InFolder1, "folder2 in folder1 doesn't exist")
-        assertTrue(
-            actual = folder2InFolder1.children.find { it.fileName == "file_in_folder1_folder2.txt" } != null,
+        assertNotNull(
+            actual = folder2InFolder1.children.find { it.fileName == "file_in_folder1_folder2.txt" },
             message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
         )
     }
@@ -127,15 +127,15 @@ class FileUtilsTest {
 
         val folder4 = findFirstChildByNameInList(tree, "folder4")
         assertNotNull(folder4, "folder4 doesn't exist")
-        assertTrue(
-            actual = folder4.children.find { it.fileName == "folder5" && it.isFolder } != null,
+        assertNotNull(
+            actual = folder4.children.find { it.fileName == "folder5" && it.isFolder },
             message = "folder4 should contain folder5",
         )
 
         val folder5 = findFirstChildByNameInList(tree, "folder5")
         assertNotNull(folder5, "folder5 doesn't exist")
-        assertTrue(
-            actual = folder5.children.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" } != null,
+        assertNotNull(
+            actual = folder5.children.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" },
             message = "file_in_folder1_folder2_folder3_folder4_folder5.txt does not exist in folder1/folder2/folder3/folder4/folder5",
         )
     }
@@ -152,15 +152,15 @@ class FileUtilsTest {
 
         val folder24 = findFirstChildByNameInList(tree, "folder24")
         assertNotNull(folder24, "folder24 doesn't exist")
-        assertTrue(
-            actual = folder24.children.find { it.fileName == "folder25" && it.isFolder } != null,
+        assertNotNull(
+            actual = folder24.children.find { it.fileName == "folder25" && it.isFolder },
             message = "folder24 should contain folder25",
         )
 
         val folder25 = findFirstChildByNameInList(tree, "folder25")
         assertNotNull(folder25, "folder25 doesn't exist")
-        assertTrue(
-            actual = folder25.children.find { it.fileName == "hidden_file.txt" } != null,
+        assertNotNull(
+            actual = folder25.children.find { it.fileName == "hidden_file.txt" },
             message = "folder25 should contain hidden_file.txt",
         )
     }
