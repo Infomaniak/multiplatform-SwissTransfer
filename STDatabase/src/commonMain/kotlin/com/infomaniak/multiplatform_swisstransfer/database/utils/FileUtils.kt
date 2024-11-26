@@ -73,6 +73,7 @@ object FileUtils {
         return FileDB.newFolder(folderName = folderName, containerUUID = containerUUID)
     }
 
+    // Computed sizes here might be incorrect, especially if the folder contain sub-folders
     private fun FileDB.computeFolderSize(fileToAdd: FileDB) {
         fileSizeInBytes += fileToAdd.fileSizeInBytes
         receivedSizeInBytes += fileToAdd.receivedSizeInBytes
