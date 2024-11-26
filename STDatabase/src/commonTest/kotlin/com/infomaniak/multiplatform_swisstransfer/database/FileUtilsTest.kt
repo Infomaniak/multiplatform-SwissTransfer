@@ -66,11 +66,11 @@ class FileUtilsTest {
             message = "Children of folder1 should contain two files",
         )
         assertNotNull(
-            actual = folder1Children?.find { it.fileName == "file3.txt" },
+            actual = folder1Children?.getFileDB("file3.txt"),
             message = "file3.txt is missing from folder1",
         )
         assertNotNull(
-            actual = folder1Children?.find { it.fileName == "file4.txt" },
+            actual = folder1Children?.getFileDB("file4.txt"),
             message = "file4.txt is missing from folder1",
         )
 
@@ -88,11 +88,11 @@ class FileUtilsTest {
             message = "Children of folder2 should contain two files",
         )
         assertNotNull(
-            actual = folder2Children.find { it.fileName == "file5.txt" },
+            actual = folder2Children.getFileDB("file5.txt"),
             message = "file5.txt in folder2 does not exist",
         )
         assertNotNull(
-            actual = folder2Children.find { it.fileName == "file6.txt" },
+            actual = folder2Children.getFileDB("file6.txt"),
             message = "file6.txt in folder2 does not exist",
         )
     }
@@ -108,7 +108,7 @@ class FileUtilsTest {
         // File contained in one folder contained in another folder
         val folder2InFolder1 = tree.getFileDB("folder1")?.children?.getFileDB("folder2")
         assertNotNull(
-            actual = folder2InFolder1?.children?.find { it.fileName == "file_in_folder1_folder2.txt" },
+            actual = folder2InFolder1?.children?.getFileDB("file_in_folder1_folder2.txt"),
             message = "file_in_folder1_folder2.txt does not exist in folder1/folder2",
         )
     }
@@ -128,7 +128,7 @@ class FileUtilsTest {
 
         val folder5 = getFolder(path, tree)
         assertNotNull(
-            actual = folder5?.children?.find { it.fileName == "file_in_folder1_folder2_folder3_folder4_folder5.txt" },
+            actual = folder5?.children?.getFileDB("file_in_folder1_folder2_folder3_folder4_folder5.txt"),
             message = "file_in_folder1_folder2_folder3_folder4_folder5.txt does not exist in $path",
         )
     }
@@ -149,7 +149,7 @@ class FileUtilsTest {
 
         val folder25 = getFolder(path, tree)
         assertNotNull(
-            actual = folder25?.children?.find { it.fileName == "hidden_file.txt" },
+            actual = folder25?.children?.getFileDB("hidden_file.txt"),
             message = "folder25 should contain hidden_file.txt",
         )
     }
