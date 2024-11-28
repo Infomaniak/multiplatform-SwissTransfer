@@ -17,16 +17,22 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.serializers
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonTransformingSerializer
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
-internal object EmptyStringAsNullSerializer : JsonTransformingSerializer<String>(String.serializer()) {
-    override fun transformDeserialize(element: JsonElement): JsonElement {
-        return runCatching {
-            if (element.jsonPrimitive.content.isBlank()) JsonNull else element
-        }.getOrDefault(element)
+internal object EmptyStringAsNullSerializer : KSerializer<String?> {
+
+    override val descriptor: SerialDescriptor = String.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): String? {
+        val content = decoder.decodeString()
+        return content.ifEmpty { null }
+    }
+
+    override fun serialize(encoder: Encoder, value: String?) {
+        encoder.encodeString(value ?: "")
     }
 }
