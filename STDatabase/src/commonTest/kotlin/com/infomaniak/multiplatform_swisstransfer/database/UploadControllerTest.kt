@@ -82,7 +82,12 @@ class UploadControllerTest {
         assertNotNull(realmUpload1)
         assertNull(realmUpload1.remoteContainer)
 
-        uploadController.updateUploadSession(dummyUpload.uuid, dummyContainer, "remoteHost", listOf("dhsd"))
+        uploadController.updateUploadSession(
+            uuid = dummyUpload.uuid,
+            remoteContainer = dummyContainer,
+            remoteUploadHost = "remoteHost",
+            remoteFilesUUID = listOf("dhsd"),
+        )
         val realmUpload2 = uploadController.getUploadByUUID(dummyUpload.uuid)
         assertNotNull(realmUpload2)
         assertNotNull(realmUpload2.remoteContainer)

@@ -111,7 +111,7 @@ class TransferManager internal constructor(
 
         runCatching {
             val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID).data ?: return
-            transferController.upsert(remoteTransfer, transferDirection)
+            transferController.upsert(remoteTransfer, transferDirection, localTransfer.password)
         }
     }
 
@@ -158,7 +158,8 @@ class TransferManager internal constructor(
         password: String?,
         transferDirection: TransferDirection,
     ): Unit = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByLinkUUID(linkUUID, password).data, transferDirection)
+        val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data
+        addTransfer(transferApi, transferDirection, password)
     }
 
     /**
@@ -189,9 +190,9 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByUrl(url: String): String? = withContext(Dispatchers.IO) {
+    suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.IO) {
         val transferApi = transferRepository.getTransferByUrl(url).data ?: return@withContext null
-        addTransfer(transferApi, TransferDirection.RECEIVED)
+        addTransfer(transferApi, TransferDirection.RECEIVED, password)
         return@withContext transferApi.linkUUID
     }
 
@@ -208,9 +209,9 @@ class TransferManager internal constructor(
         transferController.deleteTransfer(transferUUID)
     }
 
-    private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection) {
+    private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection, password: String?) {
         runCatching {
-            transferController.upsert(transferApi as Transfer, transferDirection)
+            transferController.upsert(transferApi as Transfer, transferDirection, password)
         }.onFailure {
             throw UnknownException(it)
         }
