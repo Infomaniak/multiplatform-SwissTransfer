@@ -37,8 +37,8 @@ class TransferDB() : Transfer, RealmObject {
     override var isMailSent: Boolean = false
     override var downloadHost: String = ""
     override var container: ContainerDB? = null
-
     override var password: String? = null
+
     private var transferDirectionValue: String = ""
     private var transferStatusValue: String = TransferStatus.UNKNOWN.name
 
@@ -47,7 +47,7 @@ class TransferDB() : Transfer, RealmObject {
     @Ignore
     override val transferStatus: TransferStatus get() = TransferStatus.valueOf(transferStatusValue)
 
-    constructor(transfer: Transfer, transferDirection: TransferDirection) : this() {
+    constructor(transfer: Transfer, transferDirection: TransferDirection, password: String?) : this() {
         this.linkUUID = transfer.linkUUID
         this.containerUUID = transfer.containerUUID
         this.downloadCounterCredit = transfer.downloadCounterCredit
@@ -57,6 +57,7 @@ class TransferDB() : Transfer, RealmObject {
         this.isMailSent = transfer.isMailSent
         this.downloadHost = transfer.downloadHost
         this.container = transfer.container?.let(::ContainerDB)
+        this.password = password ?: transfer.password
 
         this.transferDirectionValue = transferDirection.name
         this.transferStatusValue = transfer.transferStatus?.name ?: TransferStatus.READY.name
@@ -72,11 +73,10 @@ class TransferDB() : Transfer, RealmObject {
         this.isMailSent = false
         this.downloadHost = ""
         this.container = ContainerDB(uploadSession.remoteContainer!!, uploadSession.files)
+        this.password = uploadSession.password.ifEmpty { null }
 
         this.transferDirectionValue = TransferDirection.SENT.name
         this.transferStatusValue = transferStatus.name
-
-        this.password = uploadSession.password.ifEmpty { null }
     }
 
     internal companion object {
