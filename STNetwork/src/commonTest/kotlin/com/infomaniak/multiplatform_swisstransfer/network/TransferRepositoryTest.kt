@@ -22,9 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.Transf
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.*
 
 class TransferRepositoryTest {
 
@@ -36,6 +34,65 @@ class TransferRepositoryTest {
         val url = "https://www.swisstransfer.com/d/fa7d299d-1001-4668-83a4-2a9b61aa59e8"
         val result = transferRepository.extractUUID(url)
         assertEquals("fa7d299d-1001-4668-83a4-2a9b61aa59e8", result)
+    }
+
+    @Test
+    fun canParseEmptyMimeTypeToNull() {
+        val data = """
+            {
+              "result": "success",
+              "data": {
+                "linkUUID": "c96350da-4d8c-4c43-aa6a-40f2d2b31eac",
+                "containerUUID": "77f4f5c8-6663-42b0-b871-263d3dd11990",
+                "downloadCounterCredit": 250,
+                "createdDate": "2024-11-26 13:34:49",
+                "expiredDate": "2024-12-26 13:34:49",
+                "isDownloadOnetime": 0,
+                "isMailSent": 0,
+                "downloadHost": "download.swisstransfer.preprod.dev.infomaniak.ch",
+                "container": {
+                  "UUID": "77f4f5c8-6663-42b0-b871-263d3dd11990",
+                  "duration": 30,
+                  "createdDate": "2024-11-26 13:34:49",
+                  "expiredDate": "2024-12-26 13:34:49",
+                  "numberOfFile": 1,
+                  "message": "iusfyfuy",
+                  "needPassword": 0,
+                  "lang": "fr_FR",
+                  "sizeUploaded": 26070874,
+                  "deletedDate": null,
+                  "swiftVersion": 4,
+                  "downloadLimit": 250,
+                  "source": "ST",
+                  "WSUser": null,
+                  "files": [
+                    {
+                      "containerUUID": "77f4f5c8-6663-42b0-b871-263d3dd11990",
+                      "UUID": "2e085789-43cb-48f7-ab1f-b7322fbf5367",
+                      "fileName": "app-release (1).aab",
+                      "fileSizeInBytes": 26070874,
+                      "downloadCounter": 0,
+                      "createdDate": "2024-11-26 13:34:50",
+                      "expiredDate": "2024-12-26 13:34:50",
+                      "eVirus": "NOT_VIRUS_CHECKED",
+                      "deletedDate": null,
+                      "mimeType": "",
+                      "receivedSizeInBytes": 26070874,
+                      "path": null
+                    }
+                  ]
+                }
+              }
+            }
+        """.trimIndent()
+
+        val responseData = apiClientProvider.json.decodeFromString<ApiResponse<TransferApi>>(data).data
+        assertNotNull(responseData)
+
+        val file = responseData.container.files.firstOrNull()
+        assertNotNull(file)
+
+        assertNull(file.mimeType)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
