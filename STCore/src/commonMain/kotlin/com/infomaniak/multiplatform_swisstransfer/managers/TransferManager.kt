@@ -90,7 +90,7 @@ class TransferManager internal constructor(
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.IO) {
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
-                addTransferByLinkUUID(transfer.linkUUID, transfer.password)
+                addTransferByLinkUUID(transfer.linkUUID, transfer.password, TransferDirection.SENT)
             }
         }
     }
@@ -135,7 +135,9 @@ class TransferManager internal constructor(
      *
      * @see getTransfers
      *
-     * @param linkUUID The UUID corresponding to the uploaded transfer link.
+     * @param linkUUID The UUID corresponding to the uploaded transfer link or transferUUID.
+     * @param password The transfer password if protected
+     * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT])
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is an error related to the API during transfer retrieval.
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
@@ -151,8 +153,12 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByLinkUUID(linkUUID: String, password: String?): Unit = withContext(Dispatchers.IO) {
-        addTransfer(transferRepository.getTransferByLinkUUID(linkUUID, password).data, TransferDirection.SENT)
+    suspend fun addTransferByLinkUUID(
+        linkUUID: String,
+        password: String?,
+        transferDirection: TransferDirection,
+    ): Unit = withContext(Dispatchers.IO) {
+        addTransfer(transferRepository.getTransferByLinkUUID(linkUUID, password).data, transferDirection)
     }
 
     /**
