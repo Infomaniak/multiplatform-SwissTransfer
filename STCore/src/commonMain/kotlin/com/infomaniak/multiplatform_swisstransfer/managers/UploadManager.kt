@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
@@ -318,7 +319,7 @@ class UploadManager(
         uploadSession: UploadSession,
     ) {
         runCatching {
-            transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID, uploadSession.password)
+            transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID, uploadSession.password, TransferDirection.SENT)
         }.onFailure { exception ->
             if (exception is UnexpectedApiErrorFormatException) {
                 createTransferLocally(exception, finishUploadResponse, uploadSession)
