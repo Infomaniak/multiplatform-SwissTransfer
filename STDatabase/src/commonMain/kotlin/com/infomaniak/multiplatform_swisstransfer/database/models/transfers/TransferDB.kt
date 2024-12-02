@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Tr
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import com.infomaniak.multiplatform_swisstransfer.common.utils.daysRemainingBeforeExpiration
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -46,6 +47,9 @@ class TransferDB() : Transfer, RealmObject {
     override val transferDirection: TransferDirection get() = TransferDirection.valueOf(transferDirectionValue)
     @Ignore
     override val transferStatus: TransferStatus get() = TransferStatus.valueOf(transferStatusValue)
+
+    @Ignore
+    val expiresInDays: Int get() = daysRemainingBeforeExpiration(expiredDateTimestamp)
 
     constructor(transfer: Transfer, transferDirection: TransferDirection, password: String?) : this() {
         this.linkUUID = transfer.linkUUID

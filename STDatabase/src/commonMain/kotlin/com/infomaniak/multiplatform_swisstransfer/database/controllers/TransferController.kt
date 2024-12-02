@@ -110,6 +110,12 @@ class TransferController(private val realmProvider: RealmProvider) {
         }
     }
 
+    suspend fun deleteExpiredTransfers() = runThrowingRealm {
+        getTransfers()
+            .filter { it.expiresInDays < -DAYS_SINCE_EXPIRATION }
+            .forEach { deleteTransfer(it.linkUUID) }
+    }
+
     @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
@@ -117,6 +123,8 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     private companion object {
+
+        private const val DAYS_SINCE_EXPIRATION = 15
 
         private fun getTransferQuery(realm: Realm, linkUUID: String): RealmSingleQuery<TransferDB> {
             return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()
