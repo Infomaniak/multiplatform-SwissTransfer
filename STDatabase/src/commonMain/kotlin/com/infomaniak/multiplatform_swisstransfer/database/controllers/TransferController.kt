@@ -48,11 +48,11 @@ class TransferController(private val realmProvider: RealmProvider) {
     //region Get data
     @Throws(RealmException::class)
     internal fun getTransfers(transferDirection: TransferDirection? = null): RealmResults<TransferDB> = runThrowingRealm {
-        val sentFilterQuery = when (transferDirection) {
+        val directionFilterQuery = when (transferDirection) {
             null -> TRUE_PREDICATE
             else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
         }
-        return realm.query<TransferDB>(sentFilterQuery).sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING).find()
+        return realm.query<TransferDB>(directionFilterQuery).sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING).find()
     }
 
     @Throws(RealmException::class)
