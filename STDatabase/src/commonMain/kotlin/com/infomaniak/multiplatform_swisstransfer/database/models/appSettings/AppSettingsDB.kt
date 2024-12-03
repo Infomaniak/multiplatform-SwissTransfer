@@ -69,9 +69,9 @@ class AppSettingsDB() : RealmObject, AppSettings {
     companion object {
         val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY
+        
         private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
         private val DEFAULT_THEME = Theme.SYSTEM
-
         private val DEFAULT_TRANSFER_TYPE = TransferType.QR_CODE
     }
 }
