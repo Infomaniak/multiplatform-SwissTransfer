@@ -23,21 +23,21 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Tr
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
+import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.toRealmList
-import io.realm.kotlin.query.RealmResults
-import io.realm.kotlin.query.RealmSingleQuery
-import io.realm.kotlin.query.Sort
-import io.realm.kotlin.query.TRUE_PREDICATE
+import io.realm.kotlin.query.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -110,14 +110,9 @@ class TransferController(private val realmProvider: RealmProvider) {
         }
     }
 
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteExpiredTransfers() = runThrowingRealm {
-        getTransfers()
-            .filter {
-                // A Transfer is expired when `expiresInDays` reached 0.
-                // We allow an expired Transfer to stay a few more days before removing it.
-                it.expiresInDays + DAYS_SINCE_EXPIRATION <= 0
-            }
-            .forEach { deleteTransfer(it.linkUUID) }
+        realm.write { delete(getExpiredTransfersQuery(realm = this)) }
     }
 
     @Throws(RealmException::class, CancellationException::class)
@@ -132,6 +127,11 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         private fun getTransferQuery(realm: Realm, linkUUID: String): RealmSingleQuery<TransferDB> {
             return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()
+        }
+
+        private fun getExpiredTransfersQuery(realm: MutableRealm): RealmQuery<TransferDB> {
+            val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
+            return realm.query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
         }
     }
 }
