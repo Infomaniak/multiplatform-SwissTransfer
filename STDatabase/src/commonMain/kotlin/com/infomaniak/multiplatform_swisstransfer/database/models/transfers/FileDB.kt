@@ -43,7 +43,7 @@ class FileDB() : File, RealmObject {
     override var deletedDate: String? = null
     override var mimeType: String? = null
     override var receivedSizeInBytes: Long = 0
-    override var path: String? = ""
+    override var path: String? = null
     override var thumbnailPath: String? = ""
     var children: RealmList<FileDB> = realmListOf()
 

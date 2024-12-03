@@ -24,14 +24,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UploadFileRequest(
     val name: String = "",
+    val path: String? = null,
     val size: Long = 0L,
     @SerialName("type")
     val mimeType: String = "",
 ) {
+
     constructor(uploadFileSession: UploadFileSession) : this(
         name = uploadFileSession.name,
+        path = uploadFileSession.path,
         size = uploadFileSession.size,
         mimeType = uploadFileSession.mimeType,
     )
-
 }

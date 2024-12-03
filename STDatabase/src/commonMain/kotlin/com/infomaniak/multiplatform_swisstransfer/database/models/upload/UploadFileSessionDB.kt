@@ -22,6 +22,7 @@ import io.realm.kotlin.types.EmbeddedRealmObject
 
 class UploadFileSessionDB() : UploadFileSession, EmbeddedRealmObject {
     override var name: String = ""
+    override var path: String? = null
     override var size: Long = 0L
     override var mimeType: String = ""
     override var localPath: String = ""
@@ -29,6 +30,7 @@ class UploadFileSessionDB() : UploadFileSession, EmbeddedRealmObject {
 
     constructor(uploadFileSession: UploadFileSession) : this() {
         this.name = uploadFileSession.name
+        this.path = uploadFileSession.path
         this.size = uploadFileSession.size
         this.mimeType = uploadFileSession.mimeType
         this.localPath = uploadFileSession.localPath
