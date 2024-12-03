@@ -50,7 +50,7 @@ object DummyTransfer {
         override var containerUUID: String = "containerUUID"
         override var downloadCounterCredit: Int = 0
         override var createdDateTimestamp: Long = 0L
-        override var expiredDateTimestamp: Long = 0L
+        override var expiredDateTimestamp: Long = 1_730_458_842L // 01/11/2024
         override var hasBeenDownloadedOneTime: Boolean = false
         override var isMailSent: Boolean = true
         override var downloadHost: String = "url"
@@ -61,6 +61,7 @@ object DummyTransfer {
     val transfer2 = object : Transfer by transfer1 {
         override val linkUUID: String = "transfer2"
         override val containerUUID: String = "container2"
+        override var expiredDateTimestamp: Long = 4_102_441_200L // 01/01/2100
         override val container: Container = container2
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }

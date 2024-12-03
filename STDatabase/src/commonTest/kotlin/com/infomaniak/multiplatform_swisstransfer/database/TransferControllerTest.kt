@@ -100,6 +100,19 @@ class TransferControllerTest {
     }
 
     @Test
+    fun canDeleteExpiredTransfers() = runTest {
+
+        transferController.upsert(DummyTransfer.transfer1, TransferDirection.SENT, password = null)
+        transferController.upsert(DummyTransfer.transfer2, TransferDirection.RECEIVED, password = null)
+
+        transferController.deleteExpiredTransfers()
+
+        val transfers = transferController.getTransfers()
+        assertEquals(transfers.count(), 1, "The transfers table should contain only 1 transfer")
+        assertEquals(transfers.first().linkUUID, DummyTransfer.transfer2.linkUUID, "The remaining transfer should be `transfer2`")
+    }
+
+    @Test
     fun canRemoveTransfers() = runTest {
         transferController.upsert(DummyTransfer.transfer1, TransferDirection.SENT, password = null)
         transferController.removeData()

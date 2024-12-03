@@ -209,6 +209,17 @@ class TransferManager internal constructor(
         transferController.deleteTransfer(transferUUID)
     }
 
+    /**
+     * Delete Transfers that are expired since a certain amount of days.
+     *
+     * @throws CancellationException If the operation is cancelled.
+     * @throws RealmException An error has occurred with realm database
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun deleteExpiredTransfers() {
+        transferController.deleteExpiredTransfers()
+    }
+
     private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection, password: String?) {
         runCatching {
             transferController.upsert(transferApi as Transfer, transferDirection, password)
