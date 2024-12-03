@@ -112,7 +112,11 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     suspend fun deleteExpiredTransfers() = runThrowingRealm {
         getTransfers()
-            .filter { it.expiresInDays < -DAYS_SINCE_EXPIRATION }
+            .filter {
+                // A Transfer is expired when `expiresInDays` reached 0.
+                // We allow an expired Transfer to stay a few more days before removing it.
+                it.expiresInDays + DAYS_SINCE_EXPIRATION <= 0
+            }
             .forEach { deleteTransfer(it.linkUUID) }
     }
 
