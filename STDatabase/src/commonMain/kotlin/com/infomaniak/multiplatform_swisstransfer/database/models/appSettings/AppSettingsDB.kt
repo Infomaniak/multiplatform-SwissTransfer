@@ -20,15 +20,11 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.appSettings
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.Ignore
 
 class AppSettingsDB() : RealmObject, AppSettings {
 
-    @Ignore
-    private var defaultEmailLanguage = EmailLanguage.ENGLISH
-
-    constructor(defaultEmailLanguage: EmailLanguage) : this() {
-        this.defaultEmailLanguage = defaultEmailLanguage
+    constructor(emailLanguage: EmailLanguage) : this() {
+        this.emailLanguage = emailLanguage
     }
 
     //region Options available in App Settings
@@ -53,9 +49,9 @@ class AppSettingsDB() : RealmObject, AppSettings {
             _downloadLimit = value.value
         }
 
-    private var _emailLanguage: String = defaultEmailLanguage.value
+    private var _emailLanguage: String = DEFAULT_EMAIL_LANGUAGE.value
     override var emailLanguage: EmailLanguage
-        get() = EmailLanguage.entries.find { it.value == _emailLanguage } ?: defaultEmailLanguage
+        get() = EmailLanguage.entries.find { it.value == _emailLanguage } ?: DEFAULT_EMAIL_LANGUAGE
         set(value) {
             _emailLanguage = value.value
         }
@@ -73,8 +69,9 @@ class AppSettingsDB() : RealmObject, AppSettings {
     companion object {
         val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY
+        
+        private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
         private val DEFAULT_THEME = Theme.SYSTEM
-
         private val DEFAULT_TRANSFER_TYPE = TransferType.QR_CODE
     }
 }
