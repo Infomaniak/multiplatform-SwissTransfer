@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
 interface UploadFileSession {
     val name: String
+    val path: String?
     val size: Long
     val mimeType: String
     val localPath: String
