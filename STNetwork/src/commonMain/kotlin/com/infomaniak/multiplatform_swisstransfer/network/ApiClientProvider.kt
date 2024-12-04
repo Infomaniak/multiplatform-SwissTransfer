@@ -57,7 +57,6 @@ class ApiClientProvider internal constructor(
 
     fun createHttpClient(engine: HttpClientEngineFactory<*>?): HttpClient {
         val block: HttpClientConfig<*>.() -> Unit = {
-            expectSuccess = true
             install(UserAgent) {
                 agent = userAgent
             }
@@ -98,9 +97,9 @@ class ApiClientProvider internal constructor(
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
                         is ApiException, is UnexpectedApiErrorFormatException -> throw cause
                         else -> {
-                            val response = request.call.response
-                            val bodyResponse = response.bodyAsText()
-                            val statusCode = response.status.value
+                            val response = runCatching { request.call.response }.getOrNull()
+                            val bodyResponse = response?.bodyAsText() ?: cause.message ?: ""
+                            val statusCode = response?.status?.value ?: -1
                             throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause)
                         }
                     }
