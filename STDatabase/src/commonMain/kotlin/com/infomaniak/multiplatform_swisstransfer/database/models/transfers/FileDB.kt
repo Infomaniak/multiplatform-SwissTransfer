@@ -78,7 +78,7 @@ class FileDB() : File, RealmObject {
         this.deletedDate = null
         this.mimeType = uploadFileSession.mimeType
         this.receivedSizeInBytes = uploadFileSession.size
-        this.path = null
+        this.path = uploadFileSession.path
         this.thumbnailPath = ""
     }
 
