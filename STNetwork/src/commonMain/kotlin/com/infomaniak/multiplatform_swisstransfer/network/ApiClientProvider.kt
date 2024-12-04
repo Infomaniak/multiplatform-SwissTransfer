@@ -57,7 +57,6 @@ class ApiClientProvider internal constructor(
 
     fun createHttpClient(engine: HttpClientEngineFactory<*>?): HttpClient {
         val block: HttpClientConfig<*>.() -> Unit = {
-            expectSuccess = true
             install(UserAgent) {
                 agent = userAgent
             }
