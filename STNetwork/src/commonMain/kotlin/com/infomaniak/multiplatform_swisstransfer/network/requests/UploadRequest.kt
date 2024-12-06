@@ -49,6 +49,7 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
 
     suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody): Boolean {
         val httpResponse = httpClient.post(url = createUrl(ApiRoutes.resendEmailCode)) {
+            contentType(ContentType.Application.Json)
             setBody(resendEmailCodeBody)
         }
         return httpResponse.status.isSuccess()
