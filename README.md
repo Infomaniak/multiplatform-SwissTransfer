@@ -104,6 +104,11 @@ For others modules:
 implementation("com.github.infomaniak.multiplatform-SwissTransfer:{module_name}:{tag}")
 ```
 
+#### Step 3
+
+If you target Android devices running below API 26, you need to use Android Gradle plugin 4.0 or newer
+and enable [core library desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring).
+
 ### iOS
 
 For iOS, the Core module is provided as an XCFramework. Follow these steps to integrate it into your Xcode project:
