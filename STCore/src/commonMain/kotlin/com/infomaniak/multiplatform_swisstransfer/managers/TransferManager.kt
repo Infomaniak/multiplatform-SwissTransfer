@@ -76,6 +76,16 @@ class TransferManager internal constructor(
             .flowOn(Dispatchers.IO)
     }
 
+    suspend fun removeAllTransfer() = transferController.removeData()
+
+    suspend fun addDummyTransfer(transfer: Transfer, transferDirection: TransferDirection) {
+        runCatching {
+            transferController.upsert(transfer, transferDirection, "")
+        }.onFailure {
+            throw UnknownException(it)
+        }
+    }
+
     @Throws(RealmException::class)
     fun getTransferFlow(transferUUID: String): Flow<TransferUi?> {
         return transferController.getTransferFlow(transferUUID)
