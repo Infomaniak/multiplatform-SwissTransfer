@@ -95,8 +95,14 @@ class TransferController(private val realmProvider: RealmProvider) {
         uploadSession: UploadSession,
         transferStatus: TransferStatus,
     ) = runThrowingRealm {
+        val transferDB = TransferDB(linkUUID, uploadSession, transferStatus).apply {
+            container?.files?.let { files ->
+                FileUtils.getFileDBTree(containerUUID, files)
+            }
+        }
+
         realm.write {
-            this.copyToRealm(TransferDB(linkUUID, uploadSession, transferStatus), UpdatePolicy.ALL)
+            this.copyToRealm(transferDB, UpdatePolicy.ALL)
         }
     }
     //endregion
