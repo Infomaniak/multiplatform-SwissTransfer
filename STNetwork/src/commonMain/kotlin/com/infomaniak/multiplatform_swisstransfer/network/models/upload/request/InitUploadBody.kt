@@ -51,6 +51,6 @@ class InitUploadBody(
         recaptcha = recaptcha,
         language = uploadSession.language.code,
         files = Json.encodeToString(uploadSession.files.mapToList(::UploadFileRequest)),
-        recipientsEmails = uploadSession.recipientsEmails.joinToString(prefix = "[", postfix = "]"),
+        recipientsEmails = Json.encodeToString(uploadSession.recipientsEmails),
     )
 }
