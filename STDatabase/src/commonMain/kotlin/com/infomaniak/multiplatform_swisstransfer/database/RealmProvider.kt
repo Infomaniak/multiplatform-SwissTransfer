@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.database
 
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.EmailTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
@@ -58,7 +59,7 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
     }
 
     private val realmAppSettingsConfiguration = RealmConfiguration
-        .Builder(schema = setOf(AppSettingsDB::class))
+        .Builder(schema = setOf(AppSettingsDB::class, EmailTokenDB::class))
         .name("AppSettings.realm")
         .deleteRealmDataIfNeeded()
         .loadDataInMemoryIfNeeded()

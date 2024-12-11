@@ -19,9 +19,14 @@ package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.EmailToken
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.EmailTokenDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
@@ -55,6 +60,12 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class)
     fun getAppSettings(): AppSettings? = runThrowingRealm {
         return appSettingsQuery.find()
+    }
+
+    @Throws(RealmException::class)
+    fun getTokenForEmail(email: String): String? = runThrowingRealm {
+        val query = "${EmailTokenDB::email} == '$email'"
+        return realm.query<EmailTokenDB>(query).first().find()?.token
     }
     //endregion
 
@@ -115,6 +126,14 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setEmailToken(email: String, token: String) = runThrowingRealm {
+        realm.write {
+            val emailTokenDB = EmailTokenDB(email, token)
+            copyToRealm(emailTokenDB, UpdatePolicy.ALL)
+        }
     }
     //endregion
 }
