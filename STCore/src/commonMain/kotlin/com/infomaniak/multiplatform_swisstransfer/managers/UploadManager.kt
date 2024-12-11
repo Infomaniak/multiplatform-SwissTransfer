@@ -81,6 +81,26 @@ class UploadManager(
     }
 
     /**
+     * Retrieves an `UploadSession` by its UUID.
+     *
+     * @param uuid The UUID of the upload session to retrieve.
+     *
+     * @return The `UploadSession` with the specified UUID.
+     * 
+     * @throws RealmException If an error occurs during database interaction.
+     * @throws CancellationException If the operation is cancelled.
+     * @throws NotFoundException If no upload session with the given UUID is found in the database.
+     */
+    @Throws(
+        RealmException::class,
+        CancellationException::class,
+        NotFoundException::class,
+    )
+    fun getUploadByUUID(uuid: String): UploadSession {
+        return uploadController.getUploadByUUID(uuid) ?: throw NotFoundException("No uploadSession found in DB")
+    }
+
+    /**
      * Retrieves the total number of uploads in the database.
      *
      * @return The number of uploads.
