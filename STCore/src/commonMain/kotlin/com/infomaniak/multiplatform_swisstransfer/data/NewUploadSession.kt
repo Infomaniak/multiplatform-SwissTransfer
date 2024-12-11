@@ -27,6 +27,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 data class NewUploadSession(
     override val duration: ValidityPeriod,
     override val authorEmail: String,
+    override val authorEmailToken: String?,
     override val password: String,
     override val message: String,
     override val numberOfDownload: DownloadLimit,
