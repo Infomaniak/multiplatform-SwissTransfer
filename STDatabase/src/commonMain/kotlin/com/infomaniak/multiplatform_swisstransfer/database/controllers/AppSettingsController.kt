@@ -63,9 +63,9 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getTokenForEmail(email: String): String? = runThrowingRealm {
-        val query = "${EmailTokenDB::email} == '$email'"
-        return realm.query<EmailTokenDB>(query).first().find()?.token
+    fun getEmailTokenForEmail(email: String): EmailToken? = runThrowingRealm {
+        val query = "${EmailTokenDB::email.name} == '$email'"
+        return realm.query<EmailTokenDB>(query).first().find()
     }
     //endregion
 
