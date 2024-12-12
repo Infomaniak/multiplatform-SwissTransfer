@@ -18,7 +18,6 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.EmailToken
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.EmailTokensController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
