@@ -50,7 +50,7 @@ internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(j
         }
         val encodedInitUploadBody = nullableJson.encodeToString(initUploadBody)
         return post(
-            url = createUrl(ApiRoutes.initUpload),
+            url = createUrl(SharedApiRoutes.createUploadContainer),
             data = encodedInitUploadBody,
             appendHeaders = {
                 append(attestationHeaderName, attestationToken)
