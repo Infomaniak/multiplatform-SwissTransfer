@@ -324,8 +324,8 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun verifyEmailCode(code: String, email: String): AuthorEmailToken {
-        return uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, email))
+    suspend fun verifyEmailCode(code: String, address: String): AuthorEmailToken {
+        return uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, address))
     }
 
     @Throws(
@@ -335,9 +335,9 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun resendEmailCode(emailAddress: String) {
+    suspend fun resendEmailCode(address: String) {
         val language = emailLanguageUtils.getEmailLanguageFromLocal()
-        uploadRepository.resendEmailCode(ResendEmailCodeBody(emailAddress, language.code))
+        uploadRepository.resendEmailCode(ResendEmailCodeBody(address, language.code))
     }
 
     private suspend fun addTransferByLinkUUID(
