@@ -26,13 +26,12 @@ import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
@@ -315,6 +314,18 @@ class UploadManager(
     )
     suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.IO) {
         uploadController.removeData()
+    }
+
+    @Throws(
+        CancellationException::class,
+        EmailValidationException::class,
+        ApiException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+    )
+    suspend fun verifyEmailCode(code: String, email: String): AuthorEmailToken {
+        return uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, email))
     }
 
     @Throws(
