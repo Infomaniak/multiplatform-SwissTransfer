@@ -18,10 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.*
 import com.infomaniak.multiplatform_swisstransfer.managers.*
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
@@ -41,6 +38,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
  * @property uploadManager A manager used to orchestrate Uploads operations.
+ * @property emailTokensManager A manager used to orchestrate EmailTokens operations.
  * @property sharedApiUrlCreator An utils to help use shared routes.
  */
 class SwissTransferInjection(
@@ -54,6 +52,7 @@ class SwissTransferInjection(
     private val transferRepository by lazy { TransferRepository(apiClientProvider) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
+    private val emailTokensController by lazy { EmailTokensController(realmProvider) }
     private val uploadController by lazy { UploadController(realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
     private val fileController by lazy { FileController(realmProvider) }
@@ -68,6 +67,9 @@ class SwissTransferInjection(
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
+
+    /** A manager used to orchestrate EmailTokens operations. */
+    val emailTokensManager by lazy { EmailTokensManager(emailTokensController) }
 
     /** A manager used to orchestrate Accounts operations. */
     val accountManager by lazy {
