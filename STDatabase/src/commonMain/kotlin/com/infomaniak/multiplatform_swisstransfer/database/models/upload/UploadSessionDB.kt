@@ -33,6 +33,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var uuid: String = RealmUUID.random().toString()
     private var _duration: Int = AppSettingsDB.DEFAULT_VALIDITY_PERIOD.value
     override var authorEmail: String = ""
+    override var authorEmailToken: String? = null
     override var password: String = ""
     override var message: String = ""
     private var _numberOfDownload: Int = AppSettingsDB.DEFAULT_DOWNLOAD_LIMIT.value

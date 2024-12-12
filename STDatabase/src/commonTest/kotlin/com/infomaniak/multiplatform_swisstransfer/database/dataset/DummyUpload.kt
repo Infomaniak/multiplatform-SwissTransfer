@@ -44,6 +44,7 @@ object DummyUpload {
         override val uuid: String = "upload1"
         override val duration: ValidityPeriod = ValidityPeriod.THIRTY
         override val authorEmail: String = ""
+        override val authorEmailToken: String? = null
         override val password: String = ""
         override val message: String = ""
         override val numberOfDownload: DownloadLimit = DownloadLimit.ONE
