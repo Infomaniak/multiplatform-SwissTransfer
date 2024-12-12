@@ -41,6 +41,7 @@ centralized access point to orchestrate transfer operations.
 | Property | fileManager         | A manager used to orchestrate Files operations.       |
 | Property | accountManager      | A manager used to orchestrate Accounts operations.    |
 | Property | uploadManager       | A manager used to orchestrate Uploads operations.     |
+| Property | emailTokensManager  | A manager used to orchestrate EmailTokens operations. |
 | Property | sharedApiUrlCreator | An utils to help use shared routes                    |
 
 ### Details of Properties and Methods
@@ -110,6 +111,18 @@ centralized access point to orchestrate transfer operations.
   val core = SwissTransferInjection(userAgent = "user_agent")
   val uploadManager = core.uploadManager
   // Use the uploadManager to orchestrate Uploads
+  ```
+
+- **Type**: `EmailTokensManager`
+- **Description**:
+    - `emailTokensManager` is a lazily initialized property that provides a manager to orchestrate all EmailTokens operations. It
+      uses `EmailTokensController` to do operations.
+
+- **Usage Example**:
+  ```kotlin
+  val core = SwissTransferInjection(userAgent = "user_agent")
+  val emailTokensManager = core.emailTokensManager
+  // Use the EmailTokensManager to orchestrate EmailTokens
   ```
 
 #### Property: `sharedApiUrlCreator`
