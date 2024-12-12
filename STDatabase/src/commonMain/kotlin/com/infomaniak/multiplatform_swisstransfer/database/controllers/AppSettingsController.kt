@@ -62,11 +62,6 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
         return appSettingsQuery.find()
     }
 
-    @Throws(RealmException::class)
-    fun getEmailTokenForEmail(email: String): EmailToken? = runThrowingRealm {
-        val query = "${EmailTokenDB::email.name} == '$email'"
-        return realm.query<EmailTokenDB>(query).first().find()
-    }
     //endregion
 
     //region Update data
@@ -126,14 +121,6 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
-    }
-
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailToken(email: String, token: String) = runThrowingRealm {
-        realm.write {
-            val emailTokenDB = EmailTokenDB(email, token)
-            copyToRealm(emailTokenDB, UpdatePolicy.ALL)
-        }
     }
     //endregion
 }

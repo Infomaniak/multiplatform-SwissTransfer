@@ -123,29 +123,4 @@ class AppSettingsManager internal constructor(
     suspend fun setLastAuthorEmail(authorEmail: String?): Unit = withContext(Dispatchers.IO) {
         appSettingsController.setLastAuthorEmail(authorEmail)
     }
-
-    /**
-     * Asynchronously sets the email and it's corresponding token.
-     *
-     * @param email The validated email.
-     * @param token The valid token associated to the email.
-     *
-     * @throws RealmException If an error occurs during database access.
-     * @throws CancellationException If the operation is cancelled.
-     */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailToken(email: String, token: String): Unit = withContext(Dispatchers.IO) {
-        appSettingsController.setEmailToken(email, token)
-    }
-
-    /**
-     * Get a token for a given email.
-     *
-     * @param email The email possibly associated with a token.
-     *
-     * @return A token which may be associated with the email.
-     */
-    fun getTokenForEmail(email: String): String? {
-        return appSettingsController.getEmailTokenForEmail(email)?.token
-    }
 }
