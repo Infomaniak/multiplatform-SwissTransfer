@@ -55,9 +55,13 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun initUpload(initUploadBody: InitUploadBody): InitUploadResponseApi {
+    suspend fun initUpload(
+        initUploadBody: InitUploadBody,
+        attestationHeaderName: String,
+        attestationToken: String,
+    ): InitUploadResponseApi {
         return runCatching {
-            uploadRequest.initUpload(initUploadBody)
+            uploadRequest.initUpload(initUploadBody, attestationHeaderName, attestationToken)
         }.getOrElse { exception ->
             if (exception is UnexpectedApiErrorFormatException) {
                 throw exception.toContainerErrorsException()

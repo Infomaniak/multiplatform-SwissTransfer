@@ -40,12 +40,22 @@ import kotlinx.serialization.json.JsonObject
 
 internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
-    suspend fun initUpload(initUploadBody: InitUploadBody): InitUploadResponseApi {
+    suspend fun initUpload(
+        initUploadBody: InitUploadBody,
+        attestationHeaderName: String,
+        attestationToken: String,
+    ): InitUploadResponseApi {
         val nullableJson = Json(json) {
             explicitNulls = false
         }
         val encodedInitUploadBody = nullableJson.encodeToString(initUploadBody)
-        return post(url = createUrl(ApiRoutes.initUpload), encodedInitUploadBody)
+        return post(
+            url = createUrl(ApiRoutes.initUpload),
+            data = encodedInitUploadBody,
+            appendHeaders = {
+                append(attestationHeaderName, attestationToken)
+            },
+        )
     }
 
     suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {
