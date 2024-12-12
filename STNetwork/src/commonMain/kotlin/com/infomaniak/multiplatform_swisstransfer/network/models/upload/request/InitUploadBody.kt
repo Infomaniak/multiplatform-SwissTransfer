@@ -28,6 +28,7 @@ import kotlinx.serialization.json.Json
 class InitUploadBody(
     val duration: String = "",
     val authorEmail: String = "",
+    val authorEmailToken: String? = null,
     val password: String = "",
     val message: String = "",
     val sizeOfUpload: Long = 0L,
@@ -43,6 +44,7 @@ class InitUploadBody(
     constructor(uploadSession: UploadSession, recaptcha: String) : this(
         duration = uploadSession.duration.value.toString(),
         authorEmail = uploadSession.authorEmail,
+        authorEmailToken = uploadSession.authorEmailToken,
         password = uploadSession.password,
         message = uploadSession.message,
         sizeOfUpload = uploadSession.files.sumOf { it.size },

@@ -34,13 +34,18 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
 internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
 
     suspend fun initUpload(initUploadBody: InitUploadBody): InitUploadResponseApi {
-        return post(url = createUrl(ApiRoutes.initUpload), initUploadBody)
+        val nullableJson = Json(json) {
+            explicitNulls = false
+        }
+        val encodedInitUploadBody = nullableJson.encodeToString(initUploadBody)
+        return post(url = createUrl(ApiRoutes.initUpload), encodedInitUploadBody)
     }
 
     suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {

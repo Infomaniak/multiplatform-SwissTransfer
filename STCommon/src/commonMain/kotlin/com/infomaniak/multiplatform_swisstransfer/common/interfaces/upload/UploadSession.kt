@@ -25,6 +25,7 @@ interface UploadSession {
     val uuid: String
     val duration: ValidityPeriod get() = ValidityPeriod.THIRTY
     val authorEmail: String
+    val authorEmailToken: String?
     val password: String
     val message: String
     val numberOfDownload: DownloadLimit get() = DownloadLimit.TWO_HUNDRED_FIFTY
