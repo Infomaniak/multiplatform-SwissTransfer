@@ -33,9 +33,13 @@ class EmailTokensManager(private val emailTokensController: EmailTokensControlle
      * @param email The email possibly associated with a token.
      *
      * @return A token which may be associated with the email.
+     *
+     * @throws RealmException If an error occurs during database access.
+     * @throws CancellationException If the operation is cancelled.
      */
-    fun getEmailTokenForEmail(email: String): EmailToken? {
-        return emailTokensController.getEmailTokenForEmail(email)
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getTokenForEmail(email: String): String? = withContext(Dispatchers.IO) {
+        return@withContext emailTokensController.getEmailTokenForEmail(email)?.token
     }
 
     /**
