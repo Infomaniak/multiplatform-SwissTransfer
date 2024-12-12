@@ -26,14 +26,15 @@ import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
+import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.flowOn
@@ -54,6 +55,7 @@ class UploadManager(
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
+    private val emailLanguageUtils: EmailLanguageUtils,
 ) {
 
     val lastUploadFlow get() = uploadController.getLastUploadFlow().flowOn(Dispatchers.IO)
@@ -312,6 +314,30 @@ class UploadManager(
     )
     suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.IO) {
         uploadController.removeData()
+    }
+
+    @Throws(
+        CancellationException::class,
+        EmailValidationException::class,
+        ApiException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+    )
+    suspend fun verifyEmailCode(code: String, address: String): AuthorEmailToken {
+        return uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, address))
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+    )
+    suspend fun resendEmailCode(address: String) {
+        val language = emailLanguageUtils.getEmailLanguageFromLocal()
+        uploadRepository.resendEmailCode(ResendEmailCodeBody(address, language.code))
     }
 
     private suspend fun addTransferByLinkUUID(
