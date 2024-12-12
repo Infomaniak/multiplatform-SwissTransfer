@@ -32,8 +32,10 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
+import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.flowOn
@@ -54,6 +56,7 @@ class UploadManager(
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
+    private val emailLanguageUtils: EmailLanguageUtils,
 ) {
 
     val lastUploadFlow get() = uploadController.getLastUploadFlow().flowOn(Dispatchers.IO)
@@ -312,6 +315,18 @@ class UploadManager(
     )
     suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.IO) {
         uploadController.removeData()
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+    )
+    suspend fun resendEmailCode(emailAddress: String) {
+        val language = emailLanguageUtils.getEmailLanguageFromLocal()
+        uploadRepository.resendEmailCode(ResendEmailCodeBody(emailAddress, language.code))
     }
 
     private suspend fun addTransferByLinkUUID(
