@@ -18,8 +18,8 @@
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
 enum class TransferType {
+    MAIL,
     QR_CODE,
     LINK,
     PROXIMITY,
-    MAIL,
 }
