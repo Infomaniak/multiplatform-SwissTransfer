@@ -72,6 +72,6 @@ class AppSettingsDB() : RealmObject, AppSettings {
 
         private val DEFAULT_EMAIL_LANGUAGE = EmailLanguage.ENGLISH
         private val DEFAULT_THEME = Theme.SYSTEM
-        private val DEFAULT_TRANSFER_TYPE = TransferType.QR_CODE
+        private val DEFAULT_TRANSFER_TYPE = TransferType.LINK
     }
 }
