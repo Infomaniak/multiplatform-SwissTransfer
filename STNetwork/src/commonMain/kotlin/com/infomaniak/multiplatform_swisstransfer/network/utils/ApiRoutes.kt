@@ -29,7 +29,7 @@ internal object ApiRoutes {
     //endRegion
 
     //region Upload
-    const val initUpload = "containers"
+    const val initUpload = "mobile/containers"
     const val verifyEmailCode = "emails-validation"
     const val resendEmailCode = "$verifyEmailCode/resend"
     const val finishUpload = "uploadComplete"

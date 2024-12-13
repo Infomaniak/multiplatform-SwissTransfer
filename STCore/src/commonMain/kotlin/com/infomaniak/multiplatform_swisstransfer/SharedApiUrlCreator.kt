@@ -29,6 +29,7 @@ class SharedApiUrlCreator internal constructor(
     private val transferController: TransferController,
     private val uploadController: UploadController,
 ) {
+    val createUploadContainerUrl: String = SharedApiRoutes.createUploadContainer
 
     fun shareTransferUrl(transferUUID: String) = SharedApiRoutes.shareTransfer(transferUUID)
 

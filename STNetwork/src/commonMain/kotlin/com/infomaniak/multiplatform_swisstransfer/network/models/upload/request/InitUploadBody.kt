@@ -34,14 +34,12 @@ class InitUploadBody(
     val sizeOfUpload: Long = 0L,
     val numberOfDownload: Int = 0,
     val numberOfFile: Int = 0,
-    val recaptcha: String = "recaptcha",
-    val recaptchaVersion: Int = 3,
     @SerialName("lang")
     val language: String = "",
     val files: String = "", // List<UploadFileRequest>
     val recipientsEmails: String = "",
 ) {
-    constructor(uploadSession: UploadSession, recaptcha: String) : this(
+    constructor(uploadSession: UploadSession) : this(
         duration = uploadSession.duration.value.toString(),
         authorEmail = uploadSession.authorEmail,
         authorEmailToken = uploadSession.authorEmailToken,
@@ -50,7 +48,6 @@ class InitUploadBody(
         sizeOfUpload = uploadSession.files.sumOf { it.size },
         numberOfDownload = uploadSession.numberOfDownload.value,
         numberOfFile = uploadSession.files.count(),
-        recaptcha = recaptcha,
         language = uploadSession.language.code,
         files = Json.encodeToString(uploadSession.files.mapToList(::UploadFileRequest)),
         recipientsEmails = Json.encodeToString(uploadSession.recipientsEmails),

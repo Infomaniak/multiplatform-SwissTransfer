@@ -48,9 +48,14 @@ internal open class BaseRequest(protected val json: Json, protected val httpClie
         }.decode<R>()
     }
 
-    protected suspend inline fun <reified R> post(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
+    protected suspend inline fun <reified R> post(
+        url: Url, data: Any?,
+        crossinline appendHeaders: HeadersBuilder.() -> Unit = {},
+        httpClient: HttpClient = this.httpClient,
+    ): R {
         return httpClient.post(url) {
             contentType(ContentType.Application.Json)
+            headers { appendHeaders() }
             setBody(data)
         }.decode<R>()
     }
