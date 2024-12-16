@@ -57,6 +57,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
         if (uploadSession.uuid.isNotEmpty()) this.uuid = uploadSession.uuid
         this._duration = uploadSession.duration.value
         this.authorEmail = uploadSession.authorEmail
+        this.authorEmailToken = uploadSession.authorEmailToken
         this.password = uploadSession.password
         this.message = uploadSession.message
         this._numberOfDownload = uploadSession.numberOfDownload.value
