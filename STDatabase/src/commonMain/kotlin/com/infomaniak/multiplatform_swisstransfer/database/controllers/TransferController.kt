@@ -27,7 +27,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
-import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
@@ -43,11 +42,11 @@ import kotlin.coroutines.cancellation.CancellationException
 @OptIn(ExperimentalCoroutinesApi::class)
 class TransferController(private val realmProvider: RealmProvider) {
 
-    private val realm by lazy { realmProvider.realmTransfers!! }
-
     //region Get data
-    @Throws(RealmException::class)
-    internal fun getTransfers(transferDirection: TransferDirection? = null): RealmResults<TransferDB> = runThrowingRealm {
+    @Throws(RealmException::class, CancellationException::class)
+    internal suspend fun getTransfers(
+        transferDirection: TransferDirection? = null
+    ): RealmResults<TransferDB> = realmProvider.withRealm { realm ->
         val directionFilterQuery = when (transferDirection) {
             null -> TRUE_PREDICATE
             else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
@@ -56,22 +55,22 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = runThrowingRealm {
-        return getTransfers(transferDirection).asFlow().mapLatest { it.list }
+    fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithRealm {
+        getTransfers(transferDirection).asFlow().mapLatest { it.list }
     }
 
     @Throws(RealmException::class)
-    fun getTransferFlow(linkUUID: String): Flow<Transfer?> = runThrowingRealm {
-        return getTransferQuery(realm, linkUUID).asFlow().mapLatest { it.obj }
+    fun getTransferFlow(linkUUID: String): Flow<Transfer?> = realmProvider.flowWithRealm { realm ->
+        getTransferQuery(realm, linkUUID).asFlow().mapLatest { it.obj }
     }
 
-    @Throws(RealmException::class)
-    fun getTransfer(linkUUID: String): Transfer? = runThrowingRealm {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getTransfer(linkUUID: String): Transfer? = realmProvider.withRealm { realm ->
         return getTransferQuery(realm, linkUUID).find()
     }
 
-    @Throws(RealmException::class)
-    fun getNotReadyTransfers(): List<Transfer> = runThrowingRealm {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getNotReadyTransfers(): List<Transfer> = realmProvider.withRealm { realm ->
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
         return realm.query<TransferDB>(query).find()
     }
@@ -79,7 +78,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Upsert data
     @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
-    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection, password: String?) = runThrowingRealm {
+    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection, password: String?) = realmProvider.withRealm { realm ->
         realm.write {
             val transferDB = TransferDB(transfer, transferDirection, password)
             transferDB.container?.files?.let { transferFiles ->
@@ -94,7 +93,7 @@ class TransferController(private val realmProvider: RealmProvider) {
         linkUUID: String,
         uploadSession: UploadSession,
         transferStatus: TransferStatus,
-    ) = runThrowingRealm {
+    ) = realmProvider.withRealm { realm ->
         val transferDB = TransferDB(linkUUID, uploadSession, transferStatus).apply {
             container?.files?.let { files ->
                 FileUtils.getFileDBTree(containerUUID, files)
@@ -109,7 +108,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Update data
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteTransfer(transferUUID: String) = runThrowingRealm {
+    suspend fun deleteTransfer(transferUUID: String) = realmProvider.withRealm { realm ->
         realm.write {
             val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
             delete(transferToDelete)
@@ -117,12 +116,12 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteExpiredTransfers() = runThrowingRealm {
+    suspend fun deleteExpiredTransfers() = realmProvider.withRealm { realm ->
         realm.write { delete(getExpiredTransfersQuery(realm = this)) }
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun removeData() = runThrowingRealm {
+    suspend fun removeData() = realmProvider.withRealm { realm ->
         realm.write { deleteAll() }
     }
     //endregion

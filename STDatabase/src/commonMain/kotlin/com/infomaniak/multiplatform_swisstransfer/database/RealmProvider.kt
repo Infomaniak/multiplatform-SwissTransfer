@@ -26,18 +26,37 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.upload.RemoteU
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileSessionDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 
 class RealmProvider(private val loadDataInMemory: Boolean = false) {
 
     val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
     val realmUploads by lazy { Realm.open(realmUploadDBConfiguration) }
-    var realmTransfers: Realm? = null
-        private set
+
+    suspend fun realmTransfers(): Realm = realmTransfersAsync.await()
+
+    private val realmTransfersAsync = CompletableDeferred<Realm>()
 
     fun openRealmTransfers(userId: Int) {
-        realmTransfers = Realm.open(realmTransfersConfiguration(userId))
+        realmTransfersAsync.complete(Realm.open(realmTransfersConfiguration(userId)))
+    }
+
+    suspend inline fun <T> withRealm(block: (Realm) -> T): T {
+        runThrowingRealm {
+            return block(realmTransfers())
+        }
+    }
+
+    fun <T> flowWithRealm(block: suspend (Realm) -> Flow<T>): Flow<T> = flow {
+        runThrowingRealm {
+            emitAll(block(realmTransfers()))
+        }
     }
 
     fun closeRealmAppSettings() {
@@ -48,11 +67,11 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
         realmUploads.close()
     }
 
-    fun closeRealmTransfers() {
-        realmTransfers?.close()
+    suspend fun closeRealmTransfers() {
+        realmTransfersAsync.await().close()
     }
 
-    fun closeAllRealms() {
+    suspend fun closeAllRealms() {
         closeRealmAppSettings()
         closeRealmUploads()
         closeRealmTransfers()
