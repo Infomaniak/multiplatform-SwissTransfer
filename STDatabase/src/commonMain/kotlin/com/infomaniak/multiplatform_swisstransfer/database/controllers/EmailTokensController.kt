@@ -27,7 +27,7 @@ import io.realm.kotlin.ext.query
 import kotlin.coroutines.cancellation.CancellationException
 
 class EmailTokensController(private val realmProvider: RealmProvider) {
-    private val realm by lazy { realmProvider.realmAppSettings }
+    private val realm by lazy { realmProvider.appSettings }
 
     //region Get data
     @Throws(RealmException::class)

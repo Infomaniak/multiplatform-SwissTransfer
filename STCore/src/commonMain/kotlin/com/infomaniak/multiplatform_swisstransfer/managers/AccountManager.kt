@@ -47,7 +47,7 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(userId: Int) {
         appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-        realmProvider.openRealmTransfers(userId)
+        realmProvider.openTransfersDb(userId)
     }
 
     /**
@@ -60,6 +60,6 @@ class AccountManager internal constructor(
         uploadController.removeData()
         transferController.removeData()
 
-        realmProvider.closeAllRealms()
+        realmProvider.closeAllDatabases()
     }
 }

@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.mapLatest
 class FileController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class)
-    fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = realmProvider.flowWithRealm { realm ->
+    fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = realmProvider.flowWithTransfersDb { realm ->
         val query = "${FileDB::folder.name}.uuid == '$folderUuid'"
         realm.query<FileDB>(query).asFlow().mapLatest { it.list }
     }

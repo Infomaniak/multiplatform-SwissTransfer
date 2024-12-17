@@ -46,7 +46,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     internal suspend fun getTransfers(
         transferDirection: TransferDirection? = null
-    ): RealmResults<TransferDB> = realmProvider.withRealm { realm ->
+    ): RealmResults<TransferDB> = realmProvider.withTransfersDb { realm ->
         val directionFilterQuery = when (transferDirection) {
             null -> TRUE_PREDICATE
             else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
@@ -55,22 +55,22 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithRealm {
+    fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
         getTransfers(transferDirection).asFlow().mapLatest { it.list }
     }
 
     @Throws(RealmException::class)
-    fun getTransferFlow(linkUUID: String): Flow<Transfer?> = realmProvider.flowWithRealm { realm ->
+    fun getTransferFlow(linkUUID: String): Flow<Transfer?> = realmProvider.flowWithTransfersDb { realm ->
         getTransferQuery(realm, linkUUID).asFlow().mapLatest { it.obj }
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun getTransfer(linkUUID: String): Transfer? = realmProvider.withRealm { realm ->
+    suspend fun getTransfer(linkUUID: String): Transfer? = realmProvider.withTransfersDb { realm ->
         return getTransferQuery(realm, linkUUID).find()
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun getNotReadyTransfers(): List<Transfer> = realmProvider.withRealm { realm ->
+    suspend fun getNotReadyTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
         return realm.query<TransferDB>(query).find()
     }
@@ -78,7 +78,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Upsert data
     @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
-    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection, password: String?) = realmProvider.withRealm { realm ->
+    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection, password: String?) = realmProvider.withTransfersDb { realm ->
         realm.write {
             val transferDB = TransferDB(transfer, transferDirection, password)
             transferDB.container?.files?.let { transferFiles ->
@@ -93,7 +93,7 @@ class TransferController(private val realmProvider: RealmProvider) {
         linkUUID: String,
         uploadSession: UploadSession,
         transferStatus: TransferStatus,
-    ) = realmProvider.withRealm { realm ->
+    ) = realmProvider.withTransfersDb { realm ->
         val transferDB = TransferDB(linkUUID, uploadSession, transferStatus).apply {
             container?.files?.let { files ->
                 FileUtils.getFileDBTree(containerUUID, files)
@@ -108,7 +108,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Update data
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteTransfer(transferUUID: String) = realmProvider.withRealm { realm ->
+    suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
             val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
             delete(transferToDelete)
@@ -116,12 +116,12 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteExpiredTransfers() = realmProvider.withRealm { realm ->
+    suspend fun deleteExpiredTransfers() = realmProvider.withTransfersDb { realm ->
         realm.write { delete(getExpiredTransfersQuery(realm = this)) }
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun removeData() = realmProvider.withRealm { realm ->
+    suspend fun removeData() = realmProvider.withTransfersDb { realm ->
         realm.write { deleteAll() }
     }
     //endregion

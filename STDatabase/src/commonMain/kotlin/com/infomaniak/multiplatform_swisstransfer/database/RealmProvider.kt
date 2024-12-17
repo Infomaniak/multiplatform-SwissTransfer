@@ -36,45 +36,43 @@ import kotlinx.coroutines.flow.flow
 
 class RealmProvider(private val loadDataInMemory: Boolean = false) {
 
-    val realmAppSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
-    val realmUploads by lazy { Realm.open(realmUploadDBConfiguration) }
+    val appSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
+    val uploads by lazy { Realm.open(realmUploadDBConfiguration) }
+    private val transfersAsync = CompletableDeferred<Realm>()
+    private suspend fun transfers(): Realm = transfersAsync.await()
 
-    suspend fun realmTransfers(): Realm = realmTransfersAsync.await()
-
-    private val realmTransfersAsync = CompletableDeferred<Realm>()
-
-    fun openRealmTransfers(userId: Int) {
-        realmTransfersAsync.complete(Realm.open(realmTransfersConfiguration(userId)))
+    fun openTransfersDb(userId: Int) {
+        transfersAsync.complete(Realm.open(realmTransfersConfiguration(userId)))
     }
 
-    suspend inline fun <T> withRealm(block: (Realm) -> T): T {
+    internal suspend inline fun <T> withTransfersDb(block: (Realm) -> T): T {
         runThrowingRealm {
-            return block(realmTransfers())
+            return block(transfers())
         }
     }
 
-    fun <T> flowWithRealm(block: suspend (Realm) -> Flow<T>): Flow<T> = flow {
+    internal fun <T> flowWithTransfersDb(block: suspend (Realm) -> Flow<T>): Flow<T> = flow {
         runThrowingRealm {
-            emitAll(block(realmTransfers()))
+            emitAll(block(transfers()))
         }
     }
 
-    fun closeRealmAppSettings() {
-        realmAppSettings.close()
+    fun closeAppSettingsDb() {
+        appSettings.close()
     }
 
-    fun closeRealmUploads() {
-        realmUploads.close()
+    fun closeUploadsDb() {
+        uploads.close()
     }
 
-    suspend fun closeRealmTransfers() {
-        realmTransfersAsync.await().close()
+    suspend fun closeTransfersDb() {
+        transfersAsync.await().close()
     }
 
-    suspend fun closeAllRealms() {
-        closeRealmAppSettings()
-        closeRealmUploads()
-        closeRealmTransfers()
+    suspend fun closeAllDatabases() {
+        closeAppSettingsDb()
+        closeUploadsDb()
+        closeTransfersDb()
     }
 
     private val realmAppSettingsConfiguration = RealmConfiguration

@@ -32,14 +32,14 @@ class TransferControllerTest {
 
     @BeforeTest
     fun setup() {
-        realmProvider = RealmProvider(loadDataInMemory = true).apply { openRealmTransfers(userId = 0) }
+        realmProvider = RealmProvider(loadDataInMemory = true).apply { openTransfersDb(userId = 0) }
         transferController = TransferController(realmProvider)
     }
 
     @AfterTest
     fun tearDown() = runTest {
         transferController.removeData()
-        realmProvider.closeRealmTransfers()
+        realmProvider.closeTransfersDb()
     }
 
     @Test
