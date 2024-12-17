@@ -18,11 +18,14 @@
 package com.infomaniak.multiplatform_swisstransfer.database.utils
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import kotlinx.coroutines.CancellationException
 
 object RealmUtils {
 
     @Throws(RealmException::class)
     inline fun <R> runThrowingRealm(block: () -> R): R {
-        return runCatching { block() }.getOrElse { throw RealmException(it) }
+        return runCatching { block() }.onFailure {
+            if (it is CancellationException) throw it
+        }.getOrElse { throw RealmException(it) }
     }
 }

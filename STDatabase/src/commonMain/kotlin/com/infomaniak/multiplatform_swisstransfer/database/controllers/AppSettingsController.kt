@@ -33,7 +33,7 @@ import kotlin.coroutines.cancellation.CancellationException
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppSettingsController(private val realmProvider: RealmProvider) {
 
-    private val realm by lazy { realmProvider.realmAppSettings }
+    private val realm by lazy { realmProvider.appSettings }
 
     private val appSettingsQuery get() = realm.query<AppSettingsDB>().first()
 

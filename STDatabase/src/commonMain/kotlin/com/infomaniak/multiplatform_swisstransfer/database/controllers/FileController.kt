@@ -21,7 +21,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
-import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -30,11 +29,9 @@ import kotlinx.coroutines.flow.mapLatest
 @OptIn(ExperimentalCoroutinesApi::class)
 class FileController(private val realmProvider: RealmProvider) {
 
-    private val realm by lazy { realmProvider.realmTransfers!! }
-
     @Throws(RealmException::class)
-    fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = runThrowingRealm {
+    fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = realmProvider.flowWithTransfersDb { realm ->
         val query = "${FileDB::folder.name}.uuid == '$folderUuid'"
-        return realm.query<FileDB>(query).asFlow().mapLatest { it.list }
+        realm.query<FileDB>(query).asFlow().mapLatest { it.list }
     }
 }

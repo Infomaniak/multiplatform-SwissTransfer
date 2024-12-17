@@ -35,7 +35,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class UploadController(private val realmProvider: RealmProvider) {
 
-    private val realm by lazy { realmProvider.realmUploads }
+    private val realm by lazy { realmProvider.uploads }
 
     //region Queries
     private fun getUploadsQuery() = realm.query<UploadSessionDB>()
