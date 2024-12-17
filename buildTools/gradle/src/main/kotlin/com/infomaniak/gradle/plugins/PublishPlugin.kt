@@ -33,8 +33,11 @@ class PublishPlugin : Plugin<Project> {
         // Create the PublishExtension and add it to the project
         val extension = target.extensions.create<PublishExtension>(PublishExtension.EXTENSION_NAME)
 
-        // target.group = "com.github.Infomaniak.multiplatform-SwissTransfer" // TODO Do not put this in production
-        target.group = "com.github.infomaniak.multiplatform_swisstransfer"
+        // We use the group just below to match jitpack convention (based on GitHub repo id)
+        target.group = "com.github.Infomaniak.multiplatform-SwissTransfer"
+
+        // This is the group name we are going to use in the future.
+        // target.group = "com.github.infomaniak.multiplatform_swisstransfer" //TODO: Use that once we host this out of jitpack.io
         target.version = Versions.mavenVersionName
 
         target.afterEvaluate {
