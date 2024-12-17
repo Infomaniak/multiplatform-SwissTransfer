@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
@@ -38,7 +39,11 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
-internal class UploadRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
+internal class UploadRequest(
+    environment: ApiEnvironment,
+    json: Json,
+    httpClient: HttpClient,
+) : BaseRequest(environment, json, httpClient) {
 
     suspend fun initUpload(
         initUploadBody: InitUploadBody,

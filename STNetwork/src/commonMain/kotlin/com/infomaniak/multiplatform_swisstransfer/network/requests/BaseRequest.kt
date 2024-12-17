@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
@@ -29,10 +30,14 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
 
-internal open class BaseRequest(protected val json: Json, protected val httpClient: HttpClient) {
+internal open class BaseRequest(
+    private val environment: ApiEnvironment,
+    protected val json: Json,
+    protected val httpClient: HttpClient,
+) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
-        val baseUrl = Url(ApiRoutes.API_BASE_URL + path)
+        val baseUrl = Url(ApiRoutes.apiBaseUrl(environment) + path)
         return URLBuilder(baseUrl).apply {
             queries.forEach { parameters.append(it.first, it.second) }
         }.build()

@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
@@ -26,7 +27,11 @@ import kotlinx.serialization.json.Json
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-internal class TransferRequest(json: Json, httpClient: HttpClient) : BaseRequest(json, httpClient) {
+internal class TransferRequest(
+    environment: ApiEnvironment,
+    json: Json,
+    httpClient: HttpClient,
+) : BaseRequest(environment, json, httpClient) {
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponse<TransferApi> {
