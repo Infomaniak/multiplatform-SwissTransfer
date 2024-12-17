@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network
 
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
@@ -27,7 +28,7 @@ import kotlin.test.*
 class TransferRepositoryTest {
 
     private val apiClientProvider = ApiClientProvider()
-    private val transferRepository = TransferRepository(apiClientProvider) // TODO: Use mock client
+    private val transferRepository = TransferRepository(apiClientProvider, ApiEnvironment.Preprod) // TODO: Use mock client
 
     @Test
     fun canExtractLinkUUIDFromUrl() {

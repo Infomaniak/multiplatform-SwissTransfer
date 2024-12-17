@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
@@ -27,12 +28,13 @@ import kotlin.coroutines.cancellation.CancellationException
  * Utility class responsible for creating API URLs for shared routes.
  */
 class SharedApiUrlCreator internal constructor(
+    private val environment: ApiEnvironment,
     private val transferController: TransferController,
     private val uploadController: UploadController,
 ) {
-    val createUploadContainerUrl: String = SharedApiRoutes.createUploadContainer
+    val createUploadContainerUrl: String = SharedApiRoutes.createUploadContainer(environment)
 
-    fun shareTransferUrl(transferUUID: String) = SharedApiRoutes.shareTransfer(transferUUID)
+    fun shareTransferUrl(transferUUID: String) = SharedApiRoutes.shareTransfer(environment, transferUUID)
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFilesUrl(transferUUID: String): String? {

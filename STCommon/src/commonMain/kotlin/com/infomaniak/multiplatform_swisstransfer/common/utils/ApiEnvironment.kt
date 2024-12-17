@@ -15,23 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.utils
+package com.infomaniak.multiplatform_swisstransfer.common.utils
 
-import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
-
-internal object ApiRoutes {
-
-    fun apiBaseUrl(environment: ApiEnvironment) = "${environment.baseUrl}/api/"
-
-    //region Transfer
-    fun getTransfer(linkUUID: String): String = "links/$linkUUID"
-    //endRegion
-
-    //region Upload
-    const val initUpload = "mobile/containers"
-    const val verifyEmailCode = "emails-validation"
-    const val resendEmailCode = "$verifyEmailCode/resend"
-    const val finishUpload = "uploadComplete"
-    const val cancelUpload = "cancelUpload"
-    //endregion
+sealed class ApiEnvironment(val baseUrl: String) {
+    data object Preprod : ApiEnvironment("https://swisstransfer.preprod.dev.infomaniak.ch")
+    data object Prod : ApiEnvironment("https://swisstransfer.com")
+    data class Custom(private val url: String) : ApiEnvironment(url)
 }

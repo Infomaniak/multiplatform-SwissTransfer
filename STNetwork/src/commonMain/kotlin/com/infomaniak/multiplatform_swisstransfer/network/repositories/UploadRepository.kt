@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.repositories
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
@@ -39,13 +40,16 @@ import kotlin.coroutines.cancellation.CancellationException
 class UploadRepository internal constructor(private val uploadRequest: UploadRequest) {
 
     // for Obj-C https://youtrack.jetbrains.com/issue/KT-68288/KMP-Support-Kotlin-default-parameters-into-Swift-default-parameters-and-Objective-C-somehow-possibly-a-JvmOverloads-like
-    constructor() : this(ApiClientProvider())
-    constructor(apiClientProvider: ApiClientProvider = ApiClientProvider()) : this(
-        apiClientProvider.json,
-        apiClientProvider.httpClient,
+    constructor(environment: ApiEnvironment) : this(ApiClientProvider(), environment)
+    constructor(apiClientProvider: ApiClientProvider = ApiClientProvider(), environment: ApiEnvironment) : this(
+        environment = environment,
+        json = apiClientProvider.json,
+        httpClient = apiClientProvider.httpClient,
     )
 
-    internal constructor(json: Json, httpClient: HttpClient) : this(UploadRequest(json, httpClient))
+    internal constructor(environment: ApiEnvironment, json: Json, httpClient: HttpClient) : this(
+        UploadRequest(environment, json, httpClient)
+    )
 
     @Throws(
         CancellationException::class,

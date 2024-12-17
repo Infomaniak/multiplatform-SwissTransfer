@@ -17,11 +17,13 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.utils
 
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+
 object SharedApiRoutes {
 
-    const val createUploadContainer: String = "${ApiRoutes.API_BASE_URL}${ApiRoutes.initUpload}"
+    fun createUploadContainer(environment: ApiEnvironment): String = "${ApiRoutes.apiBaseUrl(environment)}${ApiRoutes.initUpload}"
 
-    fun shareTransfer(linkUUID: String): String = "${ApiRoutes.BASE_URL}/d/$linkUUID"
+    fun shareTransfer(environment: ApiEnvironment, linkUUID: String): String = "${environment.baseUrl}/d/$linkUUID"
 
     fun downloadFiles(downloadHost: String, linkUUID: String): String = "https://$downloadHost/api/download/$linkUUID"
 
