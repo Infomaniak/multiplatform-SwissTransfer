@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer
 
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.*
 import com.infomaniak.multiplatform_swisstransfer.managers.*
@@ -42,14 +43,15 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property sharedApiUrlCreator An utils to help use shared routes.
  */
 class SwissTransferInjection(
+    private val environment: ApiEnvironment,
     private val userAgent: String,
 ) {
 
     private val realmProvider by lazy { RealmProvider() }
     private val apiClientProvider by lazy { ApiClientProvider(userAgent) }
 
-    private val uploadRepository by lazy { UploadRepository(apiClientProvider) }
-    private val transferRepository by lazy { TransferRepository(apiClientProvider) }
+    private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
+    private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val emailTokensController by lazy { EmailTokensController(realmProvider) }
