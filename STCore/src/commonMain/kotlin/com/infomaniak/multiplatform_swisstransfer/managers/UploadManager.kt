@@ -19,9 +19,9 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
-import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
-import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
@@ -56,6 +56,7 @@ class UploadManager(
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
     private val emailLanguageUtils: EmailLanguageUtils,
+    private val emailTokensManager: EmailTokensManager,
 ) {
 
     val lastUploadFlow get() = uploadController.getLastUploadFlow().flowOn(Dispatchers.IO)
@@ -107,6 +108,27 @@ class UploadManager(
     suspend fun createAndGetUpload(newUploadSession: NewUploadSession): UploadSession = withContext(Dispatchers.IO) {
         uploadController.insertAndGet(newUploadSession)
     }
+
+    suspend fun generateNewUploadSession(
+        duration: ValidityPeriod,
+        authorEmail: String,
+        password: String,
+        message: String,
+        numberOfDownload: DownloadLimit,
+        language: EmailLanguage,
+        recipientsEmails: Set<String>,
+        files: List<UploadFileSession>,
+    ): NewUploadSession = NewUploadSession(
+        duration = duration,
+        authorEmail = authorEmail,
+        authorEmailToken = emailTokensManager.getTokenForEmail(authorEmail),
+        password = password,
+        message = message,
+        numberOfDownload = numberOfDownload,
+        language = language,
+        recipientsEmails = recipientsEmails,
+        files = files,
+    )
 
     /**
      * Initializes an upload session and update it in database with the remote data.
