@@ -23,8 +23,10 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.RealmSet
 import io.realm.kotlin.types.RealmUUID
 import io.realm.kotlin.types.annotations.PrimaryKey
 
@@ -37,7 +39,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var password: String = ""
     override var message: String = ""
     private var _numberOfDownload: Int = AppSettingsDB.DEFAULT_DOWNLOAD_LIMIT.value
-    override var recipientsEmails: RealmList<String> = realmListOf()
+    override var recipientsEmails: RealmSet<String> = realmSetOf()
     override var files: RealmList<UploadFileSessionDB> = realmListOf()
     private var _language: String = ""
 
@@ -62,7 +64,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
         this.message = uploadSession.message
         this._numberOfDownload = uploadSession.numberOfDownload.value
         this.language = uploadSession.language
-        this.recipientsEmails = realmListOf(*uploadSession.recipientsEmails.toTypedArray())
+        this.recipientsEmails = realmSetOf(*uploadSession.recipientsEmails.toTypedArray())
         this.files = uploadSession.files.mapTo(realmListOf(), ::UploadFileSessionDB)
     }
 }

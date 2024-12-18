@@ -26,5 +26,5 @@ data class FinishUploadBody(
     val containerUUID: String = "",
     @SerialName("lang")
     val language: String = "",
-    val recipientsEmails: List<String>? = null,
+    val recipientsEmails: Set<String>? = null,
 )
