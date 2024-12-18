@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.EmailTokensController
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -45,13 +46,13 @@ class EmailTokensManager(private val emailTokensController: EmailTokensControlle
      * Asynchronously sets the email and it's corresponding token.
      *
      * @param email The validated email.
-     * @param token The valid token associated to the email.
+     * @param authorEmailToken The valid token associated to the email.
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailToken(email: String, token: String): Unit = withContext(Dispatchers.IO) {
-        emailTokensController.setEmailToken(email, token)
+    suspend fun setEmailToken(email: String, authorEmailToken: AuthorEmailToken): Unit = withContext(Dispatchers.IO) {
+        emailTokensController.setEmailToken(email, authorEmailToken.token)
     }
 }
