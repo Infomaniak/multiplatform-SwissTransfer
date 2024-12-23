@@ -45,13 +45,13 @@ class EmailTokensManager(private val emailTokensController: EmailTokensControlle
      * Asynchronously sets the email and it's corresponding token.
      *
      * @param email The validated email.
-     * @param token The valid token associated to the email.
+     * @param emailToken The valid token associated to the email.
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailToken(email: String, token: String): Unit = withContext(Dispatchers.IO) {
-        emailTokensController.setEmailToken(email, token)
+    suspend fun setEmailToken(email: String, emailToken: String): Unit = withContext(Dispatchers.IO) {
+        emailTokensController.setEmailToken(email, emailToken)
     }
 }

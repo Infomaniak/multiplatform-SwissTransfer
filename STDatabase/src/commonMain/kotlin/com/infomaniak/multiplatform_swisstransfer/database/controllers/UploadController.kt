@@ -50,7 +50,7 @@ class UploadController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class)
     fun getLastUpload(): UploadSession? = runThrowingRealm {
-        return getUploadsQuery().first().find()
+        return realm.getLastUploadQuery().find()
     }
 
     @Throws(RealmException::class)
@@ -97,6 +97,14 @@ class UploadController(private val realmProvider: RealmProvider) {
         }
     }
 
+    @Throws(RealmException::class, CancellationException::class, NoSuchElementException::class)
+    suspend fun updateLastUploadSessionAuthorEmailToken(authorToken: String) {
+        realm.write {
+            val lastUpload = getLastUploadQuery().find() ?: throw NoSuchElementException("No uploadSession found in DB")
+            lastUpload.authorEmailToken = authorToken
+        }
+    }
+
     @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
@@ -112,9 +120,13 @@ class UploadController(private val realmProvider: RealmProvider) {
     //endregion
 
     private companion object {
-        //region Query
+        //region Queries
         private fun TypedRealm.getUploadSessionQuery(uuid: String): RealmSingleQuery<UploadSessionDB> {
             return query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first()
+        }
+
+        private fun TypedRealm.getLastUploadQuery(): RealmSingleQuery<UploadSessionDB> {
+            return query<UploadSessionDB>().first()
         }
         //endregion
     }
