@@ -125,7 +125,7 @@ class UploadController(private val realmProvider: RealmProvider) {
             return query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first()
         }
 
-        fun TypedRealm.getLastUploadQuery(): RealmSingleQuery<UploadSessionDB> {
+        private fun TypedRealm.getLastUploadQuery(): RealmSingleQuery<UploadSessionDB> {
             return query<UploadSessionDB>().first()
         }
         //endregion
