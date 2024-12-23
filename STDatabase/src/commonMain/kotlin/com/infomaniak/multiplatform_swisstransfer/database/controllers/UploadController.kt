@@ -120,7 +120,7 @@ class UploadController(private val realmProvider: RealmProvider) {
     //endregion
 
     private companion object {
-        //region Query
+        //region Queries
         private fun TypedRealm.getUploadSessionQuery(uuid: String): RealmSingleQuery<UploadSessionDB> {
             return query<UploadSessionDB>("${UploadSessionDB::uuid.name} == '$uuid'").first()
         }

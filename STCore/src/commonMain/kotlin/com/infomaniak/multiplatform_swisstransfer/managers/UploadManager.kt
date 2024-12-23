@@ -110,11 +110,11 @@ class UploadManager(
     }
 
     /**
-     * Stores the email address token in DB for future uses and updates the current uploadSession stored in DB with this new
-     * email address token.
+     * Stores the email address token in DB for future uses and updates the
+     * current uploadSession stored in DB with this new email address token.
      *
-     * @param authorEmail The email to which the [authorEmailToken] is associated.
-     * @param authorEmailToken The token returned by the API that proves that the user owns [authorEmail].
+     * @param authorEmail The email to which the [authorEmailToken] is associated with.
+     * @param authorEmailToken The token returned by the API that proves the user owns [authorEmail].
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
@@ -135,8 +135,8 @@ class UploadManager(
     }
 
     /**
-     * Instantiate a [NewUploadSession] and automatically fills in the author's email token with the one associated with
-     * [authorEmail] from the data base.
+     * Instantiate a [NewUploadSession] and automatically fills in the author's
+     * email token with the one associated with [authorEmail] from the data base.
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
