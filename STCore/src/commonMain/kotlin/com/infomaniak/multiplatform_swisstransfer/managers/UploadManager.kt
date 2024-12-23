@@ -113,19 +113,19 @@ class UploadManager(
      * Stores the email address token in DB for future uses and updates the
      * current uploadSession stored in DB with this new email address token.
      *
-     * @param authorEmail The email to which the [authorEmailToken] is associated with.
-     * @param authorEmailToken The token returned by the API that proves the user owns [authorEmail].
+     * @param authorEmail The email to which the [emailToken] is associated with.
+     * @param emailToken The token returned by the API that proves the user owns [authorEmail].
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      * @throws NotFoundException If we can't find any upload to update.
      */
     @Throws(RealmException::class, CancellationException::class, NotFoundException::class)
-    suspend fun updateAuthorEmailToken(authorEmail: String, authorEmailToken: AuthorEmailToken) {
-        emailTokensManager.setEmailToken(authorEmail, authorEmailToken)
+    suspend fun updateAuthorEmailToken(authorEmail: String, emailToken: String) {
+        emailTokensManager.setEmailToken(authorEmail, emailToken)
 
         runCatching {
-            uploadController.updateLastUploadSessionAuthorEmailToken(authorEmailToken.token)
+            uploadController.updateLastUploadSessionAuthorEmailToken(emailToken)
         }.onFailure {
             when (it) {
                 is NoSuchElementException -> throw NotFoundException(it.message ?: "")
