@@ -25,6 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.DownloadManagerUniqueId
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import io.realm.kotlin.MutableRealm
@@ -109,24 +110,48 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
             val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
+            delete(getDownloadManagerIdQuery(realm, transferUUID))
             delete(transferToDelete)
         }
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteExpiredTransfers() = realmProvider.withTransfersDb { realm ->
-        realm.write { delete(getExpiredTransfersQuery(realm = this)) }
+        realm.write {
+            val expiredTransfersQuery = getExpiredTransfersQuery(realm = this)
+            expiredTransfersQuery.find().forEach { delete(getDownloadManagerIdQuery(realm, it.linkUUID)) }
+            delete(expiredTransfersQuery)
+        }
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun removeData() = realmProvider.withTransfersDb { realm ->
         realm.write { deleteAll() }
     }
+
+    suspend fun writeDownloadManagerId(transferUUID: String, uniqueDownloadManagerId: Long?) {
+        realmProvider.withTransfersDb { realm ->
+            realm.write {
+                if (uniqueDownloadManagerId == null) delete(getDownloadManagerIdQuery(realm, transferUUID))
+                else copyToRealm(DownloadManagerUniqueId(transferUUID, uniqueDownloadManagerId))
+            }
+        }
+    }
+
+    suspend fun readDownloadManagerId(transferUUID: String): Long? {
+        return realmProvider.withTransfersDb { realm ->
+            getDownloadManagerIdQuery(realm, transferUUID).find()?.id
+        }
+    }
     //endregion
 
     private companion object {
 
         private const val DAYS_SINCE_EXPIRATION = 15
+
+        private fun getDownloadManagerIdQuery(realm: Realm, transferUUID: String): RealmSingleQuery<DownloadManagerUniqueId> {
+            return realm.query<DownloadManagerUniqueId>("${DownloadManagerUniqueId::transferUUID} == '$transferUUID'").first()
+        }
 
         private fun getTransferQuery(realm: Realm, linkUUID: String): RealmSingleQuery<TransferDB> {
             return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()

@@ -98,6 +98,23 @@ class TransferManager internal constructor(
     }
 
     /**
+     * Designed to keep a reference to the id from Android's DownloadManager.
+     */
+    suspend fun writeDownloadManagerId(
+        transferUUID: String,
+        uniqueDownloadManagerId: Long
+    ) {
+        transferController.writeDownloadManagerId(transferUUID, uniqueDownloadManagerId)
+    }
+
+    /**
+     * Gives the id to retrieve a previous download assigned to Android's DownloadManager.
+     */
+    suspend fun readDownloadManagerId(transferUUID: String): Long? {
+        return transferController.readDownloadManagerId(transferUUID)
+    }
+
+    /**
      * Update the local transfer with remote api
      *
      * @throws RealmException An error has occurred with realm database
