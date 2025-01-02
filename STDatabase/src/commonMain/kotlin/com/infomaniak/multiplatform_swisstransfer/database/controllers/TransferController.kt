@@ -150,7 +150,7 @@ class TransferController(private val realmProvider: RealmProvider) {
         private const val DAYS_SINCE_EXPIRATION = 15
 
         private fun getDownloadManagerIdQuery(realm: Realm, transferUUID: String): RealmSingleQuery<DownloadManagerUniqueId> {
-            return realm.query<DownloadManagerUniqueId>("${DownloadManagerUniqueId::transferUUID} == '$transferUUID'").first()
+            return realm.query<DownloadManagerUniqueId>("${DownloadManagerUniqueId::transferUUID.name} == '$transferUUID'").first()
         }
 
         private fun getTransferQuery(realm: Realm, linkUUID: String): RealmSingleQuery<TransferDB> {
