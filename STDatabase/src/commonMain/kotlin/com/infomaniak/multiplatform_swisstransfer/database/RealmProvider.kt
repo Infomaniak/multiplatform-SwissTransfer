@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.database
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.EmailTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.DownloadManagerUniqueId
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.upload.RemoteUploadFileDB
@@ -97,7 +98,7 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
         .build()
 
     private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
-        .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class))
+        .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class, DownloadManagerUniqueId::class))
         .name(transferRealmName(userId))
         .deleteRealmDataIfNeeded()
         .loadDataInMemoryIfNeeded()
