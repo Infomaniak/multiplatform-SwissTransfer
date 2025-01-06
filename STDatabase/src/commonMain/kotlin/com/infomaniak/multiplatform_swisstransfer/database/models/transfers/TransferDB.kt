@@ -21,7 +21,9 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Tr
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import io.realm.kotlin.ext.realmSetOf
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.RealmSet
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import kotlinx.datetime.Clock
@@ -38,6 +40,7 @@ class TransferDB() : Transfer, RealmObject {
     override var downloadHost: String = ""
     override var container: ContainerDB? = null
     override var password: String? = null
+    override var recipients: RealmSet<String> = realmSetOf()
 
     private var transferDirectionValue: String = ""
     private var transferStatusValue: String = TransferStatus.UNKNOWN.name
@@ -74,6 +77,7 @@ class TransferDB() : Transfer, RealmObject {
         this.downloadHost = ""
         this.container = ContainerDB(uploadSession.remoteContainer!!, uploadSession.files)
         this.password = uploadSession.password.ifEmpty { null }
+        this.recipients = uploadSession.recipientsEmails.mapTo(destination = realmSetOf(), transform = { it })
 
         this.transferDirectionValue = TransferDirection.SENT.name
         this.transferStatusValue = transferStatus.name
