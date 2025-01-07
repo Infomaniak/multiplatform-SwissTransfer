@@ -46,7 +46,7 @@ data class TransferUi(
         downloadLeft = transfer.downloadCounterCredit,
         message = transfer.container?.message,
         password = transfer.password,
-        recipients = transfer.recipients,
+        recipients = transfer.recipients.mapTo(destination = mutableSetOf(), transform = { it }),
         files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList()
     )
 }
