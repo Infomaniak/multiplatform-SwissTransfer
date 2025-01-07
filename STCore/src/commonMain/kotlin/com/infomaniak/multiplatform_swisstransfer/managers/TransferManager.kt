@@ -110,7 +110,7 @@ class TransferManager internal constructor(
             ?: throw NullPropertyException("the transferDirection property cannot be null")
 
         runCatching {
-            val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID).data ?: return
+            val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID, localTransfer.password).data ?: return
             transferController.upsert(remoteTransfer, transferDirection, localTransfer.password)
         }
     }
