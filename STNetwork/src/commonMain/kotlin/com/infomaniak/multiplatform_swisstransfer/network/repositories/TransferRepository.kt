@@ -55,7 +55,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         PasswordNeededDeeplinkException::class,
         WrongPasswordDeeplinkException::class,
     )
-    suspend fun getTransferByLinkUUID(linkUUID: String, password: String? = null): ApiResponse<TransferApi> = runCatching {
+    suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
         transferRequest.getTransfer(linkUUID, password)
     }.getOrElse { exception ->
         if (exception is UnexpectedApiErrorFormatException) throw exception.toDeeplinkException() else throw exception
