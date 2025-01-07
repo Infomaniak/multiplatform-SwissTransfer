@@ -22,15 +22,16 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  * This class is used to handle specific errors that occur during the email validation process.
  *
  * @property statusCode The HTTP status code associated with the error.
+ * @property message The message describing the error.
  * @constructor Creates an [DeeplinkException] with the given status code.
  *
  * @param statusCode The HTTP status code for the error.
  */
-sealed class DeeplinkException(statusCode: Int) : ApiException(statusCode, "Transfer need a password") {
+sealed class DeeplinkException(statusCode: Int, override val message: String) : ApiException(statusCode, message) {
 
-    class PasswordNeededDeeplinkException : DeeplinkException(401)
+    class PasswordNeededDeeplinkException : DeeplinkException(401, "Transfer need a password")
 
-    class WrongPasswordDeeplinkException : DeeplinkException(401)
+    class WrongPasswordDeeplinkException : DeeplinkException(401, "Wrong password for this Transfer")
 
     internal companion object {
 
