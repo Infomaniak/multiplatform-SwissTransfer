@@ -20,11 +20,32 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class DownloadManagerUniqueId(
+class DownloadManagerRef private constructor(
     @PrimaryKey
+    var id: String,
     var transferUUID: String,
-    var id: Long,
+    @Suppress("unused") // We prefer to keep it in the database.
+    var fileUid: String?,
+    var downloadManagerUniqueId: Long,
 ) : RealmObject {
+
+    constructor(
+        transferUUID: String,
+        fileUid: String?,
+        downloadManagerUniqueId: Long,
+    ) : this(
+        id = buildPrimaryKeyForRealm(transferUUID, fileUid),
+        transferUUID = transferUUID,
+        fileUid = fileUid,
+        downloadManagerUniqueId = downloadManagerUniqueId
+    )
+
     @Suppress("unused") // Kept for Realm
-    constructor() : this("", 0)
+    constructor() : this(id = "", transferUUID = "", fileUid = null, downloadManagerUniqueId = 0)
+
+    companion object {
+        fun buildPrimaryKeyForRealm(transferUUID: String, fileUid: String?): String {
+            return if (fileUid == null) transferUUID else "$transferUUID $fileUid"
+        }
+    }
 }
