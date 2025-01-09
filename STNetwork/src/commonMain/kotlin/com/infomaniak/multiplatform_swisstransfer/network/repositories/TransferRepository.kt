@@ -21,9 +21,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DeeplinkException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DeeplinkException.Companion.toDeeplinkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DeeplinkException.PasswordNeededDeeplinkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DeeplinkException.WrongPasswordDeeplinkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
@@ -54,6 +53,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         UnknownException::class,
         PasswordNeededDeeplinkException::class,
         WrongPasswordDeeplinkException::class,
+        ExpiredDeeplinkException::class,
     )
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
         transferRequest.getTransfer(linkUUID, password)

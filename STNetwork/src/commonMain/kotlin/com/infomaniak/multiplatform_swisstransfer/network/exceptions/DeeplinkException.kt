@@ -33,6 +33,8 @@ sealed class DeeplinkException(statusCode: Int, override val message: String) : 
 
     class WrongPasswordDeeplinkException : DeeplinkException(401, "Wrong password for this Transfer")
 
+    class ExpiredDeeplinkException : DeeplinkException(404, "Transfer is expired")
+
     internal companion object {
 
         private const val ERROR_NEED_PASSWORD = "need_password"
@@ -49,6 +51,7 @@ sealed class DeeplinkException(statusCode: Int, override val message: String) : 
         fun UnexpectedApiErrorFormatException.toDeeplinkException() = when {
             message?.contains(ERROR_NEED_PASSWORD) == true -> PasswordNeededDeeplinkException()
             message?.contains(ERROR_WRONG_PASSWORD) == true -> WrongPasswordDeeplinkException()
+            statusCode == 404 -> ExpiredDeeplinkException()
             else -> this
         }
     }
