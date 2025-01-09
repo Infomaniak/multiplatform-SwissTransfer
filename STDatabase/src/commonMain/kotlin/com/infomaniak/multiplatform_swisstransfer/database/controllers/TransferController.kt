@@ -30,6 +30,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.Tran
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
+import io.realm.kotlin.TypedRealm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.toRealmList
@@ -110,7 +111,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
             val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
-            delete(getDownloadManagerIdQuery(realm, transferUUID))
+            delete(getDownloadManagerIdQuery(this, transferUUID))
             delete(transferToDelete)
         }
     }
@@ -119,7 +120,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun deleteExpiredTransfers() = realmProvider.withTransfersDb { realm ->
         realm.write {
             val expiredTransfersQuery = getExpiredTransfersQuery(realm = this)
-            expiredTransfersQuery.find().forEach { delete(getDownloadManagerIdQuery(realm, it.linkUUID)) }
+            expiredTransfersQuery.find().forEach { delete(getDownloadManagerIdQuery(this, it.linkUUID)) }
             delete(expiredTransfersQuery)
         }
     }
@@ -132,7 +133,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun writeDownloadManagerId(transferUUID: String, uniqueDownloadManagerId: Long?) {
         realmProvider.withTransfersDb { realm ->
             realm.write {
-                if (uniqueDownloadManagerId == null) delete(getDownloadManagerIdQuery(realm, transferUUID))
+                if (uniqueDownloadManagerId == null) delete(getDownloadManagerIdQuery(this, transferUUID))
                 else copyToRealm(DownloadManagerUniqueId(transferUUID, uniqueDownloadManagerId))
             }
         }
@@ -149,7 +150,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         private const val DAYS_SINCE_EXPIRATION = 15
 
-        private fun getDownloadManagerIdQuery(realm: Realm, transferUUID: String): RealmSingleQuery<DownloadManagerUniqueId> {
+        private fun getDownloadManagerIdQuery(realm: TypedRealm, transferUUID: String): RealmSingleQuery<DownloadManagerUniqueId> {
             return realm.query<DownloadManagerUniqueId>("${DownloadManagerUniqueId::transferUUID.name} == '$transferUUID'").first()
         }
 
