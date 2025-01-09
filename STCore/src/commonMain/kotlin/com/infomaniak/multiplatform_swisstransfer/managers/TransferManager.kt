@@ -106,7 +106,7 @@ class TransferManager internal constructor(
      */
     suspend fun writeDownloadManagerId(
         transferUUID: String,
-        uniqueDownloadManagerId: Long
+        uniqueDownloadManagerId: Long?
     ) {
         transferController.writeDownloadManagerId(transferUUID, uniqueDownloadManagerId)
     }
