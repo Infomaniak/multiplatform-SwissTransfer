@@ -102,16 +102,17 @@ class TransferManager internal constructor(
      */
     suspend fun writeDownloadManagerId(
         transferUUID: String,
+        fileUid: String?,
         uniqueDownloadManagerId: Long?
     ) {
-        transferController.writeDownloadManagerId(transferUUID, uniqueDownloadManagerId)
+        transferController.writeDownloadManagerId(transferUUID, fileUid, uniqueDownloadManagerId)
     }
 
     /**
      * Gives the id to retrieve a previous download assigned to Android's DownloadManager.
      */
-    suspend fun readDownloadManagerId(transferUUID: String): Long? {
-        return transferController.readDownloadManagerId(transferUUID)
+    suspend fun readDownloadManagerId(transferUUID: String, fileUid: String?): Long? {
+        return transferController.readDownloadManagerId(transferUUID, fileUid)
     }
 
     /**
