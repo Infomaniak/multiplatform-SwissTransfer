@@ -30,6 +30,7 @@ import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DeeplinkException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
@@ -107,7 +108,12 @@ class TransferManager internal constructor(
      * @throws NotFoundException Any transfer with [transferUUID] has been found
      * @throws NullPropertyException The transferDirection of the transfer found is null
      */
-    @Throws(RealmException::class, NotFoundException::class, NullPropertyException::class, CancellationException::class)
+    @Throws(
+        RealmException::class,
+        NotFoundException::class,
+        NullPropertyException::class,
+        CancellationException::class,
+    )
     suspend fun fetchTransfer(transferUUID: String): Unit {
         val localTransfer = transferController.getTransfer(transferUUID)
             ?: throw NotFoundException("No transfer found in DB with uuid = $transferUUID")
@@ -143,12 +149,16 @@ class TransferManager internal constructor(
      * @param linkUUID The UUID corresponding to the uploaded transfer link or transferUUID.
      * @param password The transfer password if protected
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT])
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiException If there is an error related to the API during transfer retrieval.
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
+     * @throws PasswordNeededDeeplinkException If the transfer added via a deeplink is protected by a password
+     * @throws WrongPasswordDeeplinkException If we entered a wrong password for a deeplink transfer
+     * @throws ExpiredDeeplinkException If the transfer added via a deeplink is expired
      */
     @Throws(
         CancellationException::class,
@@ -157,6 +167,9 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
+        PasswordNeededDeeplinkException::class,
+        WrongPasswordDeeplinkException::class,
+        ExpiredDeeplinkException::class,
     )
     suspend fun addTransferByLinkUUID(
         linkUUID: String,
