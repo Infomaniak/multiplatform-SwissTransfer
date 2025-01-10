@@ -77,6 +77,11 @@ class TransferManager internal constructor(
     }
 
     @Throws(RealmException::class)
+    fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> {
+        return transferController.getTransfersCountFlow(transferDirection)
+    }
+
+    @Throws(RealmException::class)
     fun getTransferFlow(transferUUID: String): Flow<TransferUi?> {
         return transferController.getTransferFlow(transferUUID)
             .map { transfer -> transfer?.let(::TransferUi) }

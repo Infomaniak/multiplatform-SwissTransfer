@@ -46,17 +46,16 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     internal suspend fun getTransfers(
         transferDirection: TransferDirection? = null
-    ): RealmResults<TransferDB> = realmProvider.withTransfersDb { realm ->
-        val directionFilterQuery = when (transferDirection) {
-            null -> TRUE_PREDICATE
-            else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
-        }
-        return realm.query<TransferDB>(directionFilterQuery).sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING).find()
-    }
+    ): RealmResults<TransferDB> = getTransfersQuery(realmProvider, transferDirection).find()
 
     @Throws(RealmException::class)
     fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
         getTransfers(transferDirection).asFlow().mapLatest { it.list }
+    }
+
+    @Throws(RealmException::class)
+    fun getTransfersCountFlow(transferDirection: TransferDirection): Flow<Long> = realmProvider.flowWithTransfersDb {
+        getTransfersQuery(realmProvider, transferDirection).count().asFlow()
     }
 
     @Throws(RealmException::class)
@@ -78,15 +77,16 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Upsert data
     @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
-    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection, password: String?) = realmProvider.withTransfersDb { realm ->
-        realm.write {
-            val transferDB = TransferDB(transfer, transferDirection, password)
-            transferDB.container?.files?.let { transferFiles ->
-                transferDB.container?.files = FileUtils.getFileDBTree(transferDB.containerUUID, transferFiles).toRealmList()
-                this.copyToRealm(transferDB, UpdatePolicy.ALL)
-            } ?: throw TransferWithoutFilesException()
+    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection, password: String?) =
+        realmProvider.withTransfersDb { realm ->
+            realm.write {
+                val transferDB = TransferDB(transfer, transferDirection, password)
+                transferDB.container?.files?.let { transferFiles ->
+                    transferDB.container?.files = FileUtils.getFileDBTree(transferDB.containerUUID, transferFiles).toRealmList()
+                    this.copyToRealm(transferDB, UpdatePolicy.ALL)
+                } ?: throw TransferWithoutFilesException()
+            }
         }
-    }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun generateAndInsert(
@@ -137,6 +137,18 @@ class TransferController(private val realmProvider: RealmProvider) {
         private fun getExpiredTransfersQuery(realm: MutableRealm): RealmQuery<TransferDB> {
             val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
             return realm.query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
+        }
+
+        @Throws(RealmException::class, CancellationException::class)
+        suspend fun getTransfersQuery(
+            realmProvider: RealmProvider,
+            transferDirection: TransferDirection?,
+        ): RealmQuery<TransferDB> = realmProvider.withTransfersDb { realm ->
+            val directionFilterQuery = when (transferDirection) {
+                null -> TRUE_PREDICATE
+                else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
+            }
+            return realm.query<TransferDB>(directionFilterQuery).sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)
         }
     }
 }
