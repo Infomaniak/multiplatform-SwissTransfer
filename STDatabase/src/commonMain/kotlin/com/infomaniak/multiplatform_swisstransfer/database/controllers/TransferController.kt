@@ -141,9 +141,9 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         @Throws(RealmException::class, CancellationException::class)
         suspend fun getTransfersQuery(
-            realm: RealmProvider,
+            realmProvider: RealmProvider,
             transferDirection: TransferDirection?,
-        ): RealmQuery<TransferDB> = realm.withTransfersDb { realm ->
+        ): RealmQuery<TransferDB> = realmProvider.withTransfersDb { realm ->
             val directionFilterQuery = when (transferDirection) {
                 null -> TRUE_PREDICATE
                 else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"

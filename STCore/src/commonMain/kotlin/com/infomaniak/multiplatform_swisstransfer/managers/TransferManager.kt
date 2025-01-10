@@ -79,7 +79,6 @@ class TransferManager internal constructor(
     @Throws(RealmException::class)
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> {
         return transferController.getTransfersCountFlow(transferDirection)
-            .flowOn(Dispatchers.IO)
     }
 
     @Throws(RealmException::class)
