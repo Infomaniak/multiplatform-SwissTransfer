@@ -45,8 +45,9 @@ sealed class DeeplinkException(statusCode: Int, override val message: String) : 
          * [DeeplinkException] based on its error message.
          *
          * @receiver An instance of [UnexpectedApiErrorFormatException].
-         * @return An instance of [DeeplinkException] which can be [PasswordNeededDeeplinkException]
-         * or the original [UnexpectedApiErrorFormatException] if the error message does not match any predefined values.
+         * @return An instance of [DeeplinkException] which can be [PasswordNeededDeeplinkException],
+         * [WrongPasswordDeeplinkException], [ExpiredDeeplinkException] or the original [UnexpectedApiErrorFormatException]
+         * if we cannot map it to a [DeeplinkException].
          */
         fun UnexpectedApiErrorFormatException.toDeeplinkException() = when {
             message?.contains(ERROR_NEED_PASSWORD) == true -> PasswordNeededDeeplinkException()
