@@ -36,8 +36,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -59,7 +57,7 @@ class UploadManager(
     private val emailTokensManager: EmailTokensManager,
 ) {
 
-    val lastUploadFlow get() = uploadController.getLastUploadFlow().flowOn(Dispatchers.IO)
+    val lastUploadFlow get() = uploadController.getLastUploadFlow()
 
     /**
      * Retrieves all upload sessions from the database.
@@ -68,7 +66,7 @@ class UploadManager(
      * @throws RealmException If an error occurs during database access.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun getUploads(): List<UploadSession> = withContext(Dispatchers.IO) {
+    suspend fun getUploads(): List<UploadSession> = withContext(Dispatchers.Default) {
         return@withContext uploadController.getAllUploads()
     }
 
@@ -79,7 +77,7 @@ class UploadManager(
      * @throws RealmException If an error occurs during database access.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun getLastUpload(): UploadSession? = withContext(Dispatchers.IO) {
+    suspend fun getLastUpload(): UploadSession? = withContext(Dispatchers.Default) {
         return@withContext uploadController.getLastUpload()
     }
 
@@ -90,7 +88,7 @@ class UploadManager(
      * @throws RealmException If an error occurs during database access.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun getUploadsCount(): Long = withContext(Dispatchers.IO) {
+    suspend fun getUploadsCount(): Long = withContext(Dispatchers.Default) {
         return@withContext uploadController.getUploadsCount()
     }
 
@@ -105,7 +103,7 @@ class UploadManager(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun createAndGetUpload(newUploadSession: NewUploadSession): UploadSession = withContext(Dispatchers.IO) {
+    suspend fun createAndGetUpload(newUploadSession: NewUploadSession): UploadSession = withContext(Dispatchers.Default) {
         uploadController.insertAndGet(newUploadSession)
     }
 
@@ -121,7 +119,7 @@ class UploadManager(
      * @throws NotFoundException If we can't find any upload to update.
      */
     @Throws(RealmException::class, CancellationException::class, NotFoundException::class)
-    suspend fun updateAuthorEmailToken(authorEmail: String, emailToken: String) {
+    suspend fun updateAuthorEmailToken(authorEmail: String, emailToken: String) = withContext(Dispatchers.Default) {
         emailTokensManager.setEmailToken(authorEmail, emailToken)
 
         runCatching {
@@ -195,7 +193,7 @@ class UploadManager(
         uuid: String? = null,
         attestationHeaderName: String,
         attestationToken: String,
-    ): UploadSession? = withContext(Dispatchers.IO) {
+    ): UploadSession? = withContext(Dispatchers.Default) {
 
         val uploadSession = when (uuid) {
             null -> uploadController.getLastUpload() ?: throw NotFoundException("No uploadSession found in DB")
@@ -250,7 +248,7 @@ class UploadManager(
         isLastChunk: Boolean,
         data: ByteArray,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
-    ): Unit = withContext(Dispatchers.IO) {
+    ): Unit = withContext(Dispatchers.Default) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
             ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")
         val remoteUploadHost = uploadSession.remoteUploadHost
@@ -295,7 +293,7 @@ class UploadManager(
         NotFoundException::class,
         NullPropertyException::class,
     )
-    suspend fun finishUploadSession(uuid: String): String = withContext(Dispatchers.IO) {
+    suspend fun finishUploadSession(uuid: String): String = withContext(Dispatchers.Default) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
             ?: throw NotFoundException("Unknown upload session with uuid = $uuid")
         val containerUUID = uploadSession.remoteContainer?.uuid
@@ -342,7 +340,7 @@ class UploadManager(
         NotFoundException::class,
         NullPropertyException::class,
     )
-    suspend fun cancelUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
+    suspend fun cancelUploadSession(uuid: String): Unit = withContext(Dispatchers.Default) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
             ?: throw NotFoundException("Unknown upload session with uuid = $uuid")
         val containerUUID = uploadSession.remoteContainer?.uuid
@@ -364,7 +362,7 @@ class UploadManager(
         RealmException::class,
         CancellationException::class,
     )
-    suspend fun removeUploadSession(uuid: String): Unit = withContext(Dispatchers.IO) {
+    suspend fun removeUploadSession(uuid: String): Unit = withContext(Dispatchers.Default) {
         uploadController.removeUploadSession(uuid)
     }
 
@@ -372,7 +370,7 @@ class UploadManager(
         RealmException::class,
         CancellationException::class,
     )
-    suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.IO) {
+    suspend fun removeAllUploadSession(): Unit = withContext(Dispatchers.Default) {
         uploadController.removeData()
     }
 
@@ -384,8 +382,8 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun verifyEmailCode(code: String, address: String): AuthorEmailToken {
-        return uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, address))
+    suspend fun verifyEmailCode(code: String, address: String): AuthorEmailToken = withContext(Dispatchers.Default) {
+        return@withContext uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, address))
     }
 
     @Throws(
@@ -395,7 +393,7 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun resendEmailCode(address: String) {
+    suspend fun resendEmailCode(address: String) = withContext(Dispatchers.Default) {
         val language = emailLanguageUtils.getEmailLanguageFromLocal()
         uploadRepository.resendEmailCode(ResendEmailCodeBody(address, language.code))
     }

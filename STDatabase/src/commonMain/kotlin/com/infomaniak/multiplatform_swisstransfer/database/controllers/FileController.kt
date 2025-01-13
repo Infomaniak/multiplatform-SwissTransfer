@@ -22,16 +22,14 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Fi
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import io.realm.kotlin.ext.query
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FileController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class)
     fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = realmProvider.flowWithTransfersDb { realm ->
         val query = "${FileDB::folder.name}.uuid == '$folderUuid'"
-        realm.query<FileDB>(query).asFlow().mapLatest { it.list }
+        realm.query<FileDB>(query).asFlow().map { it.list }
     }
 }

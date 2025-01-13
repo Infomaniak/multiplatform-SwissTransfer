@@ -36,9 +36,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedA
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -74,7 +72,6 @@ class TransferManager internal constructor(
     fun getTransfers(transferDirection: TransferDirection): Flow<List<TransferUi>> {
         return transferController.getTransfersFlow(transferDirection)
             .map { it.mapToList { transfer -> TransferUi(transfer) } }
-            .flowOn(Dispatchers.IO)
     }
 
     @Throws(RealmException::class)
@@ -86,14 +83,13 @@ class TransferManager internal constructor(
     fun getTransferFlow(transferUUID: String): Flow<TransferUi?> {
         return transferController.getTransferFlow(transferUUID)
             .map { transfer -> transfer?.let(::TransferUi) }
-            .flowOn(Dispatchers.IO)
     }
 
     /**
      * Update all pending transfers in database, most transfers are in [TransferStatus.WAIT_VIRUS_CHECK] status.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.IO) {
+    suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
                 addTransferByLinkUUID(transfer.linkUUID, transfer.password, TransferDirection.SENT)
@@ -175,7 +171,7 @@ class TransferManager internal constructor(
         linkUUID: String,
         password: String?,
         transferDirection: TransferDirection,
-    ): Unit = withContext(Dispatchers.IO) {
+    ): Unit = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data
         addTransfer(transferApi, transferDirection, password)
     }
@@ -208,7 +204,7 @@ class TransferManager internal constructor(
         UnknownException::class,
         RealmException::class,
     )
-    suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.IO) {
+    suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByUrl(url).data ?: return@withContext null
         addTransfer(transferApi, TransferDirection.RECEIVED, password)
         return@withContext transferApi.linkUUID
@@ -223,7 +219,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteTransfer(transferUUID: String) {
+    suspend fun deleteTransfer(transferUUID: String) = withContext(Dispatchers.Default) {
         transferController.deleteTransfer(transferUUID)
     }
 
@@ -234,7 +230,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteExpiredTransfers() {
+    suspend fun deleteExpiredTransfers() = withContext(Dispatchers.Default) {
         transferController.deleteExpiredTransfers()
     }
 

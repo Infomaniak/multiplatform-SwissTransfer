@@ -25,12 +25,10 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.Ap
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
 import kotlin.coroutines.cancellation.CancellationException
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class AppSettingsController(private val realmProvider: RealmProvider) {
 
     private val realm by lazy { realmProvider.appSettings }
@@ -49,7 +47,7 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     //region Get data
     @Throws(RealmException::class)
     fun getAppSettingsFlow(): Flow<AppSettings?> = runThrowingRealm {
-        return appSettingsQuery.asFlow().mapLatest { it.obj }
+        return appSettingsQuery.asFlow().map { it.obj }
     }
 
     @Throws(RealmException::class)

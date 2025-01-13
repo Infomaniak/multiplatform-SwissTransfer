@@ -20,7 +20,6 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.EmailTokensController
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -37,7 +36,7 @@ class EmailTokensManager(private val emailTokensController: EmailTokensControlle
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun getTokenForEmail(email: String): String? = withContext(Dispatchers.IO) {
+    suspend fun getTokenForEmail(email: String): String? = withContext(Dispatchers.Default) {
         return@withContext emailTokensController.getEmailTokenForEmail(email)?.token
     }
 
@@ -51,7 +50,7 @@ class EmailTokensManager(private val emailTokensController: EmailTokensControlle
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailToken(email: String, emailToken: String): Unit = withContext(Dispatchers.IO) {
+    suspend fun setEmailToken(email: String, emailToken: String): Unit = withContext(Dispatchers.Default) {
         emailTokensController.setEmailToken(email, emailToken)
     }
 }

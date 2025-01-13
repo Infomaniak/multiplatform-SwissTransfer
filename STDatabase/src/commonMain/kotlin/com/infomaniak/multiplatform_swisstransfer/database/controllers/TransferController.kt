@@ -33,13 +33,11 @@ import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.query.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class TransferController(private val realmProvider: RealmProvider) {
 
     //region Get data
@@ -50,7 +48,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class)
     fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
-        getTransfers(transferDirection).asFlow().mapLatest { it.list }
+        getTransfers(transferDirection).asFlow().map { it.list }
     }
 
     @Throws(RealmException::class)
@@ -60,7 +58,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class)
     fun getTransferFlow(linkUUID: String): Flow<Transfer?> = realmProvider.flowWithTransfersDb { realm ->
-        getTransferQuery(realm, linkUUID).asFlow().mapLatest { it.obj }
+        getTransferQuery(realm, linkUUID).asFlow().map { it.obj }
     }
 
     @Throws(RealmException::class, CancellationException::class)

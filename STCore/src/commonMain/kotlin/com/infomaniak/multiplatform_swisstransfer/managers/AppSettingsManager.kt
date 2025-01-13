@@ -22,9 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.
 import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -38,11 +36,10 @@ class AppSettingsManager internal constructor(
 ) {
 
     /**
-     * A [Flow] that emits the current [AppSettings] object whenever it changes. This flow operates
-     * on the [Dispatchers.IO] context to avoid blocking the main thread.
+     * A [Flow] that emits the current [AppSettings] object whenever it changes.
      */
     val appSettings: Flow<AppSettings?>
-        get() = appSettingsController.getAppSettingsFlow().flowOn(Dispatchers.IO)
+        get() = appSettingsController.getAppSettingsFlow()
 
     fun getAppSettings(): AppSettings? = appSettingsController.getAppSettings()
 
@@ -55,7 +52,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setTheme(theme: Theme): Unit = withContext(Dispatchers.IO) {
+    suspend fun setTheme(theme: Theme): Unit = withContext(Dispatchers.Default) {
         appSettingsController.setTheme(theme)
     }
 
@@ -68,7 +65,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod): Unit = withContext(Dispatchers.IO) {
+    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod): Unit = withContext(Dispatchers.Default) {
         appSettingsController.setValidityPeriod(validityPeriod)
     }
 
@@ -81,7 +78,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setDownloadLimit(downloadLimit: DownloadLimit): Unit = withContext(Dispatchers.IO) {
+    suspend fun setDownloadLimit(downloadLimit: DownloadLimit): Unit = withContext(Dispatchers.Default) {
         appSettingsController.setDownloadLimit(downloadLimit)
     }
 
@@ -94,7 +91,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailLanguage(emailLanguage: EmailLanguage): Unit = withContext(Dispatchers.IO) {
+    suspend fun setEmailLanguage(emailLanguage: EmailLanguage): Unit = withContext(Dispatchers.Default) {
         appSettingsController.setEmailLanguage(emailLanguage)
     }
 
@@ -107,7 +104,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setLastTransferType(transferType: TransferType): Unit = withContext(Dispatchers.IO) {
+    suspend fun setLastTransferType(transferType: TransferType): Unit = withContext(Dispatchers.Default) {
         appSettingsController.setLastTransferType(transferType)
     }
 
@@ -120,7 +117,7 @@ class AppSettingsManager internal constructor(
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun setLastAuthorEmail(authorEmail: String?): Unit = withContext(Dispatchers.IO) {
+    suspend fun setLastAuthorEmail(authorEmail: String?): Unit = withContext(Dispatchers.Default) {
         appSettingsController.setLastAuthorEmail(authorEmail)
     }
 }
