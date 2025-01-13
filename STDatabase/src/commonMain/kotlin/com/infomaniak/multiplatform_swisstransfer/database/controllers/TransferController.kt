@@ -168,8 +168,8 @@ class TransferController(private val realmProvider: RealmProvider) {
         private fun getDownloadManagerIdsQuery(
             realm: TypedRealm,
             transferUUID: String
-        ): RealmSingleQuery<DownloadManagerRef> {
-            return realm.query<DownloadManagerRef>("${DownloadManagerRef::transferUUID.name} == '$transferUUID'").first()
+        ): RealmResults<DownloadManagerRef> {
+            return realm.query<DownloadManagerRef>("${DownloadManagerRef::transferUUID.name} == '$transferUUID'").find()
         }
 
         private fun getDownloadManagerIdQuery(
