@@ -28,9 +28,8 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runT
 import io.realm.kotlin.TypedRealm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.query.RealmSingleQuery
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
 import kotlin.coroutines.cancellation.CancellationException
 
 class UploadController(private val realmProvider: RealmProvider) {
@@ -42,10 +41,9 @@ class UploadController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Get data
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Throws(RealmException::class)
     fun getLastUploadFlow(): Flow<UploadSession?> = runThrowingRealm {
-        return getUploadsQuery().first().asFlow().mapLatest { it.obj }
+        return getUploadsQuery().first().asFlow().map { it.obj }
     }
 
     @Throws(RealmException::class)
