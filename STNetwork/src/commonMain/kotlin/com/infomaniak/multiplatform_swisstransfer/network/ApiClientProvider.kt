@@ -33,6 +33,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.utils.io.CancellationException
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
@@ -95,7 +96,7 @@ class ApiClientProvider internal constructor(
                 handleResponseExceptionWithRequest { cause, request ->
                     when (cause) {
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
-                        is ApiException, is UnexpectedApiErrorFormatException -> throw cause
+                        is ApiException, is CancellationException, is UnexpectedApiErrorFormatException -> throw cause
                         else -> {
                             val response = runCatching { request.call.response }.getOrNull()
                             val bodyResponse = response?.bodyAsText() ?: cause.message ?: ""
