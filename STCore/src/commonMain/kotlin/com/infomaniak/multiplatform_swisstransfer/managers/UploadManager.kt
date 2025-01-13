@@ -119,7 +119,7 @@ class UploadManager(
      * @throws NotFoundException If we can't find any upload to update.
      */
     @Throws(RealmException::class, CancellationException::class, NotFoundException::class)
-    suspend fun updateAuthorEmailToken(authorEmail: String, emailToken: String) {
+    suspend fun updateAuthorEmailToken(authorEmail: String, emailToken: String) = withContext(Dispatchers.Default) {
         emailTokensManager.setEmailToken(authorEmail, emailToken)
 
         runCatching {
@@ -382,8 +382,8 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun verifyEmailCode(code: String, address: String): AuthorEmailToken {
-        return uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, address))
+    suspend fun verifyEmailCode(code: String, address: String): AuthorEmailToken = withContext(Dispatchers.Default) {
+        return@withContext uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, address))
     }
 
     @Throws(
@@ -393,7 +393,7 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun resendEmailCode(address: String) {
+    suspend fun resendEmailCode(address: String) = withContext(Dispatchers.Default) {
         val language = emailLanguageUtils.getEmailLanguageFromLocal()
         uploadRepository.resendEmailCode(ResendEmailCodeBody(address, language.code))
     }

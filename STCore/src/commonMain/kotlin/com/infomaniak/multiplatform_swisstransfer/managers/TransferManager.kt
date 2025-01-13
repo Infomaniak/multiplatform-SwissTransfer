@@ -219,7 +219,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteTransfer(transferUUID: String) {
+    suspend fun deleteTransfer(transferUUID: String) = withContext(Dispatchers.Default) {
         transferController.deleteTransfer(transferUUID)
     }
 
@@ -230,7 +230,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteExpiredTransfers() {
+    suspend fun deleteExpiredTransfers() = withContext(Dispatchers.Default) {
         transferController.deleteExpiredTransfers()
     }
 
