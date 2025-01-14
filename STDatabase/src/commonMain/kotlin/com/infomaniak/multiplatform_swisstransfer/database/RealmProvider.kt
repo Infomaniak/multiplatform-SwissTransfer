@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 
-class RealmProvider(private val loadDataInMemory: Boolean = false) {
+class RealmProvider(private val databaseRootDirectory: String? = null, private val loadDataInMemory: Boolean = false) {
 
     val appSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
     val uploads by lazy { Realm.open(realmUploadDBConfiguration) }
@@ -76,8 +76,13 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
         closeTransfersDb()
     }
 
+    private fun RealmConfiguration.Builder.customDirectoryIfNeeded(): RealmConfiguration.Builder {
+        return apply { if (databaseRootDirectory != null) directory(databaseRootDirectory) }
+    }
+
     private val realmAppSettingsConfiguration = RealmConfiguration
         .Builder(schema = setOf(AppSettingsDB::class, EmailTokenDB::class))
+        .customDirectoryIfNeeded()
         .name("AppSettings.realm")
         .deleteRealmDataIfNeeded()
         .loadDataInMemoryIfNeeded()
@@ -92,6 +97,7 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
                 RemoteUploadFileDB::class,
             )
         )
+        .customDirectoryIfNeeded()
         .name("Uploads.realm")
         .deleteRealmDataIfNeeded()
         .loadDataInMemoryIfNeeded()
@@ -99,6 +105,7 @@ class RealmProvider(private val loadDataInMemory: Boolean = false) {
 
     private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
         .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class, DownloadManagerRef::class))
+        .customDirectoryIfNeeded()
         .name(transferRealmName(userId))
         .deleteRealmDataIfNeeded()
         .loadDataInMemoryIfNeeded()
