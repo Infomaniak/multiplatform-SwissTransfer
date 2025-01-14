@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import kotlinx.datetime.Clock
@@ -33,6 +34,7 @@ data class TransferUi(
     val password: String?,
     val recipients: Set<String> = emptySet(),
     val files: List<FileUi>,
+    val direction: TransferDirection? = null,
 ) {
 
     val expiresInDays: Int = DateUtils.timestampToDays(expirationDateTimestamp - Clock.System.now().epochSeconds).toInt()
@@ -47,6 +49,7 @@ data class TransferUi(
         message = transfer.container?.message,
         password = transfer.password,
         recipients = transfer.recipients.mapTo(destination = mutableSetOf(), transform = { it }),
-        files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList()
+        files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList(),
+        direction = transfer.transferDirection,
     )
 }
