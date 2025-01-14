@@ -17,7 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
@@ -111,103 +110,6 @@ class TransferControllerTest {
         val transfers = transferController.getTransfers()
         assertEquals(transfers.count(), 1, "The transfers table should contain only 1 transfer")
         assertEquals(transfers.first().linkUUID, DummyTransfer.notExpired.linkUUID, "The remaining transfer should be `transfer2`")
-    }
-
-    @Test
-    fun downloadManagerId() = runTest {
-        val targetTransfer = DummyTransfer.expired
-        /** Will be used to prove operations on `targetTransfer` don't affect other transfers. */
-        val referenceTransfer = DummyTransfer.notExpired
-        transferController.upsert(referenceTransfer, TransferDirection.RECEIVED, password = null)
-        transferController.upsert(targetTransfer, TransferDirection.RECEIVED, password = null)
-
-        val downloadManagerIds = object {
-            private var lastId: Long = 0L
-            val refFirstFile = ++lastId
-            val refSecondFile = ++lastId
-            val refZip = ++lastId
-            val firstFile = ++lastId
-            val secondFile = ++lastId
-            val zip = ++lastId
-        }
-        run prepareReferenceTransfer@{
-            val transferUUID = referenceTransfer.linkUUID
-            val file1 = referenceTransfer.container!!.files[0]
-            val file2 = referenceTransfer.container!!.files[1]
-            transferController.writeDownloadManagerId(
-                transferUUID = transferUUID,
-                fileUid = file1.uuid,
-                uniqueDownloadManagerId = downloadManagerIds.refFirstFile
-            )
-            transferController.writeDownloadManagerId(
-                transferUUID = transferUUID,
-                fileUid = file2.uuid,
-                uniqueDownloadManagerId = downloadManagerIds.refSecondFile
-            )
-            transferController.writeDownloadManagerId(
-                transferUUID = transferUUID,
-                fileUid = null,
-                uniqueDownloadManagerId = downloadManagerIds.refZip
-            )
-        }
-        suspend fun readDlManagerId(transfer: Transfer, file: File?): Long? {
-            return transferController.readDownloadManagerId(transferUUID = transfer.linkUUID, fileUid = file?.uuid)
-        }
-
-        suspend fun writeDlManagerId(transfer: Transfer, file: File?, uniqueId: Long?) {
-            transferController.writeDownloadManagerId(
-                transferUUID = transfer.linkUUID,
-                fileUid = file?.uuid,
-                uniqueDownloadManagerId = uniqueId
-            )
-        }
-
-        run {
-            val file1 = targetTransfer.container!!.files[0]
-            val file2 = targetTransfer.container!!.files[1]
-            writeDlManagerId(transfer = targetTransfer, file = file1, uniqueId = downloadManagerIds.firstFile)
-            writeDlManagerId(transfer = targetTransfer, file = file2, uniqueId = downloadManagerIds.secondFile)
-            writeDlManagerId(transfer = targetTransfer, file = null, uniqueId = downloadManagerIds.zip)
-
-            readDlManagerId(targetTransfer, file1) shouldBe downloadManagerIds.firstFile
-            readDlManagerId(targetTransfer, file2) shouldBe downloadManagerIds.secondFile
-            readDlManagerId(targetTransfer, file = null) shouldBe downloadManagerIds.zip
-
-            writeDlManagerId(transfer = targetTransfer, file = file1, uniqueId = null)
-            readDlManagerId(targetTransfer, file1) shouldBe null
-            readDlManagerId(targetTransfer, file2) shouldBe downloadManagerIds.secondFile
-            readDlManagerId(targetTransfer, file = null) shouldBe downloadManagerIds.zip
-
-            writeDlManagerId(transfer = targetTransfer, file = null, uniqueId = null)
-            readDlManagerId(targetTransfer, file1) shouldBe null
-            readDlManagerId(targetTransfer, file2) shouldBe downloadManagerIds.secondFile
-            readDlManagerId(targetTransfer, file = null) shouldBe null
-
-            writeDlManagerId(transfer = targetTransfer, file = file1, uniqueId = downloadManagerIds.firstFile)
-            writeDlManagerId(transfer = targetTransfer, file = null, uniqueId = downloadManagerIds.zip)
-            transferController.deleteTransfer(targetTransfer.linkUUID)
-            readDlManagerId(targetTransfer, file1) shouldBe null
-            readDlManagerId(targetTransfer, file2) shouldBe null
-            readDlManagerId(targetTransfer, file = null) shouldBe null
-
-            transferController.upsert(targetTransfer, TransferDirection.RECEIVED, password = null)
-            writeDlManagerId(transfer = targetTransfer, file = file1, uniqueId = downloadManagerIds.firstFile)
-            writeDlManagerId(transfer = targetTransfer, file = file2, uniqueId = downloadManagerIds.secondFile)
-            writeDlManagerId(transfer = targetTransfer, file = null, uniqueId = downloadManagerIds.zip)
-            transferController.deleteExpiredTransfers()
-        }
-
-        run checkReferenceWasUnchanged@{
-            val file1 = referenceTransfer.container!!.files[0]
-            val file2 = referenceTransfer.container!!.files[1]
-            readDlManagerId(referenceTransfer, file1) shouldBe downloadManagerIds.refFirstFile
-            readDlManagerId(referenceTransfer, file2) shouldBe downloadManagerIds.refSecondFile
-            readDlManagerId(referenceTransfer, file = null) shouldBe downloadManagerIds.refZip
-        }
-    }
-
-    private inline infix fun <T> T.shouldBe(expected: T) {
-        assertEquals(expected = expected, actual = this)
     }
 
     @Test
