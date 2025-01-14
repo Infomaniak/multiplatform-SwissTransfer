@@ -21,6 +21,9 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Co
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import kotlinx.datetime.Clock
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 object DummyTransfer {
 
@@ -38,12 +41,18 @@ object DummyTransfer {
         override var swiftVersion: Int = 0
         override var downloadLimit: Int = 0
         override var source: String = "source"
-        override var files: List<File> = emptyList()
+        override var files: List<File> = listOf(
+            createDummyFile(containerUUID = uuid, fileName = "cat no no.gif", mimeType = "image/gif"),
+            createDummyFile(containerUUID = uuid, fileName = "cat vibe.gif", mimeType = "image/gif"),
+        )
     }
 
     val container2 = object : Container by container1 {
         override val uuid: String = "transfer2container"
     }
+
+    val expired: Transfer
+    val notExpired: Transfer
 
     val transfer1 = object : Transfer {
         override var linkUUID: String = "transferLinkUUID1"
@@ -66,6 +75,32 @@ object DummyTransfer {
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }
 
+    init {
+        expired = transfer1
+        notExpired = transfer2
+    }
+
     val transfers = listOf(transfer1, transfer2)
+
+    private fun createDummyFile(
+        containerUUID: String,
+        fileName: String,
+        mimeType: String? = null,
+    ): File = object : File {
+        override val containerUUID: String = containerUUID
+        override val uuid: String = "$fileName|whatever"
+        override val fileName: String = fileName
+        override val fileSizeInBytes: Long = 10_000_000L
+        override val downloadCounter: Int = 0
+        override val createdDateTimestamp: Long = (Clock.System.now() - 1.hours).epochSeconds
+        override val expiredDateTimestamp: Long = (Clock.System.now() + 7.days).epochSeconds
+        override val eVirus: String = ""
+        override val deletedDate: String? = null
+        override val mimeType: String? = mimeType
+        override val receivedSizeInBytes: Long = fileSizeInBytes
+        override val path: String? = null
+        override val thumbnailPath: String? = null
+
+    }
 
 }
