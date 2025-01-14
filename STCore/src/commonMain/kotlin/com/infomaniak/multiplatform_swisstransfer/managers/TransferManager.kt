@@ -154,7 +154,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      * @throws PasswordNeededDeeplinkException If the transfer added via a deeplink is protected by a password
      * @throws WrongPasswordDeeplinkException If we entered a wrong password for a deeplink transfer
-     * @throws NotFoundDeeplinkException If the transfer added via a deeplink is expired or not found
+     * @throws NotFoundDeeplinkException If the transfer added via a deeplink is expired or doesn't exist
      */
     @Throws(
         CancellationException::class,
