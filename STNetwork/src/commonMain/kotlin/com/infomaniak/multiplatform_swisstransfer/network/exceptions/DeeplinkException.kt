@@ -29,14 +29,17 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  */
 sealed class DeeplinkException(statusCode: Int, override val message: String) : ApiException(statusCode, message) {
 
+    class ExpiredDeeplinkException : DeeplinkException(404, "Transfer expired")
+
+    class NotFoundDeeplinkException : DeeplinkException(404, "Transfer not found")
+
     class PasswordNeededDeeplinkException : DeeplinkException(401, "Transfer need a password")
 
     class WrongPasswordDeeplinkException : DeeplinkException(401, "Wrong password for this Transfer")
 
-    class NotFoundDeeplinkException : DeeplinkException(404, "Transfer is not found")
-
     internal companion object {
-
+        
+        private const val ERROR_EXPIRED = "expired"
         private const val ERROR_NEED_PASSWORD = "need_password"
         private const val ERROR_WRONG_PASSWORD = "wrong_password"
 
@@ -45,14 +48,14 @@ sealed class DeeplinkException(statusCode: Int, override val message: String) : 
          * [DeeplinkException] based on its error message.
          *
          * @receiver An instance of [UnexpectedApiErrorFormatException].
-         * @return An instance of [DeeplinkException] which can be [PasswordNeededDeeplinkException],
-         * [WrongPasswordDeeplinkException], [NotFoundDeeplinkException] or the original [UnexpectedApiErrorFormatException]
+         * @return An instance of [DeeplinkException] or the original [UnexpectedApiErrorFormatException]
          * if we cannot map it to a [DeeplinkException].
          */
         fun UnexpectedApiErrorFormatException.toDeeplinkException() = when {
+            message?.contains(ERROR_EXPIRED) == true -> ExpiredDeeplinkException()
+            statusCode == 404 -> NotFoundDeeplinkException()
             message?.contains(ERROR_NEED_PASSWORD) == true -> PasswordNeededDeeplinkException()
             message?.contains(ERROR_WRONG_PASSWORD) == true -> WrongPasswordDeeplinkException()
-            statusCode == 404 -> NotFoundDeeplinkException()
             else -> this
         }
     }
