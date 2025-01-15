@@ -77,16 +77,20 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Upsert data
     @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
-    suspend fun upsert(transfer: Transfer, transferDirection: TransferDirection, password: String?) =
-        realmProvider.withTransfersDb { realm ->
-            realm.write {
-                val transferDB = TransferDB(transfer, transferDirection, password)
-                transferDB.container?.files?.let { transferFiles ->
-                    transferDB.container?.files = FileUtils.getFileDBTree(transferDB.containerUUID, transferFiles).toRealmList()
-                    this.copyToRealm(transferDB, UpdatePolicy.ALL)
-                } ?: throw TransferWithoutFilesException()
-            }
+    suspend fun upsert(
+        transfer: Transfer,
+        transferDirection: TransferDirection,
+        password: String?,
+        recipientsEmails: Set<String> = emptySet(),
+    ) = realmProvider.withTransfersDb { realm ->
+        realm.write {
+            val transferDB = TransferDB(transfer, transferDirection, password, recipientsEmails)
+            transferDB.container?.files?.let { transferFiles ->
+                transferDB.container?.files = FileUtils.getFileDBTree(transferDB.containerUUID, transferFiles).toRealmList()
+                this.copyToRealm(transferDB, UpdatePolicy.ALL)
+            } ?: throw TransferWithoutFilesException()
         }
+    }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun generateAndInsert(
