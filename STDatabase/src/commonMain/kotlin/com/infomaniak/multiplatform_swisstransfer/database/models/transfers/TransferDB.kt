@@ -77,7 +77,7 @@ class TransferDB() : Transfer, RealmObject {
         this.downloadHost = ""
         this.container = ContainerDB(uploadSession.remoteContainer!!, uploadSession.files)
         this.password = uploadSession.password.ifEmpty { null }
-        this.recipients = uploadSession.recipientsEmails.mapTo(destination = realmSetOf(), transform = { it })
+        this.recipients = uploadSession.recipients.mapTo(destination = realmSetOf(), transform = { it })
 
         this.transferDirectionValue = TransferDirection.SENT.name
         this.transferStatusValue = transferStatus.name

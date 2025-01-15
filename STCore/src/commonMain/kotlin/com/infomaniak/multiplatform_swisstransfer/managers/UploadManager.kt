@@ -147,7 +147,7 @@ class UploadManager(
         message: String,
         numberOfDownload: DownloadLimit,
         language: EmailLanguage,
-        recipientsEmails: Set<String>,
+        recipients: Set<String>,
         files: List<UploadFileSession>,
     ): NewUploadSession = NewUploadSession(
         duration = duration,
@@ -157,7 +157,7 @@ class UploadManager(
         message = message,
         numberOfDownload = numberOfDownload,
         language = language,
-        recipientsEmails = recipientsEmails,
+        recipients = recipients,
         files = files,
     )
 
@@ -302,7 +302,7 @@ class UploadManager(
         val finishUploadBody = FinishUploadBody(
             containerUUID = containerUUID,
             language = uploadSession.language.code,
-            recipientsEmails = uploadSession.recipientsEmails,
+            recipients = uploadSession.recipients,
         )
         val finishUploadResponse = runCatching {
             uploadRepository.finishUpload(finishUploadBody).first()
