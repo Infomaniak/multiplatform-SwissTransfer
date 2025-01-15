@@ -53,6 +53,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         UnknownException::class,
         PasswordNeededDeeplinkException::class,
         WrongPasswordDeeplinkException::class,
+        ExpiredDeeplinkException::class,
         NotFoundDeeplinkException::class,
     )
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
