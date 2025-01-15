@@ -68,9 +68,13 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
+        ExpiredDeeplinkException::class,
+        NotFoundDeeplinkException::class,
+        PasswordNeededDeeplinkException::class,
+        WrongPasswordDeeplinkException::class,
     )
-    suspend fun getTransferByUrl(url: String): ApiResponse<TransferApi> {
-        return transferRequest.getTransfer(extractUUID(url))
+    suspend fun getTransferByUrl(url: String, password: String?): ApiResponse<TransferApi> {
+        return getTransferByLinkUUID(extractUUID(url), password)
     }
 
     internal fun extractUUID(url: String) = url.substringAfterLast("/")

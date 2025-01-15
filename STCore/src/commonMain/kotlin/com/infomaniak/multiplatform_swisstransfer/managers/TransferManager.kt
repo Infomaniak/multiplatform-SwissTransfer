@@ -215,6 +215,10 @@ class TransferManager internal constructor(
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
+     * @throws ExpiredDeeplinkException If the transfer added via a deeplink is expired
+     * @throws NotFoundDeeplinkException If the transfer added via a deeplink doesn't exist
+     * @throws PasswordNeededDeeplinkException If the transfer added via a deeplink is protected by a password
+     * @throws WrongPasswordDeeplinkException If we entered a wrong password for a deeplink transfer
      */
     @Throws(
         CancellationException::class,
@@ -223,9 +227,13 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
+        ExpiredDeeplinkException::class,
+        NotFoundDeeplinkException::class,
+        PasswordNeededDeeplinkException::class,
+        WrongPasswordDeeplinkException::class,
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
-        val transferApi = transferRepository.getTransferByUrl(url).data ?: return@withContext null
+        val transferApi = transferRepository.getTransferByUrl(url, password).data ?: return@withContext null
         addTransfer(transferApi, TransferDirection.RECEIVED, password)
         return@withContext transferApi.linkUUID
     }
