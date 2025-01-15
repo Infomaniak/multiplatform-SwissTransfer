@@ -39,7 +39,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var password: String = ""
     override var message: String = ""
     private var _numberOfDownload: Int = AppSettingsDB.DEFAULT_DOWNLOAD_LIMIT.value
-    override var recipients: RealmSet<String> = realmSetOf()
+    override var recipientsEmails: RealmSet<String> = realmSetOf()
     override var files: RealmList<UploadFileSessionDB> = realmListOf()
     private var _language: String = ""
 
@@ -64,7 +64,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
         this.message = uploadSession.message
         this._numberOfDownload = uploadSession.numberOfDownload.value
         this.language = uploadSession.language
-        this.recipients = realmSetOf(*uploadSession.recipients.toTypedArray())
+        this.recipientsEmails = realmSetOf(*uploadSession.recipientsEmails.toTypedArray())
         this.files = uploadSession.files.mapTo(realmListOf(), ::UploadFileSessionDB)
     }
 }

@@ -40,7 +40,7 @@ class TransferDB() : Transfer, RealmObject {
     override var downloadHost: String = ""
     override var container: ContainerDB? = null
     override var password: String? = null
-    override var recipients: RealmSet<String> = realmSetOf()
+    override var recipientsEmails: RealmSet<String> = realmSetOf()
 
     private var transferDirectionValue: String = ""
     private var transferStatusValue: String = TransferStatus.UNKNOWN.name
@@ -77,7 +77,7 @@ class TransferDB() : Transfer, RealmObject {
         this.downloadHost = ""
         this.container = ContainerDB(uploadSession.remoteContainer!!, uploadSession.files)
         this.password = uploadSession.password.ifEmpty { null }
-        this.recipients = uploadSession.recipients.mapTo(destination = realmSetOf(), transform = { it })
+        this.recipientsEmails = uploadSession.recipientsEmails.mapTo(destination = realmSetOf(), transform = { it })
 
         this.transferDirectionValue = TransferDirection.SENT.name
         this.transferStatusValue = transferStatus.name

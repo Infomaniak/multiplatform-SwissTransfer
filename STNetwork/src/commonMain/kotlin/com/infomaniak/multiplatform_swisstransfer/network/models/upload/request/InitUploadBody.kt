@@ -37,8 +37,7 @@ class InitUploadBody(
     @SerialName("lang")
     val language: String = "",
     val files: String = "", // List<UploadFileRequest>
-    @SerialName("recipientsEmails")
-    val recipients: String = "",
+    val recipientsEmails: String = "",
 ) {
     constructor(uploadSession: UploadSession) : this(
         duration = uploadSession.duration.value.toString(),
@@ -51,6 +50,6 @@ class InitUploadBody(
         numberOfFile = uploadSession.files.count(),
         language = uploadSession.language.code,
         files = Json.encodeToString(uploadSession.files.mapToList(::UploadFileRequest)),
-        recipients = Json.encodeToString(uploadSession.recipients),
+        recipientsEmails = Json.encodeToString(uploadSession.recipientsEmails),
     )
 }
