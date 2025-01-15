@@ -147,7 +147,7 @@ class UploadManager(
         message: String,
         numberOfDownload: DownloadLimit,
         language: EmailLanguage,
-        recipientsEmails: List<String>,
+        recipientsEmails: Set<String>,
         files: List<UploadFileSession>,
     ): NewUploadSession = NewUploadSession(
         duration = duration,

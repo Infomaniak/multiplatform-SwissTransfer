@@ -32,7 +32,7 @@ data class TransferUi(
     val downloadLeft: Int,
     val message: String?,
     val password: String?,
-    val recipientsEmails: List<String> = emptyList(),
+    val recipientsEmails: Set<String> = emptySet(),
     val files: List<FileUi>,
     val direction: TransferDirection? = null,
 ) {
@@ -48,7 +48,7 @@ data class TransferUi(
         downloadLeft = transfer.downloadCounterCredit,
         message = transfer.container?.message,
         password = transfer.password,
-        recipientsEmails = transfer.recipientsEmails.mapTo(destination = mutableListOf(), transform = { it }),
+        recipientsEmails = transfer.recipientsEmails.mapTo(destination = mutableSetOf(), transform = { it }),
         files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList(),
         direction = transfer.transferDirection,
     )
