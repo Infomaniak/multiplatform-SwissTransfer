@@ -32,7 +32,7 @@ data class NewUploadSession(
     override val message: String,
     override val numberOfDownload: DownloadLimit,
     override val language: EmailLanguage,
-    override val recipientsEmails: Set<String>,
+    override val recipientsEmails: List<String>,
     override val files: List<UploadFileSession>,
 ) : UploadSession {
     override val uuid: String = ""

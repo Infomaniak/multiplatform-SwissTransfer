@@ -49,7 +49,7 @@ object DummyUpload {
         override val message: String = ""
         override val numberOfDownload: DownloadLimit = DownloadLimit.ONE
         override val language: EmailLanguage = EmailLanguage.ITALIAN
-        override val recipientsEmails: Set<String> = emptySet()
+        override val recipientsEmails: List<String> = emptyList()
         override val files: List<UploadFileSession> = emptyList()
         override val remoteContainer: UploadContainer? = null
         override val remoteUploadHost: String? = null

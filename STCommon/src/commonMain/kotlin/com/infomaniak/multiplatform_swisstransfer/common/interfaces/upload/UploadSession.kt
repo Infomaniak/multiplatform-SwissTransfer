@@ -30,7 +30,7 @@ interface UploadSession {
     val message: String
     val numberOfDownload: DownloadLimit get() = DownloadLimit.TWO_HUNDRED_FIFTY
     val language: EmailLanguage
-    val recipientsEmails: Set<String>
+    val recipientsEmails: List<String>
     val files: List<UploadFileSession>
 
     // Remote

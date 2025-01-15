@@ -35,6 +35,6 @@ interface Transfer {
     val password: String? get() = null
     val transferDirection: TransferDirection? get() = null
     val transferStatus: TransferStatus? get() = null
-    val recipientsEmails: Set<String> get() = emptySet()
+    val recipientsEmails: List<String> get() = emptyList()
     //endregion
 }
