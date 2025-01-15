@@ -64,7 +64,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
         this.message = uploadSession.message
         this._numberOfDownload = uploadSession.numberOfDownload.value
         this.language = uploadSession.language
-        this.recipientsEmails = realmSetOf(*uploadSession.recipientsEmails.toTypedArray())
+        this.recipientsEmails = uploadSession.recipientsEmails.mapTo(destination = realmSetOf(), transform = { it })
         this.files = uploadSession.files.mapTo(realmListOf(), ::UploadFileSessionDB)
     }
 }
