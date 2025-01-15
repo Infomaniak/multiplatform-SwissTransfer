@@ -37,6 +37,7 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.query.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
@@ -47,16 +48,16 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     internal suspend fun getTransfers(
         transferDirection: TransferDirection? = null
-    ): RealmResults<TransferDB> = getTransfersQuery(realmProvider, transferDirection).findSuspend()
+    ): List<TransferDB> = getTransfers(realmProvider, transferDirection)
 
     @Throws(RealmException::class)
     fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
-        getTransfers(transferDirection).asFlow().map { it.list }
+        getTransfersFlow(realmProvider, transferDirection)
     }
 
     @Throws(RealmException::class)
     fun getTransfersCountFlow(transferDirection: TransferDirection): Flow<Long> = realmProvider.flowWithTransfersDb {
-        getTransfersQuery(realmProvider, transferDirection).count().asFlow()
+        getTransfersCount(realmProvider, transferDirection).asFlow()
     }
 
     @Throws(RealmException::class)
@@ -171,6 +172,62 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         private const val DAYS_SINCE_EXPIRATION = 15
 
+        private val expiredDateQuery = "${TransferDB::expiredDateTimestamp.name} < ${Clock.System.now().epochSeconds}"
+        private val downloadCounterQuery = "${TransferDB::downloadCounterCredit.name} <= 0"
+
+        private fun getNormalTransfersQuery(realm: Realm, transferDirection: TransferDirection?): RealmQuery<TransferDB> {
+            val directionFilterQuery = directionFilterQuery(transferDirection)
+            return realm.query<TransferDB>("$directionFilterQuery AND NOT ($expiredDateQuery OR $downloadCounterQuery)")
+                .sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)
+        }
+
+        private fun getExpiredTransfersQuery(realm: Realm, transferDirection: TransferDirection?): RealmQuery<TransferDB> {
+            val directionFilterQuery = directionFilterQuery(transferDirection)
+            return realm.query<TransferDB>("$directionFilterQuery AND ($expiredDateQuery OR $downloadCounterQuery)")
+                .sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)
+        }
+
+        private fun directionFilterQuery(transferDirection: TransferDirection?): String {
+            return when (transferDirection) {
+                null -> TRUE_PREDICATE
+                else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
+            }
+        }
+
+        @Throws(RealmException::class, CancellationException::class)
+        private suspend fun getTransfers(
+            realmProvider: RealmProvider,
+            transferDirection: TransferDirection?,
+        ): List<TransferDB> = realmProvider.withTransfersDb { realm ->
+
+            val normalTransfers = getNormalTransfersQuery(realm, transferDirection).findSuspend()
+            val expiredTransfers = getExpiredTransfersQuery(realm, transferDirection).findSuspend()
+
+            return@withTransfersDb normalTransfers + expiredTransfers
+        }
+
+        @Throws(RealmException::class, CancellationException::class)
+        private suspend fun getTransfersFlow(
+            realmProvider: RealmProvider,
+            transferDirection: TransferDirection?,
+        ): Flow<List<TransferDB>> = realmProvider.withTransfersDb { realm ->
+
+            val normalTransfers = getNormalTransfersQuery(realm, transferDirection).asFlow()
+            val expiredTransfers = getExpiredTransfersQuery(realm, transferDirection).asFlow()
+
+            return@withTransfersDb normalTransfers.combine(expiredTransfers) { normal, expired ->
+                normal.list + expired.list
+            }
+        }
+
+        @Throws(RealmException::class, CancellationException::class)
+        private suspend fun getTransfersCount(
+            realmProvider: RealmProvider,
+            transferDirection: TransferDirection?,
+        ): RealmScalarQuery<Long> = realmProvider.withTransfersDb { realm ->
+            return realm.query<TransferDB>(directionFilterQuery(transferDirection)).count()
+        }
+
         private fun getDownloadManagerIdsQuery(
             realm: TypedRealm,
             transferUUID: String
@@ -194,18 +251,6 @@ class TransferController(private val realmProvider: RealmProvider) {
         private fun getExpiredTransfersQuery(realm: MutableRealm): RealmQuery<TransferDB> {
             val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
             return realm.query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
-        }
-
-        @Throws(RealmException::class, CancellationException::class)
-        suspend fun getTransfersQuery(
-            realmProvider: RealmProvider,
-            transferDirection: TransferDirection?,
-        ): RealmQuery<TransferDB> = realmProvider.withTransfersDb { realm ->
-            val directionFilterQuery = when (transferDirection) {
-                null -> TRUE_PREDICATE
-                else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
-            }
-            return realm.query<TransferDB>(directionFilterQuery).sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)
         }
     }
 }
