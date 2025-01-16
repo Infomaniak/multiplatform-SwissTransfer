@@ -28,6 +28,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.DownloadManagerRef
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
+import com.infomaniak.multiplatform_swisstransfer.database.utils.findSuspend
 import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.TypedRealm
@@ -46,7 +47,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     internal suspend fun getTransfers(
         transferDirection: TransferDirection? = null
-    ): RealmResults<TransferDB> = getTransfersQuery(realmProvider, transferDirection).find()
+    ): RealmResults<TransferDB> = getTransfersQuery(realmProvider, transferDirection).findSuspend()
 
     @Throws(RealmException::class)
     fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
@@ -65,13 +66,13 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getTransfer(linkUUID: String): Transfer? = realmProvider.withTransfersDb { realm ->
-        return getTransferQuery(realm, linkUUID).find()
+        return getTransferQuery(realm, linkUUID).findSuspend()
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getNotReadyTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
-        return realm.query<TransferDB>(query).find()
+        return realm.query<TransferDB>(query).findSuspend()
     }
     //endregion
 
@@ -160,7 +161,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     suspend fun readDownloadManagerId(transferUUID: String, fileUid: String?): Long? {
         return realmProvider.withTransfersDb { realm ->
-            getDownloadManagerIdQuery(realm, transferUUID, fileUid).find()?.downloadManagerUniqueId
+            getDownloadManagerIdQuery(realm, transferUUID, fileUid).findSuspend()?.downloadManagerUniqueId
         }
     }
     //endregion

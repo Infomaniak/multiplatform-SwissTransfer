@@ -18,7 +18,13 @@
 package com.infomaniak.multiplatform_swisstransfer.database.utils
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import io.realm.kotlin.query.RealmElementQuery
+import io.realm.kotlin.query.RealmResults
+import io.realm.kotlin.query.RealmSingleQuery
+import io.realm.kotlin.types.BaseRealmObject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 object RealmUtils {
 
@@ -28,4 +34,12 @@ object RealmUtils {
             if (it is CancellationException) throw it
         }.getOrElse { throw RealmException(it) }
     }
+}
+
+suspend fun <T : BaseRealmObject> RealmElementQuery<T>.findSuspend(): RealmResults<T> {
+    return asFlow().map { it.list }.first()
+}
+
+suspend fun <T : BaseRealmObject> RealmSingleQuery<T>.findSuspend(): T? {
+    return asFlow().map { it.obj }.first()
 }
