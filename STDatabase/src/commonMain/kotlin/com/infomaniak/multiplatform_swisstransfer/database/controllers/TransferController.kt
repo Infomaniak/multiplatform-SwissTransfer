@@ -149,11 +149,12 @@ class TransferController(private val realmProvider: RealmProvider) {
                         fileUid = fileUid
                     )
                 ) else copyToRealm(
-                    DownloadManagerRef(
+                    instance = DownloadManagerRef(
                         transferUUID = transferUUID,
                         fileUid = fileUid,
                         downloadManagerUniqueId = uniqueDownloadManagerId
-                    )
+                    ),
+                    updatePolicy = UpdatePolicy.ALL
                 )
             }
         }
