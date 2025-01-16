@@ -92,7 +92,7 @@ class TransferManager internal constructor(
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
-                addTransferByLinkUUID(transfer.linkUUID, transfer.password, TransferDirection.SENT)
+                addTransferByLinkUUID(transfer.linkUUID, transfer.password, transfer.recipientsEmails, TransferDirection.SENT)
             }
         }
     }
@@ -136,7 +136,7 @@ class TransferManager internal constructor(
 
         runCatching {
             val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID, localTransfer.password).data ?: return
-            transferController.upsert(remoteTransfer, transferDirection, localTransfer.password)
+            transferController.upsert(remoteTransfer, transferDirection, localTransfer.password, localTransfer.recipientsEmails)
         }
     }
 
@@ -190,10 +190,11 @@ class TransferManager internal constructor(
     suspend fun addTransferByLinkUUID(
         linkUUID: String,
         password: String?,
+        recipientsEmails: Set<String> = emptySet(),
         transferDirection: TransferDirection,
     ): Unit = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data
-        addTransfer(transferApi, transferDirection, password)
+        addTransfer(transferApi, transferDirection, password, recipientsEmails)
     }
 
     /**
@@ -262,9 +263,14 @@ class TransferManager internal constructor(
         transferController.deleteExpiredTransfers()
     }
 
-    private suspend fun addTransfer(transferApi: TransferApi?, transferDirection: TransferDirection, password: String?) {
+    private suspend fun addTransfer(
+        transferApi: TransferApi?,
+        transferDirection: TransferDirection,
+        password: String?,
+        recipientsEmails: Set<String> = emptySet(),
+    ) {
         runCatching {
-            transferController.upsert(transferApi as Transfer, transferDirection, password)
+            transferController.upsert(transferApi as Transfer, transferDirection, password, recipientsEmails)
         }.onFailure {
             throw UnknownException(it)
         }

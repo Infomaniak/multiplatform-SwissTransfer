@@ -403,7 +403,12 @@ class UploadManager(
         uploadSession: UploadSession,
     ) {
         runCatching {
-            transferManager.addTransferByLinkUUID(finishUploadResponse.linkUUID, uploadSession.password, TransferDirection.SENT)
+            transferManager.addTransferByLinkUUID(
+                linkUUID = finishUploadResponse.linkUUID,
+                password = uploadSession.password,
+                recipientsEmails = uploadSession.recipientsEmails,
+                transferDirection = TransferDirection.SENT,
+            )
         }.onFailure { exception ->
             if (exception is UnexpectedApiErrorFormatException) {
                 createTransferLocally(exception, finishUploadResponse, uploadSession)

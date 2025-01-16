@@ -50,7 +50,12 @@ class TransferDB() : Transfer, RealmObject {
     @Ignore
     override val transferStatus: TransferStatus get() = TransferStatus.valueOf(transferStatusValue)
 
-    constructor(transfer: Transfer, transferDirection: TransferDirection, password: String?) : this() {
+    constructor(
+        transfer: Transfer,
+        transferDirection: TransferDirection,
+        password: String?,
+        recipientsEmails: Set<String>,
+    ) : this() {
         this.linkUUID = transfer.linkUUID
         this.containerUUID = transfer.containerUUID
         this.downloadCounterCredit = transfer.downloadCounterCredit
@@ -61,6 +66,7 @@ class TransferDB() : Transfer, RealmObject {
         this.downloadHost = transfer.downloadHost
         this.container = transfer.container?.let(::ContainerDB)
         this.password = password ?: transfer.password
+        this.recipientsEmails = recipientsEmails.mapTo(destination = realmSetOf(), transform = { it })
 
         this.transferDirectionValue = transferDirection.name
         this.transferStatusValue = transfer.transferStatus?.name ?: TransferStatus.READY.name
