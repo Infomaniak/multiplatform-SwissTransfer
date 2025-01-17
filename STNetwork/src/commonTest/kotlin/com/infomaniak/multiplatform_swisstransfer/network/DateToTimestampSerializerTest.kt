@@ -57,7 +57,7 @@ class DateToTimestampSerializerTest {
         """.trimIndent()
 
         val testDate = Json.decodeFromString<TestDate>(data)
-        assertEquals(1739609505, testDate.date) // Adjust for rounding or truncation behavior.
+        assertEquals(1739609505, testDate.date) // Drops the floating point precision but can parse the date
     }
 
     @Serializable
