@@ -17,11 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.serializers
 
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format.FormatStringsInDatetimeFormats
-import kotlinx.datetime.format.byUnicodePattern
-import kotlinx.datetime.toInstant
+import kotlinx.datetime.Instant
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -29,16 +25,10 @@ import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.jsonPrimitive
 
 internal object DateToTimestampSerializer : JsonTransformingSerializer<Long>(Long.serializer()) {
-    @OptIn(FormatStringsInDatetimeFormats::class)
     override fun transformDeserialize(element: JsonElement): JsonElement {
         val dateString = element.jsonPrimitive.content
 
-        val formatter = LocalDateTime.Format {
-            byUnicodePattern("uuuu-MM-dd HH:mm:ss")
-        }
-
-        val localDateTime = LocalDateTime.parse(dateString, formatter)
-        val timestamp = localDateTime.toInstant(TimeZone.UTC).epochSeconds
+        val timestamp = Instant.parse(dateString).epochSeconds
 
         return runCatching { JsonPrimitive(timestamp) }.getOrDefault(element)
     }
