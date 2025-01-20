@@ -24,6 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferU
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
@@ -39,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -89,7 +91,9 @@ class TransferManager internal constructor(
      * Fetch all transfers in database to update their status
      */
     @Throws(RealmException::class, CancellationException::class, NetworkException::class)
-    suspend fun updateAllTransfers(): Unit = withContext(Dispatchers.Default) {
+    suspend fun updateAllTransfers(lastUpdateDate: Long): Unit = withContext(Dispatchers.Default) {
+        if (lastUpdateDate + DateUtils.FIFTEEN_MINUTES > Clock.System.now().epochSeconds) return@withContext
+
         transferController.getAllTransfers().forEach { transfer ->
             runCatching {
                 transfer.transferDirection?.let { direction ->
