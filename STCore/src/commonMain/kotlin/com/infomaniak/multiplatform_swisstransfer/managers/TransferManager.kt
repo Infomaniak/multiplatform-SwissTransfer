@@ -37,8 +37,11 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedA
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
@@ -92,14 +95,25 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class, NetworkException::class)
     suspend fun updateAllTransfers(lastUpdateDate: Long): Unit = withContext(Dispatchers.Default) {
-        if (lastUpdateDate + DateUtils.FIFTEEN_MINUTES > Clock.System.now().epochSeconds) return@withContext
+        if (lastUpdateDate + DateUtils.FIFTEEN_MINUTES_IN_MS > Clock.System.now().toEpochMilliseconds()) return@withContext
 
-        transferController.getAllTransfers().forEach { transfer ->
-            runCatching {
-                transfer.transferDirection?.let { direction ->
-                    addTransferByLinkUUID(transfer.linkUUID, transfer.password, transfer.recipientsEmails, direction)
+        val semaphore = Semaphore(4)
+
+        coroutineScope {
+            transferController.getAllTransfers().forEach { transfer ->
+                if (transfer.transferDirection == null) return@forEach
+
+                semaphore.acquire()
+
+                launch {
+                    runCatching {
+                        with(transfer) { addTransferByLinkUUID(linkUUID, password, recipientsEmails, transferDirection!!) }
+                    }.onFailure { exception ->
+                        if (exception is NetworkException || exception is CancellationException) throw exception
+                    }
+                    semaphore.release()
                 }
-            }.onFailure { exception -> if (exception is NetworkException || exception is CancellationException) throw exception }
+            }
         }
     }
 
