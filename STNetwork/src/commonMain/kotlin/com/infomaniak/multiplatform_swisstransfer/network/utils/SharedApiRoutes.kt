@@ -25,7 +25,7 @@ object SharedApiRoutes {
 
     fun shareTransfer(environment: ApiEnvironment, linkUUID: String): String = "${environment.baseUrl}/d/$linkUUID"
 
-    private fun downloadFilesBase(downloadHost: String, linkUUID: String) = "https://$downloadHost/api/download/$linkUUID"
+    internal fun downloadFilesBase(downloadHost: String, linkUUID: String) = "https://$downloadHost/api/download/$linkUUID"
 
     fun downloadFiles(downloadHost: String, linkUUID: String, token: String?): String {
         return "${downloadFilesBase(downloadHost, linkUUID)}${addToken(token)}"
