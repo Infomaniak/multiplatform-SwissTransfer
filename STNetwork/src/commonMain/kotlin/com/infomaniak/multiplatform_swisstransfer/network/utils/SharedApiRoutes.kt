@@ -28,20 +28,20 @@ object SharedApiRoutes {
     internal fun downloadFilesBase(downloadHost: String, linkUUID: String) = "https://$downloadHost/api/download/$linkUUID"
 
     fun downloadFiles(downloadHost: String, linkUUID: String, token: String?): String {
-        return "${downloadFilesBase(downloadHost, linkUUID)}${addToken(token)}"
+        return "${downloadFilesBase(downloadHost, linkUUID)}${withToken(token)}"
     }
 
     fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?, token: String?): String {
-        return "${downloadFilesBase(downloadHost, linkUUID)}/$fileUUID${addToken(token)}"
+        return "${downloadFilesBase(downloadHost, linkUUID)}/$fileUUID${withToken(token)}"
     }
 
     fun downloadFolder(downloadHost: String, linkUUID: String, folderPath: String, token: String?): String {
-        return "${downloadFilesBase(downloadHost, linkUUID)}?folder=$folderPath${addToken(token, prefix = "&")}"
+        return "${downloadFilesBase(downloadHost, linkUUID)}?folder=$folderPath${withToken(token, prefix = "&")}"
     }
 
     fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String {
         return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}"
     }
 
-    private fun addToken(token: String?, prefix: String = "?") = if (token == null) "" else "${prefix}token=$token"
+    private fun withToken(token: String?, prefix: String = "?") = if (token == null) "" else "${prefix}token=$token"
 }
