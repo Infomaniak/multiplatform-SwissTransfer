@@ -25,17 +25,23 @@ object SharedApiRoutes {
 
     fun shareTransfer(environment: ApiEnvironment, linkUUID: String): String = "${environment.baseUrl}/d/$linkUUID"
 
-    fun downloadFiles(downloadHost: String, linkUUID: String): String = "https://$downloadHost/api/download/$linkUUID"
+    internal fun downloadFilesBase(downloadHost: String, linkUUID: String) = "https://$downloadHost/api/download/$linkUUID"
 
-    fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?): String {
-        return "${downloadFiles(downloadHost, linkUUID)}/$fileUUID"
+    fun downloadFiles(downloadHost: String, linkUUID: String, token: String?): String {
+        return "${downloadFilesBase(downloadHost, linkUUID)}${withToken(token)}"
     }
 
-    fun downloadFolder(downloadHost: String, linkUUID: String, folderPath: String): String {
-        return "${downloadFiles(downloadHost, linkUUID)}?folder=$folderPath"
+    fun downloadFile(downloadHost: String, linkUUID: String, fileUUID: String?, token: String?): String {
+        return "${downloadFilesBase(downloadHost, linkUUID)}/$fileUUID${withToken(token)}"
+    }
+
+    fun downloadFolder(downloadHost: String, linkUUID: String, folderPath: String, token: String?): String {
+        return "${downloadFilesBase(downloadHost, linkUUID)}?folder=$folderPath${withToken(token, prefix = "&")}"
     }
 
     fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String {
         return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}"
     }
+
+    private fun withToken(token: String?, prefix: String = "?") = if (token == null) "" else "${prefix}token=$token"
 }

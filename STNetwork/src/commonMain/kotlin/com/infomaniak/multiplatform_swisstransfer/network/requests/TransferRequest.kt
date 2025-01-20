@@ -22,8 +22,14 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -43,5 +49,13 @@ internal class TransferRequest(
                 }
             }
         )
+    }
+
+    suspend fun generateDownloadToken(jsonBody: JsonObject): String {
+        val httpResponse = httpClient.post(url = createUrl(ApiRoutes.generateDownloadToken())) {
+            contentType(ContentType.Application.Json)
+            setBody(jsonBody)
+        }
+        return httpResponse.bodyAsText()
     }
 }
