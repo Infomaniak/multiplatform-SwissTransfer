@@ -48,6 +48,12 @@ class SharedApiUrlCreator internal constructor(
         return SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUUID, fileUUID)
     }
 
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun downloadFolderUrl(transferUUID: String, folderPath: String): String? {
+        val transfer = transferController.getTransfer(transferUUID) ?: return null
+        return SharedApiRoutes.downloadFolder(transfer.downloadHost, transfer.linkUUID, folderPath)
+    }
+
     @Throws(RealmException::class)
     fun uploadChunkUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String? {
         val upload = uploadController.getUploadByUUID(uploadUUID) ?: return null
