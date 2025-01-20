@@ -411,7 +411,7 @@ class UploadManager(
                 transferDirection = TransferDirection.SENT,
             )
         }.onFailure { exception ->
-            if (exception is UnexpectedApiErrorFormatException) {
+            if (exception is FetchTransferException) {
                 createTransferLocally(exception, finishUploadResponse, uploadSession)
             } else {
                 throw exception
@@ -420,12 +420,12 @@ class UploadManager(
     }
 
     private suspend fun createTransferLocally(
-        exception: UnexpectedApiErrorFormatException,
+        exception: FetchTransferException,
         finishUploadResponse: UploadCompleteResponse,
         uploadSession: UploadSession,
     ) {
         val transferStatus = when {
-            exception.toFetchTransferException() is FetchTransferException.VirusCheckFetchTransferException -> TransferStatus.WAIT_VIRUS_CHECK
+            exception is FetchTransferException.VirusCheckFetchTransferException -> TransferStatus.WAIT_VIRUS_CHECK
             else -> TransferStatus.UNKNOWN
         }
         transferManager.createTransferLocally(finishUploadResponse.linkUUID, uploadSession, transferStatus)

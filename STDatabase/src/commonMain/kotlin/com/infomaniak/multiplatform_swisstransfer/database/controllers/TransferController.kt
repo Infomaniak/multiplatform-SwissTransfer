@@ -118,9 +118,10 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Update data
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun updateTransferStatus(transferUUID: String, transferStatus: TransferStatus) = realmProvider.withTransfersDb { realm ->
         realm.write {
-            val transferToUpdate = getTransferQuery(realm, transferUUID).find()
+            val transferToUpdate = getTransferQuery(this, transferUUID).find()
             transferToUpdate?.transferStatus = transferStatus
         }
     }
