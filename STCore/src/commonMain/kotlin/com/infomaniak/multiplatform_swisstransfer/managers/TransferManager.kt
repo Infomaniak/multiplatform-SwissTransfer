@@ -30,7 +30,7 @@ import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DeeplinkException.*
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
@@ -215,10 +215,10 @@ class TransferManager internal constructor(
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
-     * @throws ExpiredDeeplinkException If the transfer added via a deeplink is expired
-     * @throws NotFoundDeeplinkException If the transfer added via a deeplink doesn't exist
-     * @throws PasswordNeededDeeplinkException If the transfer added via a deeplink is protected by a password
-     * @throws WrongPasswordDeeplinkException If we entered a wrong password for a deeplink transfer
+     * @throws ExpiredFetchTransferException If the transfer added via a deeplink is expired
+     * @throws NotFoundFetchTransferException If the transfer added via a deeplink doesn't exist
+     * @throws PasswordNeededFetchTransferException If the transfer added via a deeplink is protected by a password
+     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a deeplink transfer
      */
     @Throws(
         CancellationException::class,
@@ -227,10 +227,10 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
-        ExpiredDeeplinkException::class,
-        NotFoundDeeplinkException::class,
-        PasswordNeededDeeplinkException::class,
-        WrongPasswordDeeplinkException::class,
+        ExpiredFetchTransferException::class,
+        NotFoundFetchTransferException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
     )
     suspend fun addTransferByLinkUUID(
         linkUUID: String,
@@ -261,10 +261,10 @@ class TransferManager internal constructor(
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
-     * @throws ExpiredDeeplinkException If the transfer added via a deeplink is expired
-     * @throws NotFoundDeeplinkException If the transfer added via a deeplink doesn't exist
-     * @throws PasswordNeededDeeplinkException If the transfer added via a deeplink is protected by a password
-     * @throws WrongPasswordDeeplinkException If we entered a wrong password for a deeplink transfer
+     * @throws ExpiredFetchTransferException If the transfer added via a deeplink is expired
+     * @throws NotFoundFetchTransferException If the transfer added via a deeplink doesn't exist
+     * @throws PasswordNeededFetchTransferException If the transfer added via a deeplink is protected by a password
+     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a deeplink transfer
      */
     @Throws(
         CancellationException::class,
@@ -273,10 +273,10 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
-        ExpiredDeeplinkException::class,
-        NotFoundDeeplinkException::class,
-        PasswordNeededDeeplinkException::class,
-        WrongPasswordDeeplinkException::class,
+        ExpiredFetchTransferException::class,
+        NotFoundFetchTransferException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByUrl(url, password).data ?: return@withContext null

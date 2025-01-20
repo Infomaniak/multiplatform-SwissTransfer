@@ -18,44 +18,48 @@
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
 /**
- * A sealed class representing exceptions related to deep link's opening to extend [ApiException].
- * This class is used to handle specific errors that occur during the email validation process.
+ * A sealed class representing exceptions related to fetched transfers to extend [ApiException].
+ * This class is used to handle specific errors that occur when fetching a transfer.
  *
  * @property statusCode The HTTP status code associated with the error.
  * @property message The message describing the error.
- * @constructor Creates an [DeeplinkException] with the given status code.
+ * @constructor Creates an [FetchTransferException] with the given status code.
  *
  * @param statusCode The HTTP status code for the error.
  */
-sealed class DeeplinkException(statusCode: Int, override val message: String) : ApiException(statusCode, message) {
+sealed class FetchTransferException(statusCode: Int, override val message: String) : ApiException(statusCode, message) {
 
-    class ExpiredDeeplinkException : DeeplinkException(404, "Transfer expired")
+    class VirusCheckFetchTransferException: FetchTransferException(404, "Virus check in progress")
 
-    class NotFoundDeeplinkException : DeeplinkException(404, "Transfer not found")
+    class ExpiredFetchTransferException : FetchTransferException(404, "Transfer expired")
 
-    class PasswordNeededDeeplinkException : DeeplinkException(401, "Transfer need a password")
+    class NotFoundFetchTransferException : FetchTransferException(404, "Transfer not found")
 
-    class WrongPasswordDeeplinkException : DeeplinkException(401, "Wrong password for this Transfer")
+    class PasswordNeededFetchTransferException : FetchTransferException(401, "Transfer need a password")
+
+    class WrongPasswordFetchTransferException : FetchTransferException(401, "Wrong password for this Transfer")
 
     internal companion object {
-        
+
+        private const val ERROR_VIRUS_CHECK = "wait_virus_check"
         private const val ERROR_EXPIRED = "expired"
         private const val ERROR_NEED_PASSWORD = "need_password"
         private const val ERROR_WRONG_PASSWORD = "wrong_password"
 
         /**
          * Extension function to convert an instance of [UnexpectedApiErrorFormatException] to a specific
-         * [DeeplinkException] based on its error message.
+         * [FetchTransferException] based on its error message.
          *
          * @receiver An instance of [UnexpectedApiErrorFormatException].
-         * @return An instance of [DeeplinkException] or the original [UnexpectedApiErrorFormatException]
-         * if we cannot map it to a [DeeplinkException].
+         * @return An instance of [FetchTransferException] or the original [UnexpectedApiErrorFormatException]
+         * if we cannot map it to a [FetchTransferException].
          */
-        fun UnexpectedApiErrorFormatException.toDeeplinkException() = when {
-            message?.contains(ERROR_EXPIRED) == true -> ExpiredDeeplinkException()
-            statusCode == 404 -> NotFoundDeeplinkException()
-            message?.contains(ERROR_NEED_PASSWORD) == true -> PasswordNeededDeeplinkException()
-            message?.contains(ERROR_WRONG_PASSWORD) == true -> WrongPasswordDeeplinkException()
+        fun UnexpectedApiErrorFormatException.toFetchTransferException() = when {
+            message?.contains(ERROR_VIRUS_CHECK) == true -> VirusCheckFetchTransferException()
+            message?.contains(ERROR_EXPIRED) == true -> ExpiredFetchTransferException()
+            statusCode == 404 -> NotFoundFetchTransferException()
+            message?.contains(ERROR_NEED_PASSWORD) == true -> PasswordNeededFetchTransferException()
+            message?.contains(ERROR_WRONG_PASSWORD) == true -> WrongPasswordFetchTransferException()
             else -> this
         }
     }
