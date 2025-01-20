@@ -36,10 +36,18 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedA
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 /**
  * TransferManager is responsible for orchestrating data transfer operations
@@ -58,6 +66,9 @@ class TransferManager internal constructor(
     private val transferController: TransferController,
     private val transferRepository: TransferRepository,
 ) {
+
+    private val minDurationBetweenAutoUpdates = 15.minutes
+    private var lastUpdateDate: TimeMark = TimeSource.Monotonic.markNow() - (minDurationBetweenAutoUpdates + 1.seconds)
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
@@ -87,16 +98,32 @@ class TransferManager internal constructor(
 
     /**
      * Fetch all transfers in database to update their status
+     *
+     * This function tries to update all existing transfers if it's been more than [minDurationBetweenAutoUpdates] since the last
+     * auto update.
      */
-    @Throws(RealmException::class, CancellationException::class, NetworkException::class)
-    suspend fun updateAllTransfers(): Unit = withContext(Dispatchers.Default) {
-        transferController.getAllTransfers().forEach { transfer ->
-            runCatching {
-                transfer.transferDirection?.let { direction ->
-                    addTransferByLinkUUID(transfer.linkUUID, transfer.password, transfer.recipientsEmails, direction)
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun tryUpdatingAllTransfers(): Unit = withContext(Dispatchers.Default) {
+        val nextUpdate = lastUpdateDate + minDurationBetweenAutoUpdates
+        if (nextUpdate.hasNotPassedNow()) return@withContext
+
+        val semaphore = Semaphore(4)
+
+        coroutineScope {
+            transferController.getAllTransfers().forEach { transfer ->
+                if (transfer.transferDirection == null) return@forEach
+
+                launch {
+                    runCatching {
+                        semaphore.withPermit {
+                            with(transfer) { addTransferByLinkUUID(linkUUID, password, recipientsEmails, transferDirection!!) }
+                        }
+                    }.onFailure { exception -> if (exception is CancellationException) throw exception }
                 }
-            }.onFailure { exception -> if (exception is NetworkException || exception is CancellationException) throw exception }
+            }
         }
+
+        lastUpdateDate = TimeSource.Monotonic.markNow()
     }
 
     /**
