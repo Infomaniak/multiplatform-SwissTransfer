@@ -70,7 +70,9 @@ class SharedApiUrlCreator internal constructor(
 
     private suspend fun generateToken(transfer: Transfer, password: String?): String? {
         return password?.let {
-            transferRepository.generateDownloadToken(transfer.containerUUID, fileUUID = null, password = it)
+            runCatching {
+                transferRepository.generateDownloadToken(transfer.containerUUID, fileUUID = null, password = it)
+            }.getOrNull()
         }
     }
 }
