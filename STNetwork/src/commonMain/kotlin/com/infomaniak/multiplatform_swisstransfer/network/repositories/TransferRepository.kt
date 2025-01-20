@@ -30,6 +30,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.Transf
 import com.infomaniak.multiplatform_swisstransfer.network.requests.TransferRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
@@ -88,12 +89,13 @@ class TransferRepository internal constructor(private val transferRequest: Trans
     )
     suspend fun generateDownloadToken(
         containerUUID: String,
-        fileUUID: String,
+        fileUUID: String?,
         password: String,
     ): String {
+        val fileUUIDJson = fileUUID?.let { JsonPrimitive(it) } ?: JsonNull
         val bodyMap = mapOf(
             "containerUUID" to JsonPrimitive(containerUUID),
-            "fileUUID" to JsonPrimitive(fileUUID),
+            "fileUUID" to fileUUIDJson,
             "password" to JsonPrimitive(password),
         )
         return transferRequest.generateDownloadToken(JsonObject(bodyMap))
