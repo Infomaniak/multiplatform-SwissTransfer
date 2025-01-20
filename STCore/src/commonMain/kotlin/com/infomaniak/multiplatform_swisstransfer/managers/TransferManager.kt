@@ -88,14 +88,14 @@ class TransferManager internal constructor(
     /**
      * Fetch all transfers in database to update their status
      */
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class, NetworkException::class)
     suspend fun updateAllTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getAllTransfers().forEach { transfer ->
             runCatching {
                 transfer.transferDirection?.let { direction ->
                     addTransferByLinkUUID(transfer.linkUUID, transfer.password, transfer.recipientsEmails, direction)
                 }
-            }
+            }.onFailure { exception -> if (exception is NetworkException || exception is CancellationException) throw exception }
         }
     }
 
