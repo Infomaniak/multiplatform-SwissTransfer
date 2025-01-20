@@ -25,6 +25,8 @@ internal object ApiRoutes {
 
     //region Transfer
     fun getTransfer(linkUUID: String): String = "links/$linkUUID"
+
+    fun generateDownloadToken() = "generateDownloadToken"
     //endRegion
 
     //region Upload
