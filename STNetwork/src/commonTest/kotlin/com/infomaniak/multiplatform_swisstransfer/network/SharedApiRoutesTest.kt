@@ -26,20 +26,21 @@ class SharedApiRoutesTest {
     @Test
     fun downloadFilesBase_IsCorrect() {
         val result = SharedApiRoutes.downloadFilesBase("host", "linkUUID")
-        assertEquals("https://host/api/download/linkUUID", result)
+        assertEquals(expected = "https://host/api/download/linkUUID", result)
     }
 
     @Test
     fun downloadFilesUrl_IsCorrect() {
         val result = SharedApiRoutes.downloadFiles(downloadHost = "host", linkUUID = "linkUUID", token = null)
-        assertEquals(SharedApiRoutes.downloadFilesBase(downloadHost = "host", linkUUID = "linkUUID"), result)
+        val expected = SharedApiRoutes.downloadFilesBase(downloadHost = "host", linkUUID = "linkUUID")
+        assertEquals(expected, result)
     }
 
     @Test
     fun downloadFilesUrlWithPassword_IsCorrect() {
         val result = SharedApiRoutes.downloadFiles(downloadHost = "host", linkUUID = "linkUUID", token = "token")
-        val url = SharedApiRoutes.downloadFilesBase(downloadHost = "host", linkUUID = "linkUUID") + "?token=token"
-        assertEquals(url, result)
+        val expected = SharedApiRoutes.downloadFilesBase(downloadHost = "host", linkUUID = "linkUUID") + "?token=token"
+        assertEquals(expected, result)
     }
 
     @Test
