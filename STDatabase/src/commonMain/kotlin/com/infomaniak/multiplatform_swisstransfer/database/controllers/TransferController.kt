@@ -71,6 +71,11 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class, CancellationException::class)
+    suspend fun getAllTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
+        return getAllTransfersQuery(realm).findSuspend()
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun getNotReadyTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
         return realm.query<TransferDB>(query).findSuspend()
@@ -255,6 +260,10 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         private fun getTransferQuery(realm: Realm, linkUUID: String): RealmSingleQuery<TransferDB> {
             return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()
+        }
+
+        private fun getAllTransfersQuery(realm: Realm): RealmQuery<TransferDB> {
+            return realm.query<TransferDB>()
         }
 
         private fun getExpiredTransfersQuery(realm: MutableRealm): RealmQuery<TransferDB> {

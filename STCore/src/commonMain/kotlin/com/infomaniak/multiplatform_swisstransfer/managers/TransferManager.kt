@@ -86,6 +86,20 @@ class TransferManager internal constructor(
     }
 
     /**
+     * Fetch all transfers in database to update their status
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun updateAllTransfers(): Unit = withContext(Dispatchers.Default) {
+        transferController.getAllTransfers().forEach { transfer ->
+            runCatching {
+                transfer.transferDirection?.let { direction ->
+                    addTransferByLinkUUID(transfer.linkUUID, transfer.password, transfer.recipientsEmails, direction)
+                }
+            }
+        }
+    }
+
+    /**
      * Update all pending transfers in database, most transfers are in [TransferStatus.WAIT_VIRUS_CHECK] status.
      */
     @Throws(RealmException::class, CancellationException::class)
