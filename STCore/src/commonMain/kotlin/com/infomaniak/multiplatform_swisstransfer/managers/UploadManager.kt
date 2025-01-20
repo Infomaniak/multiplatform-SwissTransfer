@@ -27,6 +27,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadCon
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.Companion.toFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
@@ -424,7 +425,7 @@ class UploadManager(
         uploadSession: UploadSession,
     ) {
         val transferStatus = when {
-            exception.bodyResponse.contains("wait_virus_check") -> TransferStatus.WAIT_VIRUS_CHECK
+            exception.toFetchTransferException() is FetchTransferException.VirusCheckFetchTransferException -> TransferStatus.WAIT_VIRUS_CHECK
             else -> TransferStatus.UNKNOWN
         }
         transferManager.createTransferLocally(finishUploadResponse.linkUUID, uploadSession, transferStatus)

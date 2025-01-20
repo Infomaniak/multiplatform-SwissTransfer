@@ -39,7 +39,7 @@ sealed class FetchTransferException(statusCode: Int, override val message: Strin
 
     class WrongPasswordFetchTransferException : FetchTransferException(401, "Wrong password for this Transfer")
 
-    internal companion object {
+    companion object {
 
         private const val ERROR_VIRUS_CHECK = "wait_virus_check"
         private const val ERROR_EXPIRED = "expired"
