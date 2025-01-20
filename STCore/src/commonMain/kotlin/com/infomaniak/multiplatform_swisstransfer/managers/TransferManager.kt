@@ -133,7 +133,7 @@ class TransferManager internal constructor(
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
-                addTransferByLinkUUID(transfer.linkUUID, transfer.password, transfer.recipientsEmails, TransferDirection.SENT)
+                fetchTransfer(transfer.linkUUID)
             }
         }
     }
@@ -182,6 +182,17 @@ class TransferManager internal constructor(
         runCatching {
             val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID, localTransfer.password).data ?: return
             transferController.upsert(remoteTransfer, transferDirection, localTransfer.password, localTransfer.recipientsEmails)
+        }.onFailure { exception ->
+            when (exception) {
+                is VirusCheckFetchTransferException -> transferController.updateTransferStatus(
+                    transferUUID,
+                    TransferStatus.WAIT_VIRUS_CHECK,
+                )
+                is ExpiredFetchTransferException, is NotFoundFetchTransferException -> transferController.updateTransferStatus(
+                    transferUUID,
+                    TransferStatus.EXPIRED,
+                )
+            }
         }
     }
 
