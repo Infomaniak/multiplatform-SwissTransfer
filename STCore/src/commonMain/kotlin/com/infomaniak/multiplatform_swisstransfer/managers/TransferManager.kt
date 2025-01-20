@@ -115,6 +115,10 @@ class TransferManager internal constructor(
         return transferController.readDownloadManagerId(transferUUID, fileUid)
     }
 
+    fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> {
+        return transferController.downloadManagerIdFor(transferUUID, fileUid)
+    }
+
     /**
      * Update the local transfer with remote api
      *
