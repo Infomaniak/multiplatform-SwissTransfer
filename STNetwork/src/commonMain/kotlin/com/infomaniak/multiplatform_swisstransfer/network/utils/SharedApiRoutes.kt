@@ -31,6 +31,10 @@ object SharedApiRoutes {
         return "${downloadFiles(downloadHost, linkUUID)}/$fileUUID"
     }
 
+    fun downloadFolder(downloadHost: String, linkUUID: String, folderPath: String): String {
+        return "${downloadFiles(downloadHost, linkUUID)}?folder=$folderPath"
+    }
+
     fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String {
         return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}"
     }
