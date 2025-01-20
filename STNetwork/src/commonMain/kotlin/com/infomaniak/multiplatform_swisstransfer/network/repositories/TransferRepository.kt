@@ -30,6 +30,8 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.Transf
 import com.infomaniak.multiplatform_swisstransfer.network.requests.TransferRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
 
 class TransferRepository internal constructor(private val transferRequest: TransferRequest) {
@@ -75,6 +77,26 @@ class TransferRepository internal constructor(private val transferRequest: Trans
     )
     suspend fun getTransferByUrl(url: String, password: String?): ApiResponse<TransferApi> {
         return getTransferByLinkUUID(extractUUID(url), password)
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun generateDownloadToken(
+        containerUUID: String,
+        fileUUID: String,
+        password: String,
+    ): String {
+        val bodyMap = mapOf(
+            "containerUUID" to JsonPrimitive(containerUUID),
+            "fileUUID" to JsonPrimitive(fileUUID),
+            "password" to JsonPrimitive(password),
+        )
+        return transferRequest.generateDownloadToken(JsonObject(bodyMap))
     }
 
     internal fun extractUUID(url: String) = url.substringAfterLast("/")
