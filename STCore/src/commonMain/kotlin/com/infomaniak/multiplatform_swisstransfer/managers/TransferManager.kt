@@ -24,7 +24,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferU
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
-import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
@@ -42,9 +41,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 /**
  * TransferManager is responsible for orchestrating data transfer operations
@@ -63,6 +66,9 @@ class TransferManager internal constructor(
     private val transferController: TransferController,
     private val transferRepository: TransferRepository,
 ) {
+
+    private val minDurationBetweenAutoUpdates = 15.minutes
+    private var lastUpdateDate: TimeMark = TimeSource.Monotonic.markNow() - (minDurationBetweenAutoUpdates + 1.seconds)
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
@@ -92,10 +98,14 @@ class TransferManager internal constructor(
 
     /**
      * Fetch all transfers in database to update their status
+     *
+     * This function tries to update all existing transfers if it's been more than [minDurationBetweenAutoUpdates] since the last
+     * auto update.
      */
-    @Throws(RealmException::class, CancellationException::class, NetworkException::class)
-    suspend fun updateAllTransfers(lastUpdateDate: Long): Unit = withContext(Dispatchers.Default) {
-        if (lastUpdateDate + DateUtils.FIFTEEN_MINUTES_IN_MS > Clock.System.now().toEpochMilliseconds()) return@withContext
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun tryUpdatingAllTransfers(): Unit = withContext(Dispatchers.Default) {
+        val nextUpdate = lastUpdateDate + minDurationBetweenAutoUpdates
+        if (nextUpdate.hasNotPassedNow()) return@withContext
 
         val semaphore = Semaphore(4)
 
@@ -103,18 +113,17 @@ class TransferManager internal constructor(
             transferController.getAllTransfers().forEach { transfer ->
                 if (transfer.transferDirection == null) return@forEach
 
-                semaphore.acquire()
-
                 launch {
                     runCatching {
-                        with(transfer) { addTransferByLinkUUID(linkUUID, password, recipientsEmails, transferDirection!!) }
-                    }.onFailure { exception ->
-                        if (exception is NetworkException || exception is CancellationException) throw exception
-                    }
-                    semaphore.release()
+                        semaphore.withPermit {
+                            with(transfer) { addTransferByLinkUUID(linkUUID, password, recipientsEmails, transferDirection!!) }
+                        }
+                    }.onFailure { exception -> if (exception is CancellationException) throw exception }
                 }
             }
         }
+
+        lastUpdateDate = TimeSource.Monotonic.markNow()
     }
 
     /**

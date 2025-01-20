@@ -21,7 +21,5 @@ object DateUtils {
 
     const val SECONDS_IN_A_DAY = 24L * 60L * 60L
 
-    const val FIFTEEN_MINUTES_IN_MS = 60L * 15L * 1000L
-
     fun timestampToDays(timestamp: Long) = timestamp / SECONDS_IN_A_DAY
 }
