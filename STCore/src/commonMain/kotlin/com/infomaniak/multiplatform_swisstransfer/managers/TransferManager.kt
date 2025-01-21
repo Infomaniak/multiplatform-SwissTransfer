@@ -111,12 +111,12 @@ class TransferManager internal constructor(
 
         coroutineScope {
             transferController.getAllTransfers().forEach { transfer ->
-                if (transfer.transferDirection == null) return@forEach
+                val transferDirection = transfer.transferDirection ?: return@forEach
 
                 launch {
                     runCatching {
                         semaphore.withPermit {
-                            with(transfer) { fetchTransfer(transfer, transferDirection!!) }
+                            fetchTransfer(transfer, transferDirection)
                         }
                     }.onFailure { exception -> if (exception is CancellationException) throw exception }
                 }
