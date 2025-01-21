@@ -38,6 +38,7 @@ import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.query.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
@@ -180,9 +181,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     suspend fun readDownloadManagerId(transferUUID: String, fileUid: String?): Long? {
-        return realmProvider.withTransfersDb { realm ->
-            getDownloadManagerIdQuery(realm, transferUUID, fileUid).findSuspend()?.downloadManagerUniqueId
-        }
+        return downloadManagerIdFor(transferUUID = transferUUID, fileUid = fileUid).first()
     }
 
     fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> = realmProvider.flowWithTransfersDb { realm ->
