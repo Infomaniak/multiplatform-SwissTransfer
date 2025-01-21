@@ -23,6 +23,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
 import com.infomaniak.multiplatform_swisstransfer.database.extensions.shouldBe
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.test.AfterTest
@@ -136,7 +137,7 @@ class DownloadManagerIdStorageTest {
     }
 
     private suspend fun readDlManagerId(transfer: Transfer, file: File?): Long? {
-        return transferController.readDownloadManagerId(transferUUID = transfer.linkUUID, fileUid = file?.uuid)
+        return transferController.downloadManagerIdFor(transferUUID = transfer.linkUUID, fileUid = file?.uuid).first()
     }
 
     private suspend fun writeDlManagerId(transfer: Transfer, file: File?, uniqueId: Long?) {

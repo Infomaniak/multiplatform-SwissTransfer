@@ -179,12 +179,6 @@ class TransferController(private val realmProvider: RealmProvider) {
         }
     }
 
-    suspend fun readDownloadManagerId(transferUUID: String, fileUid: String?): Long? {
-        return realmProvider.withTransfersDb { realm ->
-            getDownloadManagerIdQuery(realm, transferUUID, fileUid).findSuspend()?.downloadManagerUniqueId
-        }
-    }
-
     fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> = realmProvider.flowWithTransfersDb { realm ->
         getDownloadManagerIdQuery(realm, transferUUID, fileUid).asFlow().map { it.obj?.downloadManagerUniqueId }
     }

@@ -152,10 +152,6 @@ class TransferManager internal constructor(
     /**
      * Gives the id to retrieve a previous download assigned to Android's DownloadManager.
      */
-    suspend fun readDownloadManagerId(transferUUID: String, fileUid: String?): Long? {
-        return transferController.readDownloadManagerId(transferUUID, fileUid)
-    }
-
     fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> {
         return transferController.downloadManagerIdFor(transferUUID, fileUid)
     }
