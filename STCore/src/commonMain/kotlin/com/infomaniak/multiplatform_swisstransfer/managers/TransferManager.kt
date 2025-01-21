@@ -30,7 +30,7 @@ import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DeeplinkException.*
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
@@ -111,12 +111,12 @@ class TransferManager internal constructor(
 
         coroutineScope {
             transferController.getAllTransfers().forEach { transfer ->
-                if (transfer.transferDirection == null) return@forEach
+                val transferDirection = transfer.transferDirection ?: return@forEach
 
                 launch {
                     runCatching {
                         semaphore.withPermit {
-                            with(transfer) { addTransferByLinkUUID(linkUUID, password, recipientsEmails, transferDirection!!) }
+                            fetchTransfer(transfer, transferDirection)
                         }
                     }.onFailure { exception -> if (exception is CancellationException) throw exception }
                 }
@@ -133,7 +133,7 @@ class TransferManager internal constructor(
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
-                addTransferByLinkUUID(transfer.linkUUID, transfer.password, transfer.recipientsEmails, TransferDirection.SENT)
+                fetchTransfer(transfer, TransferDirection.SENT)
             }
         }
     }
@@ -173,15 +173,37 @@ class TransferManager internal constructor(
         NullPropertyException::class,
         CancellationException::class,
     )
-    suspend fun fetchTransfer(transferUUID: String): Unit {
+    suspend fun fetchTransfer(transferUUID: String) {
         val localTransfer = transferController.getTransfer(transferUUID)
             ?: throw NotFoundException("No transfer found in DB with uuid = $transferUUID")
         val transferDirection = localTransfer.transferDirection
             ?: throw NullPropertyException("the transferDirection property cannot be null")
 
+        fetchTransfer(localTransfer, transferDirection)
+    }
+
+    /**
+     * Update the local transfer with remote api
+     */
+    private suspend fun fetchTransfer(transfer: Transfer, direction: TransferDirection) {
         runCatching {
-            val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID, localTransfer.password).data ?: return
-            transferController.upsert(remoteTransfer, transferDirection, localTransfer.password, localTransfer.recipientsEmails)
+            val remoteTransfer = transferRepository.getTransferByLinkUUID(transfer.linkUUID, transfer.password).data ?: return
+            transferController.upsert(remoteTransfer, direction, transfer.password, transfer.recipientsEmails)
+        }.onFailure { exception ->
+            when (exception) {
+                is VirusCheckFetchTransferException -> transferController.updateTransferStatus(
+                    transfer.linkUUID,
+                    TransferStatus.WAIT_VIRUS_CHECK,
+                )
+                is VirusDetectedFetchTransferException -> transferController.updateTransferStatus(
+                    transfer.linkUUID,
+                    TransferStatus.VIRUS_DETECTED,
+                )
+                is ExpiredFetchTransferException, is NotFoundFetchTransferException -> transferController.updateTransferStatus(
+                    transfer.linkUUID,
+                    TransferStatus.EXPIRED,
+                )
+            }
         }
     }
 
@@ -203,10 +225,13 @@ class TransferManager internal constructor(
      * a `linkUUID` is returned, which must be passed to this function to retrieve the corresponding transfer.
      * After retrieving the transfer, it is saved to the database.
      *
+     * Some data are not part of the API and we need to save them manually like [password] and [recipientsEmails].
+     *
      * @see getTransfers
      *
      * @param linkUUID The UUID corresponding to the uploaded transfer link or transferUUID.
      * @param password The transfer password if protected
+     * @param recipientsEmails The transfer recipients emails if transfer type is "email" else the list can be empty
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT])
      *
      * @throws CancellationException If the operation is cancelled.
@@ -215,10 +240,12 @@ class TransferManager internal constructor(
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
-     * @throws ExpiredDeeplinkException If the transfer added via a deeplink is expired
-     * @throws NotFoundDeeplinkException If the transfer added via a deeplink doesn't exist
-     * @throws PasswordNeededDeeplinkException If the transfer added via a deeplink is protected by a password
-     * @throws WrongPasswordDeeplinkException If we entered a wrong password for a deeplink transfer
+     * @throws VirusCheckFetchTransferException If the virus check is in progress
+     * @throws VirusDetectedFetchTransferException If a virus has been detected
+     * @throws ExpiredFetchTransferException If the transfer is expired
+     * @throws NotFoundFetchTransferException If the transfer doesn't exist
+     * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
+     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
      */
     @Throws(
         CancellationException::class,
@@ -227,10 +254,12 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
-        ExpiredDeeplinkException::class,
-        NotFoundDeeplinkException::class,
-        PasswordNeededDeeplinkException::class,
-        WrongPasswordDeeplinkException::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
+        ExpiredFetchTransferException::class,
+        NotFoundFetchTransferException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
     )
     suspend fun addTransferByLinkUUID(
         linkUUID: String,
@@ -261,10 +290,12 @@ class TransferManager internal constructor(
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
-     * @throws ExpiredDeeplinkException If the transfer added via a deeplink is expired
-     * @throws NotFoundDeeplinkException If the transfer added via a deeplink doesn't exist
-     * @throws PasswordNeededDeeplinkException If the transfer added via a deeplink is protected by a password
-     * @throws WrongPasswordDeeplinkException If we entered a wrong password for a deeplink transfer
+     * @throws VirusCheckFetchTransferException If the virus check is in progress
+     * @throws VirusDetectedFetchTransferException If a virus has been detected
+     * @throws ExpiredFetchTransferException If the transfer is expired
+     * @throws NotFoundFetchTransferException If the transfer doesn't exist
+     * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
+     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
      */
     @Throws(
         CancellationException::class,
@@ -273,10 +304,12 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
-        ExpiredDeeplinkException::class,
-        NotFoundDeeplinkException::class,
-        PasswordNeededDeeplinkException::class,
-        WrongPasswordDeeplinkException::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
+        ExpiredFetchTransferException::class,
+        NotFoundFetchTransferException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByUrl(url, password).data ?: return@withContext null

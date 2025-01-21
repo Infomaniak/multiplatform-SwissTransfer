@@ -119,6 +119,15 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Update data
     @Throws(RealmException::class, CancellationException::class)
+    suspend fun updateTransferStatus(transferUUID: String, transferStatus: TransferStatus) =
+        realmProvider.withTransfersDb { realm ->
+            realm.write {
+                val transferToUpdate = getTransferQuery(this, transferUUID).find()
+                transferToUpdate?.transferStatus = transferStatus
+            }
+        }
+
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
             val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
@@ -258,7 +267,7 @@ class TransferController(private val realmProvider: RealmProvider) {
             return realm.query<DownloadManagerRef>("${DownloadManagerRef::id.name} == '$id'").first()
         }
 
-        private fun getTransferQuery(realm: Realm, linkUUID: String): RealmSingleQuery<TransferDB> {
+        private fun getTransferQuery(realm: TypedRealm, linkUUID: String): RealmSingleQuery<TransferDB> {
             return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()
         }
 

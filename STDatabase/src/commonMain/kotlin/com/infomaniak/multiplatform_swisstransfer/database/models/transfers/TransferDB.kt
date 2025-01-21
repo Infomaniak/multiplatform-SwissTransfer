@@ -48,7 +48,11 @@ class TransferDB() : Transfer, RealmObject {
     @Ignore
     override val transferDirection: TransferDirection get() = TransferDirection.valueOf(transferDirectionValue)
     @Ignore
-    override val transferStatus: TransferStatus get() = TransferStatus.valueOf(transferStatusValue)
+    override var transferStatus: TransferStatus
+        get() = TransferStatus.valueOf(transferStatusValue)
+        set(value) {
+            transferStatusValue = value.name
+        }
 
     constructor(
         transfer: Transfer,
