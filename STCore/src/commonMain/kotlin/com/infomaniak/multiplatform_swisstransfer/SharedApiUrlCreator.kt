@@ -42,21 +42,21 @@ class SharedApiUrlCreator internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFilesUrl(transferUUID: String): String? {
         val transfer = transferController.getTransfer(transferUUID) ?: return null
-        val token = transfer.password?.let { generateToken(transfer, it) ?: return null }
+        val token = transfer.nullablePassword?.let { generateToken(transfer, it) ?: return null }
         return SharedApiRoutes.downloadFiles(transfer.downloadHost, transfer.linkUUID, token)
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFileUrl(transferUUID: String, fileUUID: String?): String? {
         val transfer = transferController.getTransfer(transferUUID) ?: return null
-        val token = transfer.password?.let { generateToken(transfer, it) ?: return null }
+        val token = transfer.nullablePassword?.let { generateToken(transfer, it) ?: return null }
         return SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUUID, fileUUID, token)
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFolderUrl(transferUUID: String, folderPath: String): String? {
         val transfer = transferController.getTransfer(transferUUID) ?: return null
-        val token = transfer.password?.let { generateToken(transfer, it) ?: return null }
+        val token = transfer.nullablePassword?.let { generateToken(transfer, it) ?: return null }
         return SharedApiRoutes.downloadFolder(transfer.downloadHost, transfer.linkUUID, folderPath, token)
     }
 
@@ -67,6 +67,8 @@ class SharedApiUrlCreator internal constructor(
         val uploadHost = upload.remoteUploadHost ?: return null
         return SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
     }
+
+    private val Transfer.nullablePassword get() = password?.takeIf { it.isNotEmpty() }
 
     private suspend fun generateToken(transfer: Transfer, password: String): String? = runCatching {
         transferRepository.generateDownloadToken(transfer.containerUUID, fileUUID = null, password = password)
