@@ -235,10 +235,13 @@ class TransferManager internal constructor(
      * a `linkUUID` is returned, which must be passed to this function to retrieve the corresponding transfer.
      * After retrieving the transfer, it is saved to the database.
      *
+     * Some data are not part of the API and we need to save them manually like [password] and [recipientsEmails].
+     *
      * @see getTransfers
      *
      * @param linkUUID The UUID corresponding to the uploaded transfer link or transferUUID.
      * @param password The transfer password if protected
+     * @param recipientsEmails The transfer recipients emails if transfer type is "email" else the list can be empty
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT])
      *
      * @throws CancellationException If the operation is cancelled.
