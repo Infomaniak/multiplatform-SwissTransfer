@@ -188,6 +188,10 @@ class TransferManager internal constructor(
                     transferUUID,
                     TransferStatus.WAIT_VIRUS_CHECK,
                 )
+                is VirusDetectedFetchTransferException -> transferController.updateTransferStatus(
+                    transferUUID,
+                    TransferStatus.VIRUS_DETECTED,
+                )
                 is ExpiredFetchTransferException, is NotFoundFetchTransferException -> transferController.updateTransferStatus(
                     transferUUID,
                     TransferStatus.EXPIRED,
@@ -226,10 +230,12 @@ class TransferManager internal constructor(
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
-     * @throws ExpiredFetchTransferException If the transfer added via a deeplink is expired
-     * @throws NotFoundFetchTransferException If the transfer added via a deeplink doesn't exist
-     * @throws PasswordNeededFetchTransferException If the transfer added via a deeplink is protected by a password
-     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a deeplink transfer
+     * @throws VirusCheckFetchTransferException If the virus check is in progress
+     * @throws VirusDetectedFetchTransferException If a virus has been detected
+     * @throws ExpiredFetchTransferException If the transfer is expired
+     * @throws NotFoundFetchTransferException If the transfer doesn't exist
+     * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
+     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
      */
     @Throws(
         CancellationException::class,
@@ -238,6 +244,8 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
         ExpiredFetchTransferException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
@@ -272,10 +280,12 @@ class TransferManager internal constructor(
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
      * @throws RealmException An error has occurred with realm database
-     * @throws ExpiredFetchTransferException If the transfer added via a deeplink is expired
-     * @throws NotFoundFetchTransferException If the transfer added via a deeplink doesn't exist
-     * @throws PasswordNeededFetchTransferException If the transfer added via a deeplink is protected by a password
-     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a deeplink transfer
+     * @throws VirusCheckFetchTransferException If the virus check is in progress
+     * @throws VirusDetectedFetchTransferException If a virus has been detected
+     * @throws ExpiredFetchTransferException If the transfer is expired
+     * @throws NotFoundFetchTransferException If the transfer doesn't exist
+     * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
+     * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
      */
     @Throws(
         CancellationException::class,
@@ -284,6 +294,8 @@ class TransferManager internal constructor(
         NetworkException::class,
         UnknownException::class,
         RealmException::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
         ExpiredFetchTransferException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,

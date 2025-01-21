@@ -31,6 +31,8 @@ sealed class FetchTransferException(statusCode: Int, override val message: Strin
 
     class VirusCheckFetchTransferException: FetchTransferException(404, "Virus check in progress")
 
+    class VirusDetectedFetchTransferException: FetchTransferException(404, "Virus has been detected")
+
     class ExpiredFetchTransferException : FetchTransferException(404, "Transfer expired")
 
     class NotFoundFetchTransferException : FetchTransferException(404, "Transfer not found")
@@ -42,6 +44,7 @@ sealed class FetchTransferException(statusCode: Int, override val message: Strin
     companion object {
 
         private const val ERROR_VIRUS_CHECK = "wait_virus_check"
+        private const val ERROR_VIRUS_DETECTED = "virus has been detected"
         private const val ERROR_EXPIRED = "expired"
         private const val ERROR_NEED_PASSWORD = "need_password"
         private const val ERROR_WRONG_PASSWORD = "wrong_password"
@@ -56,6 +59,7 @@ sealed class FetchTransferException(statusCode: Int, override val message: Strin
          */
         fun UnexpectedApiErrorFormatException.toFetchTransferException() = when {
             message?.contains(ERROR_VIRUS_CHECK) == true -> VirusCheckFetchTransferException()
+            message?.contains(ERROR_VIRUS_DETECTED) == true -> VirusDetectedFetchTransferException()
             message?.contains(ERROR_EXPIRED) == true -> ExpiredFetchTransferException()
             statusCode == 404 -> NotFoundFetchTransferException()
             message?.contains(ERROR_NEED_PASSWORD) == true -> PasswordNeededFetchTransferException()
