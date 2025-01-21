@@ -173,7 +173,7 @@ class TransferManager internal constructor(
         NullPropertyException::class,
         CancellationException::class,
     )
-    suspend fun fetchTransfer(transferUUID: String): Unit {
+    suspend fun fetchTransfer(transferUUID: String) {
         val localTransfer = transferController.getTransfer(transferUUID)
             ?: throw NotFoundException("No transfer found in DB with uuid = $transferUUID")
         val transferDirection = localTransfer.transferDirection
@@ -195,7 +195,7 @@ class TransferManager internal constructor(
         NullPropertyException::class,
         CancellationException::class,
     )
-    suspend fun fetchTransfer(transfer: Transfer, direction: TransferDirection): Unit {
+    suspend fun fetchTransfer(transfer: Transfer, direction: TransferDirection) {
         runCatching {
             val remoteTransfer = transferRepository.getTransferByLinkUUID(transfer.linkUUID, transfer.password).data ?: return
             transferController.upsert(remoteTransfer, direction, transfer.password, transfer.recipientsEmails)

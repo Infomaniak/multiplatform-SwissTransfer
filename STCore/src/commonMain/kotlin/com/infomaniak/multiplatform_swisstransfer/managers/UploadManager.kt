@@ -27,7 +27,6 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadCon
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.Companion.toFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
