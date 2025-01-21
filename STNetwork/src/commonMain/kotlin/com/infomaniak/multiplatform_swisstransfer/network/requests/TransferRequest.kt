@@ -56,6 +56,6 @@ internal class TransferRequest(
             contentType(ContentType.Application.Json)
             setBody(jsonBody)
         }
-        return httpResponse.bodyAsText()
+        return httpResponse.bodyAsText().trim('"')
     }
 }
