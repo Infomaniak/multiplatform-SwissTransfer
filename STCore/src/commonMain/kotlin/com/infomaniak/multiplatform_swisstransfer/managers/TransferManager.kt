@@ -116,7 +116,7 @@ class TransferManager internal constructor(
                 launch {
                     runCatching {
                         semaphore.withPermit {
-                            with(transfer) { addTransferByLinkUUID(linkUUID, password, recipientsEmails, transferDirection!!) }
+                            with(transfer) { fetchTransfer(transfer, transferDirection!!) }
                         }
                     }.onFailure { exception -> if (exception is CancellationException) throw exception }
                 }
@@ -133,7 +133,7 @@ class TransferManager internal constructor(
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
-                fetchTransfer(transfer.linkUUID)
+                fetchTransfer(transfer, TransferDirection.SENT)
             }
         }
     }
@@ -179,21 +179,38 @@ class TransferManager internal constructor(
         val transferDirection = localTransfer.transferDirection
             ?: throw NullPropertyException("the transferDirection property cannot be null")
 
+        fetchTransfer(localTransfer, transferDirection)
+    }
+
+    /**
+     * Update the local transfer with remote api
+     *
+     * @throws RealmException An error has occurred with realm database
+     * @throws NotFoundException Any transfer with [transferUUID] has been found
+     * @throws NullPropertyException The transferDirection of the transfer found is null
+     */
+    @Throws(
+        RealmException::class,
+        NotFoundException::class,
+        NullPropertyException::class,
+        CancellationException::class,
+    )
+    suspend fun fetchTransfer(transfer: Transfer, direction: TransferDirection): Unit {
         runCatching {
-            val remoteTransfer = transferRepository.getTransferByLinkUUID(transferUUID, localTransfer.password).data ?: return
-            transferController.upsert(remoteTransfer, transferDirection, localTransfer.password, localTransfer.recipientsEmails)
+            val remoteTransfer = transferRepository.getTransferByLinkUUID(transfer.linkUUID, transfer.password).data ?: return
+            transferController.upsert(remoteTransfer, direction, transfer.password, transfer.recipientsEmails)
         }.onFailure { exception ->
             when (exception) {
                 is VirusCheckFetchTransferException -> transferController.updateTransferStatus(
-                    transferUUID,
+                    transfer.linkUUID,
                     TransferStatus.WAIT_VIRUS_CHECK,
                 )
                 is VirusDetectedFetchTransferException -> transferController.updateTransferStatus(
-                    transferUUID,
+                    transfer.linkUUID,
                     TransferStatus.VIRUS_DETECTED,
                 )
                 is ExpiredFetchTransferException, is NotFoundFetchTransferException -> transferController.updateTransferStatus(
-                    transferUUID,
+                    transfer.linkUUID,
                     TransferStatus.EXPIRED,
                 )
             }
