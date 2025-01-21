@@ -184,18 +184,8 @@ class TransferManager internal constructor(
 
     /**
      * Update the local transfer with remote api
-     *
-     * @throws RealmException An error has occurred with realm database
-     * @throws NotFoundException Any transfer with [transferUUID] has been found
-     * @throws NullPropertyException The transferDirection of the transfer found is null
      */
-    @Throws(
-        RealmException::class,
-        NotFoundException::class,
-        NullPropertyException::class,
-        CancellationException::class,
-    )
-    suspend fun fetchTransfer(transfer: Transfer, direction: TransferDirection) {
+    private suspend fun fetchTransfer(transfer: Transfer, direction: TransferDirection) {
         runCatching {
             val remoteTransfer = transferRepository.getTransferByLinkUUID(transfer.linkUUID, transfer.password).data ?: return
             transferController.upsert(remoteTransfer, direction, transfer.password, transfer.recipientsEmails)
