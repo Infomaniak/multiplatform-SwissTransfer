@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.common.utils
 
 sealed class ApiEnvironment(val baseUrl: String) {
+    // Those urls are duplicated with the ones we have in Android so don't forget to change them also in Android
     data object Preprod : ApiEnvironment("https://swisstransfer.preprod.dev.infomaniak.ch")
     data object Prod : ApiEnvironment("https://www.swisstransfer.com")
     data class Custom(private val url: String) : ApiEnvironment(url)
