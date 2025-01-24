@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.findSuspend
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -31,5 +32,10 @@ class FileController(private val realmProvider: RealmProvider) {
     fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = realmProvider.flowWithTransfersDb { realm ->
         val query = "${FileDB::folder.name}.uuid == '$folderUuid'"
         realm.query<FileDB>(query).asFlow().map { it.list }
+    }
+
+    suspend fun getFile(fileUUID: String): File? = realmProvider.withTransfersDb { realm ->
+        val query = "${FileDB::uuid.name} == '$fileUUID'"
+        return realm.query<FileDB>(query).first().findSuspend()
     }
 }
