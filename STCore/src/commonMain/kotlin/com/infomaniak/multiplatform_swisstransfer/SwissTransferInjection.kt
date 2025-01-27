@@ -99,5 +99,13 @@ class SwissTransferInjection(
     }
 
     /** An utils to help use shared routes  */
-    val sharedApiUrlCreator by lazy { SharedApiUrlCreator(environment, transferController, uploadController, transferRepository) }
+    val sharedApiUrlCreator by lazy {
+        SharedApiUrlCreator(
+            environment,
+            fileController,
+            transferController,
+            uploadController,
+            transferRepository,
+        )
+    }
 }

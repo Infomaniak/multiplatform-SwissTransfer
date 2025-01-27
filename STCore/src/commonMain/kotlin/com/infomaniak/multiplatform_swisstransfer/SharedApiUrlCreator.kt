@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
@@ -31,6 +32,7 @@ import kotlin.coroutines.cancellation.CancellationException
  */
 class SharedApiUrlCreator internal constructor(
     private val environment: ApiEnvironment,
+    private val fileController: FileController,
     private val transferController: TransferController,
     private val uploadController: UploadController,
     private val transferRepository: TransferRepository,
@@ -42,22 +44,20 @@ class SharedApiUrlCreator internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFilesUrl(transferUUID: String): String? {
         val transfer = transferController.getTransfer(transferUUID) ?: return null
-        val token = transfer.notEmptyPassword?.let { generateToken(transfer, it) ?: return null }
+        val token = transfer.notEmptyPassword?.let { generateToken(transfer, password = it) ?: return null }
         return SharedApiRoutes.downloadFiles(transfer.downloadHost, transfer.linkUUID, token)
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun downloadFileUrl(transferUUID: String, fileUUID: String?): String? {
+    suspend fun downloadFileUrl(transferUUID: String, fileUUID: String): String? {
         val transfer = transferController.getTransfer(transferUUID) ?: return null
-        val token = transfer.notEmptyPassword?.let { generateToken(transfer, it) ?: return null }
-        return SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUUID, fileUUID, token)
-    }
-
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun downloadFolderUrl(transferUUID: String, folderPath: String): String? {
-        val transfer = transferController.getTransfer(transferUUID) ?: return null
-        val token = transfer.notEmptyPassword?.let { generateToken(transfer, it) ?: return null }
-        return SharedApiRoutes.downloadFolder(transfer.downloadHost, transfer.linkUUID, folderPath, token)
+        val file = fileController.getFile(fileUUID) ?: return null
+        val token = transfer.notEmptyPassword?.let { generateToken(transfer, password = it, fileUUID) ?: return null }
+        val folderPath = file.path ?: file.fileName
+        return when {
+            file.isFolder -> SharedApiRoutes.downloadFolder(transfer.downloadHost, transfer.linkUUID, folderPath, token)
+            else -> SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUUID, fileUUID, token)
+        }
     }
 
     @Throws(RealmException::class)
@@ -70,7 +70,7 @@ class SharedApiUrlCreator internal constructor(
 
     private val Transfer.notEmptyPassword get() = password?.takeIf { it.isNotEmpty() }
 
-    private suspend fun generateToken(transfer: Transfer, password: String): String? = runCatching {
-        transferRepository.generateDownloadToken(transfer.containerUUID, fileUUID = null, password = password)
+    private suspend fun generateToken(transfer: Transfer, password: String, fileUUID: String? = null): String? = runCatching {
+        transferRepository.generateDownloadToken(transfer.containerUUID, fileUUID = fileUUID, password = password)
     }.getOrNull()
 }
