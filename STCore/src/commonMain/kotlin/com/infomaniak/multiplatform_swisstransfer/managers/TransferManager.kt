@@ -116,7 +116,7 @@ class TransferManager internal constructor(
                 launch {
                     runCatching {
                         semaphore.withPermit {
-                            fetchTransfer(transfer, transferDirection)
+                            fetchTransfer(transfer)
                         }
                     }.onFailure { exception -> if (exception is CancellationException) throw exception }
                 }
@@ -133,7 +133,7 @@ class TransferManager internal constructor(
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
-                fetchTransfer(transfer, TransferDirection.SENT)
+                fetchTransfer(transfer)
             }
         }
     }
@@ -175,16 +175,16 @@ class TransferManager internal constructor(
         val transferDirection = localTransfer.transferDirection
             ?: throw NullPropertyException("the transferDirection property cannot be null")
 
-        fetchTransfer(localTransfer, transferDirection)
+        fetchTransfer(localTransfer)
     }
 
     /**
      * Update the local transfer with remote api
      */
-    private suspend fun fetchTransfer(transfer: Transfer, direction: TransferDirection) {
+    private suspend fun fetchTransfer(transfer: Transfer) {
         runCatching {
             val remoteTransfer = transferRepository.getTransferByLinkUUID(transfer.linkUUID, transfer.password).data ?: return
-            transferController.upsert(remoteTransfer, direction, transfer.password, transfer.recipientsEmails)
+            transferController.update(remoteTransfer)
         }.onFailure { exception ->
             when (exception) {
                 is VirusCheckFetchTransferException -> transferController.updateTransferStatus(
@@ -344,7 +344,7 @@ class TransferManager internal constructor(
         recipientsEmails: Set<String> = emptySet(),
     ) {
         runCatching {
-            transferController.upsert(transferApi as Transfer, transferDirection, password, recipientsEmails)
+            transferController.insert(transferApi as Transfer, transferDirection, password, recipientsEmails)
         }.onFailure {
             throw UnknownException(it)
         }

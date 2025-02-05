@@ -62,17 +62,17 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class)
     fun getTransferFlow(linkUUID: String): Flow<Transfer?> = realmProvider.flowWithTransfersDb { realm ->
-        getTransferQuery(realm, linkUUID).asFlow().map { it.obj }
+        realm.getTransferQuery(linkUUID).asFlow().map { it.obj }
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getTransfer(linkUUID: String): Transfer? = realmProvider.withTransfersDb { realm ->
-        return getTransferQuery(realm, linkUUID).findSuspend()
+        return realm.getTransferQuery(linkUUID).findSuspend()
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getAllTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
-        return getAllTransfersQuery(realm).findSuspend()
+        return realm.getAllTransfersQuery().findSuspend()
     }
 
     @Throws(RealmException::class, CancellationException::class)
@@ -84,7 +84,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
     //region Upsert data
     @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
-    suspend fun upsert(
+    suspend fun insert(
         transfer: Transfer,
         transferDirection: TransferDirection,
         password: String?,
@@ -118,11 +118,23 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Update data
+
+    @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
+    suspend fun update(transfer: Transfer) = realmProvider.withTransfersDb { realm ->
+        realm.write {
+            getTransferQuery(transfer.linkUUID).find()?.let {
+                it.downloadCounterCredit = transfer.downloadCounterCredit
+                it.isMailSent = transfer.isMailSent
+                it.downloadHost = transfer.downloadHost
+            }
+        }
+    }
+
     @Throws(RealmException::class, CancellationException::class)
     suspend fun updateTransferStatus(transferUUID: String, transferStatus: TransferStatus) =
         realmProvider.withTransfersDb { realm ->
             realm.write {
-                val transferToUpdate = getTransferQuery(this, transferUUID).find()
+                val transferToUpdate = this.getTransferQuery(transferUUID).find()
                 transferToUpdate?.transferStatus = transferStatus
             }
         }
@@ -130,9 +142,8 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
-            val transferToDelete = query<TransferDB>("${TransferDB::linkUUID.name} == '$transferUUID'").first()
-            delete(getDownloadManagerIdsQuery(this, transferUUID))
-            delete(transferToDelete)
+            delete(this.getDownloadManagerIdsQuery(transferUUID))
+            delete(getTransferQuery(transferUUID))
         }
     }
 
@@ -140,7 +151,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun deleteExpiredTransfers() = realmProvider.withTransfersDb { realm ->
         realm.write {
             val expiredTransfersQuery = getExpiredTransfersQuery(realm = this)
-            expiredTransfersQuery.find().forEach { delete(getDownloadManagerIdsQuery(this, it.linkUUID)) }
+            expiredTransfersQuery.find().forEach { delete(this.getDownloadManagerIdsQuery(it.linkUUID)) }
             delete(expiredTransfersQuery)
         }
     }
@@ -245,11 +256,8 @@ class TransferController(private val realmProvider: RealmProvider) {
             return realm.query<TransferDB>(directionFilterQuery(transferDirection)).count()
         }
 
-        private fun getDownloadManagerIdsQuery(
-            realm: TypedRealm,
-            transferUUID: String
-        ): RealmResults<DownloadManagerRef> {
-            return realm.query<DownloadManagerRef>("${DownloadManagerRef::transferUUID.name} == '$transferUUID'").find()
+        private fun TypedRealm.getDownloadManagerIdsQuery(transferUUID: String): RealmResults<DownloadManagerRef> {
+            return query<DownloadManagerRef>("${DownloadManagerRef::transferUUID.name} == '$transferUUID'").find()
         }
 
         private fun getDownloadManagerIdQuery(
@@ -261,13 +269,11 @@ class TransferController(private val realmProvider: RealmProvider) {
             return realm.query<DownloadManagerRef>("${DownloadManagerRef::id.name} == '$id'").first()
         }
 
-        private fun getTransferQuery(realm: TypedRealm, linkUUID: String): RealmSingleQuery<TransferDB> {
-            return realm.query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()
+        private fun TypedRealm.getTransferQuery(linkUUID: String): RealmSingleQuery<TransferDB> {
+            return query<TransferDB>("${TransferDB::linkUUID.name} == '$linkUUID'").first()
         }
 
-        private fun getAllTransfersQuery(realm: Realm): RealmQuery<TransferDB> {
-            return realm.query<TransferDB>()
-        }
+        private fun TypedRealm.getAllTransfersQuery(): RealmQuery<TransferDB> = query<TransferDB>()
 
         private fun getExpiredTransfersQuery(realm: MutableRealm): RealmQuery<TransferDB> {
             val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
