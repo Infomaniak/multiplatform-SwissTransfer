@@ -87,8 +87,8 @@ class DownloadManagerIdStorageTest {
         val targetTransfer = DummyTransfer.expired
         /** Will be used to prove operations on `targetTransfer` don't affect other transfers. */
         val referenceTransfer = DummyTransfer.notExpired
-        transferController.upsert(referenceTransfer, TransferDirection.RECEIVED, password = null)
-        transferController.upsert(targetTransfer, TransferDirection.RECEIVED, password = null)
+        transferController.insert(referenceTransfer, TransferDirection.RECEIVED, password = null)
+        transferController.insert(targetTransfer, TransferDirection.RECEIVED, password = null)
 
         prepareReferenceTransfer(referenceTransfer)
 
@@ -126,7 +126,7 @@ class DownloadManagerIdStorageTest {
             readDlManagerId(targetTransfer, file = null) shouldBe null
 
             // Check deleting expired transfers deletes their related DL manager ids.
-            transferController.upsert(targetTransfer, TransferDirection.RECEIVED, password = null)
+            transferController.insert(targetTransfer, TransferDirection.RECEIVED, password = null)
             writeDlManagerId(transfer = targetTransfer, file = file1, uniqueId = downloadManagerIds.firstFile)
             writeDlManagerId(transfer = targetTransfer, file = file2, uniqueId = downloadManagerIds.secondFile)
             writeDlManagerId(transfer = targetTransfer, file = null, uniqueId = downloadManagerIds.zip)

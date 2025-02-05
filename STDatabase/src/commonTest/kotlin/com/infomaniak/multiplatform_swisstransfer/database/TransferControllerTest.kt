@@ -82,19 +82,19 @@ class TransferControllerTest {
         // Insert a transfer
         val transfer1 = DummyTransfer.transfer1
         val password = "password"
-        transferController.upsert(transfer1, TransferDirection.SENT, password)
+        transferController.insert(transfer1, TransferDirection.SENT, password)
         val realmTransfer1 = transferController.getTransfer(transfer1.linkUUID)
         assertNotNull(realmTransfer1)
 
         // Update the transfer
         val transfer2 = object : Transfer by transfer1 {
-            override var containerUUID: String = "transfer2"
+            override val downloadCounterCredit: Int = 12
         }
-        transferController.upsert(transfer2, TransferDirection.SENT, password)
+        transferController.update(transfer2)
         val realmTransfers = transferController.getTransfers()
         assertNotNull(realmTransfers)
         assertEquals(1, realmTransfers.count())
-        assertEquals(transfer2.containerUUID, realmTransfers.first().containerUUID)
+        assertEquals(transfer2.downloadCounterCredit, realmTransfers.first().downloadCounterCredit)
         assertEquals(password, realmTransfer1.password)
         assertEquals(realmTransfer1.password, realmTransfers.first().password)
     }
@@ -102,8 +102,8 @@ class TransferControllerTest {
     @Test
     fun canDeleteExpiredTransfers() = runTest {
 
-        transferController.upsert(DummyTransfer.expired, TransferDirection.SENT, password = null)
-        transferController.upsert(DummyTransfer.notExpired, TransferDirection.RECEIVED, password = null)
+        transferController.insert(DummyTransfer.expired, TransferDirection.SENT, password = null)
+        transferController.insert(DummyTransfer.notExpired, TransferDirection.RECEIVED, password = null)
 
         transferController.deleteExpiredTransfers()
 
@@ -122,14 +122,14 @@ class TransferControllerTest {
 
     @Test
     fun canRemoveTransfers() = runTest {
-        transferController.upsert(DummyTransfer.transfer1, TransferDirection.SENT, password = null)
+        transferController.insert(DummyTransfer.transfer1, TransferDirection.SENT, password = null)
         transferController.removeData()
         assertEquals(0, transferController.getTransfers().count(), "The transfers table must be empty")
     }
 
     private suspend fun canCreateTransfer(sent: TransferDirection) {
         val transfer = DummyTransfer.transfer1
-        transferController.upsert(transfer, sent, transfer.password)
+        transferController.insert(transfer, sent, transfer.password)
         val realmTransfer = transferController.getTransfer(transfer.linkUUID)
         assertNotNull(realmTransfer, "The transfer cannot be null")
         assertEquals(sent, realmTransfer.transferDirection)
@@ -139,7 +139,7 @@ class TransferControllerTest {
     private suspend fun addTwoRandomTransfersInDatabase() {
         DummyTransfer.transfers.take(2).forEachIndexed { index, transfer ->
             val transferDirection = if (index == 0) TransferDirection.SENT else TransferDirection.RECEIVED
-            transferController.upsert(transfer, transferDirection, transfer.password)
+            transferController.insert(transfer, transferDirection, transfer.password)
         }
     }
 
