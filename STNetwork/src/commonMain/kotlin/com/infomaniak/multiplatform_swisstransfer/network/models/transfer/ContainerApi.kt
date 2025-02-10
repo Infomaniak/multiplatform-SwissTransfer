@@ -47,8 +47,6 @@ data class ContainerApi(
     override var deletedDateTimestamp: Long? = null,
     override var swiftVersion: Int = 0,
     override var downloadLimit: Int,
-    override var source: String = "ST",
-    // @SerialName("WSUser") // TODO: What's this ?
-    // var wsUser: JsonElement? = null
+    override var source: String = "MOBILE", //ST=Webapp, EXT=Chrome extension to be removed before v2, WS= Workspace Mail
     override var files: List<FileApi>,
 ) : Container
