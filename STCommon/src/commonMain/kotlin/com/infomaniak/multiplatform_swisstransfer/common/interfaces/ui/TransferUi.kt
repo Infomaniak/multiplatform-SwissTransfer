@@ -51,7 +51,7 @@ data class TransferUi(
         message = transfer.container?.message,
         password = transfer.password,
         recipientsEmails = transfer.recipientsEmails.mapTo(destination = mutableSetOf(), transform = { it }),
-        files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList(),
+        files = transfer.container?.files?.mapToList { FileUi(file = it, transferUUID = transfer.linkUUID)} ?: emptyList(),
         direction = transfer.transferDirection,
         transferStatus = transfer.transferStatus
     )

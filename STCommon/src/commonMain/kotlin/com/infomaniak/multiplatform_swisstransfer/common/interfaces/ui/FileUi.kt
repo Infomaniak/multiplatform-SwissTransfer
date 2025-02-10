@@ -24,6 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 data class FileUi(
     val uid: String,
     val containerUUID: String,
+    val transferUUID: String?,
     val fileName: String,
     /** The path of the file or folder, relative to its parent. */
     val path: String?,
@@ -34,9 +35,10 @@ data class FileUi(
     val localPath: String?,
 ) {
 
-    constructor(file: File) : this(
+    constructor(file: File, transferUUID: String? = null) : this(
         uid = file.uuid,
         containerUUID = file.containerUUID,
+        transferUUID = transferUUID,
         fileName = file.fileName,
         path = file.path,
         isFolder = file.isFolder,
