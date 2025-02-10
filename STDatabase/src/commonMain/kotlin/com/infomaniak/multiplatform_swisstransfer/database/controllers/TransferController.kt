@@ -126,6 +126,9 @@ class TransferController(private val realmProvider: RealmProvider) {
                 it.downloadCounterCredit = transfer.downloadCounterCredit
                 it.isMailSent = transfer.isMailSent
                 it.downloadHost = transfer.downloadHost
+                if (it.transferStatus != transfer.transferStatus) {
+                    it.transferStatus = transfer.transferStatus ?: TransferStatus.READY
+                }
             }
         }
     }
