@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -51,5 +52,19 @@ class InitUploadBody(
         language = uploadSession.language.code,
         files = Json.encodeToString(uploadSession.files.mapToList(::UploadFileRequest)),
         recipientsEmails = Json.encodeToString(uploadSession.recipientsEmails),
+    )
+
+    constructor(req: UploadSessionRequest) : this(
+        duration = req.validityPeriod.value.toString(),
+        authorEmail = req.authorEmail,
+        authorEmailToken = req.authorEmailToken,
+        password = req.password,
+        message = req.message,
+        sizeOfUpload = req.sizeOfUpload,
+        numberOfDownload = req.downloadCountLimit,
+        numberOfFile = req.filesCount,
+        language = req.languageCode,
+        files = Json.encodeToString(req.filesMetadata.map(::UploadFileRequest)),
+        recipientsEmails = req.recipientsEmails
     )
 }

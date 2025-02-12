@@ -34,8 +34,33 @@ data class NewUploadSession(
     override val language: EmailLanguage,
     override val recipientsEmails: Set<String>,
     override val files: List<UploadFileSession>,
+    override val uuid: String,
+    override val remoteContainer: UploadContainer?,
+    override val remoteUploadHost: String?,
 ) : UploadSession {
-    override val uuid: String = ""
-    override val remoteContainer: UploadContainer? = null
-    override val remoteUploadHost: String? = null
+
+    constructor(
+        duration: ValidityPeriod,
+        authorEmail: String,
+        authorEmailToken: String?,
+        password: String,
+        message: String,
+        numberOfDownload: DownloadLimit,
+        language: EmailLanguage,
+        recipientsEmails: Set<String>,
+        files: List<UploadFileSession>,
+    ) : this (
+        duration = duration,
+        authorEmail = authorEmail,
+        authorEmailToken = authorEmailToken,
+        password = password,
+        message = message,
+        numberOfDownload = numberOfDownload,
+        language = language,
+        recipientsEmails = recipientsEmails,
+        files = files,
+        uuid = "",
+        remoteContainer = null,
+        remoteUploadHost = null
+    )
 }

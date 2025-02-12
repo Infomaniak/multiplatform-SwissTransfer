@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.FileToUploadMetadata
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -35,5 +36,12 @@ data class UploadFileRequest(
         path = uploadFileSession.path,
         size = uploadFileSession.size,
         mimeType = uploadFileSession.mimeType,
+    )
+
+    constructor(metadata: FileToUploadMetadata) : this(
+        name = metadata.name,
+        path = null,
+        size = metadata.size,
+        mimeType = metadata.mimeType
     )
 }
