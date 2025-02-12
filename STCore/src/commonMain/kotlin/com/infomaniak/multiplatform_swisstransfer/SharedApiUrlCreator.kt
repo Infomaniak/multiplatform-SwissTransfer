@@ -61,11 +61,18 @@ class SharedApiUrlCreator internal constructor(
     }
 
     @Throws(RealmException::class)
-    fun uploadChunkUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String? {
+    fun uploadChunkUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean, isRetry: Boolean): String? {
         val upload = uploadController.getUploadByUUID(uploadUUID) ?: return null
         val containerUUID = upload.remoteContainer?.uuid ?: return null
         val uploadHost = upload.remoteUploadHost ?: return null
-        return SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
+        return SharedApiRoutes.uploadChunk(
+            uploadHost = uploadHost,
+            containerUUID = containerUUID,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            isLastChunk = isLastChunk,
+            isRetry = isRetry
+        )
     }
 
     private val Transfer.notEmptyPassword get() = password?.takeIf { it.isNotEmpty() }

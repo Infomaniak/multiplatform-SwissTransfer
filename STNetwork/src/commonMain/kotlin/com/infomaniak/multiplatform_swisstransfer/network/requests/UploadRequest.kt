@@ -67,12 +67,11 @@ internal class UploadRequest(
         return post(url = createUrl(ApiRoutes.verifyEmailCode), verifyEmailCodeBody)
     }
 
-    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody): Boolean {
-        val httpResponse = httpClient.post(url = createUrl(ApiRoutes.resendEmailCode)) {
+    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody) {
+        httpClient.post(url = createUrl(ApiRoutes.resendEmailCode)) {
             contentType(ContentType.Application.Json)
             setBody(resendEmailCodeBody)
         }
-        return httpResponse.status.isSuccess()
     }
 
     suspend fun uploadChunk(
@@ -81,28 +80,33 @@ internal class UploadRequest(
         fileUUID: String,
         chunkIndex: Int,
         isLastChunk: Boolean,
+        isRetry: Boolean,
         data: ByteArray,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
-    ): Boolean {
-        val httpResponse = httpClient.post(
-            urlString = SharedApiRoutes.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk)
+    ) {
+        httpClient.post(
+            urlString = SharedApiRoutes.uploadChunk(
+                uploadHost = uploadHost,
+                containerUUID = containerUUID,
+                fileUUID = fileUUID,
+                chunkIndex = chunkIndex,
+                isLastChunk = isLastChunk, isRetry = isRetry
+            )
         ) {
             longTimeout()
             setBody(data)
             onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength ?: 0) }
         }
-        return httpResponse.status.isSuccess()
     }
 
     suspend fun finishUpload(finishUploadBody: FinishUploadBody): List<UploadCompleteResponse> {
         return post(createUrl(ApiRoutes.finishUpload), finishUploadBody)
     }
 
-    suspend fun cancelUpload(jsonBody: JsonObject): Boolean {
-        val httpResponse = httpClient.post(url = createUrl(ApiRoutes.cancelUpload)) {
+    suspend fun cancelUpload(jsonBody: JsonObject) {
+        httpClient.post(url = createUrl(ApiRoutes.cancelUpload)) {
             contentType(ContentType.Application.Json)
             setBody(jsonBody)
         }
-        return httpResponse.status.isSuccess()
     }
 }
