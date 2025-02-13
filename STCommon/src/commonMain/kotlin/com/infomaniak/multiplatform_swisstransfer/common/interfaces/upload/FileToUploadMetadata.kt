@@ -18,7 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
 data class FileToUploadMetadata(
-    val name: String = "",
-    val size: Long = 0L,
-    val mimeType: String = "",
+    val name: String,
+    val size: Long,
+    val mimeType: String,
 )
