@@ -203,6 +203,10 @@ class TransferManager internal constructor(
         }
     }
 
+    suspend fun updateTransferFilesThumbnails(transferUUID: String, thumbnailRootPath: String) {
+        transferController.updateTransferFilesThumbnails(transferUUID, thumbnailRootPath)
+    }
+
     /**
      * Retrieves a [TransferUi] by linkUUID.
      *

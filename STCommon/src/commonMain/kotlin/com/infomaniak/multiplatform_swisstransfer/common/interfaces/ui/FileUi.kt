@@ -31,6 +31,7 @@ data class FileUi(
     val fileSize: Long,
     val mimeType: String?,
     val localPath: String?,
+    val thumbnailPath: String?,
 ) {
 
     constructor(file: File) : this(
@@ -41,6 +42,7 @@ data class FileUi(
         fileSize = file.receivedSizeInBytes,
         mimeType = file.mimeType,
         localPath = null,
+        thumbnailPath = file.thumbnailPath,
     )
 
     fun toUploadFileSession(): UploadFileSession {
