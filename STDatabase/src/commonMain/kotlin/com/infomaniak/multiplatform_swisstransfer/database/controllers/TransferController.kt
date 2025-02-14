@@ -143,6 +143,17 @@ class TransferController(private val realmProvider: RealmProvider) {
         }
 
     @Throws(RealmException::class, CancellationException::class)
+    suspend fun updateTransferFilesThumbnails(transferUUID: String, thumbnailRootPath: String) =
+        realmProvider.withTransfersDb { realm ->
+            realm.write {
+                val transferToUpdate = this.getTransferQuery(transferUUID).find()
+                transferToUpdate?.container?.files?.forEach {
+                    it.thumbnailPath = "$thumbnailRootPath/${it.uuid}"
+                }
+            }
+        }
+
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
             delete(this.getDownloadManagerIdsQuery(transferUUID))
