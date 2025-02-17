@@ -17,8 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
-class UploadDestination(
-    val containerUuid: String,
+data class UploadDestination(
+    val container: UploadContainer,
     val uploadHost: String,
     val filesUuid: List<String>
 )

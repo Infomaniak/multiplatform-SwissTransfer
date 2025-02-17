@@ -34,7 +34,7 @@ data class NewUploadSession(
     override val language: EmailLanguage,
     override val recipientsEmails: Set<String>,
     override val files: List<UploadFileSession>,
-    override val uuid: String,
+    override val uuid: String = "",
     override val remoteContainer: UploadContainer?,
     override val remoteUploadHost: String?,
 ) : UploadSession {

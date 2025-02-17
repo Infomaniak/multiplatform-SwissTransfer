@@ -61,10 +61,10 @@ class InitUploadBody(
         password = req.password,
         message = req.message,
         sizeOfUpload = req.sizeOfUpload,
-        numberOfDownload = req.downloadCountLimit,
+        numberOfDownload = req.downloadCountLimit.value,
         numberOfFile = req.filesCount,
-        language = req.languageCode,
+        language = req.languageCode.code,
         files = Json.encodeToString(req.filesMetadata.map(::UploadFileRequest)),
-        recipientsEmails = req.recipientsEmails
+        recipientsEmails = Json.encodeToString(req.recipientsEmails),
     )
 }

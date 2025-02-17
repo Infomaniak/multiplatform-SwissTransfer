@@ -17,18 +17,20 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
+import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 
 class UploadSessionRequest(
     val validityPeriod: ValidityPeriod,
-    val authorEmail: String = "",
-    val authorEmailToken: String? = null,
-    val password: String = "",
-    val message: String = "",
-    val sizeOfUpload: Long = 0L,
-    val downloadCountLimit: Int = 0,
-    val filesCount: Int = 0,
-    val languageCode: String = "",
+    val authorEmail: String,
+    val authorEmailToken: String?,
+    val password: String,
+    val message: String,
+    val sizeOfUpload: Long,
+    val downloadCountLimit: DownloadLimit,
+    val filesCount: Int,
+    val languageCode: EmailLanguage,
     val filesMetadata: List<FileToUploadMetadata>,
-    val recipientsEmails: String = "",
+    val recipientsEmails: Set<String>,
 )
