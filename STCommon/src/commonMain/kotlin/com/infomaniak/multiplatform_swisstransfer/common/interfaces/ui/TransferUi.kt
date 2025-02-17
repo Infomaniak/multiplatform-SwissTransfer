@@ -26,6 +26,7 @@ import kotlinx.datetime.Clock
 
 data class TransferUi(
     val uuid: String,
+    val containerUuid: String,
     val createdDateTimestamp: Long,
     val expirationDateTimestamp: Long,
     val sizeUploaded: Long,
@@ -43,6 +44,7 @@ data class TransferUi(
 
     constructor(transfer: Transfer) : this(
         uuid = transfer.linkUUID,
+        containerUuid = transfer.containerUUID,
         createdDateTimestamp = transfer.createdDateTimestamp,
         expirationDateTimestamp = transfer.expiredDateTimestamp,
         sizeUploaded = transfer.container?.sizeUploaded ?: 0,

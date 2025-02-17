@@ -25,14 +25,15 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.DownloadManagerRef
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import com.infomaniak.multiplatform_swisstransfer.database.utils.findSuspend
-import io.realm.kotlin.MutableRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.TypedRealm
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.delete
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.query.*
@@ -79,6 +80,11 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun getNotReadyTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
         return realm.query<TransferDB>(query).findSuspend()
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getExpiredTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
+        realm.getExpiredTransfersQuery().findSuspend()
     }
     //endregion
 
@@ -156,16 +162,32 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
-            delete(this.getDownloadManagerIdsQuery(transferUUID))
-            delete(getTransferQuery(transferUUID))
+            getTransferQuery(transferUUID).find()?.let { transferToDelete ->
+                delete(this.getDownloadManagerIdsQuery(transferUUID))
+
+                transferToDelete.container?.let { containerToDelete ->
+                    delete(containerToDelete.files)
+                    delete(containerToDelete)
+                }
+                delete(transferToDelete)
+            }
         }
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteExpiredTransfers() = realmProvider.withTransfersDb { realm ->
         realm.write {
-            val expiredTransfersQuery = getExpiredTransfersQuery(realm = this)
-            expiredTransfersQuery.find().forEach { delete(this.getDownloadManagerIdsQuery(it.linkUUID)) }
+            val expiredTransfersQuery = getExpiredTransfersQuery()
+
+            expiredTransfersQuery.find().forEach { expiredTransfers ->
+                delete(this.getDownloadManagerIdsQuery(expiredTransfers.linkUUID))
+
+                expiredTransfers.container?.let { expiredContainer ->
+                    delete(expiredContainer.files)
+                    delete(expiredContainer)
+                }
+            }
+
             delete(expiredTransfersQuery)
         }
     }
@@ -289,9 +311,14 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         private fun TypedRealm.getAllTransfersQuery(): RealmQuery<TransferDB> = query<TransferDB>()
 
-        private fun getExpiredTransfersQuery(realm: MutableRealm): RealmQuery<TransferDB> {
+        private fun TypedRealm.getExpiredTransfersQuery(): RealmQuery<TransferDB> {
             val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
-            return realm.query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
+            return query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
+        }
+
+        private fun TypedRealm.getExpiredContainersQuery(): RealmQuery<ContainerDB> {
+            val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
+            return query<ContainerDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
         }
     }
 }

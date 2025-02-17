@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileContr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class FileManager(private val fileController: FileController) {
+class FileManager internal constructor(private val fileController: FileController) {
 
     /**
      * Retrieves a flow of files contained in a folder with the specified folderUuid.

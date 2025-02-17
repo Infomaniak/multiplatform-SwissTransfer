@@ -59,13 +59,20 @@ class SwissTransferInjection(
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val emailTokensController by lazy { EmailTokensController(realmProvider) }
     private val uploadController by lazy { UploadController(realmProvider) }
+
     private val transferController by lazy { TransferController(realmProvider) }
     private val fileController by lazy { FileController(realmProvider) }
 
     private val emailLanguageUtils by lazy { EmailLanguageUtils() }
 
     /** A manager used to orchestrate Transfers operations. */
-    val transferManager by lazy { TransferManager(apiClientProvider, transferController, transferRepository) }
+    val transferManager by lazy {
+        TransferManager(
+            apiClientProvider,
+            transferController,
+            transferRepository
+        )
+    }
 
     /** A manager used to orchestrate Files operations. */
     val fileManager by lazy { FileManager(fileController) }
