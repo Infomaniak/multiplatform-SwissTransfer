@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
+import io.realm.kotlin.ext.backlinks
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
@@ -44,6 +45,8 @@ class ContainerDB() : Container, RealmObject {
     // @SerialName("WSUser") // TODO: What's this ?
     // val wsUser: JsonElement?
     override var files: RealmList<FileDB> = realmListOf()
+
+    val transfer by backlinks(TransferDB::container)
 
     constructor(container: Container) : this() {
         this.uuid = container.uuid
