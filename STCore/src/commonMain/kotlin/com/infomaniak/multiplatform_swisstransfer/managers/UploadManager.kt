@@ -223,6 +223,7 @@ class UploadManager(
      *
      * @return The upload session that has been updated or null if it no longer exists after the update.
      *
+     * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      * @throws ContainerErrorsException If there is an error with the container.
      * @throws ApiException If there is a general API error.
@@ -232,6 +233,7 @@ class UploadManager(
      * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
      */
     @Throws(
+        RealmException::class,
         CancellationException::class,
         ContainerErrorsException::class,
         ApiException::class,
@@ -246,7 +248,10 @@ class UploadManager(
         attestationToken: String,
     ): UploadDestination = withContext(Dispatchers.Default) {
 
-        val initUploadBody = InitUploadBody(request)
+        val initUploadBody = InitUploadBody(
+            req = request,
+            authorEmailToken = emailTokensManager.getTokenForEmail(request.authorEmail)
+        )
         val initUploadResponse = uploadRepository.initUpload(initUploadBody, attestationHeaderName, attestationToken)
 
         UploadDestination(

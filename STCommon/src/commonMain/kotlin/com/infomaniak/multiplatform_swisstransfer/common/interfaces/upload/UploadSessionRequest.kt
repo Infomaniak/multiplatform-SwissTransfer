@@ -24,7 +24,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 class UploadSessionRequest(
     val validityPeriod: ValidityPeriod,
     val authorEmail: String,
-    val authorEmailToken: String?,
     val password: String,
     val message: String,
     val sizeOfUpload: Long,

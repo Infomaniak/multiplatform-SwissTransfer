@@ -54,10 +54,10 @@ class InitUploadBody(
         recipientsEmails = Json.encodeToString(uploadSession.recipientsEmails),
     )
 
-    constructor(req: UploadSessionRequest) : this(
+    constructor(req: UploadSessionRequest, authorEmailToken: String?) : this(
         duration = req.validityPeriod.value.toString(),
         authorEmail = req.authorEmail,
-        authorEmailToken = req.authorEmailToken,
+        authorEmailToken = authorEmailToken,
         password = req.password,
         message = req.message,
         sizeOfUpload = req.sizeOfUpload,
