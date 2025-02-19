@@ -299,6 +299,7 @@ class TransferManager internal constructor(
      * @throws VirusCheckFetchTransferException If the virus check is in progress
      * @throws VirusDetectedFetchTransferException If a virus has been detected
      * @throws ExpiredDateFetchTransferException If the transfer is expired
+     * @throws ExpiredDownloadFetchTransferException If the transfer was downloaded too many times
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
      * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
@@ -313,6 +314,7 @@ class TransferManager internal constructor(
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
+        ExpiredDownloadFetchTransferException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
