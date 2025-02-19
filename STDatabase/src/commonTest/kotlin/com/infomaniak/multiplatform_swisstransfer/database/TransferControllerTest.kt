@@ -22,6 +22,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
+import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
@@ -125,6 +127,28 @@ class TransferControllerTest {
         transferController.insert(DummyTransfer.transfer1, TransferDirection.SENT, password = null)
         transferController.removeData()
         assertEquals(0, transferController.getTransfers().count(), "The transfers table must be empty")
+    }
+
+    @Test
+    fun isContainerAndFilesDeleted() = runTest {
+        transferController.insert(DummyTransfer.transfer1, TransferDirection.SENT, password = null)
+        transferController.deleteTransfer(DummyTransfer.transfer1.linkUUID)
+        assertEquals(0, transferController.getTransfers().count(), "The transfers table must be empty")
+        assertEquals(0, transferController.getContainers().count(), "The containers table must be empty")
+        assertEquals(0, transferController.getFiles().count(), "The files table must be empty")
+    }
+
+    @Test
+    fun canFetchOrphanContainers() = runTest {
+        assertEquals(0, transferController.getOrphanContainers().count(), "We should NOT have an orphan container")
+
+        realmProvider.withTransfersDb { realm ->
+            realm.write {
+                copyToRealm(ContainerDB(DummyTransfer.container2), UpdatePolicy.ALL)
+            }
+        }
+
+        assertEquals(1, transferController.getOrphanContainers().count(), "We should have an orphan container")
     }
 
     private suspend fun canCreateTransfer(sent: TransferDirection) {

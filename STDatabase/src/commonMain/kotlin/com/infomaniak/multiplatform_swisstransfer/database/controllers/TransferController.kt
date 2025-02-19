@@ -19,13 +19,17 @@ package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.TransferWithoutFilesException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.DownloadManagerRef
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtils
 import com.infomaniak.multiplatform_swisstransfer.database.utils.findSuspend
@@ -79,6 +83,21 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun getNotReadyTransfers(): List<Transfer> = realmProvider.withTransfersDb { realm ->
         val query = "${TransferDB.transferStatusPropertyName} != '${TransferStatus.READY.name}'"
         return realm.query<TransferDB>(query).findSuspend()
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getContainers(): List<Container> = realmProvider.withTransfersDb { realm ->
+        return realm.query<ContainerDB>().findSuspend()
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getFiles(): List<File> = realmProvider.withTransfersDb { realm ->
+        return realm.query<FileDB>().findSuspend()
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getOrphanContainers(): List<Container> = realmProvider.withTransfersDb { realm ->
+        return realm.getOrphanContainers().findSuspend()
     }
     //endregion
 
@@ -156,17 +175,43 @@ class TransferController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String) = realmProvider.withTransfersDb { realm ->
         realm.write {
-            delete(this.getDownloadManagerIdsQuery(transferUUID))
-            delete(getTransferQuery(transferUUID))
+            getTransferQuery(transferUUID).find()?.let { transferToDelete ->
+                delete(this.getDownloadManagerIdsQuery(transferUUID))
+
+                deleteContainerAndFiles(transferToDelete)
+                delete(transferToDelete)
+            }
         }
     }
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteExpiredTransfers() = realmProvider.withTransfersDb { realm ->
         realm.write {
-            val expiredTransfersQuery = getExpiredTransfersQuery(realm = this)
-            expiredTransfersQuery.find().forEach { delete(this.getDownloadManagerIdsQuery(it.linkUUID)) }
+            val expiredTransfersQuery = getExpiredTransfersQuery()
+
+            expiredTransfersQuery.find().forEach { expiredTransfer ->
+                delete(this.getDownloadManagerIdsQuery(expiredTransfer.linkUUID))
+
+                deleteContainerAndFiles(expiredTransfer)
+            }
+
             delete(expiredTransfersQuery)
+
+            deleteOrphanContainers()
+        }
+    }
+
+    private fun MutableRealm.deleteOrphanContainers() {
+        getOrphanContainers().find().forEach { container ->
+            delete(container.files)
+            delete(container)
+        }
+    }
+
+    private fun MutableRealm.deleteContainerAndFiles(transferToDelete: TransferDB) {
+        transferToDelete.container?.let { containerToDelete ->
+            delete(containerToDelete.files)
+            delete(containerToDelete)
         }
     }
 
@@ -289,9 +334,13 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         private fun TypedRealm.getAllTransfersQuery(): RealmQuery<TransferDB> = query<TransferDB>()
 
-        private fun getExpiredTransfersQuery(realm: MutableRealm): RealmQuery<TransferDB> {
+        private fun TypedRealm.getExpiredTransfersQuery(): RealmQuery<TransferDB> {
             val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
-            return realm.query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
+            return query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
+        }
+
+        private fun TypedRealm.getOrphanContainers(): RealmQuery<ContainerDB> {
+            return query<ContainerDB>("${ContainerDB::transfer.name}.@count == 0")
         }
     }
 }

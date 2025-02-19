@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +25,21 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.findSuspend
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.coroutines.cancellation.CancellationException
 
 class FileController(private val realmProvider: RealmProvider) {
 
+    //region Get
     @Throws(RealmException::class)
     fun getFilesFromTransfer(folderUuid: String): Flow<List<File>> = realmProvider.flowWithTransfersDb { realm ->
         val query = "${FileDB::folder.name}.uuid == '$folderUuid'"
         realm.query<FileDB>(query).asFlow().map { it.list }
     }
 
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun getFile(fileUUID: String): File? = realmProvider.withTransfersDb { realm ->
         val query = "${FileDB::uuid.name} == '$fileUUID'"
         return realm.query<FileDB>(query).first().findSuspend()
     }
+    //endregion
 }
