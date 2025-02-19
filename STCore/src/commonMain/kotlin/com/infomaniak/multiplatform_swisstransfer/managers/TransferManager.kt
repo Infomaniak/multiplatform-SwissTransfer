@@ -195,7 +195,7 @@ class TransferManager internal constructor(
                     transfer.linkUUID,
                     TransferStatus.VIRUS_DETECTED,
                 )
-                is ExpiredFetchTransferException, is NotFoundFetchTransferException -> transferController.updateTransferStatus(
+                is ExpiredDateFetchTransferException, is NotFoundFetchTransferException -> transferController.updateTransferStatus(
                     transfer.linkUUID,
                     TransferStatus.EXPIRED,
                 )
@@ -242,7 +242,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      * @throws VirusCheckFetchTransferException If the virus check is in progress
      * @throws VirusDetectedFetchTransferException If a virus has been detected
-     * @throws ExpiredFetchTransferException If the transfer is expired
+     * @throws ExpiredDateFetchTransferException If the transfer is expired
      * @throws ExpiredDownloadFetchTransferException If the transfer was downloaded too many times
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
@@ -257,7 +257,7 @@ class TransferManager internal constructor(
         RealmException::class,
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
-        ExpiredFetchTransferException::class,
+        ExpiredDateFetchTransferException::class,
         ExpiredDownloadFetchTransferException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
@@ -298,7 +298,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      * @throws VirusCheckFetchTransferException If the virus check is in progress
      * @throws VirusDetectedFetchTransferException If a virus has been detected
-     * @throws ExpiredFetchTransferException If the transfer is expired
+     * @throws ExpiredDateFetchTransferException If the transfer is expired
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
      * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
@@ -312,7 +312,7 @@ class TransferManager internal constructor(
         RealmException::class,
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
-        ExpiredFetchTransferException::class,
+        ExpiredDateFetchTransferException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
