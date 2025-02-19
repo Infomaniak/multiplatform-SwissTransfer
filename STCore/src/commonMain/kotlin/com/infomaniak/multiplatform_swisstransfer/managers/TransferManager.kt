@@ -197,7 +197,7 @@ class TransferManager internal constructor(
                 )
                 is ExpiredDateFetchTransferException, is NotFoundFetchTransferException -> transferController.updateTransferStatus(
                     transfer.linkUUID,
-                    TransferStatus.EXPIRED,
+                    TransferStatus.EXPIRED_DATE,
                 )
             }
         }
