@@ -270,9 +270,6 @@ class TransferManager internal constructor(
         transferDirection: TransferDirection,
     ): Unit = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data
-        transferApi?.downloadCounterCredit?.takeIf { it > 0 }?.let {
-            throw ExpiredDownloadFetchTransferException()
-        }
 
         addTransfer(transferApi, transferDirection, password, recipientsEmails)
     }

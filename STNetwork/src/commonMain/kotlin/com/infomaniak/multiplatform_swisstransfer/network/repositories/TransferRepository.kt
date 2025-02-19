@@ -63,7 +63,14 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
-        transferRequest.getTransfer(linkUUID, password)
+        val transferRequest = transferRequest.getTransfer(linkUUID, password)
+        val transferData = transferRequest.data
+
+        if (transferData != null && transferData.downloadCounterCredit <= 0) {
+            throw ExpiredDownloadFetchTransferException()
+        }
+
+        return@runCatching transferRequest
     }.getOrElse { exception ->
         if (exception is UnexpectedApiErrorFormatException) throw exception.toFetchTransferException() else throw exception
     }
