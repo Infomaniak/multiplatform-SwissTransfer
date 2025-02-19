@@ -243,6 +243,7 @@ class TransferManager internal constructor(
      * @throws VirusCheckFetchTransferException If the virus check is in progress
      * @throws VirusDetectedFetchTransferException If a virus has been detected
      * @throws ExpiredFetchTransferException If the transfer is expired
+     * @throws ExpiredDownloadFetchTransferException If the transfer was downloaded too many times
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
      * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
@@ -257,6 +258,7 @@ class TransferManager internal constructor(
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredFetchTransferException::class,
+        ExpiredDownloadFetchTransferException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
@@ -268,6 +270,12 @@ class TransferManager internal constructor(
         transferDirection: TransferDirection,
     ): Unit = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data
+        transferApi?.downloadCounterCredit?.let {
+            if (it > 0) {
+                throw ExpiredDownloadFetchTransferException()
+            }
+        }
+
         addTransfer(transferApi, transferDirection, password, recipientsEmails)
     }
 
