@@ -35,7 +35,7 @@ sealed class FetchTransferException(statusCode: Int, override val message: Strin
 
     class ExpiredDateFetchTransferException : FetchTransferException(404, "Transfer expired")
 
-    class ExpiredDownloadFetchTransferException : FetchTransferException(404, "Transfer expired")
+    class ExpiredDownloadFetchTransferException : Exception("Transfer expired")
 
     class NotFoundFetchTransferException : FetchTransferException(404, "Transfer not found")
 
