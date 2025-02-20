@@ -125,7 +125,7 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         //region Configurations versions
         const val APP_SETTINGS_SCHEMA_VERSION = 1L
         const val UPLOAD_SCHEMA_VERSION = 1L
-        const val TRANSFERS_SCHEMA_VERSION = 1L
+        const val TRANSFERS_SCHEMA_VERSION = 2L
         //endregion
     }
 }
