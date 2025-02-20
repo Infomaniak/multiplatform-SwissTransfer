@@ -17,25 +17,16 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-import io.realm.kotlin.dynamic.DynamicMutableRealmObject
-import io.realm.kotlin.dynamic.DynamicRealmObject
-import io.realm.kotlin.dynamic.getValue
 import io.realm.kotlin.migration.AutomaticSchemaMigration
-import io.realm.kotlin.migration.AutomaticSchemaMigration.MigrationContext
 
 val APP_SETTINGS_MIGRATION = AutomaticSchemaMigration { migrationContext ->
-    migrationContext.deleteRealmFromFirstMigration()
+
 }
 
 val UPLOAD_MIGRATION = AutomaticSchemaMigration { migrationContext ->
-    migrationContext.deleteRealmFromFirstMigration()
+
 }
 
 val TRANSFERS_MIGRATION = AutomaticSchemaMigration { migrationContext ->
-    migrationContext.deleteRealmFromFirstMigration()
-}
 
-// Migrate to version #1
-private fun MigrationContext.deleteRealmFromFirstMigration() {
-    if (oldRealm.schemaVersion() < 1L) newRealm.deleteAll()
 }
