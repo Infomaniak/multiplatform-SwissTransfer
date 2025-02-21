@@ -313,7 +313,10 @@ class TransferManager internal constructor(
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByUrl(url, password).data ?: return@withContext null
-        addTransfer(transferApi, TransferDirection.RECEIVED, password)
+        val transfer = transferController.getTransfer(transferApi.linkUUID)
+        if (transfer == null) {
+            addTransfer(transferApi, TransferDirection.RECEIVED, password)
+        }
         return@withContext transferApi.linkUUID
     }
 
