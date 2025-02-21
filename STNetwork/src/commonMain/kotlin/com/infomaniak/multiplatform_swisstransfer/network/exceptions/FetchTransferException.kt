@@ -69,4 +69,4 @@ sealed class FetchTransferException(statusCode: Int, override val message: Strin
     }
 }
 
-class ExpiredDownloadFetchTransferException : Exception("Transfer Download quota expired")
+class DownloadQuotaExceededException : Exception("Transfer download quota exceeded")

@@ -30,7 +30,7 @@ import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ExpiredDownloadFetchTransferException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
@@ -200,7 +200,7 @@ class TransferManager internal constructor(
                     transfer.linkUUID,
                     TransferStatus.EXPIRED_DATE,
                 )
-                is ExpiredDownloadFetchTransferException -> transferController.updateTransferStatus(
+                is DownloadQuotaExceededException -> transferController.updateTransferStatus(
                     transfer.linkUUID,
                     TransferStatus.EXPIRED_DOWNLOAD_QUOTA,
                 )
@@ -248,7 +248,7 @@ class TransferManager internal constructor(
      * @throws VirusCheckFetchTransferException If the virus check is in progress
      * @throws VirusDetectedFetchTransferException If a virus has been detected
      * @throws ExpiredDateFetchTransferException If the transfer is expired
-     * @throws ExpiredDownloadFetchTransferException If the transfer was downloaded too many times
+     * @throws DownloadQuotaExceededException If the transfer was downloaded too many times
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
      * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
@@ -263,7 +263,7 @@ class TransferManager internal constructor(
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
-        ExpiredDownloadFetchTransferException::class,
+        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
@@ -301,7 +301,7 @@ class TransferManager internal constructor(
      * @throws VirusCheckFetchTransferException If the virus check is in progress
      * @throws VirusDetectedFetchTransferException If a virus has been detected
      * @throws ExpiredDateFetchTransferException If the transfer is expired
-     * @throws ExpiredDownloadFetchTransferException If the transfer was downloaded too many times
+     * @throws DownloadQuotaExceededException If the transfer was downloaded too many times
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
      * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
@@ -316,7 +316,7 @@ class TransferManager internal constructor(
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
-        ExpiredDownloadFetchTransferException::class,
+        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,

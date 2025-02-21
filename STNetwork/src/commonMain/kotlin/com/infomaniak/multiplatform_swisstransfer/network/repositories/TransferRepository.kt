@@ -21,7 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ExpiredDownloadFetchTransferException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.Companion.toFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -58,7 +58,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
-        ExpiredDownloadFetchTransferException::class,
+        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
@@ -68,7 +68,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         val transferData = transferRequest.data
 
         if (transferData != null && transferData.downloadCounterCredit <= 0) {
-            throw ExpiredDownloadFetchTransferException()
+            throw DownloadQuotaExceededException()
         }
 
         return@runCatching transferRequest
@@ -85,7 +85,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
-        ExpiredDownloadFetchTransferException::class,
+        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
