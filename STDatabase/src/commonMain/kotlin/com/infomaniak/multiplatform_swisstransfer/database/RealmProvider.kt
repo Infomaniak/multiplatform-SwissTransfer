@@ -30,6 +30,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadS
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.migration.AutomaticSchemaMigration
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -84,8 +85,9 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         .Builder(schema = setOf(AppSettingsDB::class, EmailTokenDB::class))
         .customDirectoryIfNeeded()
         .name("AppSettings.realm")
-        .deleteRealmDataIfNeeded()
+        .schemaVersion(APP_SETTINGS_SCHEMA_VERSION)
         .loadDataInMemoryIfNeeded()
+        .migration(APP_SETTINGS_MIGRATION)
         .build()
 
     private val realmUploadDBConfiguration = RealmConfiguration
@@ -99,16 +101,18 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         )
         .customDirectoryIfNeeded()
         .name("Uploads.realm")
-        .deleteRealmDataIfNeeded()
+        .schemaVersion(UPLOAD_SCHEMA_VERSION)
         .loadDataInMemoryIfNeeded()
+        .migration(UPLOAD_MIGRATION)
         .build()
 
     private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
         .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class, DownloadManagerRef::class))
         .customDirectoryIfNeeded()
         .name(transferRealmName(userId))
-        .deleteRealmDataIfNeeded()
+        .schemaVersion(TRANSFERS_SCHEMA_VERSION)
         .loadDataInMemoryIfNeeded()
+        .migration(TRANSFERS_MIGRATION)
         .build()
 
     private fun transferRealmName(userId: Int) = "Transfers-$userId.realm"
@@ -117,8 +121,11 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         return apply { if (loadDataInMemory) inMemory() }
     }
 
-    // TODO: Remove before going to production !
-    private fun RealmConfiguration.Builder.deleteRealmDataIfNeeded(): RealmConfiguration.Builder {
-        return apply { if (!loadDataInMemory) deleteRealmIfMigrationNeeded() }
+    companion object {
+        //region Configurations versions
+        const val APP_SETTINGS_SCHEMA_VERSION = 1L
+        const val UPLOAD_SCHEMA_VERSION = 1L
+        const val TRANSFERS_SCHEMA_VERSION = 1L
+        //endregion
     }
 }
