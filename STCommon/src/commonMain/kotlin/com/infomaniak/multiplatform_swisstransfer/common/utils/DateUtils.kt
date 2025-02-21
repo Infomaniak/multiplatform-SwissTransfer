@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.utils
 
 object DateUtils {
 
-    const val SECONDS_IN_A_DAY = 24L * 60L * 60L
+    const val SECONDS_IN_A_DAY = 86_400L
 
     fun timestampToDays(timestamp: Long) = timestamp / SECONDS_IN_A_DAY
 }

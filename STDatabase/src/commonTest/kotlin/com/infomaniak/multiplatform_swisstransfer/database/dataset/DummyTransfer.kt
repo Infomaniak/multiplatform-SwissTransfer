@@ -100,7 +100,5 @@ object DummyTransfer {
         override val receivedSizeInBytes: Long = fileSizeInBytes
         override val path: String? = null
         override val thumbnailPath: String? = null
-
     }
-
 }
