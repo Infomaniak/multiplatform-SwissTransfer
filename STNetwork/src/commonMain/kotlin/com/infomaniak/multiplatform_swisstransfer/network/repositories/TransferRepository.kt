@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.Companion.toFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -56,13 +57,21 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         UnknownException::class,
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
-        ExpiredFetchTransferException::class,
+        ExpiredDateFetchTransferException::class,
+        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
-        transferRequest.getTransfer(linkUUID, password)
+        val transferRequest = transferRequest.getTransfer(linkUUID, password)
+        val transferData = transferRequest.data
+
+        if (transferData != null && transferData.downloadCounterCredit <= 0) {
+            throw DownloadQuotaExceededException()
+        }
+
+        return@runCatching transferRequest
     }.getOrElse { exception ->
         if (exception is UnexpectedApiErrorFormatException) throw exception.toFetchTransferException() else throw exception
     }
@@ -75,7 +84,8 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         UnknownException::class,
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
-        ExpiredFetchTransferException::class,
+        ExpiredDateFetchTransferException::class,
+        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,

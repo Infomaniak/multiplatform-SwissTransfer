@@ -18,5 +18,5 @@
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
 enum class TransferStatus {
-    UNKNOWN, READY, WAIT_VIRUS_CHECK, VIRUS_DETECTED, EXPIRED
+    UNKNOWN, READY, WAIT_VIRUS_CHECK, VIRUS_DETECTED, EXPIRED_DATE, EXPIRED_DOWNLOAD_QUOTA
 }
