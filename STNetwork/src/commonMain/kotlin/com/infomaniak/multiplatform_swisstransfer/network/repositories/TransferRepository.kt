@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.repositories
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
@@ -58,20 +59,12 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
-        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
-        val transferRequest = transferRequest.getTransfer(linkUUID, password)
-        val transferData = transferRequest.data
-
-        if (transferData != null && transferData.downloadCounterCredit <= 0) {
-            throw DownloadQuotaExceededException()
-        }
-
-        return@runCatching transferRequest
+        return@runCatching transferRequest.getTransfer(linkUUID, password)
     }.getOrElse { exception ->
         if (exception is UnexpectedApiErrorFormatException) throw exception.toFetchTransferException() else throw exception
     }
@@ -91,7 +84,14 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByUrl(url: String, password: String?): ApiResponse<TransferApi> {
-        return getTransferByLinkUUID(extractUUID(url), password)
+        val transferRequest = getTransferByLinkUUID(extractUUID(url), password)
+        val transferData = transferRequest.data
+
+        if (transferData != null && transferData.downloadCounterCredit <= 0) {
+            throw DownloadQuotaExceededException()
+        }
+
+        return transferRequest
     }
 
     @Throws(

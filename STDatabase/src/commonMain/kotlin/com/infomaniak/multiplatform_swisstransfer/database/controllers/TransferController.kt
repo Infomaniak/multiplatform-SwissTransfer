@@ -137,7 +137,6 @@ class TransferController(private val realmProvider: RealmProvider) {
     //endregion
 
     //region Update data
-
     @Throws(RealmException::class, CancellationException::class, TransferWithoutFilesException::class)
     suspend fun update(transfer: Transfer) = realmProvider.withTransfersDb { realm ->
         realm.write {
@@ -145,8 +144,10 @@ class TransferController(private val realmProvider: RealmProvider) {
                 it.downloadCounterCredit = transfer.downloadCounterCredit
                 it.isMailSent = transfer.isMailSent
                 it.downloadHost = transfer.downloadHost
-                if (it.transferStatus != transfer.transferStatus) {
-                    it.transferStatus = transfer.transferStatus ?: TransferStatus.READY
+                it.transferStatus = if (transfer.downloadCounterCredit <= 0) {
+                    TransferStatus.EXPIRED_DOWNLOAD_QUOTA
+                } else {
+                    transfer.transferStatus ?: TransferStatus.READY
                 }
             }
         }
