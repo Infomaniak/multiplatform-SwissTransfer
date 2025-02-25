@@ -151,6 +151,32 @@ class TransferControllerTest {
         assertEquals(1, transferController.getOrphanContainers().count(), "We should have an orphan container")
     }
 
+    @Test
+    fun ensureTransferStatusIsPreservedOnUpdateIfDownloadCounterCreditIsMoreThanZero() = runTest {
+        val transfer = DummyTransfer.transfer3
+
+        transferController.insert(transfer, TransferDirection.SENT, transfer.password)
+        val realmTransfer = transferController.getTransfer(transfer.linkUUID)!!
+
+        transferController.update(realmTransfer)
+        val realmTransfer2 = transferController.getTransfer(transfer.linkUUID)!!
+
+        assertEquals(transfer.transferStatus, realmTransfer2.transferStatus)
+    }
+
+    @Test
+    fun ensureTransferStatusIsExpiredDownloadQuotaOnUpdateIfDownloadCounterCreditIsZero() = runTest {
+        val transfer = DummyTransfer.transfer4
+
+        transferController.insert(transfer, TransferDirection.SENT, transfer.password)
+        val realmTransfer = transferController.getTransfer(transfer.linkUUID)!!
+
+        transferController.update(realmTransfer)
+        val realmTransfer2 = transferController.getTransfer(transfer.linkUUID)!!
+
+        assertNotEquals(transfer.transferStatus, realmTransfer2.transferStatus)
+    }
+
     private suspend fun canCreateTransfer(sent: TransferDirection) {
         val transfer = DummyTransfer.transfer1
         transferController.insert(transfer, sent, transfer.password)
