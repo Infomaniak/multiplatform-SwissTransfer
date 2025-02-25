@@ -23,6 +23,8 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettin
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -41,13 +43,17 @@ class AccountManager internal constructor(
     private val realmProvider: RealmProvider,
 ) {
 
+    private val mutex = Mutex()
+
     /**
      * Loads the default User account and initializes Realm Transfers for the default UserID defined in Constants.
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(userId: Int) {
-        appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-        realmProvider.openTransfersDb(userId)
+        mutex.withLock {
+            appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
+            realmProvider.openTransfersDb(userId)
+        }
     }
 
     /**
