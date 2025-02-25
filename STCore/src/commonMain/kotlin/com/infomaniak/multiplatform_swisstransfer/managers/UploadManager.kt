@@ -494,6 +494,28 @@ class UploadManager(
     }
 
     /**
+     * Cancel an upload session from api and remove it.
+     *
+     * @param containerUUID The UUID of the upload session's container to cancel.
+     *
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws NetworkException If there is a network error.
+     * @throws UnknownException If an unknown error occurs.
+     */
+    @Throws(
+        CancellationException::class,
+        ApiException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun cancelUploadSessionByContainerId(containerUUID: String): Unit = withContext(Dispatchers.Default) {
+        uploadRepository.cancelUpload(containerUUID)
+    }
+
+    /**
      * Remove an upload session from the database.
      *
      * @param uuid The UUID of the upload session to remove.
