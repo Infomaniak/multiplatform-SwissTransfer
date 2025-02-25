@@ -35,7 +35,7 @@ val TRANSFERS_MIGRATION = AutomaticSchemaMigration { migrationContext ->
     migrationContext.renameEnumValueAfterFirstMigration()
 }
 
-// Migrate from version #1
+// Migrate to version #2
 private fun MigrationContext.renameEnumValueAfterFirstMigration() {
 
     if (oldRealm.schemaVersion() <= 1L) {
