@@ -58,20 +58,14 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
-        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
-        val transferRequest = transferRequest.getTransfer(linkUUID, password)
-        val transferData = transferRequest.data
-
-        if (transferData != null && transferData.downloadCounterCredit <= 0) {
-            throw DownloadQuotaExceededException()
+        return@runCatching transferRequest.getTransfer(linkUUID, password).also {
+            it.data?.validateDownloadCounterCreditOrThrow()
         }
-
-        return@runCatching transferRequest
     }.getOrElse { exception ->
         if (exception is UnexpectedApiErrorFormatException) throw exception.toFetchTransferException() else throw exception
     }
@@ -91,7 +85,13 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByUrl(url: String, password: String?): ApiResponse<TransferApi> {
-        return getTransferByLinkUUID(extractUUID(url), password)
+        return getTransferByLinkUUID(extractUUID(url), password).also {
+            it.data?.validateDownloadCounterCreditOrThrow()
+        }
+    }
+
+    private fun TransferApi.validateDownloadCounterCreditOrThrow() {
+        if (downloadCounterCredit <= 0) throw DownloadQuotaExceededException()
     }
 
     @Throws(
