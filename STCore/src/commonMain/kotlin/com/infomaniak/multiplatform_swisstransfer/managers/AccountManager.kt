@@ -44,6 +44,8 @@ class AccountManager internal constructor(
 ) {
 
     private val mutex = Mutex()
+
+    // We store the currentUserId to avoid creating database instances when it's the same user
     private var currentUserId: Int? = null
 
     /**
