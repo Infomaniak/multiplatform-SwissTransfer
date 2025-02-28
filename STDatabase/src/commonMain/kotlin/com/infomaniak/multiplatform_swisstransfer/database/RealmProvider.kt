@@ -39,10 +39,14 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
 
     val appSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
     val uploads by lazy { Realm.open(realmUploadDBConfiguration) }
-    private val transfersAsync = CompletableDeferred<Realm>()
+    internal var transfersAsync = CompletableDeferred<Realm>()
     private suspend fun transfers(): Realm = transfersAsync.await()
 
-    fun openTransfersDb(userId: Int) {
+    suspend fun openTransfersDb(userId: Int) {
+        if (!transfersAsync.isActive) {
+            closeTransfersDb()
+            transfersAsync = CompletableDeferred()
+        }
         transfersAsync.complete(Realm.open(realmTransfersConfiguration(userId)))
     }
 
