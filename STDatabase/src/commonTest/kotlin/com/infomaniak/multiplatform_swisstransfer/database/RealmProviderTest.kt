@@ -40,20 +40,20 @@ class RealmProviderTest {
     @Test
     fun canSwitchUserByClosingPreviousUser() = runTest {
         // Login user
-        realmProvider.openTransfersDb(1)
+        realmProvider.openTransfersDb(userId = 1)
         val previousRealm = realmProvider.transfersAsync.await()
         val oldTransferJob = realmProvider.transfersAsync.job
         assertEquals(true, realmProvider.transfersAsync.isCompleted)
 
         // Switch user account with another user
-        realmProvider.openTransfersDb(2)
+        realmProvider.openTransfersDb(userId = 2)
         assertNotEquals(oldTransferJob, realmProvider.transfersAsync.job, "The new switched account must have its own job")
         assertTrue(previousRealm.isClosed(), "The realm of the previous user must be closed")
     }
 
     @Test
     fun canCloseTransfersDb() = runTest {
-        realmProvider.openTransfersDb(1)
+        realmProvider.openTransfersDb(userId = 1)
         val transfersRealm = realmProvider.transfersAsync.await()
         assertFalse(transfersRealm.isClosed())
 
