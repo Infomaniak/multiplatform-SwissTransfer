@@ -33,7 +33,7 @@ class TransferControllerTest {
     private lateinit var transferController: TransferController
 
     @BeforeTest
-    fun setup() {
+    fun setup() = runTest {
         realmProvider = RealmProvider(loadDataInMemory = true).apply { openTransfersDb(userId = 0) }
         transferController = TransferController(realmProvider)
     }
