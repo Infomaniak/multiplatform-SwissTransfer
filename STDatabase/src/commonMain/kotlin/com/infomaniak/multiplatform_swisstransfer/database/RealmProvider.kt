@@ -30,7 +30,6 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadS
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import io.realm.kotlin.migration.AutomaticSchemaMigration
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -40,10 +39,14 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
 
     val appSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
     val uploads by lazy { Realm.open(realmUploadDBConfiguration) }
-    private val transfersAsync = CompletableDeferred<Realm>()
+    internal var transfersAsync = CompletableDeferred<Realm>()
     private suspend fun transfers(): Realm = transfersAsync.await()
 
-    fun openTransfersDb(userId: Int) {
+    suspend fun openTransfersDb(userId: Int) {
+        if (!transfersAsync.isActive) {
+            closeTransfersDb()
+            transfersAsync = CompletableDeferred()
+        }
         transfersAsync.complete(Realm.open(realmTransfersConfiguration(userId)))
     }
 

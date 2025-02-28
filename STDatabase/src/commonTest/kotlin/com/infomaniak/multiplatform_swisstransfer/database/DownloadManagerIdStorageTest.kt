@@ -27,15 +27,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class DownloadManagerIdStorageTest {
 
-    private val realmProvider: RealmProvider by lazy(NONE) {
-        RealmProvider(loadDataInMemory = true).apply { openTransfersDb(userId = 0) }
-    }
+    private lateinit var realmProvider: RealmProvider
     private val transferController: TransferController by lazy(NONE) {
         TransferController(realmProvider)
+    }
+
+    @BeforeTest
+    fun setup() = runTest {
+        realmProvider = RealmProvider(loadDataInMemory = true).apply { openTransfersDb(userId = 0) }
     }
 
     @AfterTest
