@@ -44,6 +44,7 @@ class AccountManager internal constructor(
 ) {
 
     private val mutex = Mutex()
+    private var currentUserId: Int? = null
 
     /**
      * Loads the default User account and initializes Realm Transfers for the default UserID defined in Constants.
@@ -51,8 +52,11 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(userId: Int) {
         mutex.withLock {
-            appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-            realmProvider.openTransfersDb(userId)
+            if (currentUserId != userId) {
+                appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
+                realmProvider.openTransfersDb(userId)
+                currentUserId = userId
+            }
         }
     }
 
