@@ -75,6 +75,7 @@ object DummyTransfer {
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }
 
+    // Transfer with downloadCounterCredit greater than 0.
     val transfer3 = object : Transfer by transfer1 {
         override val linkUUID: String = "transfer3"
         override val containerUUID: String = "container3"
@@ -84,6 +85,7 @@ object DummyTransfer {
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }
 
+    // Transfer with downloadCounterCredit equal to 0.
     val transfer4 = object : Transfer by transfer1 {
         override val linkUUID: String = "transfer4"
         override val containerUUID: String = "container4"
