@@ -75,12 +75,32 @@ object DummyTransfer {
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }
 
+    // Transfer with downloadCounterCredit greater than 0.
+    val transfer3 = object : Transfer by transfer1 {
+        override val linkUUID: String = "transfer3"
+        override val containerUUID: String = "container3"
+        override var downloadCounterCredit: Int = 1
+        override var expiredDateTimestamp: Long = 4_102_441_200L // 01/01/2100
+        override val container: Container = container2
+        override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
+    }
+
+    // Transfer with downloadCounterCredit equal to 0.
+    val transfer4 = object : Transfer by transfer1 {
+        override val linkUUID: String = "transfer4"
+        override val containerUUID: String = "container4"
+        override var downloadCounterCredit: Int = 0
+        override var expiredDateTimestamp: Long = 4_102_441_200L // 01/01/2100
+        override val container: Container = container2
+        override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
+    }
+
     init {
         expired = transfer1
         notExpired = transfer2
     }
 
-    val transfers = listOf(transfer1, transfer2)
+    val transfers = listOf(transfer1, transfer2, transfer3, transfer4)
 
     private fun createDummyFile(
         containerUUID: String,

@@ -200,10 +200,6 @@ class TransferManager internal constructor(
                     transfer.linkUUID,
                     TransferStatus.EXPIRED_DATE,
                 )
-                is DownloadQuotaExceededException -> transferController.updateTransferStatus(
-                    transfer.linkUUID,
-                    TransferStatus.EXPIRED_DOWNLOAD_QUOTA,
-                )
             }
         }
     }
