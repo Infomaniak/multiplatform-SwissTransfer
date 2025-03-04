@@ -184,7 +184,7 @@ class InMemoryUploadManager(
     }
 
     /**
-     * Cancel an upload session from api and remove it.
+     * Requests cancelling the upload session in the backend.
      *
      * @param containerUUID The UUID of the upload session's container to cancel.
      *
