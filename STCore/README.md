@@ -33,16 +33,17 @@ centralized access point to orchestrate transfer operations.
 
 ### Table of Public Properties and Methods
 
-| Type     | Name                | Description                                           |
-|----------|---------------------|-------------------------------------------------------|
-| Property | userAgent           | Customize client api userAgent.                       |
-| Property | appSettingsManager  | A manager used to orchestrate AppSettings operations. |
-| Property | transferManager     | A manager used to orchestrate Transfers operations.   |
-| Property | fileManager         | A manager used to orchestrate Files operations.       |
-| Property | accountManager      | A manager used to orchestrate Accounts operations.    |
-| Property | uploadManager       | A manager used to orchestrate Uploads operations.     |
-| Property | emailTokensManager  | A manager used to orchestrate EmailTokens operations. |
-| Property | sharedApiUrlCreator | An utils to help use shared routes                    |
+| Type     | Name                  | Description                                                                |
+|----------|-----------------------|----------------------------------------------------------------------------|
+| Property | userAgent             | Customize client api userAgent.                                            |
+| Property | appSettingsManager    | A manager used to orchestrate AppSettings operations.                      |
+| Property | transferManager       | A manager used to orchestrate Transfers operations.                        |
+| Property | fileManager           | A manager used to orchestrate Files operations.                            |
+| Property | accountManager        | A manager used to orchestrate Accounts operations.                         |
+| Property | inMemoryUploadManager | A manager used to perform Uploads operations, without session persistence. |
+| Property | uploadManager         | A manager used to orchestrate Uploads operations.                          |
+| Property | emailTokensManager    | A manager used to orchestrate EmailTokens operations.                      |
+| Property | sharedApiUrlCreator   | An utils to help use shared routes                                         |
 
 ### Details of Properties and Methods
 

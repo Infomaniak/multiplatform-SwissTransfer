@@ -102,8 +102,8 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody): Boolean {
-        return uploadRequest.resendEmailCode(resendEmailCodeBody)
+    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody) {
+        uploadRequest.resendEmailCode(resendEmailCodeBody)
     }
 
     @Throws(
@@ -119,10 +119,20 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         fileUUID: String,
         chunkIndex: Int,
         isLastChunk: Boolean,
+        isRetry: Boolean,
         data: ByteArray,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
-    ): Boolean {
-        return uploadRequest.uploadChunk(uploadHost, containerUUID, fileUUID, chunkIndex, isLastChunk, data, onUpload)
+    ) {
+        uploadRequest.uploadChunk(
+            uploadHost = uploadHost,
+            containerUUID = containerUUID,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            isLastChunk = isLastChunk,
+            isRetry = isRetry,
+            data = data,
+            onUpload = onUpload
+        )
     }
 
     @Throws(
@@ -143,11 +153,11 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         NetworkException::class,
         UnknownException::class,
     )
-    suspend fun cancelUpload(containerUUID: String): Boolean {
+    suspend fun cancelUpload(containerUUID: String) {
         val bodyMap = mapOf(
             "UUID" to JsonPrimitive(containerUUID),
             "message" to JsonPrimitive("Cancel by Android User")
         )
-        return uploadRequest.cancelUpload(JsonObject(bodyMap))
+        uploadRequest.cancelUpload(JsonObject(bodyMap))
     }
 }

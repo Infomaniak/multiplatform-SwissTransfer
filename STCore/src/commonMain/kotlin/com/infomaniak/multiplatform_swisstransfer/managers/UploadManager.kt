@@ -21,7 +21,9 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
-import com.infomaniak.multiplatform_swisstransfer.common.models.*
+import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
+import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
+import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
@@ -32,9 +34,9 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
+import com.infomaniak.multiplatform_swisstransfer.utils.addTransferByLinkUUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -262,6 +264,7 @@ class UploadManager(
             fileUUID = fileUUID,
             chunkIndex = chunkIndex,
             isLastChunk = isLastChunk,
+            isRetry = false,
             data = data,
             onUpload = onUpload,
         )
@@ -310,7 +313,7 @@ class UploadManager(
             throw if (exception is NoSuchElementException) UnknownException(exception) else exception
         }
 
-        addTransferByLinkUUID(finishUploadResponse, uploadSession)
+        transferManager.addTransferByLinkUUID(finishUploadResponse, uploadSession)
         uploadController.removeUploadSession(uuid)
 
         return@withContext finishUploadResponse.linkUUID // Here the linkUUID correspond to the transferUUID of a transferUI
@@ -393,40 +396,8 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
     )
-    suspend fun resendEmailCode(address: String) = withContext(Dispatchers.Default) {
+    suspend fun resendEmailCode(address: String): Unit = withContext(Dispatchers.Default) {
         val language = emailLanguageUtils.getEmailLanguageFromLocal()
         uploadRepository.resendEmailCode(ResendEmailCodeBody(address, language.code))
-    }
-
-    private suspend fun addTransferByLinkUUID(
-        finishUploadResponse: UploadCompleteResponse,
-        uploadSession: UploadSession,
-    ) {
-        runCatching {
-            transferManager.addTransferByLinkUUID(
-                linkUUID = finishUploadResponse.linkUUID,
-                password = uploadSession.password,
-                recipientsEmails = uploadSession.recipientsEmails,
-                transferDirection = TransferDirection.SENT,
-            )
-        }.onFailure { exception ->
-            if (exception is FetchTransferException) {
-                createTransferLocally(exception, finishUploadResponse, uploadSession)
-            } else {
-                throw exception
-            }
-        }
-    }
-
-    private suspend fun createTransferLocally(
-        exception: FetchTransferException,
-        finishUploadResponse: UploadCompleteResponse,
-        uploadSession: UploadSession,
-    ) {
-        val transferStatus = when {
-            exception is FetchTransferException.VirusCheckFetchTransferException -> TransferStatus.WAIT_VIRUS_CHECK
-            else -> TransferStatus.UNKNOWN
-        }
-        transferManager.createTransferLocally(finishUploadResponse.linkUUID, uploadSession, transferStatus)
     }
 }

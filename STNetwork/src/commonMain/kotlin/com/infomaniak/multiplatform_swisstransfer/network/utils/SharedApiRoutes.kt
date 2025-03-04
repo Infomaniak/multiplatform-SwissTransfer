@@ -39,8 +39,16 @@ object SharedApiRoutes {
         return "${downloadFilesBase(downloadHost, linkUUID)}?folder=$folderPath${withToken(token, prefix = "&")}"
     }
 
-    fun uploadChunk(uploadHost: String, containerUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean): String {
-        return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}"
+    fun uploadChunk(
+        uploadHost: String,
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        isLastChunk: Boolean,
+        isRetry: Boolean,
+    ): String {
+        val retry = if (isRetry) "/retry" else ""
+        return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}$retry"
     }
 
     private fun withToken(token: String?, prefix: String = "?") = if (token == null) "" else "${prefix}token=$token"

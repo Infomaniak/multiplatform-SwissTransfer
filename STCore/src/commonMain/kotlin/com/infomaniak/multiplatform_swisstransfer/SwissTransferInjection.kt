@@ -40,6 +40,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property transferManager A manager used to orchestrate transfer operations.
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
+ * @property inMemoryUploadManager A manager used to perform Uploads operations, without session persistence.
  * @property uploadManager A manager used to orchestrate Uploads operations.
  * @property emailTokensManager A manager used to orchestrate EmailTokens operations.
  * @property sharedApiUrlCreator An utils to help use shared routes.
@@ -90,6 +91,17 @@ class SwissTransferInjection(
     /** A manager used to orchestrate Uploads operations. */
     val uploadManager by lazy {
         UploadManager(
+            uploadController,
+            uploadRepository,
+            transferManager,
+            emailLanguageUtils,
+            emailTokensManager,
+        )
+    }
+
+    /** A manager used to perform Uploads operations, without session persistence. */
+    val inMemoryUploadManager by lazy {
+        InMemoryUploadManager(
             uploadController,
             uploadRepository,
             transferManager,
