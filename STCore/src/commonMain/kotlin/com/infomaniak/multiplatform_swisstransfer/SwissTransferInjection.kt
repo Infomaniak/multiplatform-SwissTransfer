@@ -98,6 +98,8 @@ class SwissTransferInjection(
             emailTokensManager,
         )
     }
+
+    /** A manager used to perform Uploads operations, without session persistence. */
     val inMemoryUploadManager by lazy {
         InMemoryUploadManager(
             uploadController,
