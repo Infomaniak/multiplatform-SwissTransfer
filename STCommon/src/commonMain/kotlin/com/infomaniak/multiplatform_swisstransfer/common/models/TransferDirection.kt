@@ -17,6 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class TransferDirection {
-    SENT, RECEIVED
+enum class TransferDirection(val matomoValue: String) {
+    SENT("Sent"), RECEIVED("Received")
 }
