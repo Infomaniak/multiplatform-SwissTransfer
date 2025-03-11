@@ -77,11 +77,11 @@ class TransferManager internal constructor(
      * @see addTransferByUrl
      * @see addTransferByLinkUUID
      *
-     * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
+     * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]) or null to get both.
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
     @Throws(RealmException::class)
-    fun getTransfers(transferDirection: TransferDirection): Flow<List<TransferUi>> {
+    fun getTransfers(transferDirection: TransferDirection? = null): Flow<List<TransferUi>> {
         return transferController.getTransfersFlow(transferDirection)
             .map { it.mapToList { transfer -> TransferUi(transfer) } }
     }

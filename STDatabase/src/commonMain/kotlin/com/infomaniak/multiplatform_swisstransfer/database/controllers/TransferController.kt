@@ -55,7 +55,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     ): List<TransferDB> = getTransfers(realmProvider, transferDirection)
 
     @Throws(RealmException::class)
-    fun getTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
+    fun getTransfersFlow(transferDirection: TransferDirection?): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
         getTransfersFlow(realmProvider, transferDirection)
     }
 
