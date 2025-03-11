@@ -81,7 +81,7 @@ internal open class BaseRequest(
             body<R>()
         }.getOrElse { exception ->
             when (exception) {
-                is ApiException, is NetworkException, is UnexpectedApiErrorFormatException -> throw exception
+                is ApiErrorException, is NetworkException, is UnexpectedApiErrorFormatException -> throw exception
                 else -> throw UnknownException(exception)
             }
         }

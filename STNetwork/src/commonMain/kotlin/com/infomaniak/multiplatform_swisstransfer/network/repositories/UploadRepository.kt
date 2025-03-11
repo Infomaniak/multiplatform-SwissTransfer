@@ -20,9 +20,13 @@ package com.infomaniak.multiplatform_swisstransfer.network.repositories
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
@@ -54,7 +58,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
     @Throws(
         CancellationException::class,
         ContainerErrorsException::class,
-        ApiException::class,
+        ApiErrorException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
@@ -78,7 +82,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
     @Throws(
         CancellationException::class,
         EmailValidationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
@@ -97,7 +101,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
@@ -108,7 +112,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
@@ -137,7 +141,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
@@ -148,7 +152,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,

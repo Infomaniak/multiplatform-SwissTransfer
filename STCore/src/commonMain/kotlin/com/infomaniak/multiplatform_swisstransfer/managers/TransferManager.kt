@@ -29,11 +29,11 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferC
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import kotlinx.coroutines.Dispatchers
@@ -236,7 +236,7 @@ class TransferManager internal constructor(
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT])
      *
      * @throws CancellationException If the operation is cancelled.
-     * @throws ApiException If there is an error related to the API during transfer retrieval.
+     * @throws ApiErrorException If there is an error related to the API during transfer retrieval.
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
@@ -251,7 +251,7 @@ class TransferManager internal constructor(
      */
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
@@ -289,7 +289,7 @@ class TransferManager internal constructor(
      * @return The transferUUID of the added transfer, otherwise null if the api doesn't return the transfer
      *
      * @throws CancellationException If the operation is cancelled.
-     * @throws ApiException If there is an error related to the API during transfer retrieval.
+     * @throws ApiErrorException If there is an error related to the API during transfer retrieval.
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
@@ -304,7 +304,7 @@ class TransferManager internal constructor(
      */
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,

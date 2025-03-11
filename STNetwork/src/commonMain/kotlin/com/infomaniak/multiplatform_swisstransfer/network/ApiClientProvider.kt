@@ -17,9 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network
 
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -82,26 +82,28 @@ class ApiClientProvider internal constructor(
             }
             HttpResponseValidator {
                 validateResponse { response: HttpResponse ->
+                    val requestContextId = response.headers["x-request-id"] ?: ""
                     val statusCode = response.status.value
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
                         val apiError = runCatching {
                             json.decodeFromString<ApiError>(bodyResponse)
                         }.getOrElse {
-                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null)
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null, requestContextId)
                         }
-                        throw ApiException(apiError.errorCode, apiError.message)
+                        throw ApiErrorException(apiError.errorCode, apiError.message, requestContextId)
                     }
                 }
                 handleResponseExceptionWithRequest { cause, request ->
                     when (cause) {
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
-                        is ApiException, is CancellationException, is UnexpectedApiErrorFormatException -> throw cause
+                        is ApiErrorException, is CancellationException, is UnexpectedApiErrorFormatException -> throw cause
                         else -> {
                             val response = runCatching { request.call.response }.getOrNull()
+                            val requestContextId = response?.headers?.get("x-request-id") ?: ""
                             val bodyResponse = response?.bodyAsText() ?: cause.message ?: ""
                             val statusCode = response?.status?.value ?: -1
-                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause)
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause, requestContextId)
                         }
                     }
                 }

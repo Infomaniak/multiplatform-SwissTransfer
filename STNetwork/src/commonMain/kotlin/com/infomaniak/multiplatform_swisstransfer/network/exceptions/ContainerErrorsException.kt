@@ -17,8 +17,10 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+
 /**
- * A sealed class representing various container error exceptions that extend [ApiException].
+ * A sealed class representing various container error exceptions that extend [ApiErrorException].
  * This class is used to handle API errors that occur when creating a container through the API.
  * Each specific error exception is associated with an HTTP status code and a descriptive error message.
  *
@@ -27,41 +29,50 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  * @param statusCode The HTTP status code for the error.
  * @param errorMessage A descriptive error message for the error.
  */
-sealed class ContainerErrorsException(val statusCode: Int, errorMessage: String) : ApiException(statusCode, errorMessage) {
+sealed class ContainerErrorsException(
+    val statusCode: Int,
+    errorMessage: String,
+    requestContextId: String,
+) : ApiErrorException(statusCode, errorMessage, requestContextId) {
 
     /**
      * Exception indicating that email address validation is required.
      * This corresponds to an HTTP 401 Unauthorized status.
      */
-    class EmailValidationRequired : ContainerErrorsException(401, "Email address validation required")
+    class EmailValidationRequired(requestContextId: String) :
+        ContainerErrorsException(401, "Email address validation required", requestContextId)
 
     /**
      * Exception indicating that the domain was automatically blocked for security reasons.
      * This corresponds to an HTTP 403 Forbidden status.
      */
-    class DomainBlockedException : ContainerErrorsException(403, "The domain was automatically blocked for security reasons")
+    class DomainBlockedException(requestContextId: String) :
+        ContainerErrorsException(403, "The domain was automatically blocked for security reasons", requestContextId)
 
     /**
      * Exception indicating that the daily transfer limit has been reached.
      * This corresponds to an HTTP 404 Not Found status.
      */
-    class DailyTransferLimitReachedException : ContainerErrorsException(404, "Daily transfer limit reached")
+    class DailyTransferLimitReachedException(requestContextId: String) :
+        ContainerErrorsException(404, "Daily transfer limit reached", requestContextId)
 
     /**
      * Exception indicating that the provided captcha is not valid.
      * This corresponds to an HTTP 422 Unprocessable Entity status.
      */
-    class CaptchaNotValidException : ContainerErrorsException(422, "Captcha not valid")
+    class CaptchaNotValidException(requestContextId: String) :
+        ContainerErrorsException(422, "Captcha not valid", requestContextId)
 
     /**
      * Exception indicating that too many codes have been generated.
      * This corresponds to an HTTP 429 Too Many Requests status.
      */
-    class TooManyCodesGeneratedException : ContainerErrorsException(429, "Too many codes generated")
+    class TooManyCodesGeneratedException(requestContextId: String) :
+        ContainerErrorsException(429, "Too many codes generated", requestContextId)
 
     internal companion object {
         /**
-         * Extension function to convert an instance of [UnexpectedApiErrorFormatException] to a more specific exception
+         * Extension function to convert an instance of [ApiException.UnexpectedApiErrorFormatException] to a more specific exception
          * based on its HTTP status code.
          *
          * This function maps the status codes to specific exceptions as follows:
@@ -70,19 +81,19 @@ sealed class ContainerErrorsException(val statusCode: Int, errorMessage: String)
          * - 404: [DailyTransferLimitReachedException]
          * - 422: [CaptchaNotValidException]
          * - 429: [TooManyCodesGeneratedException]
-         * - Other status codes: The original [UnexpectedApiErrorFormatException] instance
+         * - Other status codes: The original [ApiException.UnexpectedApiErrorFormatException] instance
          *
-         * @receiver An instance of [UnexpectedApiErrorFormatException].
+         * @receiver An instance of [ApiException.UnexpectedApiErrorFormatException].
          * @return An instance of [Exception] which can be one of the specific exceptions mentioned above,
-         * or the original [UnexpectedApiErrorFormatException] if the status code does not match any predefined values.
+         * or the original [ApiException.UnexpectedApiErrorFormatException] if the status code does not match any predefined values.
          */
         fun UnexpectedApiErrorFormatException.toContainerErrorsException(): Exception {
             return when (statusCode) {
-                401 -> EmailValidationRequired()
-                403 -> DomainBlockedException()
-                404 -> DailyTransferLimitReachedException()
-                422 -> CaptchaNotValidException()
-                429 -> TooManyCodesGeneratedException()
+                401 -> EmailValidationRequired(requestContextId)
+                403 -> DomainBlockedException(requestContextId)
+                404 -> DailyTransferLimitReachedException(requestContextId)
+                422 -> CaptchaNotValidException(requestContextId)
+                429 -> TooManyCodesGeneratedException(requestContextId)
                 else -> this
             }
         }

@@ -20,12 +20,12 @@ package com.infomaniak.multiplatform_swisstransfer.network.repositories
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.Companion.toFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.requests.TransferRequest
@@ -51,7 +51,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
@@ -72,7 +72,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
@@ -96,7 +96,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
