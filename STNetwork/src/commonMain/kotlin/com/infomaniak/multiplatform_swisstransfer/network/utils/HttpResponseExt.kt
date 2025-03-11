@@ -24,7 +24,7 @@ import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.utils.io.CancellationException
 
-internal fun HttpResponse.getRequestContextId() = headers["x-request-id"] ?: ""
+internal fun HttpResponse.getRequestContextId() = headers[CONTENT_REQUEST_ID_HEADER] ?: ""
 
 internal suspend inline fun <reified R> HttpResponse.decode(): R = runCatching {
     body<R>()

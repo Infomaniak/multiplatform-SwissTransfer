@@ -21,6 +21,8 @@ import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 
+const val CONTENT_REQUEST_ID_HEADER = "x-request-id"
+
 internal fun HttpRequestBuilder.longTimeout() {
     timeout {
         requestTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT

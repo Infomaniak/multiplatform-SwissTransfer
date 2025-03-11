@@ -25,7 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
 import com.infomaniak.multiplatform_swisstransfer.network.utils.getRequestContextId
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
@@ -40,7 +40,7 @@ import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 class ApiClientProvider internal constructor(
-    engine: HttpClientEngineFactory<*>? = null,
+    engine: HttpClientEngine? = null,
     // When you don't use SwissTransferInjection, you don't have an userAgent, so we're currently setting a default value.
     // See later how to improve it.
     private val userAgent: String = "Ktor client",
@@ -58,7 +58,7 @@ class ApiClientProvider internal constructor(
 
     val httpClient = createHttpClient(engine)
 
-    fun createHttpClient(engine: HttpClientEngineFactory<*>?): HttpClient {
+    fun createHttpClient(engine: HttpClientEngine?): HttpClient {
         val block: HttpClientConfig<*>.() -> Unit = {
             install(UserAgent) {
                 agent = userAgent
