@@ -24,7 +24,11 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.*
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
@@ -65,7 +69,7 @@ class InMemoryUploadManager(
      *
      * @throws ContainerErrorsException If there is an error with the container.
      * @throws NetworkException If there is a network error.
-     * @throws ApiException If there is a general API error.
+     * @throws ApiErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws RealmException If an error occurs during database access.
      * @throws UnknownException If an unknown error occurs.
@@ -75,7 +79,7 @@ class InMemoryUploadManager(
         RealmException::class,
         CancellationException::class,
         ContainerErrorsException::class,
-        ApiException::class,
+        ApiErrorException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
@@ -102,7 +106,7 @@ class InMemoryUploadManager(
     @Throws(
         CancellationException::class,
         EmailValidationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
@@ -113,7 +117,7 @@ class InMemoryUploadManager(
 
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
@@ -148,7 +152,7 @@ class InMemoryUploadManager(
      * @param data The chunk data to upload.
      *
      * @throws NetworkException If there is a network error.
-     * @throws ApiException If there is a general API error.
+     * @throws ApiErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
      * @throws UnknownException If an unknown error occurs.
@@ -156,7 +160,7 @@ class InMemoryUploadManager(
      */
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
@@ -189,14 +193,14 @@ class InMemoryUploadManager(
      * @param containerUUID The UUID of the upload session's container to cancel.
      *
      * @throws NetworkException If there is a network error.
-     * @throws ApiException If there is a general API error.
+     * @throws ApiErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
@@ -213,7 +217,7 @@ class InMemoryUploadManager(
      * @return The transfer UUID of the uploaded transfer.
      *
      * @throws NetworkException If there is a network error.
-     * @throws ApiException If there is a general API error.
+     * @throws ApiErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
      * @throws UnknownException If an unknown error occurs.
@@ -222,7 +226,7 @@ class InMemoryUploadManager(
      */
     @Throws(
         CancellationException::class,
-        ApiException::class,
+        ApiErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,

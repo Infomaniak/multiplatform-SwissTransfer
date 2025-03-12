@@ -17,14 +17,33 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.utils
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.statement.HttpResponse
+import io.ktor.utils.io.CancellationException
+
+const val CONTENT_REQUEST_ID_HEADER = "x-request-id"
 
 internal fun HttpRequestBuilder.longTimeout() {
     timeout {
         requestTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
         connectTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
         socketTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
+    }
+}
+
+internal fun HttpResponse.getRequestContextId() = headers[CONTENT_REQUEST_ID_HEADER] ?: ""
+
+internal suspend inline fun <reified R> HttpResponse.decode(): R = runCatching {
+    body<R>()
+}.getOrElse { exception ->
+    when (exception) {
+        is CancellationException, is NetworkException, is ApiException -> throw exception
+        else -> throw UnknownException(exception)
     }
 }

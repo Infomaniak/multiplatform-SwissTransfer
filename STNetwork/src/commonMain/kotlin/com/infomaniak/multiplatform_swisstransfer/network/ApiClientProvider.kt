@@ -18,12 +18,14 @@
 package com.infomaniak.multiplatform_swisstransfer.network
 
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
+import com.infomaniak.multiplatform_swisstransfer.network.utils.getRequestContextId
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
@@ -38,7 +40,7 @@ import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 class ApiClientProvider internal constructor(
-    engine: HttpClientEngineFactory<*>? = null,
+    engine: HttpClientEngine? = null,
     // When you don't use SwissTransferInjection, you don't have an userAgent, so we're currently setting a default value.
     // See later how to improve it.
     private val userAgent: String = "Ktor client",
@@ -56,7 +58,7 @@ class ApiClientProvider internal constructor(
 
     val httpClient = createHttpClient(engine)
 
-    fun createHttpClient(engine: HttpClientEngineFactory<*>?): HttpClient {
+    fun createHttpClient(engine: HttpClientEngine?): HttpClient {
         val block: HttpClientConfig<*>.() -> Unit = {
             install(UserAgent) {
                 agent = userAgent
@@ -82,26 +84,28 @@ class ApiClientProvider internal constructor(
             }
             HttpResponseValidator {
                 validateResponse { response: HttpResponse ->
+                    val requestContextId = response.getRequestContextId()
                     val statusCode = response.status.value
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
                         val apiError = runCatching {
                             json.decodeFromString<ApiError>(bodyResponse)
                         }.getOrElse {
-                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null)
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null, requestContextId)
                         }
-                        throw ApiException(apiError.errorCode, apiError.message)
+                        throw ApiErrorException(apiError.errorCode, apiError.message, requestContextId)
                     }
                 }
                 handleResponseExceptionWithRequest { cause, request ->
                     when (cause) {
                         is IOException -> throw NetworkException("Network error: ${cause.message}")
-                        is ApiException, is CancellationException, is UnexpectedApiErrorFormatException -> throw cause
+                        is ApiException, is CancellationException -> throw cause
                         else -> {
                             val response = runCatching { request.call.response }.getOrNull()
+                            val requestContextId = response?.getRequestContextId() ?: ""
                             val bodyResponse = response?.bodyAsText() ?: cause.message ?: ""
                             val statusCode = response?.status?.value ?: -1
-                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause)
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, cause, requestContextId)
                         }
                     }
                 }

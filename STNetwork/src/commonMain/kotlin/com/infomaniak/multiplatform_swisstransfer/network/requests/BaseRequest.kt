@@ -17,16 +17,11 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests
 
-import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
+import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
 
@@ -74,16 +69,5 @@ internal open class BaseRequest(
 
     protected suspend inline fun <reified R> delete(url: Url, httpClient: HttpClient = this.httpClient): R {
         return httpClient.delete(url) {}.decode<R>()
-    }
-
-    protected suspend inline fun <reified R> HttpResponse.decode(): R {
-        return runCatching {
-            body<R>()
-        }.getOrElse { exception ->
-            when (exception) {
-                is ApiException, is NetworkException, is UnexpectedApiErrorFormatException -> throw exception
-                else -> throw UnknownException(exception)
-            }
-        }
     }
 }
