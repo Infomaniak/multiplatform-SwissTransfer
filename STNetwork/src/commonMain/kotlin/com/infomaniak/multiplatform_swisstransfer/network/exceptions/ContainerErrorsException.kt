@@ -28,6 +28,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
  *
  * @param statusCode The HTTP status code for the error.
  * @param errorMessage A descriptive error message for the error.
+ * @param requestContextId The request context id send by the backend to track the call
  */
 sealed class ContainerErrorsException(
     val statusCode: Int,
@@ -38,6 +39,8 @@ sealed class ContainerErrorsException(
     /**
      * Exception indicating that email address validation is required.
      * This corresponds to an HTTP 401 Unauthorized status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
      */
     class EmailValidationRequired(requestContextId: String) :
         ContainerErrorsException(401, "Email address validation required", requestContextId)
@@ -45,6 +48,8 @@ sealed class ContainerErrorsException(
     /**
      * Exception indicating that the domain was automatically blocked for security reasons.
      * This corresponds to an HTTP 403 Forbidden status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
      */
     class DomainBlockedException(requestContextId: String) :
         ContainerErrorsException(403, "The domain was automatically blocked for security reasons", requestContextId)
@@ -52,6 +57,8 @@ sealed class ContainerErrorsException(
     /**
      * Exception indicating that the daily transfer limit has been reached.
      * This corresponds to an HTTP 404 Not Found status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
      */
     class DailyTransferLimitReachedException(requestContextId: String) :
         ContainerErrorsException(404, "Daily transfer limit reached", requestContextId)
@@ -59,6 +66,8 @@ sealed class ContainerErrorsException(
     /**
      * Exception indicating that the provided captcha is not valid.
      * This corresponds to an HTTP 422 Unprocessable Entity status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
      */
     class CaptchaNotValidException(requestContextId: String) :
         ContainerErrorsException(422, "Captcha not valid", requestContextId)
@@ -66,6 +75,8 @@ sealed class ContainerErrorsException(
     /**
      * Exception indicating that too many codes have been generated.
      * This corresponds to an HTTP 429 Too Many Requests status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
      */
     class TooManyCodesGeneratedException(requestContextId: String) :
         ContainerErrorsException(429, "Too many codes generated", requestContextId)

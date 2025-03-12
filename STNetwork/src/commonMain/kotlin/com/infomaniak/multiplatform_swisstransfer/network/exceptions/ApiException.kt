@@ -23,8 +23,9 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  * This exception is used to represent errors returned by an API, with an associated [requestContextId]
  * and message describing the problem.
  *
- * @param requestContextId The request context id used to track what happened during calls session by the backend
  * @param errorMessage The detailed error message explaining the cause of the failure.
+ * @param cause The cause of the exception if exists otherwise null
+ * @param requestContextId The request context id used to track what happened during calls session by the backend
  */
 sealed class ApiException(
     errorMessage: String,
@@ -40,6 +41,7 @@ sealed class ApiException(
      *
      * @param errorCode The specific error code returned by the API.
      * @param errorMessage The detailed error message explaining the cause of the failure.
+     * @param requestContextId The request context id send by the backend to track the call
      */
     open class ApiErrorException(
         val errorCode: Int,
@@ -56,6 +58,7 @@ sealed class ApiException(
      * @param statusCode The HTTP status code returned by the API.
      * @param bodyResponse The raw response body from the API that could not be parsed.
      * @param cause The cause of the exception if exists otherwise null
+     * @param requestContextId The request context id send by the backend to track the call
      */
     class UnexpectedApiErrorFormatException(
         val statusCode: Int,

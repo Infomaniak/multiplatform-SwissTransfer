@@ -23,10 +23,10 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
  * A sealed class representing exceptions related to email validation that extend [ApiException].
  * This class is used to handle specific errors that occur during the email validation process.
  *
- * @property statusCode The HTTP status code associated with the error.
  * @constructor Creates an [EmailValidationException] with the given status code.
  *
  * @param statusCode The HTTP status code for the error.
+ * @param requestContextId The request context id send by the backend to track the call
  */
 sealed class EmailValidationException(
     statusCode: Int,
@@ -36,6 +36,8 @@ sealed class EmailValidationException(
     /**
      * Exception indicating that the provided password is invalid during email validation.
      * This corresponds to an HTTP 401 Unauthorized status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
      */
     class InvalidPasswordException(requestContextId: String) : EmailValidationException(401, requestContextId)
 

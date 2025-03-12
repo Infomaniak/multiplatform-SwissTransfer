@@ -23,11 +23,11 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
  * A sealed class representing exceptions related to fetched transfers to extend [ApiException.ApiErrorException].
  * This class is used to handle specific errors that occur when fetching a transfer.
  *
- * @property statusCode The HTTP status code associated with the error.
- * @property message The message describing the error.
  * @constructor Creates an [FetchTransferException] with the given status code.
  *
  * @param statusCode The HTTP status code for the error.
+ * @param message The message describing the error.
+ * @param requestContextId The request context id send by the backend to track the call
  */
 sealed class FetchTransferException(
     statusCode: Int,
@@ -35,21 +35,57 @@ sealed class FetchTransferException(
     requestContextId: String,
 ) : ApiErrorException(statusCode, message, requestContextId) {
 
+    /**
+     * Exception indicating that the transfer cannot be fetched due to being currently under a virus check .
+     * This corresponds to an HTTP 404 Not found status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
+     */
     class VirusCheckFetchTransferException(requestContextId: String) :
         FetchTransferException(404, "Virus check in progress", requestContextId)
 
+    /**
+     * Exception indicating that the transfer cannot be fetched because a virus was detected.
+     * This corresponds to an HTTP 404 Not found status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
+     */
     class VirusDetectedFetchTransferException(requestContextId: String) :
         FetchTransferException(404, "Virus has been detected", requestContextId)
 
+    /**
+     * Exception indicating that the transfer cannot be fetched because the transfer has expired.
+     * This corresponds to an HTTP 404 Not found status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
+     */
     class ExpiredDateFetchTransferException(requestContextId: String) :
         FetchTransferException(404, "Transfer expired", requestContextId)
 
+    /**
+     * Exception indicating that the transfer cannot be fetched because it's not found.
+     * This corresponds to an HTTP 404 Not found status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
+     */
     class NotFoundFetchTransferException(requestContextId: String) :
         FetchTransferException(404, "Transfer not found", requestContextId)
 
+    /**
+     * Exception indicating that the transfer cannot be fetched because it needs a password.
+     * This corresponds to an HTTP 404 Not found status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
+     */
     class PasswordNeededFetchTransferException(requestContextId: String) :
         FetchTransferException(401, "Transfer need a password", requestContextId)
 
+    /**
+     * Exception indicating that the transfer cannot be fetched because the given password is wrong.
+     * This corresponds to an HTTP 404 Not found status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
+     */
     class WrongPasswordFetchTransferException(requestContextId: String) :
         FetchTransferException(401, "Wrong password for this Transfer", requestContextId)
 
