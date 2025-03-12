@@ -85,12 +85,12 @@ class ApiClientProvider internal constructor(
                     val statusCode = response.status.value
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
-                        runCatching {
-                            val apiError = json.decodeFromString<ApiError>(bodyResponse)
-                            throw ApiException(apiError.errorCode, apiError.message)
-                        }.onFailure {
+                        val apiError = runCatching {
+                            json.decodeFromString<ApiError>(bodyResponse)
+                        }.getOrElse {
                             throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null)
                         }
+                        throw ApiException(apiError.errorCode, apiError.message)
                     }
                 }
                 handleResponseExceptionWithRequest { cause, request ->
