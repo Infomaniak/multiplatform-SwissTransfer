@@ -23,12 +23,11 @@ package com.infomaniak.multiplatform_swisstransfer.common.exceptions
  * This exception is used to encapsulate unexpected or unknown errors that are not covered
  * by other specific exception types.
  *
- * @property message The detailed message describing the error.
- * @property cause The underlying cause of this exception, if any.
- *
  * @constructor Creates an instance of `UnknownException` with a detailed error message and an optional cause.
  *
  * @param cause The underlying exception that caused this exception.
+ *
+ * @property message The detailed message describing the error.
  */
 class UnknownException(cause: Throwable) : Exception(cause) {
     override val message: String = cause.message ?: cause.toString()

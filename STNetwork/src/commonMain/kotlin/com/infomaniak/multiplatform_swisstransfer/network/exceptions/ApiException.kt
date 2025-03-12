@@ -25,7 +25,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  *
  * @param errorMessage The detailed error message explaining the cause of the failure.
  * @param cause The cause of the exception if exists otherwise null
- * @param requestContextId The request context id used to track what happened during calls session by the backend
+ * @property requestContextId The request context id used to track what happened during calls session by the backend
  */
 sealed class ApiException(
     errorMessage: String,
@@ -39,8 +39,8 @@ sealed class ApiException(
      * This exception is used to represent errors returned by an API, with an associated error code
      * and message describing the problem.
      *
-     * @param errorCode The specific error code returned by the API.
-     * @param errorMessage The detailed error message explaining the cause of the failure.
+     * @property errorCode The specific error code returned by the API.
+     * @property errorMessage The detailed error message explaining the cause of the failure.
      * @param requestContextId The request context id send by the backend to track the call
      */
     open class ApiErrorException(
@@ -55,8 +55,8 @@ sealed class ApiException(
      * This exception indicates that the API response format is different from what was expected,
      * preventing proper parsing of the error details.
      *
-     * @param statusCode The HTTP status code returned by the API.
-     * @param bodyResponse The raw response body from the API that could not be parsed.
+     * @property statusCode The HTTP status code returned by the API.
+     * @property bodyResponse The raw response body from the API that could not be parsed.
      * @param cause The cause of the exception if exists otherwise null
      * @param requestContextId The request context id send by the backend to track the call
      */

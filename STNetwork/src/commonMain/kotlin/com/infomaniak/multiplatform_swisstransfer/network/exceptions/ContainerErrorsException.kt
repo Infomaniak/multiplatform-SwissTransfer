@@ -26,7 +26,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
  *
  * @constructor Creates a [ContainerErrorsException] with the given status code and error message.
  *
- * @param statusCode The HTTP status code for the error.
+ * @property statusCode The HTTP status code for the error.
  * @param errorMessage A descriptive error message for the error.
  * @param requestContextId The request context id send by the backend to track the call
  */
