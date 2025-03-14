@@ -22,7 +22,13 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTok
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.InvalidAttestationTokenException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class UploadTokensManager(private val uploadTokensController: UploadTokensController) {
 
@@ -69,8 +75,8 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getAttestationToken(): String = withContext(Dispatchers.Default) {
-        return@withContext uploadTokensController.getAttestationToken()?.token?.also(::checkAttestationTokenValidity)
-            ?: throw InvalidAttestationTokenException("Missing token", "")
+        return@withContext uploadTokensController.getAttestationToken()?.token?.also(::assertAttestationTokenValidity)
+            ?: throw InvalidAttestationTokenException("Missing token")
     }
 
     /**
@@ -81,18 +87,33 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class, InvalidAttestationTokenException::class)
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun setAttestationToken(attestationToken: String): Unit = withContext(Dispatchers.Default) {
         uploadTokensController.setAttestationToken(attestationToken)
     }
 
-    private fun checkAttestationTokenValidity(attestationToken: String): Boolean {
-        decodeJwtToken(attestationToken)
-        return true // TODO
+    private fun assertAttestationTokenValidity(attestationToken: String) {
+        val tokenExpiryAt = runCatching {
+            decodeJwtToken(attestationToken)!!
+        }.getOrElse {
+            throw InvalidAttestationTokenException("Invalid token", cause = it)
+        }
+
+        if (tokenExpiryAt < Clock.System.now().epochSeconds) {
+            throw InvalidAttestationTokenException("Token expired")
+        }
     }
 
-    private fun decodeJwtToken(token: String) {
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun decodeJwtToken(token: String): Long? {
+        val encodedPayload = token.split('.')[1]
+        val payload = Base64.UrlSafe.decode(encodedPayload.encodeToByteArray()).decodeToString()
 
+        return Json.parseToJsonElement(payload).jsonObject[JSON_JWT_EXPIRATION_KEY]?.jsonPrimitive?.content?.toLong()
     }
     //endregion
+
+    companion object {
+        private const val JSON_JWT_EXPIRATION_KEY = "exp"
+    }
 }

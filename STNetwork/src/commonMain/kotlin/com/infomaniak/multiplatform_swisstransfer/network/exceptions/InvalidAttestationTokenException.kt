@@ -22,6 +22,8 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  * It could happen either if it's expired or if it has been used to its maximum capacity
  *
  * @param message A message explaining what we couldn't find
+ * @param requestContextId The request context id send by the backend to track the call
+ * @property cause The original exception.
  */
-class InvalidAttestationTokenException(message: String, requestContextId: String) :
+class InvalidAttestationTokenException(message: String, requestContextId: String = "", override val cause: Throwable? = null) :
     ApiException.ApiErrorException(401, message, requestContextId)

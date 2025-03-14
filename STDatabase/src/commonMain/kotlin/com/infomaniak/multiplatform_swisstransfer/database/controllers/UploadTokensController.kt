@@ -55,7 +55,10 @@ class UploadTokensController(private val realmProvider: RealmProvider) {
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun setAttestationToken(token: String) = runThrowingRealm {
-        realm.write { copyToRealm(AttestationTokenDB(token), UpdatePolicy.ALL) }
+        realm.write {
+            deleteAll() // Always only keep the last token
+            copyToRealm(AttestationTokenDB(token), UpdatePolicy.ALL)
+        }
     }
     //endregion
 }
