@@ -32,6 +32,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
@@ -60,7 +61,7 @@ class UploadManager(
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
     private val emailLanguageUtils: EmailLanguageUtils,
-    private val emailTokensManager: EmailTokensManager,
+    private val uploadTokensManager: UploadTokensManager,
 ) {
 
     val lastUploadFlow get() = uploadController.getLastUploadFlow()
@@ -126,7 +127,7 @@ class UploadManager(
      */
     @Throws(RealmException::class, CancellationException::class, NotFoundException::class)
     suspend fun updateAuthorEmailToken(authorEmail: String, emailToken: String) = withContext(Dispatchers.Default) {
-        emailTokensManager.setEmailToken(authorEmail, emailToken)
+        uploadTokensManager.setEmailToken(authorEmail, emailToken)
 
         runCatching {
             uploadController.updateLastUploadSessionAuthorEmailToken(emailToken)
@@ -158,7 +159,7 @@ class UploadManager(
     ): NewUploadSession = NewUploadSession(
         duration = duration,
         authorEmail = authorEmail,
-        authorEmailToken = emailTokensManager.getTokenForEmail(authorEmail),
+        authorEmailToken = uploadTokensManager.getTokenForEmail(authorEmail),
         password = password,
         message = message,
         numberOfDownload = numberOfDownload,
@@ -194,12 +195,15 @@ class UploadManager(
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
         NotFoundException::class,
+        InvalidAttestationTokenException::class,
     )
     suspend fun initUploadSession(
         uuid: String? = null,
         attestationHeaderName: String,
-        attestationToken: String,
     ): UploadSession? = withContext(Dispatchers.Default) {
+
+        // Get  token from realm
+        val attestationToken = uploadTokensManager.getAttestationToken()
 
         val uploadSession = when (uuid) {
             null -> uploadController.getLastUpload() ?: throw NotFoundException("No uploadSession found in DB")

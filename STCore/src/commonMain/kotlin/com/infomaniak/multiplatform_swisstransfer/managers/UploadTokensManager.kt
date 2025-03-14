@@ -18,13 +18,15 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.EmailTokensController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTokensController
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.InvalidAttestationTokenException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
-class EmailTokensManager(private val emailTokensController: EmailTokensController) {
+class UploadTokensManager(private val uploadTokensController: UploadTokensController) {
 
+    //region Email token
     /**
      * Get a token for a given email.
      *
@@ -37,7 +39,7 @@ class EmailTokensManager(private val emailTokensController: EmailTokensControlle
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getTokenForEmail(email: String): String? = withContext(Dispatchers.Default) {
-        return@withContext emailTokensController.getEmailTokenForEmail(email)?.token
+        return@withContext uploadTokensController.getEmailTokenForEmail(email)?.token
     }
 
     /**
@@ -51,6 +53,46 @@ class EmailTokensManager(private val emailTokensController: EmailTokensControlle
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun setEmailToken(email: String, emailToken: String): Unit = withContext(Dispatchers.Default) {
-        emailTokensController.setEmailToken(email, emailToken)
+        uploadTokensController.setEmailToken(email, emailToken)
     }
+    //endregion
+
+    //region Attestation token
+
+    /**
+     * Get the current attestation token.
+     *
+     * @return A token which is used to attest the app integrity to the API.
+     *
+     * @throws RealmException If an error occurs during database access.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getAttestationToken(): String = withContext(Dispatchers.Default) {
+        return@withContext uploadTokensController.getAttestationToken()?.token?.also(::checkAttestationTokenValidity)
+            ?: throw InvalidAttestationTokenException("Missing token", "")
+    }
+
+    /**
+     * Asynchronously sets the attestation token.
+     *
+     * @param attestationToken The valid attestation token used to attest the app integrity to the API.
+     *
+     * @throws RealmException If an error occurs during database access.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(RealmException::class, CancellationException::class, InvalidAttestationTokenException::class)
+    suspend fun setAttestationToken(attestationToken: String): Unit = withContext(Dispatchers.Default) {
+        uploadTokensController.setAttestationToken(attestationToken)
+    }
+
+    private fun checkAttestationTokenValidity(attestationToken: String): Boolean {
+        decodeJwtToken(attestationToken)
+        return true // TODO
+    }
+
+    private fun decodeJwtToken(token: String) {
+
+    }
+    //endregion
 }

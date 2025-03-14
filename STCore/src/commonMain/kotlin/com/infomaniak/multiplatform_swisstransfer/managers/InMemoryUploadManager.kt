@@ -56,7 +56,7 @@ class InMemoryUploadManager(
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
     private val emailLanguageUtils: EmailLanguageUtils,
-    private val emailTokensManager: EmailTokensManager,
+    private val emailTokensManager: UploadTokensManager,
 ) {
 
     /**

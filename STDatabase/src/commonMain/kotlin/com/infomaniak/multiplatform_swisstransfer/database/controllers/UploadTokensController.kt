@@ -19,14 +19,16 @@ package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.EmailToken
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.UploadToken
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AttestationTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.EmailTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import kotlin.coroutines.cancellation.CancellationException
 
-class EmailTokensController(private val realmProvider: RealmProvider) {
+class UploadTokensController(private val realmProvider: RealmProvider) {
     private val realm by lazy { realmProvider.appSettings }
 
     //region Get data
@@ -34,6 +36,11 @@ class EmailTokensController(private val realmProvider: RealmProvider) {
     fun getEmailTokenForEmail(email: String): EmailToken? = runThrowingRealm {
         val query = "${EmailTokenDB::email.name} == '$email'"
         return realm.query<EmailTokenDB>(query).first().find()
+    }
+
+    @Throws(RealmException::class)
+    fun getAttestationToken(): UploadToken? = runThrowingRealm {
+        return realm.query<AttestationTokenDB>().first().find()
     }
     //endregion
 
@@ -44,6 +51,11 @@ class EmailTokensController(private val realmProvider: RealmProvider) {
             val emailTokenDB = EmailTokenDB(email, token)
             copyToRealm(emailTokenDB, UpdatePolicy.ALL)
         }
+    }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun setAttestationToken(token: String) = runThrowingRealm {
+        realm.write { copyToRealm(AttestationTokenDB(token), UpdatePolicy.ALL) }
     }
     //endregion
 }

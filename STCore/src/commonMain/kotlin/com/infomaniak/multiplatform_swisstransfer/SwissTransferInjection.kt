@@ -42,7 +42,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property accountManager A manager used to orchestrate Accounts operations.
  * @property inMemoryUploadManager A manager used to perform Uploads operations, without session persistence.
  * @property uploadManager A manager used to orchestrate Uploads operations.
- * @property emailTokensManager A manager used to orchestrate EmailTokens operations.
+ * @property uploadTokensManager A manager used to orchestrate EmailTokens operations.
  * @property sharedApiUrlCreator An utils to help use shared routes.
  */
 class SwissTransferInjection(
@@ -58,7 +58,7 @@ class SwissTransferInjection(
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
-    private val emailTokensController by lazy { EmailTokensController(realmProvider) }
+    private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
     private val uploadController by lazy { UploadController(realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
     private val fileController by lazy { FileController(realmProvider) }
@@ -75,7 +75,7 @@ class SwissTransferInjection(
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
 
     /** A manager used to orchestrate EmailTokens operations. */
-    val emailTokensManager by lazy { EmailTokensManager(emailTokensController) }
+    val uploadTokensManager by lazy { UploadTokensManager(uploadTokensController) }
 
     /** A manager used to orchestrate Accounts operations. */
     val accountManager by lazy {
@@ -95,7 +95,7 @@ class SwissTransferInjection(
             uploadRepository,
             transferManager,
             emailLanguageUtils,
-            emailTokensManager,
+            uploadTokensManager,
         )
     }
 
@@ -106,7 +106,7 @@ class SwissTransferInjection(
             uploadRepository,
             transferManager,
             emailLanguageUtils,
-            emailTokensManager,
+            uploadTokensManager,
         )
     }
 
