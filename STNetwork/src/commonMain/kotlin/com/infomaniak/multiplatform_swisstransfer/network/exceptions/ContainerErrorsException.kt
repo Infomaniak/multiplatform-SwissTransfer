@@ -99,8 +99,22 @@ sealed class ContainerErrorsException(
          * or the original [ApiException.UnexpectedApiErrorFormatException] if the status code does not match any predefined values.
          */
         fun UnexpectedApiErrorFormatException.toContainerErrorsException(): Exception {
+
+            fun UnexpectedApiErrorFormatException.manage401Errors() = when {
+                message?.contains("expired_token") == true -> {
+                    InvalidAttestationTokenException("expired_token", requestContextId)
+                }
+                message?.contains("jwt_limit_reached") == true -> {
+                    InvalidAttestationTokenException("jwt_limit_reached", requestContextId)
+                }
+                message?.contains("invalid_jwt") == true -> {
+                    InvalidAttestationTokenException("invalid_jwt", requestContextId)
+                }
+                else -> EmailValidationRequired(requestContextId)
+            }
+
             return when (statusCode) {
-                401 -> EmailValidationRequired(requestContextId)
+                401 -> manage401Errors()
                 403 -> DomainBlockedException(requestContextId)
                 404 -> DailyTransferLimitReachedException(requestContextId)
                 422 -> CaptchaNotValidException(requestContextId)
