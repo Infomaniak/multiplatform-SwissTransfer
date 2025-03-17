@@ -30,9 +30,10 @@ import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.FailedRetryAttestationTokenException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
@@ -186,6 +187,9 @@ class UploadManager(
      *
      * @param uuid The UUID of the upload session or null to use the last upload session.
      * @param attestationHeaderName The name of the attestation header.
+     * @param isRetrying Needed to know if the attestation [InvalidAttestationTokenException] is raised because of a legit error
+     * (token expired, max usage reached) or an unexpected API error when getting the new token.
+     * In this second case, the method will raise an [FailedRetryAttestationTokenException] instead.
      *
      * @return The upload session that has been updated or null if it no longer exists after the update.
      *
@@ -197,6 +201,8 @@ class UploadManager(
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
      * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
+     * @throws InvalidAttestationTokenException If the attestation token is expired
+     * @throws FailedRetryAttestationTokenException If getting a new attestation token from the API Failed
      */
     @Throws(
         RealmException::class,
@@ -208,14 +214,21 @@ class UploadManager(
         UnknownException::class,
         NotFoundException::class,
         InvalidAttestationTokenException::class,
+        FailedRetryAttestationTokenException::class,
     )
     suspend fun initUploadSession(
         uuid: String? = null,
         attestationHeaderName: String,
+        isRetrying: Boolean,
     ): UploadSession? = withContext(Dispatchers.Default) {
 
         // Get  token from realm
-        val attestationToken = uploadTokensManager.getAttestationToken()
+        val attestationToken = runCatching {
+            uploadTokensManager.getAttestationToken()
+        }.getOrElse {
+            if (isRetrying && it is InvalidAttestationTokenException) throw FailedRetryAttestationTokenException()
+            throw it
+        }
 
         val uploadSession = when (uuid) {
             null -> uploadController.getLastUpload() ?: throw NotFoundException("No uploadSession found in DB")

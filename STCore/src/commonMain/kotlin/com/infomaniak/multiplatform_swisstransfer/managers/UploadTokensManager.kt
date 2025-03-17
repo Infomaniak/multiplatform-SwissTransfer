@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTokensController
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.InvalidAttestationTokenException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
@@ -72,8 +72,9 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
+     * @throws InvalidAttestationTokenException If the token is expired of if we couldn't get a new one from the API
      */
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(RealmException::class, CancellationException::class, InvalidAttestationTokenException::class)
     suspend fun getAttestationToken(): String = withContext(Dispatchers.Default) {
         return@withContext uploadTokensController.getAttestationToken()?.token?.also(::assertAttestationTokenValidity)
             ?: throw InvalidAttestationTokenException("Missing token")
@@ -107,7 +108,8 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
     @OptIn(ExperimentalEncodingApi::class)
     private fun decodeJwtToken(token: String): Long? {
         val encodedPayload = token.split('.')[1]
-        val payload = Base64.UrlSafe.decode(encodedPayload.encodeToByteArray()).decodeToString()
+        val decoder = Base64.UrlSafe.withPadding(Base64.PaddingOption.PRESENT_OPTIONAL)
+        val payload = decoder.decode(encodedPayload.encodeToByteArray()).decodeToString()
 
         return Json.parseToJsonElement(payload).jsonObject[JSON_JWT_EXPIRATION_KEY]?.jsonPrimitive?.content?.toLong()
     }

@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 
 /**
  * A sealed class representing various container error exceptions that extend [ApiErrorException].
