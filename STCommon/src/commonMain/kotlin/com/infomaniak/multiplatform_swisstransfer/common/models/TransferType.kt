@@ -17,9 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class TransferType {
-    LINK,
-    MAIL,
-    QR_CODE,
-    PROXIMITY,
+enum class TransferType(val matomoValue: String) {
+    LINK("link"),
+    MAIL("mail"),
+    QR_CODE("qrCode"),
+    PROXIMITY("proximity"),
 }
