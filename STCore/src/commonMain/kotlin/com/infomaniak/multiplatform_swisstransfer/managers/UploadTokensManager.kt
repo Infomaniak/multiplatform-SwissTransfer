@@ -94,26 +94,27 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
         uploadTokensController.setAttestationToken(attestationToken)
     }
 
-    @Throws(InvalidAttestationTokenException::class)
-    internal fun assertAttestationTokenValidity(attestationToken: String) {
-        val tokenExpiryAt = decodeJwtToken(attestationToken)
-        if (tokenExpiryAt < Clock.System.now().epochSeconds) throw InvalidAttestationTokenException("Local token is expired")
-    }
-
-    @OptIn(ExperimentalEncodingApi::class)
-    @Throws(InvalidAttestationTokenException::class)
-    internal fun decodeJwtToken(token: String): Long = runCatching {
-        val encodedPayload = token.split('.')[1]
-        val decoder = Base64.UrlSafe.withPadding(Base64.PaddingOption.PRESENT_OPTIONAL)
-        val payload = decoder.decode(encodedPayload.encodeToByteArray()).decodeToString()
-
-        Json.parseToJsonElement(payload).jsonObject[JSON_JWT_EXPIRATION_KEY]?.jsonPrimitive?.content?.toLong()!!
-    }.getOrElse {
-        throw InvalidAttestationTokenException("Error decoding token", cause = it)
-    }
     //endregion
 
     companion object {
         private const val JSON_JWT_EXPIRATION_KEY = "exp"
+
+        @Throws(InvalidAttestationTokenException::class)
+        internal fun assertAttestationTokenValidity(attestationToken: String) {
+            val tokenExpiryAt = decodeJwtToken(attestationToken)
+            if (tokenExpiryAt < Clock.System.now().epochSeconds) throw InvalidAttestationTokenException("Local token is expired")
+        }
+
+        @OptIn(ExperimentalEncodingApi::class)
+        @Throws(InvalidAttestationTokenException::class)
+        internal fun decodeJwtToken(token: String): Long = runCatching {
+            val encodedPayload = token.split('.')[1]
+            val decoder = Base64.UrlSafe.withPadding(Base64.PaddingOption.PRESENT_OPTIONAL)
+            val payload = decoder.decode(encodedPayload.encodeToByteArray()).decodeToString()
+
+            Json.parseToJsonElement(payload).jsonObject[JSON_JWT_EXPIRATION_KEY]?.jsonPrimitive?.content?.toLong()!!
+        }.getOrElse {
+            throw InvalidAttestationTokenException("Error decoding token", cause = it)
+        }
     }
 }
