@@ -95,14 +95,14 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
     }
 
     @Throws(InvalidAttestationTokenException::class)
-    private fun assertAttestationTokenValidity(attestationToken: String) {
+    internal fun assertAttestationTokenValidity(attestationToken: String) {
         val tokenExpiryAt = decodeJwtToken(attestationToken)
         if (tokenExpiryAt < Clock.System.now().epochSeconds) throw InvalidAttestationTokenException("Local token is expired")
     }
 
     @OptIn(ExperimentalEncodingApi::class)
     @Throws(InvalidAttestationTokenException::class)
-    private fun decodeJwtToken(token: String): Long = runCatching {
+    internal fun decodeJwtToken(token: String): Long = runCatching {
         val encodedPayload = token.split('.')[1]
         val decoder = Base64.UrlSafe.withPadding(Base64.PaddingOption.PRESENT_OPTIONAL)
         val payload = decoder.decode(encodedPayload.encodeToByteArray()).decodeToString()
