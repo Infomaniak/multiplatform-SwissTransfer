@@ -46,7 +46,7 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getTokenForEmail(email: String): String? = withContext(Dispatchers.Default) {
-        return@withContext uploadTokensController.getEmailTokenForEmail(email)?.token
+        return@withContext uploadTokensController.getTokenForEmail(email)?.token
     }
 
     /**

@@ -21,7 +21,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  * Parent class for attestation tokens exceptions
  * This is thrown whenever an attestation token cannot be used by the API to create a container
  *
- * @param message A message explaining what we couldn't find
+ * @param message The message describing the error.
  * @param requestContextId The request context id send by the backend to track the call
  */
 sealed class AttestationTokenException(
@@ -33,7 +33,7 @@ sealed class AttestationTokenException(
      * Thrown when we the attestation token returned by the Api is invalid
      * It could happen either if it's expired or if it has been used to its maximum capacity
      *
-     * @param message A message explaining what we couldn't find
+     * @param message The message describing the error.
      * @param requestContextId The request context id send by the backend to track the call
      * @property cause The original exception.
      */

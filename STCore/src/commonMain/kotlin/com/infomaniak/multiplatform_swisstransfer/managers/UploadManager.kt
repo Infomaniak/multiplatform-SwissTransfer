@@ -56,6 +56,8 @@ import kotlin.coroutines.cancellation.CancellationException
  * @property uploadController The controller for managing upload data in the database.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
  * @property transferManager Transfer operations
+ * @property emailLanguageUtils Utils containing helpers for email language
+ * @property uploadTokensManager Manager that handle uploads' token operation
  */
 class UploadManager(
     private val uploadController: UploadController,

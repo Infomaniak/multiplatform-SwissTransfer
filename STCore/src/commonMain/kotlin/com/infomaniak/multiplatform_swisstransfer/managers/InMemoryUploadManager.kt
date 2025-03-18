@@ -50,13 +50,15 @@ import kotlin.coroutines.cancellation.CancellationException
  * @property uploadController The controller for managing upload data in the database.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
  * @property transferManager Transfer operations
+ * @property emailLanguageUtils Utils containing helpers for email language
+ * @property uploadTokensManager Manager that handle uploads' token operation
  */
 class InMemoryUploadManager(
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
     private val emailLanguageUtils: EmailLanguageUtils,
-    private val emailTokensManager: UploadTokensManager,
+    private val uploadTokensManager: UploadTokensManager,
 ) {
 
     /**
@@ -92,7 +94,7 @@ class InMemoryUploadManager(
 
         val initUploadBody = InitUploadBody(
             req = request,
-            authorEmailToken = emailTokensManager.getTokenForEmail(request.authorEmail)
+            authorEmailToken = uploadTokensManager.getTokenForEmail(request.authorEmail)
         )
         val initUploadResponse = uploadRepository.initUpload(initUploadBody, attestationHeaderName, attestationToken)
 
@@ -138,7 +140,7 @@ class InMemoryUploadManager(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun saveAuthorEmailToken(authorEmail: String, emailToken: String) {
-        emailTokensManager.setEmailToken(authorEmail, emailToken)
+        uploadTokensManager.setEmailToken(authorEmail, emailToken)
     }
 
     /**

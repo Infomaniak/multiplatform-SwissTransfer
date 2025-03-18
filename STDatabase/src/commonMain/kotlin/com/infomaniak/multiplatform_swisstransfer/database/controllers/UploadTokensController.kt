@@ -33,7 +33,7 @@ class UploadTokensController(private val realmProvider: RealmProvider) {
 
     //region Get data
     @Throws(RealmException::class)
-    fun getEmailTokenForEmail(email: String): EmailToken? = runThrowingRealm {
+    fun getTokenForEmail(email: String): EmailToken? = runThrowingRealm {
         val query = "${EmailTokenDB::email.name} == '$email'"
         return realm.query<EmailTokenDB>(query).first().find()
     }
@@ -56,7 +56,7 @@ class UploadTokensController(private val realmProvider: RealmProvider) {
     @Throws(RealmException::class, CancellationException::class)
     suspend fun setAttestationToken(token: String) = runThrowingRealm {
         realm.write {
-            delete(AttestationTokenDB::class) // Always only keep the last token
+            deleteAll() // Always only keep the last token
             copyToRealm(AttestationTokenDB(token), UpdatePolicy.ALL)
         }
     }
