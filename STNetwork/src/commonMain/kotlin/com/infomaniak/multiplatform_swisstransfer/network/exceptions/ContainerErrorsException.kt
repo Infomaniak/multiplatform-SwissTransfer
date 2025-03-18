@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 
 /**
  * A sealed class representing various container error exceptions that extend [ApiErrorException].
@@ -82,6 +83,11 @@ sealed class ContainerErrorsException(
         ContainerErrorsException(429, "Too many codes generated", requestContextId)
 
     internal companion object {
+
+        private const val EXPIRED_TOKEN_CODE = "expired_token"
+        private const val JWT_LIMIT_REACHED_CODE = "jwt_limit_reached"
+        private const val INVALID_JWT_CODE = "invalid_jwt"
+
         /**
          * Extension function to convert an instance of [ApiException.UnexpectedApiErrorFormatException] to a more specific exception
          * based on its HTTP status code.
@@ -99,8 +105,22 @@ sealed class ContainerErrorsException(
          * or the original [ApiException.UnexpectedApiErrorFormatException] if the status code does not match any predefined values.
          */
         fun UnexpectedApiErrorFormatException.toContainerErrorsException(): Exception {
+
+            fun UnexpectedApiErrorFormatException.manage401Errors() = when {
+                message?.contains(EXPIRED_TOKEN_CODE) == true -> {
+                    InvalidAttestationTokenException(EXPIRED_TOKEN_CODE, requestContextId)
+                }
+                message?.contains(JWT_LIMIT_REACHED_CODE) == true -> {
+                    InvalidAttestationTokenException(JWT_LIMIT_REACHED_CODE, requestContextId)
+                }
+                message?.contains(INVALID_JWT_CODE) == true -> {
+                    InvalidAttestationTokenException(INVALID_JWT_CODE, requestContextId)
+                }
+                else -> EmailValidationRequired(requestContextId)
+            }
+
             return when (statusCode) {
-                401 -> EmailValidationRequired(requestContextId)
+                401 -> manage401Errors()
                 403 -> DomainBlockedException(requestContextId)
                 404 -> DailyTransferLimitReachedException(requestContextId)
                 422 -> CaptchaNotValidException(requestContextId)

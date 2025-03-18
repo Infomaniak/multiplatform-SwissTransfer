@@ -26,6 +26,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerEr
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
@@ -59,6 +60,7 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         CancellationException::class,
         ContainerErrorsException::class,
         ApiErrorException::class,
+        InvalidAttestationTokenException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
