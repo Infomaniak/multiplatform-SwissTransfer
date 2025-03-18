@@ -222,7 +222,6 @@ class UploadManager(
         isRetrying: Boolean,
     ): UploadSession? = withContext(Dispatchers.Default) {
 
-        // Get  token from realm
         val attestationToken = runCatching {
             uploadTokensManager.getAttestationToken()
         }.getOrElse {

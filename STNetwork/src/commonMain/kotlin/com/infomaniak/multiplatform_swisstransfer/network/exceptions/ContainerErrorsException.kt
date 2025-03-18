@@ -83,6 +83,11 @@ sealed class ContainerErrorsException(
         ContainerErrorsException(429, "Too many codes generated", requestContextId)
 
     internal companion object {
+
+        private const val EXPIRED_TOKEN_CODE = "expired_token"
+        private const val JWT_LIMIT_REACHED_CODE = "jwt_limit_reached"
+        private const val INVALID_JWT_CODE = "invalid_jwt"
+
         /**
          * Extension function to convert an instance of [ApiException.UnexpectedApiErrorFormatException] to a more specific exception
          * based on its HTTP status code.
@@ -102,14 +107,14 @@ sealed class ContainerErrorsException(
         fun UnexpectedApiErrorFormatException.toContainerErrorsException(): Exception {
 
             fun UnexpectedApiErrorFormatException.manage401Errors() = when {
-                message?.contains("expired_token") == true -> {
-                    InvalidAttestationTokenException("expired_token", requestContextId)
+                message?.contains(EXPIRED_TOKEN_CODE) == true -> {
+                    InvalidAttestationTokenException(EXPIRED_TOKEN_CODE, requestContextId)
                 }
-                message?.contains("jwt_limit_reached") == true -> {
-                    InvalidAttestationTokenException("jwt_limit_reached", requestContextId)
+                message?.contains(JWT_LIMIT_REACHED_CODE) == true -> {
+                    InvalidAttestationTokenException(JWT_LIMIT_REACHED_CODE, requestContextId)
                 }
-                message?.contains("invalid_jwt") == true -> {
-                    InvalidAttestationTokenException("invalid_jwt", requestContextId)
+                message?.contains(INVALID_JWT_CODE) == true -> {
+                    InvalidAttestationTokenException(INVALID_JWT_CODE, requestContextId)
                 }
                 else -> EmailValidationRequired(requestContextId)
             }

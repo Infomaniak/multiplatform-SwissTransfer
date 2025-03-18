@@ -33,6 +33,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 class UploadTokensManager(private val uploadTokensController: UploadTokensController) {
 
     //region Email token
+
     /**
      * Get a token for a given email.
      *
@@ -72,7 +73,7 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
      *
      * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
-     * @throws InvalidAttestationTokenException If the token is expired of if we couldn't get a new one from the API
+     * @throws InvalidAttestationTokenException If the token is expired or if we couldn't get a new one from the API
      */
     @Throws(RealmException::class, CancellationException::class, InvalidAttestationTokenException::class)
     suspend fun getAttestationToken(): String = withContext(Dispatchers.Default) {
@@ -97,11 +98,11 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
         val tokenExpiryAt = runCatching {
             decodeJwtToken(attestationToken)!!
         }.getOrElse {
-            throw InvalidAttestationTokenException("Invalid token", cause = it)
+            throw InvalidAttestationTokenException("Error decoding token", cause = it)
         }
 
         if (tokenExpiryAt < Clock.System.now().epochSeconds) {
-            throw InvalidAttestationTokenException("Token expired")
+            throw InvalidAttestationTokenException("Local token is expired")
         }
     }
 
