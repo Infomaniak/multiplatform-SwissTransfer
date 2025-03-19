@@ -107,6 +107,9 @@ class InMemoryUploadManager(
             uploadRepository.initUpload(initUploadBody, attestationHeaderName, attestationToken)
         } catch (_: InvalidAttestationTokenException) {
             val attestationToken = generateAttestationToken().also { uploadTokensManager.setAttestationToken(it) }
+            // `initUpload` might throw an `InvalidAttestationTokenException` again,
+            // but in that case, it means the new token returned by the backend was bad,
+            // so we let it propagate (but this should never happen, realistically).
             uploadRepository.initUpload(initUploadBody, attestationHeaderName, attestationToken)
         }
 
