@@ -102,12 +102,13 @@ class InMemoryUploadManager(
             req = request,
             authorEmailToken = uploadTokensManager.getTokenForEmail(request.authorEmail)
         )
-        val attestationToken = try {
-            uploadTokensManager.getAttestationToken()
+        val initUploadResponse = try {
+            val attestationToken = uploadTokensManager.getAttestationToken()
+            uploadRepository.initUpload(initUploadBody, attestationHeaderName, attestationToken)
         } catch (_: InvalidAttestationTokenException) {
-            generateAttestationToken().also { uploadTokensManager.setAttestationToken(it) }
+            val attestationToken = generateAttestationToken().also { uploadTokensManager.setAttestationToken(it) }
+            uploadRepository.initUpload(initUploadBody, attestationHeaderName, attestationToken)
         }
-        val initUploadResponse = uploadRepository.initUpload(initUploadBody, attestationHeaderName, attestationToken)
 
         return UploadDestination(
             container = initUploadResponse.container,
