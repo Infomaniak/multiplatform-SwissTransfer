@@ -24,6 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AttestationTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.EmailTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
+import com.infomaniak.multiplatform_swisstransfer.database.utils.findSuspend
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import kotlin.coroutines.cancellation.CancellationException
@@ -38,9 +39,9 @@ class UploadTokensController(private val realmProvider: RealmProvider) {
         return realm.query<EmailTokenDB>(query).first().find()
     }
 
-    @Throws(RealmException::class)
-    fun getAttestationToken(): UploadToken? = runThrowingRealm {
-        return realm.query<AttestationTokenDB>().first().find()
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getAttestationToken(): UploadToken? = runThrowingRealm {
+        return realm.query<AttestationTokenDB>().findSuspend().firstOrNull()
     }
     //endregion
 
