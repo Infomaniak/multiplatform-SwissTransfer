@@ -33,8 +33,8 @@ import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.Url
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -72,6 +72,22 @@ internal class UploadRequest(
             contentType(ContentType.Application.Json)
             setBody(resendEmailCodeBody)
         }
+    }
+
+    suspend fun doesChunkExist(
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        chunkSize: Long,
+    ): Boolean {
+        val string = SharedApiRoutes.doesChunkExist(
+            environment = environment,
+            containerUUID = containerUUID,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            chunkSize = chunkSize
+        )
+        return get(Url(string))
     }
 
     suspend fun uploadChunk(

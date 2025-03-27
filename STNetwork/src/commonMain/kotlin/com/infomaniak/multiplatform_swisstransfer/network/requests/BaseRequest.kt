@@ -26,7 +26,7 @@ import io.ktor.http.*
 import kotlinx.serialization.json.Json
 
 internal open class BaseRequest(
-    private val environment: ApiEnvironment,
+    protected val environment: ApiEnvironment,
     protected val json: Json,
     protected val httpClient: HttpClient,
 ) {
