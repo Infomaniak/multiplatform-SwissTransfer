@@ -82,11 +82,21 @@ sealed class ContainerErrorsException(
     class TooManyCodesGeneratedException(requestContextId: String) :
         ContainerErrorsException(429, "Too many codes generated", requestContextId)
 
+    /**
+     * Exception indicating that the daily quota have been exceeded.
+     * This corresponds to an HTTP 429 Too Many Requests status.
+     *
+     * @param requestContextId The request context id send by the backend to track the call
+     */
+    class DailyQuotaExceededException(requestContextId: String) :
+        ContainerErrorsException(429, "Daily transfer limit reached", requestContextId)
+
     internal companion object {
 
         private const val EXPIRED_TOKEN_CODE = "expired_token"
         private const val JWT_LIMIT_REACHED_CODE = "jwt_limit_reached"
         private const val INVALID_JWT_CODE = "invalid_jwt"
+        private const val DAILY_TRANSFER_LIMIT = "Daily transfer limit reached"
 
         /**
          * Extension function to convert an instance of [ApiException.UnexpectedApiErrorFormatException] to a more specific exception
@@ -119,12 +129,21 @@ sealed class ContainerErrorsException(
                 else -> EmailValidationRequired(requestContextId)
             }
 
+            fun UnexpectedApiErrorFormatException.manage429Errors() = when {
+                message?.contains(DAILY_TRANSFER_LIMIT) == true -> {
+                    DailyQuotaExceededException(requestContextId)
+                }
+                else -> {
+                    TooManyCodesGeneratedException(requestContextId)
+                }
+            }
+
             return when (statusCode) {
                 401 -> manage401Errors()
                 403 -> DomainBlockedException(requestContextId)
                 404 -> DailyTransferLimitReachedException(requestContextId)
                 422 -> CaptchaNotValidException(requestContextId)
-                429 -> TooManyCodesGeneratedException(requestContextId)
+                429 -> manage429Errors()
                 else -> this
             }
         }
