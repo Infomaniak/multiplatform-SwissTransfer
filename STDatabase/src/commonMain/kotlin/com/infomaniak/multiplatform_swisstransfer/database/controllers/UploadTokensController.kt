@@ -33,10 +33,10 @@ class UploadTokensController(private val realmProvider: RealmProvider) {
     private val realm by lazy { realmProvider.appSettings }
 
     //region Get data
-    @Throws(RealmException::class)
-    fun getTokenForEmail(email: String): EmailToken? = runThrowingRealm {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getTokenForEmail(email: String): EmailToken? = runThrowingRealm {
         val query = "${EmailTokenDB::email.name} == '$email'"
-        return realm.query<EmailTokenDB>(query).first().find()
+        return realm.query<EmailTokenDB>(query).findSuspend().firstOrNull()
     }
 
     @Throws(RealmException::class, CancellationException::class)
