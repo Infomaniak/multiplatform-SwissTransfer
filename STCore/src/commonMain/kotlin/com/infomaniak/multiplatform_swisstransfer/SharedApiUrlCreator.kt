@@ -61,6 +61,19 @@ class SharedApiUrlCreator internal constructor(
     }
 
     @Throws(RealmException::class)
+    fun doesChunkExistUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, chunkSize: Long): String? {
+        val upload = uploadController.getUploadByUUID(uploadUUID) ?: return null
+        val containerUUID = upload.remoteContainer?.uuid ?: return null
+        return SharedApiRoutes.doesChunkExist(
+            environment = environment,
+            containerUUID = containerUUID,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            chunkSize = chunkSize
+        )
+    }
+
+    @Throws(RealmException::class)
     fun uploadChunkUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean, isRetry: Boolean): String? {
         val upload = uploadController.getUploadByUUID(uploadUUID) ?: return null
         val containerUUID = upload.remoteContainer?.uuid ?: return null

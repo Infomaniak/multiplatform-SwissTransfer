@@ -159,6 +159,43 @@ class InMemoryUploadManager(
     }
 
     /**
+     * Returns true if the chunk of the file at the given index was already uploaded fully with success.
+     *
+     * @param remoteContainerUuid The id of the container returned by the backend earlier.
+     * @param fileUUID The UUID of the file being uploaded.
+     * @param chunkIndex The index of the chunk being uploaded.
+     * @param chunkSize The actual size of the given chunk
+     *
+     * @throws NetworkException If there is a network error.
+     * @throws ApiErrorException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(
+        CancellationException::class,
+        ApiErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+        NotFoundException::class,
+    )
+    suspend fun doesChunkExist(
+        remoteContainerUuid: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        chunkSize: Long
+    ): Boolean = withContext(Dispatchers.Default) {
+        uploadRepository.doesChunkExist(
+            containerUUID = remoteContainerUuid,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            chunkSize = chunkSize,
+        )
+    }
+
+    /**
      * Uploads a chunk of data for a file in the given container at the given host
      *
      * @param uploadHost The host of the upload session.

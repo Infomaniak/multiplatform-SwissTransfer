@@ -119,6 +119,27 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         NetworkException::class,
         UnknownException::class,
     )
+    suspend fun doesChunkExist(
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        chunkSize: Long,
+    ): Boolean {
+        return uploadRequest.doesChunkExist(
+            containerUUID = containerUUID,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            chunkSize = chunkSize,
+        )
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
     suspend fun uploadChunk(
         uploadHost: String,
         containerUUID: String,

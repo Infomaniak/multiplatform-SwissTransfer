@@ -39,6 +39,18 @@ object SharedApiRoutes {
         return "${downloadFilesBase(downloadHost, linkUUID)}?folder=$folderPath${withToken(token, prefix = "&")}"
     }
 
+    fun doesChunkExist(
+        environment: ApiEnvironment,
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        chunkSize: Long
+    ): String {
+        val params = "chunk_size=$chunkSize"
+        val host = ApiRoutes.apiBaseUrl(environment)
+        return "${host}mobile/containers/${containerUUID}/files/${fileUUID}/chunks/${chunkIndex}/exists?$params"
+    }
+
     fun uploadChunk(
         uploadHost: String,
         containerUUID: String,
