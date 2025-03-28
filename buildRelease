@@ -20,8 +20,9 @@
 
 # Variables
 BOLD=$(tput bold)
-END_BOLD=$(tput sgr0)
-BOLD_GREEN='\033[1;32m'
+BOLD_OFF=$(tput sgr0)
+GREEN='\033[0;32m'
+GREEN_BOLD='\033[1;32m'
 COLOR_OFF='\033[0m'
 
 # Function to check whether a string is a valid version (x.x.x)
@@ -66,7 +67,7 @@ function release_ios {
     ./gradlew :STCore:assembleSTCoreReleaseXCFramework
 
     # Archive
-    echo "Archive XCFramework to ${BOLD}release${END_BOLD} folder"
+    echo "Archive XCFramework to ${BOLD}release${BOLD_OFF} folder"
     mkdir -p release
     zip -r release/STNetwork.xcframework.zip STNetwork/build/XCFrameworks/release/STNetwork.xcframework
     zip -r release/STDatabase.xcframework.zip STDatabase/build/XCFrameworks/release/STDatabase.xcframework
@@ -79,7 +80,7 @@ function release_ios {
     CORE_CHECKSUM=$(swift package compute-checksum release/STCore.xcframework.zip)
 
     # Update Package.swift
-    echo "${BOLD}Update Package.swift${END_BOLD}"
+    echo "${BOLD}Update Package.swift${BOLD_OFF}"
     NETWORK_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/STNetwork.xcframework.zip"
     DATABASE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/STDatabase.xcframework.zip"
     CORE_URL="https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/$IOS_TAG/STCore.xcframework.zip"
@@ -89,7 +90,7 @@ function release_ios {
     perl -0777 -pi -e "s|url: \".*Core.xcframework.zip\",(\s*)checksum: \".*\"|url: \"$CORE_URL\",\1checksum: \"$CORE_CHECKSUM\"|g" Package.swift
 
     # Upload info
-    echo "${BOLD_GREEN}Check the ${BOLD}release${END_BOLD} folder to see if the archives are there, then you can upload them to a github release.${COLOR_OFF}"
+    echo -e "${GREEN}Check the${COLOR_OFF} ${GREEN_BOLD}release${COLOR_OFF} ${GREEN}folder to see if the archives are there, then you can upload them to a GitHub release.${COLOR_OFF}"
 }
 
 # Release Android and iOS
