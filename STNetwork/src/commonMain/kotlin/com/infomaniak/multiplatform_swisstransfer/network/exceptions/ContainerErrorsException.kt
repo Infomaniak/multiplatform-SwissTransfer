@@ -96,7 +96,8 @@ sealed class ContainerErrorsException(
         private const val EXPIRED_TOKEN_CODE = "expired_token"
         private const val JWT_LIMIT_REACHED_CODE = "jwt_limit_reached"
         private const val INVALID_JWT_CODE = "invalid_jwt"
-        private const val DAILY_TRANSFER_LIMIT = "Daily transfer limit reached"
+        private const val DAILY_TRANSFER_LIMIT_CODE = "Daily transfer limit reached"
+        private const val EMAIL_VALIDATION_REQUIRED_CODE = "Email address validation required"
 
         /**
          * Extension function to convert an instance of [ApiException.UnexpectedApiErrorFormatException] to a more specific exception
@@ -126,11 +127,14 @@ sealed class ContainerErrorsException(
                 message?.contains(INVALID_JWT_CODE) == true -> {
                     InvalidAttestationTokenException(INVALID_JWT_CODE, requestContextId)
                 }
-                else -> EmailValidationRequired(requestContextId)
+                message?.contains(EMAIL_VALIDATION_REQUIRED_CODE) == true -> {
+                    EmailValidationRequired(requestContextId)
+                }
+                else -> this
             }
 
             fun UnexpectedApiErrorFormatException.manage429Errors() = when {
-                message?.contains(DAILY_TRANSFER_LIMIT) == true -> {
+                message?.contains(DAILY_TRANSFER_LIMIT_CODE) == true -> {
                     DailyQuotaExceededException(requestContextId)
                 }
                 else -> {
