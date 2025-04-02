@@ -113,11 +113,9 @@ class TransferManager internal constructor(
         coroutineScope {
             transferController.getAllTransfers().forEach { transfer ->
                 launch {
-                    runCatching {
-                        semaphore.withPermit {
-                            fetchTransfer(transfer)
-                        }
-                    }.onFailure { exception -> if (exception is CancellationException) throw exception }
+                    semaphore.withPermit {
+                        fetchTransfer(transfer)
+                    }
                 }
             }
         }
@@ -131,9 +129,7 @@ class TransferManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
-            runCatching {
-                fetchTransfer(transfer)
-            }
+            fetchTransfer(transfer)
         }
     }
 
@@ -196,6 +192,7 @@ class TransferManager internal constructor(
                     transfer.linkUUID,
                     TransferStatus.EXPIRED_DATE,
                 )
+                is CancellationException -> throw exception
             }
         }
     }
