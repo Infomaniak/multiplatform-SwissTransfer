@@ -64,7 +64,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
         transferRequest.getTransfer(linkUUID, password)
     }.getOrElse { exception ->
-        if (exception is UnexpectedApiErrorFormatException) throw exception.toFetchTransferException() else throw exception
+        throw if (exception is UnexpectedApiErrorFormatException) exception.toFetchTransferException() else exception
     }
 
     @Throws(
