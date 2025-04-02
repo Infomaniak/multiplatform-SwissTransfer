@@ -114,7 +114,11 @@ class TransferManager internal constructor(
             transferController.getAllTransfers().forEach { transfer ->
                 launch {
                     semaphore.withPermit {
-                        fetchTransfer(transfer)
+                        runCatching {
+                            fetchTransfer(transfer)
+                        }.onFailure { exception ->
+                            if (exception is CancellationException) throw exception
+                        }
                     }
                 }
             }
@@ -129,7 +133,11 @@ class TransferManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
         transferController.getNotReadyTransfers().forEach { transfer ->
-            fetchTransfer(transfer)
+            runCatching {
+                fetchTransfer(transfer)
+            }.onFailure { exception ->
+                if (exception is CancellationException) throw exception
+            }
         }
     }
 
@@ -163,6 +171,11 @@ class TransferManager internal constructor(
         NotFoundException::class,
         NullPropertyException::class,
         CancellationException::class,
+        ApiErrorException::class,
+        NetworkException::class,
+        UnknownException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
     )
     suspend fun fetchTransfer(transferUUID: String) {
         val localTransfer = transferController.getTransfer(transferUUID)
@@ -192,7 +205,7 @@ class TransferManager internal constructor(
                     transfer.linkUUID,
                     TransferStatus.EXPIRED_DATE,
                 )
-                is CancellationException -> throw exception
+                else -> throw exception
             }
         }
     }
