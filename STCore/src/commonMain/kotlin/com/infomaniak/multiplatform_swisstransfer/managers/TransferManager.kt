@@ -112,8 +112,6 @@ class TransferManager internal constructor(
 
         coroutineScope {
             transferController.getAllTransfers().forEach { transfer ->
-                val transferDirection = transfer.transferDirection ?: return@forEach
-
                 launch {
                     runCatching {
                         semaphore.withPermit {
