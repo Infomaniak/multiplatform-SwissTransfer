@@ -26,13 +26,14 @@ import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.statement.HttpResponse
 import io.ktor.utils.io.CancellationException
+import kotlin.time.Duration.Companion.hours
 
 const val CONTENT_REQUEST_ID_HEADER = "x-request-id"
 
 internal fun HttpRequestBuilder.longTimeout() {
     timeout {
-        requestTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
-        connectTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
+        requestTimeoutMillis = 1.hours.inWholeMilliseconds // Be permissive for DSL or slow mobile connections.
+        connectTimeoutMillis = ApiClientProvider.REQUEST_TIMEOUT // Don't let the user wait too long for connection.
         socketTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
     }
 }

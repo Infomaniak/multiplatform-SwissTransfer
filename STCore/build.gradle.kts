@@ -16,6 +16,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(commonProject)
+            api(libs.ktor.client.core)
             implementation(project(":STDatabase"))
             implementation(project(":STNetwork"))
         }

@@ -38,6 +38,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import com.infomaniak.multiplatform_swisstransfer.utils.addTransferByLinkUUID
+import io.ktor.http.content.OutgoingContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.contracts.ExperimentalContracts
@@ -236,6 +237,51 @@ class InMemoryUploadManager(
             chunkIndex = chunkIndex,
             isLastChunk = isLastChunk,
             isRetry = false,
+            data = data,
+            onUpload = onUpload,
+        )
+    }
+
+    /**
+     * Uploads a chunk of data for a file in the given container at the given host
+     *
+     * @param uploadHost The host of the upload session.
+     * @param remoteContainerUuid The id of the container returned by the backend earlier.
+     * @param fileUUID The UUID of the file being uploaded.
+     * @param chunkIndex The index of the chunk being uploaded.
+     * @param isLastChunk True if this is the last chunk of the file, false otherwise.
+     * @param data The chunk data to upload.
+     *
+     * @throws NetworkException If there is a network error.
+     * @throws ApiErrorException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(
+        CancellationException::class,
+        ApiErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+        NotFoundException::class,
+    )
+    suspend fun uploadChunk(
+        uploadHost: String,
+        remoteContainerUuid: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        isLastChunk: Boolean,
+        data: OutgoingContent.WriteChannelContent,
+        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
+    ): Unit = withContext(Dispatchers.Default) {
+        uploadRepository.uploadChunk(
+            uploadHost = uploadHost,
+            containerUUID = remoteContainerUuid,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            isLastChunk = isLastChunk,
             data = data,
             onUpload = onUpload,
         )

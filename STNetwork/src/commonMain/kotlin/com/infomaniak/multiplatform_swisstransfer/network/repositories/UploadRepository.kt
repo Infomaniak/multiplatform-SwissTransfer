@@ -37,6 +37,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
 import io.ktor.client.HttpClient
+import io.ktor.http.content.OutgoingContent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -157,6 +158,33 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
             chunkIndex = chunkIndex,
             isLastChunk = isLastChunk,
             isRetry = isRetry,
+            data = data,
+            onUpload = onUpload
+        )
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun uploadChunk(
+        uploadHost: String,
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        isLastChunk: Boolean,
+        data: OutgoingContent.WriteChannelContent,
+        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
+    ) {
+        uploadRequest.uploadChunk(
+            uploadHost = uploadHost,
+            containerUUID = containerUUID,
+            fileUUID = fileUUID,
+            chunkIndex = chunkIndex,
+            isLastChunk = isLastChunk,
             data = data,
             onUpload = onUpload
         )

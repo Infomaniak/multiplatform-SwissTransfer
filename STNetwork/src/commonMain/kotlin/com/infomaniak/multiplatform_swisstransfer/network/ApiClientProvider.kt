@@ -118,7 +118,7 @@ class ApiClientProvider internal constructor(
     private fun Throwable.isNetworkException() = this is IOException
 
     companion object {
-        private const val REQUEST_TIMEOUT = 10_000L
+        const val REQUEST_TIMEOUT = 10_000L
         private const val MAX_RETRY = 3
         const val REQUEST_LONG_TIMEOUT = 60_000L
     }
