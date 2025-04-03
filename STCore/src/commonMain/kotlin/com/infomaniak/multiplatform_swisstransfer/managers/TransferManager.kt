@@ -112,14 +112,14 @@ class TransferManager internal constructor(
 
         coroutineScope {
             transferController.getAllTransfers().forEach { transfer ->
-                val transferDirection = transfer.transferDirection ?: return@forEach
-
                 launch {
-                    runCatching {
-                        semaphore.withPermit {
+                    semaphore.withPermit {
+                        runCatching {
                             fetchTransfer(transfer)
+                        }.onFailure { exception ->
+                            if (exception is CancellationException) throw exception
                         }
-                    }.onFailure { exception -> if (exception is CancellationException) throw exception }
+                    }
                 }
             }
         }
@@ -135,6 +135,8 @@ class TransferManager internal constructor(
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
                 fetchTransfer(transfer)
+            }.onFailure { exception ->
+                if (exception is CancellationException) throw exception
             }
         }
     }
@@ -169,12 +171,15 @@ class TransferManager internal constructor(
         NotFoundException::class,
         NullPropertyException::class,
         CancellationException::class,
+        ApiErrorException::class,
+        NetworkException::class,
+        UnknownException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
     )
     suspend fun fetchTransfer(transferUUID: String) {
         val localTransfer = transferController.getTransfer(transferUUID)
             ?: throw NotFoundException("No transfer found in DB with uuid = $transferUUID")
-        val transferDirection = localTransfer.transferDirection
-            ?: throw NullPropertyException("the transferDirection property cannot be null")
 
         fetchTransfer(localTransfer)
     }
@@ -200,6 +205,7 @@ class TransferManager internal constructor(
                     transfer.linkUUID,
                     TransferStatus.EXPIRED_DATE,
                 )
+                else -> throw exception
             }
         }
     }
@@ -270,7 +276,8 @@ class TransferManager internal constructor(
         recipientsEmails: Set<String> = emptySet(),
         transferDirection: TransferDirection,
     ): Unit = withContext(Dispatchers.Default) {
-        val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data
+        val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data ?: return@withContext
+        transferApi.validateDownloadCounterCreditOrThrow()
 
         addTransfer(transferApi, transferDirection, password, recipientsEmails)
     }
@@ -319,11 +326,16 @@ class TransferManager internal constructor(
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByUrl(url, password).data ?: return@withContext null
+        transferApi.validateDownloadCounterCreditOrThrow()
         val transfer = transferController.getTransfer(transferApi.linkUUID)
         if (transfer == null) {
             addTransfer(transferApi, TransferDirection.RECEIVED, password)
         }
         return@withContext transferApi.linkUUID
+    }
+
+    private fun TransferApi.validateDownloadCounterCreditOrThrow() {
+        if (downloadCounterCredit <= 0) throw DownloadQuotaExceededException()
     }
 
     /**

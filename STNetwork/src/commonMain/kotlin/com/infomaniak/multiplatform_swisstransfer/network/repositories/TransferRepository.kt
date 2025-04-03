@@ -22,7 +22,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.*
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.Companion.toFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -63,11 +62,9 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = runCatching {
-        return@runCatching transferRequest.getTransfer(linkUUID, password).also {
-            it.data?.validateDownloadCounterCreditOrThrow()
-        }
+        transferRequest.getTransfer(linkUUID, password)
     }.getOrElse { exception ->
-        if (exception is UnexpectedApiErrorFormatException) throw exception.toFetchTransferException() else throw exception
+        throw if (exception is UnexpectedApiErrorFormatException) exception.toFetchTransferException() else exception
     }
 
     @Throws(
@@ -79,19 +76,12 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
         ExpiredDateFetchTransferException::class,
-        DownloadQuotaExceededException::class,
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
     )
     suspend fun getTransferByUrl(url: String, password: String?): ApiResponse<TransferApi> {
-        return getTransferByLinkUUID(extractUUID(url), password).also {
-            it.data?.validateDownloadCounterCreditOrThrow()
-        }
-    }
-
-    private fun TransferApi.validateDownloadCounterCreditOrThrow() {
-        if (downloadCounterCredit <= 0) throw DownloadQuotaExceededException()
+        return getTransferByLinkUUID(extractUUID(url), password)
     }
 
     @Throws(
