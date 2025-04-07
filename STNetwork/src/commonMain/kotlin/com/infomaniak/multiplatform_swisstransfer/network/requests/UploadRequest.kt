@@ -30,10 +30,12 @@ import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.longTimeout
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
+import io.ktor.client.plugins.retry
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.Url
+import io.ktor.http.content.OutgoingContent
 import io.ktor.http.contentType
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -109,6 +111,32 @@ internal class UploadRequest(
                 isLastChunk = isLastChunk, isRetry = isRetry
             )
         ) {
+            longTimeout()
+            setBody(data)
+            onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength ?: 0) }
+        }
+    }
+
+    suspend fun uploadChunk(
+        uploadHost: String,
+        containerUUID: String,
+        fileUUID: String,
+        chunkIndex: Int,
+        isLastChunk: Boolean,
+        data: OutgoingContent.WriteChannelContent,
+        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
+    ) {
+        httpClient.post(
+            urlString = SharedApiRoutes.uploadChunk(
+                uploadHost = uploadHost,
+                containerUUID = containerUUID,
+                fileUUID = fileUUID,
+                chunkIndex = chunkIndex,
+                isLastChunk = isLastChunk,
+                isRetry = false, // Not needed anymore, including when retrying.
+            )
+        ) {
+            retry { noRetry() }
             longTimeout()
             setBody(data)
             onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength ?: 0) }

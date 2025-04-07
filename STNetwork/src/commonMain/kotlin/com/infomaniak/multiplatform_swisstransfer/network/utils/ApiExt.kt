@@ -18,7 +18,6 @@
 package com.infomaniak.multiplatform_swisstransfer.network.utils
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
-import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import io.ktor.client.call.body
@@ -26,14 +25,17 @@ import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.statement.HttpResponse
 import io.ktor.utils.io.CancellationException
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 const val CONTENT_REQUEST_ID_HEADER = "x-request-id"
 
 internal fun HttpRequestBuilder.longTimeout() {
     timeout {
-        requestTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
-        connectTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
-        socketTimeoutMillis = ApiClientProvider.REQUEST_LONG_TIMEOUT
+        requestTimeoutMillis = 1.hours.inWholeMilliseconds // Be permissive for DSL or slow mobile connections.
+        connectTimeoutMillis = 10.seconds.inWholeMilliseconds // Don't let the user wait too long for connection.
+        socketTimeoutMillis = 1.minutes.inWholeMilliseconds // Be permissive if packets are slow to be delivered.
     }
 }
 
