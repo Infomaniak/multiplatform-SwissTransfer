@@ -132,7 +132,8 @@ internal class UploadRequest(
                 containerUUID = containerUUID,
                 fileUUID = fileUUID,
                 chunkIndex = chunkIndex,
-                isLastChunk = isLastChunk, isRetry = false
+                isLastChunk = isLastChunk,
+                isRetry = false, // Not needed anymore, including when retrying.
             )
         ) {
             retry { noRetry() }
