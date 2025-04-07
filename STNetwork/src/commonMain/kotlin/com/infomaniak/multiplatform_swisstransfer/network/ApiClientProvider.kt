@@ -38,6 +38,7 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.CancellationException
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.seconds
 
 class ApiClientProvider internal constructor(
     engine: HttpClientEngine? = null,
@@ -70,9 +71,10 @@ class ApiClientProvider internal constructor(
                 gzip()
             }
             install(HttpTimeout) {
-                requestTimeoutMillis = REQUEST_TIMEOUT
-                connectTimeoutMillis = REQUEST_TIMEOUT
-                socketTimeoutMillis = REQUEST_TIMEOUT
+                // Each value can be fine-tuned independently, hence the value not being shared.
+                requestTimeoutMillis = 10.seconds.inWholeMilliseconds
+                connectTimeoutMillis = 10.seconds.inWholeMilliseconds
+                socketTimeoutMillis = 10.seconds.inWholeMilliseconds
             }
             install(HttpRequestRetry) {
                 retryOnExceptionIf(maxRetries = MAX_RETRY) { _, cause ->
@@ -118,8 +120,6 @@ class ApiClientProvider internal constructor(
     private fun Throwable.isNetworkException() = this is IOException
 
     companion object {
-        const val REQUEST_TIMEOUT = 10_000L
         private const val MAX_RETRY = 3
-        const val REQUEST_LONG_TIMEOUT = 60_000L
     }
 }
