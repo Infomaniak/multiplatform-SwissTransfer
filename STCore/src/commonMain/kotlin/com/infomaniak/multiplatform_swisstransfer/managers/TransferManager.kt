@@ -347,7 +347,7 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun deleteTransfer(transferUUID: String) = withContext(Dispatchers.Default) {
+    suspend fun deleteTransfer(transferUUID: String): Unit = withContext(Dispatchers.Default) {
         transferController.deleteTransfer(transferUUID)
     }
 
