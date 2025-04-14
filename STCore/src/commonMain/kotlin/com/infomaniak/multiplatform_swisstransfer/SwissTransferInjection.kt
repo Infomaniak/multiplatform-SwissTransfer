@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.SentryInterface
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.*
@@ -37,6 +38,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property environment Customize client api base url, for example [ApiEnvironment.Prod]
  * @property userAgent Customize client api userAgent.
  * @property databaseRootDirectory Customize root directory for realm, eg. iOS app group container.
+ * @property sentry An abstract Sentry used to log error and add breadcrumbs.
  * @property transferManager A manager used to orchestrate transfer operations.
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
@@ -49,6 +51,7 @@ class SwissTransferInjection(
     private val environment: ApiEnvironment,
     private val userAgent: String,
     private val databaseRootDirectory: String? = null,
+    private val sentry: SentryInterface,
 ) {
 
     private val realmProvider by lazy { RealmProvider(databaseRootDirectory) }
