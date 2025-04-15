@@ -19,4 +19,5 @@ package com.infomaniak.multiplatform_swisstransfer.utils
 
 object FileUtils {
     const val MAX_FILES_SIZE = 50L * 1_024 * 1_024 * 1_024 // 50 GiB
+    const val MAX_FILE_COUNT = 5_000
 }
