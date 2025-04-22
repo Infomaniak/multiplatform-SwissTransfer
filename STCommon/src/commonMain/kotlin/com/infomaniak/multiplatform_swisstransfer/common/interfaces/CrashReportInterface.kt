@@ -26,7 +26,6 @@ public enum class CrashReportLevel {
 }
 
 public interface CrashReportInterface {
-
     /**
      * Adds a breadcrumb to the crash reporting system to provide contextual information
      * leading up to a potential crash.
@@ -34,13 +33,13 @@ public interface CrashReportInterface {
      * @param message A descriptive message for the breadcrumb, explaining the event or action.
      * @param category A category string to group related breadcrumbs (e.g., "UI", "Network").
      * @param level The severity level of the breadcrumb (e.g., info, warning, error).
-     * @param metadata Optional additional metadata providing more context about the event.
+     * @param data Optional additional data providing more context about the event.
      */
     fun addBreadcrumb(
         message: String,
         category: String,
         level: CrashReportLevel,
-        metadata: Map<String, Any>? = null
+        data: Map<String, Any>? = null
     )
 
     /**
