@@ -17,7 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces
 
-public enum class SentryLevel {
+public enum class CrashReportLevel {
     DEBUG,
     INFO,
     WARNING,
@@ -25,11 +25,11 @@ public enum class SentryLevel {
     FATAL
 }
 
-public interface SentryInterface {
+public interface CrashReportInterface {
     fun addBreadcrumb(
         message: String,
         category: String,
-        level: SentryLevel,
+        level: CrashReportLevel,
         metadata: Map<String, Any>? = null
     )
 
@@ -44,7 +44,7 @@ public interface SentryInterface {
         message: String,
         context: Map<String, Any>? = null,
         contextKey: String? = null,
-        level: SentryLevel? = null,
+        level: CrashReportLevel? = null,
         extras: Map<String, Any>? = null
     )
 }
