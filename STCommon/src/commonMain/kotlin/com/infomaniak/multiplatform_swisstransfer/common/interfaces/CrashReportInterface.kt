@@ -51,13 +51,11 @@ public interface CrashReportInterface {
      * @param context Optional contextual data to provide more insight into the environment
      *                or state when the error occurred.
      * @param contextKey An optional key to identify or categorize the provided context.
-     * @param extras Optional additional metadata to include in the report for debugging purposes.
      */
     fun capture(
         error: Throwable,
         context: Map<String, Any>? = null,
-        contextKey: String? = null,
-        extras: Map<String, Any>? = null
+        contextKey: String? = null
     )
 
     /**
@@ -69,14 +67,12 @@ public interface CrashReportInterface {
      *                or state when the message was logged.
      * @param contextKey An optional key to categorize or identify the provided context data.
      * @param level The severity level of the message (e.g., `info`, `warning`, `error`).
-     * @param extras Optional additional metadata to include with the message for debugging purposes.
      */
     fun capture(
         message: String,
         context: Map<String, Any>? = null,
         contextKey: String? = null,
-        level: CrashReportLevel? = null,
-        extras: Map<String, Any>? = null
+        level: CrashReportLevel? = null
     )
 }
 
