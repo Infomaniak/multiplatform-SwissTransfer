@@ -28,7 +28,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
-import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
@@ -58,12 +57,10 @@ import kotlin.time.TimeSource
  * smooth and efficient data transfers, providing a centralized management point
  * for transfer-related activities.
  *
- * @property clientProvider The provider for creating and configuring HTTP clients for API communication.
  * @property transferController The provider for transfer data from database.
  * @property transferRepository The provider for transfer data from api.
  */
 class TransferManager internal constructor(
-    private val clientProvider: ApiClientProvider,
     private val transferController: TransferController,
     private val transferRepository: TransferRepository,
 ) {
