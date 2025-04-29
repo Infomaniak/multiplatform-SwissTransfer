@@ -220,11 +220,9 @@ class TransferController(private val realmProvider: RealmProvider) {
     suspend fun removeData() = realmProvider.withTransfersDb { realm ->
         realm.write { deleteAll() }
     }
-
     //endregion
 
-    //region DownloadManager id
-
+    //region DownloadManager ID
     suspend fun writeDownloadManagerId(
         transferUUID: String,
         fileUid: String?,
@@ -253,7 +251,6 @@ class TransferController(private val realmProvider: RealmProvider) {
     fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> = realmProvider.flowWithTransfersDb { realm ->
         getDownloadManagerIdQuery(realm, transferUUID, fileUid).asFlow().map { it.obj?.downloadManagerUniqueId }
     }
-
     //endregion
 
     private companion object {
