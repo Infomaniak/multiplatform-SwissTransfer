@@ -24,7 +24,9 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferC
 import com.infomaniak.multiplatform_swisstransfer.database.dataset.DummyTransfer
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
 import io.realm.kotlin.UpdatePolicy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlin.collections.first
 import kotlin.test.*
 
 class TransferControllerTest {
@@ -70,6 +72,56 @@ class TransferControllerTest {
         assertNotNull(transfers)
         assertEquals(1, transfers.count(), "The transfers list must contain 1 item")
         assertEquals(transferDirection, transfers.first().transferDirection)
+    }
+
+    @Test
+    fun canGetAllTransfersFlow() = runTest {
+        addTwoRandomTransfersInDatabase()
+        val transfers = transferController.getAllTransfersFlow().first()
+        assertEquals(2, transfers.count(), "The transfers list must contain 2 items")
+    }
+
+    @Test
+    fun canGetSortedTransfersFlow() = runTest {
+        addTwoRandomTransfersInDatabase()
+
+        val transferDirection = TransferDirection.SENT
+        transferController.insert(DummyTransfer.expired, transferDirection, DummyTransfer.expired.password)
+        transferController.insert(DummyTransfer.notExpired, transferDirection, DummyTransfer.notExpired.password)
+
+        val (validTransfers, expiredTransfers) = transferController.getSortedTransfersFlow(transferDirection).first()
+
+        assertEquals(1, validTransfers.count(), "The valid transfers list must contain 1 items")
+        assertEquals(
+            expected = DummyTransfer.notExpired.linkUUID,
+            actual = validTransfers.first().linkUUID,
+            message = "The transfer in `validTransfers` should be `notExpired`",
+        )
+
+        assertEquals(1, expiredTransfers.count(), "The expired transfers list must contain 1 items")
+        assertEquals(
+            expected = DummyTransfer.expired.linkUUID,
+            actual = expiredTransfers.first().linkUUID,
+            message = "The transfer in `expiredTransfers` should be `expired`",
+        )
+    }
+
+    @Test
+    fun canGetTransfersCountFlow() = runTest {
+        addTwoRandomTransfersInDatabase()
+        val count = transferController.getTransfersCountFlow(TransferDirection.SENT).first()
+        assertEquals(1, count, "The transfers list must contain 1 item")
+    }
+
+    @Test
+    fun canGetTransferFlow() = runTest {
+        transferController.insert(DummyTransfer.transfer1, TransferDirection.SENT, DummyTransfer.expired.password)
+        val transfer = transferController.getTransferFlow(DummyTransfer.transfer1.linkUUID).first()
+        assertEquals(
+            expected = DummyTransfer.transfer1.linkUUID,
+            actual = transfer?.linkUUID,
+            message = "The transfer should be `transfer1`",
+        )
     }
 
     @Test

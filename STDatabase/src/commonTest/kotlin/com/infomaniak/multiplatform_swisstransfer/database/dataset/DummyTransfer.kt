@@ -70,6 +70,7 @@ object DummyTransfer {
     val transfer2 = object : Transfer by transfer1 {
         override val linkUUID: String = "transfer2"
         override val containerUUID: String = "container2"
+        override var downloadCounterCredit: Int = 1
         override var expiredDateTimestamp: Long = 4_102_441_200L // 01/01/2100
         override val container: Container = container2
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
