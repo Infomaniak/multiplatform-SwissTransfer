@@ -32,6 +32,7 @@ class TransferControllerTest {
     private lateinit var realmProvider: RealmProvider
     private lateinit var transferController: TransferController
 
+    //region Configure tests
     @BeforeTest
     fun setup() = runTest {
         realmProvider = RealmProvider(loadDataInMemory = true).apply { openTransfersDb(userId = 0) }
@@ -43,22 +44,14 @@ class TransferControllerTest {
         transferController.removeData()
         realmProvider.closeTransfersDb()
     }
+    //endregion
 
-    @Test
-    fun canCreateSentTransfer() = runTest {
-        canCreateTransfer(TransferDirection.SENT)
-    }
-
-    @Test
-    fun canCreateReceivedTransfer() = runTest {
-        canCreateTransfer(TransferDirection.RECEIVED)
-    }
-
+    //region Get data
     @Test
     fun canGetTransfers() = runTest {
         addTwoRandomTransfersInDatabase()
         val transfers = transferController.getTransfers()
-        assertEquals(2, transfers.count(), "The transfer list must contain 2 items")
+        assertEquals(2, transfers.count(), "The transfers list must contain 2 items")
     }
 
     @Test
@@ -71,6 +64,14 @@ class TransferControllerTest {
         canGetTransfersByDirection(TransferDirection.RECEIVED)
     }
 
+    private suspend fun canGetTransfersByDirection(transferDirection: TransferDirection) {
+        addTwoRandomTransfersInDatabase()
+        val transfers = transferController.getTransfers(transferDirection)
+        assertNotNull(transfers)
+        assertEquals(1, transfers.count(), "The transfers list must contain 1 item")
+        assertEquals(transferDirection, transfers.first().transferDirection)
+    }
+
     @Test
     fun canGetNotReadyTransfers() = runTest {
         addTwoRandomTransfersInDatabase()
@@ -79,6 +80,47 @@ class TransferControllerTest {
         assertEquals(transfers.first().transferStatus, TransferStatus.WAIT_VIRUS_CHECK)
     }
 
+    @Test
+    fun canFetchOrphanContainers() = runTest {
+        assertEquals(0, transferController.getOrphanContainers().count(), "We should NOT have an orphan container")
+
+        realmProvider.withTransfersDb { realm ->
+            realm.write { copyToRealm(ContainerDB(DummyTransfer.container2), UpdatePolicy.ALL) }
+        }
+
+        assertEquals(1, transferController.getOrphanContainers().count(), "We should have an orphan container")
+    }
+
+    private suspend fun addTwoRandomTransfersInDatabase() {
+        DummyTransfer.transfers.take(2).forEachIndexed { index, transfer ->
+            val transferDirection = if (index == 0) TransferDirection.SENT else TransferDirection.RECEIVED
+            transferController.insert(transfer, transferDirection, transfer.password)
+        }
+    }
+    //endregion
+
+    //region Upsert data
+    @Test
+    fun canCreateSentTransfer() = runTest {
+        canCreateTransfer(TransferDirection.SENT)
+    }
+
+    @Test
+    fun canCreateReceivedTransfer() = runTest {
+        canCreateTransfer(TransferDirection.RECEIVED)
+    }
+
+    private suspend fun canCreateTransfer(sent: TransferDirection) {
+        val transfer = DummyTransfer.transfer1
+        transferController.insert(transfer, sent, transfer.password)
+        val realmTransfer = transferController.getTransfer(transfer.linkUUID)
+        assertNotNull(realmTransfer, "The transfer cannot be null")
+        assertEquals(sent, realmTransfer.transferDirection)
+        assertEquals(transfer.container?.uuid, realmTransfer.container?.uuid, "The container is missing")
+    }
+    //endregion
+
+    //region Update data
     @Test
     fun canUpdateAnExistingTransfer() = runTest {
         // Insert a transfer
@@ -102,6 +144,42 @@ class TransferControllerTest {
     }
 
     @Test
+    fun ensureTransferStatusIsPreservedOnUpdateIfDownloadCounterCreditIsMoreThanZero() = runTest {
+        val transfer = DummyTransfer.transfer3
+
+        val initialTransferStatus = transfer.transferStatus
+
+        assertTrue(transfer.downloadCounterCredit > 0, "downloadCounterCredit must be greater than 0")
+
+        transferController.insert(transfer, TransferDirection.SENT, transfer.password)
+        val realmTransfer = transferController.getTransfer(transfer.linkUUID)!!
+
+        transferController.update(realmTransfer)
+        val realmTransfer2 = transferController.getTransfer(transfer.linkUUID)!!
+
+        assertEquals(initialTransferStatus, realmTransfer2.transferStatus)
+    }
+
+    @Test
+    fun ensureTransferStatusIsExpiredDownloadQuotaOnUpdateIfDownloadCounterCreditIsZero() = runTest {
+        val transfer = DummyTransfer.transfer4
+
+        val initialTransferStatus = transfer.transferStatus
+
+        assertTrue(transfer.downloadCounterCredit == 0, "downloadCounterCredit must be equal to 0")
+
+        assertEquals(transfer.downloadCounterCredit, 0)
+
+        transferController.insert(transfer, TransferDirection.SENT, transfer.password)
+        val realmTransfer = transferController.getTransfer(transfer.linkUUID)!!
+
+        transferController.update(realmTransfer)
+        val realmTransfer2 = transferController.getTransfer(transfer.linkUUID)!!
+
+        assertNotEquals(initialTransferStatus, realmTransfer2.transferStatus)
+    }
+
+    @Test
     fun canDeleteExpiredTransfers() = runTest {
 
         transferController.insert(DummyTransfer.expired, TransferDirection.SENT, password = null)
@@ -113,12 +191,12 @@ class TransferControllerTest {
         assertEquals(
             expected = 1,
             actual = transfers.count(),
-            message = "The transfers table should contain only 1 transfer"
+            message = "The transfers table should contain only 1 transfer",
         )
         assertEquals(
             expected = DummyTransfer.notExpired.linkUUID,
             actual = transfers.first().linkUUID,
-            message = "The remaining transfer should be `notExpired`"
+            message = "The remaining transfer should be `notExpired`",
         )
     }
 
@@ -137,77 +215,5 @@ class TransferControllerTest {
         assertEquals(0, transferController.getContainers().count(), "The containers table must be empty")
         assertEquals(0, transferController.getFiles().count(), "The files table must be empty")
     }
-
-    @Test
-    fun canFetchOrphanContainers() = runTest {
-        assertEquals(0, transferController.getOrphanContainers().count(), "We should NOT have an orphan container")
-
-        realmProvider.withTransfersDb { realm ->
-            realm.write {
-                copyToRealm(ContainerDB(DummyTransfer.container2), UpdatePolicy.ALL)
-            }
-        }
-
-        assertEquals(1, transferController.getOrphanContainers().count(), "We should have an orphan container")
-    }
-
-    @Test
-    fun ensureTransferStatusIsPreservedOnUpdateIfDownloadCounterCreditIsMoreThanZero() = runTest {
-        val transfer = DummyTransfer.transfer3
-
-        val initialTransferStatus = transfer.transferStatus
-
-        assertTrue(transfer.downloadCounterCredit > 0, "downloadCounterCredit must be greater than 0.")
-
-        transferController.insert(transfer, TransferDirection.SENT, transfer.password)
-        val realmTransfer = transferController.getTransfer(transfer.linkUUID)!!
-
-        transferController.update(realmTransfer)
-        val realmTransfer2 = transferController.getTransfer(transfer.linkUUID)!!
-
-        assertEquals(initialTransferStatus, realmTransfer2.transferStatus)
-    }
-
-    @Test
-    fun ensureTransferStatusIsExpiredDownloadQuotaOnUpdateIfDownloadCounterCreditIsZero() = runTest {
-        val transfer = DummyTransfer.transfer4
-
-        val initialTransferStatus = transfer.transferStatus
-
-        assertTrue(transfer.downloadCounterCredit == 0, "downloadCounterCredit must be equal to 0.")
-
-        assertEquals(transfer.downloadCounterCredit, 0)
-
-        transferController.insert(transfer, TransferDirection.SENT, transfer.password)
-        val realmTransfer = transferController.getTransfer(transfer.linkUUID)!!
-
-        transferController.update(realmTransfer)
-        val realmTransfer2 = transferController.getTransfer(transfer.linkUUID)!!
-
-        assertNotEquals(initialTransferStatus, realmTransfer2.transferStatus)
-    }
-
-    private suspend fun canCreateTransfer(sent: TransferDirection) {
-        val transfer = DummyTransfer.transfer1
-        transferController.insert(transfer, sent, transfer.password)
-        val realmTransfer = transferController.getTransfer(transfer.linkUUID)
-        assertNotNull(realmTransfer, "The transfer cannot be null")
-        assertEquals(sent, realmTransfer.transferDirection)
-        assertEquals(transfer.container?.uuid, realmTransfer.container?.uuid, "The container is missing")
-    }
-
-    private suspend fun addTwoRandomTransfersInDatabase() {
-        DummyTransfer.transfers.take(2).forEachIndexed { index, transfer ->
-            val transferDirection = if (index == 0) TransferDirection.SENT else TransferDirection.RECEIVED
-            transferController.insert(transfer, transferDirection, transfer.password)
-        }
-    }
-
-    private suspend fun canGetTransfersByDirection(transferDirection: TransferDirection) {
-        addTwoRandomTransfersInDatabase()
-        val transfers = transferController.getTransfers(transferDirection)
-        assertNotNull(transfers)
-        assertEquals(1, transfers.count(), "The transfer list must contain 1 item")
-        assertEquals(transferDirection, transfers.first().transferDirection)
-    }
+    //endregion
 }
