@@ -41,7 +41,6 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.query.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
@@ -60,10 +59,13 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getSortedTransfersFlow(
-        transferDirection: TransferDirection,
-    ): Flow<Pair<List<Transfer>, List<Transfer>>> = realmProvider.flowWithTransfersDb {
-        getSortedTransfersFlow(realmProvider, transferDirection)
+    fun getValidTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
+        getValidTransfersFlow(realmProvider, transferDirection)
+    }
+
+    @Throws(RealmException::class)
+    fun getExpiredTransfersFlow(transferDirection: TransferDirection): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
+        getExpiredTransfersFlow(realmProvider, transferDirection)
     }
 
     @Throws(RealmException::class)
@@ -310,15 +312,19 @@ class TransferController(private val realmProvider: RealmProvider) {
         }
 
         @Throws(RealmException::class, CancellationException::class)
-        private suspend fun getSortedTransfersFlow(
+        private suspend fun getValidTransfersFlow(
             realmProvider: RealmProvider,
             transferDirection: TransferDirection,
-        ): Flow<Pair<List<TransferDB>, List<TransferDB>>> = realmProvider.withTransfersDb { realm ->
+        ): Flow<List<TransferDB>> = realmProvider.withTransfersDb { realm ->
+            return@withTransfersDb getValidTransfersQuery(realm, transferDirection).asFlow().map { it.list }
+        }
 
-            val validTransfers = getValidTransfersQuery(realm, transferDirection).asFlow()
-            val expiredTransfers = getExpiredTransfersQuery(realm, transferDirection).asFlow()
-
-            return@withTransfersDb validTransfers.combine(expiredTransfers) { valid, expired -> valid.list to expired.list }
+        @Throws(RealmException::class, CancellationException::class)
+        private suspend fun getExpiredTransfersFlow(
+            realmProvider: RealmProvider,
+            transferDirection: TransferDirection,
+        ): Flow<List<TransferDB>> = realmProvider.withTransfersDb { realm ->
+            return@withTransfersDb getExpiredTransfersQuery(realm, transferDirection).asFlow().map { it.list }
         }
 
         @Throws(RealmException::class, CancellationException::class)

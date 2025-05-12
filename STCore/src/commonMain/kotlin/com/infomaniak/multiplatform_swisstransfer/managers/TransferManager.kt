@@ -38,6 +38,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
@@ -92,8 +93,10 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class)
     fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> {
-        return transferController.getSortedTransfersFlow(transferDirection)
-            .map { SortedTransfers(it.first.mapToList(::TransferUi), it.second.mapToList(::TransferUi)) }
+        return transferController.getValidTransfersFlow(transferDirection)
+            .combine(transferController.getExpiredTransfersFlow(transferDirection)) { valid, expired ->
+                SortedTransfers(valid.mapToList(::TransferUi), expired.mapToList(::TransferUi))
+            }
     }
 
     @Throws(RealmException::class)
