@@ -60,7 +60,7 @@ class SwissTransferInjection(
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
 
-    private val appSettingsController by lazy { AppSettingsController(realmProvider) }
+    private val appSettingsController by lazy { AppSettingsController(realmProvider, crashReport) }
     private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
     private val uploadController by lazy { UploadController(realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
