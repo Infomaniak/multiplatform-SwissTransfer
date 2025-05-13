@@ -38,6 +38,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
@@ -69,18 +70,33 @@ class TransferManager internal constructor(
     private var lastUpdateDate: TimeMark = TimeSource.Monotonic.markNow() - (minDurationBetweenAutoUpdates + 1.seconds)
 
     /**
+     * Retrieves a flow of all transfers.
+     *
+     * @see addTransferByUrl
+     * @see addTransferByLinkUUID
+     *
+     * @return A `Flow` that emits the list of all transfers.
+     */
+    @Throws(RealmException::class)
+    fun getAllTransfers(): Flow<List<TransferUi>> {
+        return transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) }
+    }
+
+    /**
      * Retrieves a flow of transfers based on the specified transfer direction.
      *
      * @see addTransferByUrl
      * @see addTransferByLinkUUID
      *
-     * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]) or null to get both.
+     * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
     @Throws(RealmException::class)
-    fun getTransfers(transferDirection: TransferDirection? = null): Flow<List<TransferUi>> {
-        return transferController.getTransfersFlow(transferDirection)
-            .map { it.mapToList { transfer -> TransferUi(transfer) } }
+    fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> {
+        return transferController.getValidTransfersFlow(transferDirection)
+            .combine(transferController.getExpiredTransfersFlow(transferDirection)) { valid, expired ->
+                SortedTransfers(valid.mapToList(::TransferUi), expired.mapToList(::TransferUi))
+            }
     }
 
     @Throws(RealmException::class)
@@ -231,7 +247,8 @@ class TransferManager internal constructor(
      *
      * Some data are not part of the API and we need to save them manually like [password] and [recipientsEmails].
      *
-     * @see getTransfers
+     * @see getAllTransfers
+     * @see getSortedTransfers
      *
      * @param linkUUID The UUID corresponding to the uploaded transfer link or transferUUID.
      * @param password The transfer password if protected
@@ -286,7 +303,8 @@ class TransferManager internal constructor(
      * the corresponding transfer, and after the transfer is successfully retrieved, it is saved to
      * the database.
      *
-     * @see getTransfers
+     * @see getAllTransfers
+     * @see getSortedTransfers
      *
      * @param url The URL associated with the transfer to retrieve.
      *
@@ -379,4 +397,9 @@ class TransferManager internal constructor(
             throw UnknownException(it)
         }
     }
+
+    data class SortedTransfers(
+        val validTransfers: List<TransferUi>,
+        val expiredTransfers: List<TransferUi>,
+    )
 }
