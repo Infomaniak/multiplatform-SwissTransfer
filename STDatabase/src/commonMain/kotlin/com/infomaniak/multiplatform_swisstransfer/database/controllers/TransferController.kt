@@ -48,11 +48,6 @@ import kotlin.coroutines.cancellation.CancellationException
 class TransferController(private val realmProvider: RealmProvider) {
 
     //region Get data
-    @Throws(RealmException::class, CancellationException::class)
-    internal suspend fun getTransfers(
-        transferDirection: TransferDirection? = null
-    ): List<TransferDB> = getTransfers(realmProvider, transferDirection)
-
     @Throws(RealmException::class)
     fun getAllTransfersFlow(): Flow<List<Transfer>> = realmProvider.flowWithTransfersDb {
         getAllTransfersFlow(realmProvider)
@@ -290,18 +285,6 @@ class TransferController(private val realmProvider: RealmProvider) {
                 null -> TRUE_PREDICATE
                 else -> "${TransferDB.transferDirectionPropertyName} == '${transferDirection}'"
             }
-        }
-
-        @Throws(RealmException::class, CancellationException::class)
-        private suspend fun getTransfers(
-            realmProvider: RealmProvider,
-            transferDirection: TransferDirection?,
-        ): List<TransferDB> = realmProvider.withTransfersDb { realm ->
-
-            val validTransfers = getValidTransfersQuery(realm, transferDirection).findSuspend()
-            val expiredTransfers = getExpiredTransfersQuery(realm, transferDirection).findSuspend()
-
-            return@withTransfersDb validTransfers + expiredTransfers
         }
 
         @Throws(RealmException::class, CancellationException::class)
