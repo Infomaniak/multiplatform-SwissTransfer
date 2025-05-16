@@ -51,8 +51,8 @@ class AppSettingsController(private val realmProvider: RealmProvider, private va
     fun getAppSettingsFlow(): Flow<AppSettings?> = runThrowingRealm {
         return appSettingsQuery.asFlow()
             .map { it.obj }
-            .catch {
-                crashReport.capture(message = "An error occurred while getting appSettings from Realm DB", it)
+            .catch { exception ->
+                crashReport.capture(message = "An error occurred while getting appSettings from Realm DB", exception)
                 emit(null)
             }
     }
