@@ -39,7 +39,7 @@ public interface CrashReportInterface {
         message: String,
         category: String,
         level: CrashReportLevel,
-        data: Map<String, Any>? = null
+        data: Map<String, String>? = null
     )
 
     /**
@@ -48,15 +48,12 @@ public interface CrashReportInterface {
      *
      * @param message A custom message to be reported (e.g., an error message or event description).
      * @param error The [Throwable] to be reported.
-     * @param data Optional contextual data to provide more insight into the environment
-     *                or state when the error occurred.
-     * @param dataKey An optional string representing the key of the data.
+     * @param data Optional contextual data to provide more insight into the environment or state when the error occurred.
      */
     fun capture(
         message: String,
         error: Throwable,
-        data: Map<String, Any>? = null,
-        dataKey: String? = null,
+        data: Map<String, String>? = null,
     )
 
     /**
@@ -66,14 +63,11 @@ public interface CrashReportInterface {
      * @param message The custom message to be reported (e.g., an error message or event description).
      * @param data Optional contextual data that provides additional information about the environment
      *                or state when the message was logged.
-     * @param dataKey An optional string representing the key of the data.
      * @param level The severity level of the message (e.g., `info`, `warning`, `error`).
      */
     fun capture(
         message: String,
-        data: Map<String, Any>? = null,
-        dataKey: String? = null,
+        data: Map<String, String>? = null,
         level: CrashReportLevel? = null
     )
 }
-
