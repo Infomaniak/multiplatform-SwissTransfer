@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.*
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
@@ -26,10 +27,11 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runT
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.cancellation.CancellationException
 
-class AppSettingsController(private val realmProvider: RealmProvider) {
+class AppSettingsController(private val realmProvider: RealmProvider, private val crashReport: CrashReportInterface) {
 
     private val realm by lazy { realmProvider.appSettings }
 
@@ -47,7 +49,12 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     //region Get data
     @Throws(RealmException::class)
     fun getAppSettingsFlow(): Flow<AppSettings?> = runThrowingRealm {
-        return appSettingsQuery.asFlow().map { it.obj }
+        return appSettingsQuery.asFlow()
+            .map { it.obj }
+            .catch { exception ->
+                crashReport.capture(message = "An error occurred while getting appSettings from Realm DB", exception)
+                emit(null)
+            }
     }
 
     @Throws(RealmException::class)
