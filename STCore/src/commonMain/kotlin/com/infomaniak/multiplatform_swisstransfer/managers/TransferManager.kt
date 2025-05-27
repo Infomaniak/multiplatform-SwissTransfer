@@ -367,6 +367,26 @@ class TransferManager internal constructor(
     }
 
     /**
+     * Delete a transfer by deeplink.
+     *
+     * @param transferUUID The UUID of the transfer to be removed.
+     * @param token Delete token.
+     *
+     * @throws CancellationException If the operation is cancelled.
+     * @throws RealmException An error has occurred with realm database
+     */
+    @Throws(
+        CancellationException::class,
+        ApiErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun deleteTransfer(transferUUID: String, token: String): Unit = withContext(Dispatchers.Default) {
+        transferRepository.delete(transferUUID, token)
+    }
+
+    /**
      * Delete Transfers that are expired since a certain amount of days.
      *
      * @throws CancellationException If the operation is cancelled.

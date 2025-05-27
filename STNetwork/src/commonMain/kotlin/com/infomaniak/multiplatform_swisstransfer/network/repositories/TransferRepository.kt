@@ -105,5 +105,24 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         return transferRequest.generateDownloadToken(JsonObject(bodyMap))
     }
 
+    @Throws(
+        CancellationException::class,
+        ApiErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+    )
+    suspend fun delete(
+        linkUUID: String,
+        token: String
+    ): Boolean {
+        val bodyMap = mapOf(
+            "linkUUID" to JsonPrimitive(linkUUID),
+            "token" to JsonPrimitive(token),
+        )
+        return transferRequest.deleteTransfer(JsonObject(bodyMap))
+    }
+
+
     internal fun extractUUID(url: String) = url.substringAfterLast("/")
 }

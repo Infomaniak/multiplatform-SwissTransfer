@@ -28,6 +28,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlin.io.encoding.Base64
@@ -49,6 +50,16 @@ internal class TransferRequest(
                 }
             }
         )
+    }
+
+    suspend fun deleteTransfer(jsonBody: JsonObject): Boolean {
+        val response = httpClient.post(
+            url = createUrl(ApiRoutes.disableLinks())
+        ) {
+            contentType(ContentType.Application.Json)
+            setBody(jsonBody)
+        }
+        return response.status.isSuccess()
     }
 
     suspend fun generateDownloadToken(jsonBody: JsonObject): String {
