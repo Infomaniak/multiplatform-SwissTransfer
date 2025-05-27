@@ -116,11 +116,7 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         linkUUID: String,
         token: String
     ): Boolean {
-        val bodyMap = mapOf(
-            "linkUUID" to JsonPrimitive(linkUUID),
-            "token" to JsonPrimitive(token),
-        )
-        return transferRequest.deleteTransfer(JsonObject(bodyMap))
+        return transferRequest.deleteTransfer(linkUUID, token)
     }
 
 
