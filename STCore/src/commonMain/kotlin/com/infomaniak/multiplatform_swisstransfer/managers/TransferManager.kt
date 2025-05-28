@@ -377,6 +377,7 @@ class TransferManager internal constructor(
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
      * @throws NetworkException If there is a network issue during the transfer retrieval.
      * @throws UnknownException Any error not already handled by the above ones.
+     * @throws RealmException An error has occurred with realm database
      */
     @Throws(
         CancellationException::class,
@@ -384,9 +385,11 @@ class TransferManager internal constructor(
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
+        RealmException::class
     )
     suspend fun deleteTransfer(transferUUID: String, token: String): Unit = withContext(Dispatchers.Default) {
         transferRepository.delete(transferUUID, token)
+        transferController.deleteTransfer(transferUUID)
     }
 
     /**
