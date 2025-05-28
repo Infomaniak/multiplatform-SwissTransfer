@@ -28,8 +28,11 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -49,6 +52,21 @@ internal class TransferRequest(
                 }
             }
         )
+    }
+
+    suspend fun deleteTransfer(linkUUID: String, token: String): Boolean {
+        val payload = buildJsonObject {
+            put("linkUUID", linkUUID)
+            put("token", token)
+        }
+
+        val response = httpClient.post(
+            url = createUrl(ApiRoutes.disableLinks())
+        ) {
+            contentType(ContentType.Application.Json)
+            setBody(payload)
+        }
+        return response.status.isSuccess()
     }
 
     suspend fun generateDownloadToken(jsonBody: JsonObject): String {
