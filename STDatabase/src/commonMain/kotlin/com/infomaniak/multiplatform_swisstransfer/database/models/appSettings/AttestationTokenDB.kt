@@ -21,7 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 
-class AttestationTokenDB()  : RealmObject, UploadToken {
+class AttestationTokenDB() : RealmObject, UploadToken {
 
     @PrimaryKey
     override var token: String = ""

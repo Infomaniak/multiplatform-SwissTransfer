@@ -49,7 +49,7 @@ data class NewUploadSession(
         language: EmailLanguage,
         recipientsEmails: Set<String>,
         files: List<UploadFileSession>,
-    ) : this (
+    ) : this(
         duration = duration,
         authorEmail = authorEmail,
         authorEmailToken = authorEmailToken,
