@@ -23,7 +23,11 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.Transf
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class TransferRepositoryTest {
 
