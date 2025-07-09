@@ -19,10 +19,10 @@ package com.infomaniak.multiplatform_swisstransfer.utils
 
 import com.infomaniak.multiplatform_swisstransfer.data.DeeplinkType
 
-interface DeeplinkTypeIos: DeeplinkType {
-    data class ImportTransferFromExtension(override val uuid: String): DeeplinkTypeIos {
+open class DeeplinkTypeIos(uuid: String) : DeeplinkType(uuid) {
+    data class ImportTransferFromExtension(val uuid: String): DeeplinkTypeIos(uuid) {
         companion object {
-            private val REGEX = "^https://.+/import?uuid=(?<uuid>[^?]+)$".toRegex()
+            private val REGEX = "^https://.+/import\\?uuid=(?<uuid>[^?]+)$".toRegex()
 
             fun fromURL(url: String): ImportTransferFromExtension? {
                 val matchResult = REGEX.matchEntire(url) ?: return null

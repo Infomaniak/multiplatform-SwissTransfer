@@ -17,10 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.data
 
-interface DeeplinkType {
-    val uuid: String
-
-    data class DeleteTransfer(override val uuid: String, val token: String): DeeplinkType {
+open class DeeplinkType(uuid: String) {
+    data class DeleteTransfer(val uuid: String, val token: String): DeeplinkType(uuid) {
         companion object {
             private val REGEX = "^https://.+/d/(?<uuid>[^?]+)(\\?delete=(?<token>.+))?$".toRegex()
 
@@ -34,7 +32,7 @@ interface DeeplinkType {
         }
     }
 
-    data class OpenTransfer(override val uuid: String): DeeplinkType {
+    data class OpenTransfer(val uuid: String): DeeplinkType(uuid) {
         companion object {
             private val REGEX = "^https://.+/d/(?<uuid>[^?]+)$".toRegex()
 
