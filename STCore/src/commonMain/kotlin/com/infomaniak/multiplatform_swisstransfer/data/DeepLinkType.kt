@@ -17,8 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.data
 
-open class DeepLinkType(uuid: String) {
-    data class DeleteTransfer(val uuid: String, val token: String): DeepLinkType(uuid) {
+sealed class DeepLinkType {
+    data class DeleteTransfer(val uuid: String, val token: String) : DeepLinkType() {
         companion object {
             private val REGEX = "^https://.+/d/(?<uuid>[^?]+)(\\?delete=(?<token>.+))?$".toRegex()
 
@@ -32,7 +32,7 @@ open class DeepLinkType(uuid: String) {
         }
     }
 
-    data class OpenTransfer(val uuid: String): DeepLinkType(uuid) {
+    data class OpenTransfer(val uuid: String) : DeepLinkType() {
         companion object {
             private val REGEX = "^https://.+/d/(?<uuid>[^?]+)$".toRegex()
 
@@ -45,9 +45,25 @@ open class DeepLinkType(uuid: String) {
         }
     }
 
+    // ImportTransferFromExtension is only necessary for iOS
+    data class ImportTransferFromExtension(val uuid: String) : DeepLinkType() {
+        companion object {
+            private val REGEX = "^https://.+/import\\?uuid=(?<uuid>[^?]+)$".toRegex()
+
+            fun fromURL(url: String): ImportTransferFromExtension? {
+                val matchResult = REGEX.matchEntire(url) ?: return null
+
+                val uuid = matchResult.groups["uuid"]?.value ?: return null
+                return ImportTransferFromExtension(uuid)
+            }
+        }
+    }
+
     companion object {
         fun fromURL(url: String): DeepLinkType? {
-            return DeleteTransfer.fromURL(url) ?: OpenTransfer.fromURL(url)
+            return DeleteTransfer.fromURL(url)
+                ?: OpenTransfer.fromURL(url)
+                ?: ImportTransferFromExtension.fromURL(url)
         }
     }
 }
