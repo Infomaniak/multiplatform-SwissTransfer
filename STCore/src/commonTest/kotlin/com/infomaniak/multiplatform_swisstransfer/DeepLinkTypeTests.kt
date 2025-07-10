@@ -52,10 +52,8 @@ class DeepLinkTypeTests {
         val deleteTransfer = DeepLinkType.fromURL("$SWISSTRANSFER_PROD_URL/d/$FAKE_UUID?delete=$token")
         assertIs<DeepLinkType.DeleteTransfer>(deleteTransfer)
 
-        if (deleteTransfer is DeepLinkType.DeleteTransfer) {
-            assertEquals(FAKE_UUID, deleteTransfer.uuid)
-            assertEquals(token, deleteTransfer.token)
-        }
+        assertEquals(FAKE_UUID, deleteTransfer.uuid)
+        assertEquals(token, deleteTransfer.token)
     }
 
     @Test
@@ -92,9 +90,7 @@ class DeepLinkTypeTests {
         val openTransfer = DeepLinkType.fromURL("$SWISSTRANSFER_PROD_URL/d/$FAKE_UUID")
         assertIs<DeepLinkType.OpenTransfer>(openTransfer)
 
-        if (openTransfer is DeepLinkType.OpenTransfer) {
-            assertEquals(FAKE_UUID, openTransfer.uuid)
-        }
+        assertEquals(FAKE_UUID, openTransfer.uuid)
     }
 
     // ImportTransferFromExtension
@@ -111,9 +107,7 @@ class DeepLinkTypeTests {
         val importTransfer = DeepLinkType.fromURL("$SWISSTRANSFER_PROD_URL/import?uuid=$FAKE_UUID")
         assertIs<DeepLinkType.ImportTransferFromExtension>(importTransfer)
 
-        if (importTransfer is DeepLinkType.ImportTransferFromExtension) {
-            assertEquals(FAKE_UUID, importTransfer.uuid)
-        }
+        assertEquals(FAKE_UUID, importTransfer.uuid)
     }
 
     @Test
