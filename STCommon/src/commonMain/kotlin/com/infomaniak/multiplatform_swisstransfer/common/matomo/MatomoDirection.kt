@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.models
+package com.infomaniak.multiplatform_swisstransfer.common.matomo
 
-import com.infomaniak.multiplatform_swisstransfer.common.matomo.MatomoName
-
-enum class TransferType(val matomoValue: String) {
-    LINK(MatomoName.Link.eventName),
-    MAIL(MatomoName.Mail.eventName),
+enum class MatomoDirection(val matomoDirection: String) {
+    SENT("Sent"),
+    RECEIVED("Received"),
+    NEWTRANSFER("NewTransfer"),
+    EXISTINGTRANSFER("ExistingTransfer"),
 }

@@ -15,11 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.models
+package com.infomaniak.multiplatform_swisstransfer.common.matomo
 
-import com.infomaniak.multiplatform_swisstransfer.common.matomo.MatomoName
+enum class MatomoScreen {
+    Sent,
+    Received,
+    Settings,
+    NewTransfer,
+    NewTransferFileList,
+    VerifyMail,
+    UploadProgress,
+    UploadError,
+    UploadSuccess,
+    SentTransferDetails,
+    ReceivedTransferDetails,
+    TransferDetailsFileList,
+    ThemeSetting,
+    ValidityPeriodSetting,
+    DownloadLimitSetting,
+    EmailLanguageSetting;
 
-enum class TransferType(val matomoValue: String) {
-    LINK(MatomoName.Link.eventName),
-    MAIL(MatomoName.Mail.eventName),
+    override fun toString() = "${name}View"
 }
