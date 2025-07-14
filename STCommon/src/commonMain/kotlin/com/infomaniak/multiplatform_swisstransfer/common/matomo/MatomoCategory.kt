@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.matomo
 
-enum class MatomoCategory(val categoryName: String) {
+enum class MatomoCategory(val value: String) {
     TransferType("transferType"),
     AppUpdate("appUpdate"),
     NewTransferData("newTransferData"),
@@ -31,5 +31,5 @@ enum class MatomoCategory(val categoryName: String) {
     SettingsLocalPassword("settingsLocalPassword"),
     SettingsGlobalTheme("settingsGlobalTheme"),
     SentTransfer("sentTransfer"),
-    ReceivedTransfer("receivedTransfer");
+    ReceivedTransfer("receivedTransfer"),
 }

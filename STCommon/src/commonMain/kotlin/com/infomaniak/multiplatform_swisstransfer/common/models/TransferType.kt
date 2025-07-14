@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.models
 
 import com.infomaniak.multiplatform_swisstransfer.common.matomo.MatomoName
 
-enum class TransferType(val matomoValue: String) {
-    LINK(MatomoName.Link.eventName),
-    MAIL(MatomoName.Mail.eventName),
+enum class TransferType(val matomoName: MatomoName) {
+    LINK(MatomoName.Link),
+    MAIL(MatomoName.Mail),
 }

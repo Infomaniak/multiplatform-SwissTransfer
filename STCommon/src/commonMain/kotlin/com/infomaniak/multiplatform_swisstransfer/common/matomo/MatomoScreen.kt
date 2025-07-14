@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,23 +17,21 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.matomo
 
-enum class MatomoScreen {
-    Sent,
-    Received,
-    Settings,
-    NewTransfer,
-    NewTransferFileList,
-    VerifyMail,
-    UploadProgress,
-    UploadError,
-    UploadSuccess,
-    SentTransferDetails,
-    ReceivedTransferDetails,
-    TransferDetailsFileList,
-    ThemeSetting,
-    ValidityPeriodSetting,
-    DownloadLimitSetting,
-    EmailLanguageSetting;
-
-    override fun toString() = "${name}View"
+enum class MatomoScreen(val value: String) {
+    Sent("sent"),
+    Received("received"),
+    Settings("settings"),
+    NewTransfer("newTransfer"),
+    NewTransferFileList("newTransferFileList"),
+    VerifyMail("verifyMail"),
+    UploadProgress("uploadProgress"),
+    UploadError("uploadError"),
+    UploadSuccess("uploadSuccess"),
+    SentTransferDetails("sentTransferDetails"),
+    ReceivedTransferDetails("receivedTransferDetails"),
+    TransferDetailsFileList("transferDetailsFileList"),
+    ThemeSetting("themeSetting"),
+    ValidityPeriodSetting("validityPeriodSetting"),
+    DownloadLimitSetting("downloadLimitSetting"),
+    EmailLanguageSetting("emailLanguageSetting"),
 }
