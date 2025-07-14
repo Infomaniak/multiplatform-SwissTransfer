@@ -18,18 +18,29 @@
 package com.infomaniak.multiplatform_swisstransfer.common.matomo
 
 enum class MatomoCategory(val value: String) {
-    TransferType("transferType"),
+
+    //region Common
     AppUpdate("appUpdate"),
-    NewTransferData("newTransferData"),
     NewTransfer("newTransfer"),
-    SettingsGlobalEmailLanguage("settingsGlobalEmailLanguage"),
-    SettingsLocalEmailLanguage("settingsLocalEmailLanguage"),
-    SettingsGlobalValidityPeriod("settingsGlobalValidityPeriod"),
-    SettingsLocalValidityPeriod("settingsLocalValidityPeriod"),
-    SettingsGlobalDownloadLimit("settingsGlobalDownloadLimit"),
-    SettingsLocalDownloadLimit("settingsLocalDownloadLimit"),
-    SettingsLocalPassword("settingsLocalPassword"),
-    SettingsGlobalTheme("settingsGlobalTheme"),
-    SentTransfer("sentTransfer"),
+    NewTransferData("newTransferData"),
     ReceivedTransfer("receivedTransfer"),
+    SentTransfer("sentTransfer"),
+    SettingsGlobalDownloadLimit("settingsGlobalDownloadLimit"),
+    SettingsGlobalEmailLanguage("settingsGlobalEmailLanguage"),
+    SettingsGlobalTheme("settingsGlobalTheme"),
+    SettingsGlobalValidityPeriod("settingsGlobalValidityPeriod"),
+    SettingsLocalDownloadLimit("settingsLocalDownloadLimit"),
+    SettingsLocalEmailLanguage("settingsLocalEmailLanguage"),
+    SettingsLocalPassword("settingsLocalPassword"),
+    SettingsLocalValidityPeriod("settingsLocalValidityPeriod"),
+    TransferType("transferType"),
+    //endregion
+
+    //region iOS
+    ImportFileFromFileList("importFileFromFileList"),
+    ImportFileFromNewTransfer("importFileFromNewTransfer"),
+    ImportFileFromReceived("importFileFromReceived"),
+    ImportFileFromSent("importFileFromSent"),
+    ImportFileFromSidebar("importFileFromSidebar"),
+    //endregion
 }
