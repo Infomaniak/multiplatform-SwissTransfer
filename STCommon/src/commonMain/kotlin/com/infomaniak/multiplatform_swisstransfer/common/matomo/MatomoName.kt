@@ -22,6 +22,7 @@ enum class MatomoName(val value: String) {
     //region Common
     ConsultOneFile("consultOneFile"),
     CopyLink("copyLink"),
+    CopyPassword("copyPassword"),
     Dark("dark"),
     DeleteFile("deleteFile"),
     DiscoverLater("discoverLater"),
