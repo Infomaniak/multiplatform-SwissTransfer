@@ -183,11 +183,14 @@ class TransferManager internal constructor(
      * @throws RealmException An error has occurred with realm database
      * @throws NotFoundException Any transfer with [transferUUID] has been found
      * @throws NullPropertyException The transferDirection of the transfer found is null
+     * @throws UnexpectedApiErrorFormatException Unparsable api error response.
+     *
      */
     @Throws(
         RealmException::class,
         NotFoundException::class,
         NullPropertyException::class,
+        UnexpectedApiErrorFormatException::class,
         CancellationException::class,
         ApiErrorException::class,
         NetworkException::class,
