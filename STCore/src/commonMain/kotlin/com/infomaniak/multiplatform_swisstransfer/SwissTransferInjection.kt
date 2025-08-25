@@ -65,7 +65,7 @@ class SwissTransferInjection(
 ) {
 
     private val realmProvider by lazy { RealmProvider(databaseRootDirectory) }
-    private val apiClientProvider by lazy { ApiClientProvider(userAgent) }
+    private val apiClientProvider by lazy { ApiClientProvider(userAgent, crashReport) }
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }

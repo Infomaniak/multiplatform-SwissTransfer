@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
@@ -45,10 +46,15 @@ class ApiClientProvider internal constructor(
     // When you don't use SwissTransferInjection, you don't have an userAgent, so we're currently setting a default value.
     // See later how to improve it.
     private val userAgent: String = "Ktor client",
+    private val crashReport: CrashReportInterface? = null,
 ) {
 
     constructor() : this(null)
-    constructor(userAgent: String) : this(engine = null, userAgent)
+    constructor(userAgent: String, crashReport: CrashReportInterface) : this(
+        engine = null,
+        userAgent = userAgent,
+        crashReport = crashReport,
+    )
 
     val json = Json {
         ignoreUnknownKeys = true
