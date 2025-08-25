@@ -17,7 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces
 
-public enum class CrashReportLevel {
+enum class CrashReportLevel {
     DEBUG,
     INFO,
     WARNING,
@@ -25,7 +25,7 @@ public enum class CrashReportLevel {
     FATAL
 }
 
-public interface CrashReportInterface {
+interface CrashReportInterface {
     /**
      * Adds a breadcrumb to the crash reporting system to provide contextual information
      * leading up to a potential crash.
