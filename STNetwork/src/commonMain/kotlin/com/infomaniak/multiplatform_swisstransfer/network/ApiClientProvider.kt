@@ -17,6 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.BreadcrumbType
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportLevel
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
@@ -34,6 +37,8 @@ import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.request
+import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.CancellationException
 import kotlinx.io.IOException
@@ -45,10 +50,15 @@ class ApiClientProvider internal constructor(
     // When you don't use SwissTransferInjection, you don't have an userAgent, so we're currently setting a default value.
     // See later how to improve it.
     private val userAgent: String = "Ktor client",
+    private val crashReport: CrashReportInterface? = null,
 ) {
 
     constructor() : this(null)
-    constructor(userAgent: String) : this(engine = null, userAgent)
+    constructor(userAgent: String, crashReport: CrashReportInterface) : this(
+        engine = null,
+        userAgent = userAgent,
+        crashReport = crashReport,
+    )
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -88,6 +98,9 @@ class ApiClientProvider internal constructor(
                 validateResponse { response: HttpResponse ->
                     val requestContextId = response.getRequestContextId()
                     val statusCode = response.status.value
+
+                    addSentryUrlBreadcrumb(response, statusCode, requestContextId)
+
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
                         val apiError = runCatching {
@@ -115,6 +128,27 @@ class ApiClientProvider internal constructor(
         }
 
         return if (engine != null) HttpClient(engine, block) else HttpClient(block)
+    }
+
+    private fun addSentryUrlBreadcrumb(response: HttpResponse, statusCode: Int, requestContextId: String) {
+        val requestUrl = response.request.url
+        val data = buildMap {
+            put("url", "${requestUrl.protocol.name}://${requestUrl.host}${requestUrl.encodedPath}")
+            put("method", response.request.method.value)
+            put("status_code", "$statusCode")
+            if (requestUrl.encodedQuery.isNotEmpty()) put("http.query", requestUrl.encodedQuery)
+            put("request_id", requestContextId)
+            put("http.start_timestamp", "${response.requestTime.timestamp}")
+            put("http.end_timestamp", "${response.responseTime.timestamp}")
+            response.contentLength()?.let { put("response_content_length", "$it") }
+        }
+        crashReport?.addBreadcrumb(
+            message = "",
+            category = "http",
+            level = CrashReportLevel.INFO,
+            type = BreadcrumbType.HTTP,
+            data = data
+        )
     }
 
     private fun Throwable.isNetworkException() = this is IOException
