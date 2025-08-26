@@ -26,7 +26,7 @@ enum class CrashReportLevel {
 }
 
 /**
- * Breadcrumb types for Sentry. Controls the icon/color in the UI.
+ * Breadcrumb types for Sentry. Controls how the icon/color is displayed in the UI on Sentry's webpage.
  *
  * @param value The value used in the JSON payload.
  * @see <a href="https://develop.sentry.dev/sdk/data-model/event-payloads/breadcrumbs/#breadcrumb-types">Sentry Documentation</a>
