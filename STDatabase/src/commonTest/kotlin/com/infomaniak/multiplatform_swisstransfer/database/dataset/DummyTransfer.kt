@@ -21,9 +21,10 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Co
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
 
 object DummyTransfer {
 
@@ -113,7 +114,9 @@ object DummyTransfer {
         override val fileName: String = fileName
         override val fileSizeInBytes: Long = 10_000_000L
         override val downloadCounter: Int = 0
+        @OptIn(ExperimentalTime::class)
         override val createdDateTimestamp: Long = (Clock.System.now() - 1.hours).epochSeconds
+        @OptIn(ExperimentalTime::class)
         override val expiredDateTimestamp: Long = (Clock.System.now() + 7.days).epochSeconds
         override val eVirus: String = ""
         override val deletedDate: String? = null

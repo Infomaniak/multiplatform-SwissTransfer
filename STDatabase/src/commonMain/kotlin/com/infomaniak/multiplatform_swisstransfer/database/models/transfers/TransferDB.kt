@@ -26,7 +26,8 @@ import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmSet
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class TransferDB() : Transfer, RealmObject {
     @PrimaryKey
@@ -76,6 +77,7 @@ class TransferDB() : Transfer, RealmObject {
         this.transferStatusValue = transfer.transferStatus?.name ?: TransferStatus.READY.name
     }
 
+    @OptIn(ExperimentalTime::class)
     constructor(linkUUID: String, uploadSession: UploadSession, transferStatus: TransferStatus) : this() {
         this.linkUUID = linkUUID
         this.containerUUID = uploadSession.remoteContainer!!.uuid

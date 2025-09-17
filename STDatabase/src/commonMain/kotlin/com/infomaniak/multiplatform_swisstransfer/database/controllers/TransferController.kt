@@ -47,8 +47,9 @@ import io.realm.kotlin.query.Sort
 import io.realm.kotlin.query.TRUE_PREDICATE
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class TransferController(private val realmProvider: RealmProvider) {
 
@@ -266,6 +267,7 @@ class TransferController(private val realmProvider: RealmProvider) {
 
         private const val DAYS_SINCE_EXPIRATION = 15
 
+        @OptIn(ExperimentalTime::class)
         private val expiredDateQuery = "${TransferDB::expiredDateTimestamp.name} < ${Clock.System.now().epochSeconds}"
         private val downloadCounterQuery = "${TransferDB::downloadCounterCredit.name} <= 0"
 
@@ -343,6 +345,7 @@ class TransferController(private val realmProvider: RealmProvider) {
         private fun TypedRealm.getAllTransfersQuery(): RealmQuery<TransferDB> = query<TransferDB>()
 
         private fun TypedRealm.getExpiredTransfersQuery(): RealmQuery<TransferDB> {
+            @OptIn(ExperimentalTime::class)
             val expiry = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY)
             return query<TransferDB>("${TransferDB::expiredDateTimestamp.name} < '${expiry}'")
         }

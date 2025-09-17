@@ -17,17 +17,19 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.serializers
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 internal object DateToTimestampSerializer : JsonTransformingSerializer<Long>(Long.serializer()) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
         val dateString = element.jsonPrimitive.content
 
+        @OptIn(ExperimentalTime::class)
         val timestamp = Instant.parse(dateString).epochSeconds
 
         return runCatching { JsonPrimitive(timestamp) }.getOrDefault(element)

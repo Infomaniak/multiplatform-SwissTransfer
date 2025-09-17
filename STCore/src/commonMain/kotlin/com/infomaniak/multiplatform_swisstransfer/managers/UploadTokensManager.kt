@@ -22,13 +22,14 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTok
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class UploadTokensManager(private val uploadTokensController: UploadTokensController) {
 
@@ -102,6 +103,7 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
         @Throws(InvalidAttestationTokenException::class)
         internal fun assertAttestationTokenValidity(attestationToken: String) {
             val tokenExpiryAt = decodeJwtToken(attestationToken)
+            @OptIn(ExperimentalTime::class)
             if (tokenExpiryAt < Clock.System.now().epochSeconds) throw InvalidAttestationTokenException("Local token is expired")
         }
 
