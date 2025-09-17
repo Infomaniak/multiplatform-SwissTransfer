@@ -4,10 +4,10 @@ desugar_jdk_libs = "2.1.4"
 kotlinxDatetime = "0.6.1"
 kotlinxSerializationJson = "1.7.3"
 ktor = "3.0.1"
-skie = "0.9.3"
 coroutines = "1.10.2"
 kotlin = "2.2.0"
 realmKotlin = "3.2.8-2"
+skie = "0.10.6"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
