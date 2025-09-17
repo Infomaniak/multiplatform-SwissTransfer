@@ -72,9 +72,8 @@ private fun KotlinMultiplatformExtension.setup(
         }
     }
 
-    // Provide documentation with kDoc in Objective-C header
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
-        freeCompilerArgs.add("-Xexport-kdoc")
+        freeCompilerArgs.add("-Xexport-kdoc") // Provide documentation with kDoc in Objective-C header
+        freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 }
