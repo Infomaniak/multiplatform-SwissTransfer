@@ -26,9 +26,18 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
-internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatformExtension) = extension.apply {
+internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatformExtension): KotlinMultiplatformExtension {
     // Create the STMultiplatformExtension and add it to the project
     val stMultiplatformExtension = extensions.create<STMultiplatformExtension>(STMultiplatformExtension.EXTENSION_NAME)
+    return extension.also {
+        it.setup(this, stMultiplatformExtension)
+    }
+}
+
+private fun KotlinMultiplatformExtension.setup(
+    project: Project,
+    stMultiplatformExtension: STMultiplatformExtension
+) {
 
     // Do not generate source code for all platforms, only for Android
     withSourcesJar(publish = false)
@@ -42,8 +51,8 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
         publishLibraryVariants("release")
     }
 
-    val xcframeworkName = name
-    val xcf = XCFramework()
+    val xcframeworkName = project.name
+    val xcf = project.XCFramework()
     listOf(
         iosArm64(),
         iosSimulatorArm64(),
@@ -55,7 +64,7 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
             xcf.add(this)
             isStatic = true
 
-            afterEvaluate {
+            project.afterEvaluate {
                 stMultiplatformExtension.appleExportedProjects.forEach { stProject ->
                     export(stProject)
                 }

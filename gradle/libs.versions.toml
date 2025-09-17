@@ -2,12 +2,12 @@
 agp = "8.6.1"
 coroutines = "1.9.0"
 desugar_jdk_libs = "2.1.4"
-kotlin = "2.0.21"
 kotlinxDatetime = "0.6.1"
 kotlinxSerializationJson = "1.7.3"
 ktor = "3.0.1"
-realm = "3.0.0"
 skie = "0.9.3"
+kotlin = "2.2.0"
+realmKotlin = "3.2.8-2"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -24,7 +24,7 @@ ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = 
 ktor-client-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
-realm-base = { module = "io.realm.kotlin:library-base", version.ref = "realm" }
+realm-base = { module = "com.infomaniak.realm.kotlin:library-base", version.ref = "realmKotlin" }
 skie-gradle-plugin = { module = "co.touchlab.skie:gradle-plugin-api", version.ref = "skie" }
 #Test
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -33,5 +33,5 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-realm = { id = "io.realm.kotlin", version.ref = "realm" }
+realm = { id = "com.infomaniak.realm.kotlin", version.ref = "realmKotlin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
