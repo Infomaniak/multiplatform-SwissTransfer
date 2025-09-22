@@ -27,7 +27,8 @@ import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmUUID
 import io.realm.kotlin.types.annotations.PrimaryKey
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class FileDB() : File, RealmObject {
     @PrimaryKey
@@ -72,6 +73,7 @@ class FileDB() : File, RealmObject {
         this.fileName = uploadFileSession.name
         this.fileSizeInBytes = uploadFileSession.size
         this.downloadCounter = 0
+        @OptIn(ExperimentalTime::class)
         this.createdDateTimestamp = Clock.System.now().epochSeconds
         this.expiredDateTimestamp = uploadContainer.expiredDateTimestamp
         this.eVirus = "NOT_VIRUS_CHECKED"
