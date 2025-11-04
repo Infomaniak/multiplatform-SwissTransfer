@@ -122,7 +122,7 @@ class DeepLinkTypeTests {
 
     companion object {
         private const val SWISSTRANSFER_PROD_URL = "https://www.swisstransfer.com"
-        private const val SWISSTRANSFER_PREPROD_URL = "https://swisstransfer.preprod.dev.infomaniak.ch"
+        private const val SWISSTRANSFER_PREPROD_URL = "https://swisstransfer-legacy.preprod.dev.infomaniak.ch"
         private const val SWISSTRANSFER_RANDOM_URL = "https://custom_st_url.ch"
 
         private val possibleURLs = arrayOf(SWISSTRANSFER_PROD_URL, SWISSTRANSFER_PREPROD_URL, SWISSTRANSFER_RANDOM_URL)
