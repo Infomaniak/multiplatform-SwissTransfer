@@ -25,6 +25,7 @@ enum class MatomoCategory(val value: String) {
     NewTransferData("newTransferData"),
     ReceivedTransfer("receivedTransfer"),
     SentTransfer("sentTransfer"),
+    DeleteTransferHistory("deleteTransferHistory"),
     SettingsGlobalDownloadLimit("settingsGlobalDownloadLimit"),
     SettingsGlobalEmailLanguage("settingsGlobalEmailLanguage"),
     SettingsGlobalTheme("settingsGlobalTheme"),
