@@ -49,6 +49,9 @@ enum class MatomoName(val value: String) {
     TogglePassword("togglePassword"),
     TwentyDownloads("20downloads"),
     TwoHundredAndFiftyDownloads("250downloads"),
+    ExpiredDate("expiredDate"),
+    ExpiredDownloads("expiredDownloads"),
+    VirusDetected("virusDetected"),
     //endregion
 
     //region iOS
