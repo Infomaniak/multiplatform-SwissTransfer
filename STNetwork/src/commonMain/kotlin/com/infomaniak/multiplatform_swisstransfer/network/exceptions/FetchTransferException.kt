@@ -105,13 +105,28 @@ sealed class FetchTransferException(
          * @return An instance of [FetchTransferException] or the original [ApiException.UnexpectedApiErrorFormatException]
          * if we cannot map it to a [FetchTransferException].
          */
-        fun UnexpectedApiErrorFormatException.toFetchTransferException() = when {
+        internal fun UnexpectedApiErrorFormatException.toFetchTransferException() = when {
             message?.contains(ERROR_VIRUS_CHECK) == true -> VirusCheckFetchTransferException(requestContextId)
             message?.contains(ERROR_VIRUS_DETECTED) == true -> VirusDetectedFetchTransferException(requestContextId)
             message?.contains(ERROR_EXPIRED) == true -> ExpiredDateFetchTransferException(requestContextId)
             statusCode == 404 -> NotFoundFetchTransferException(requestContextId)
             message?.contains(ERROR_NEED_PASSWORD) == true -> PasswordNeededFetchTransferException(requestContextId)
             message?.contains(ERROR_WRONG_PASSWORD) == true -> WrongPasswordFetchTransferException(requestContextId)
+            else -> this
+        }
+
+        /**
+         * Extension function to convert an instance of [ApiException.ApiErrorException] to a specific [FetchTransferException]
+         * based on its error code.
+         *
+         * Useful to translate some correctly formatted api error exceptions as our custom type of errors we handle everywhere.
+         *
+         * @receiver An instance of [ApiException.ApiErrorException].
+         * @return An instance of [FetchTransferException] or the original [ApiException.ApiErrorException] if we cannot map it
+         * to a [FetchTransferException].
+         */
+        internal fun ApiErrorException.toFetchTransferException() = when {
+            errorCode == 404 -> NotFoundFetchTransferException(requestContextId)
             else -> this
         }
     }
