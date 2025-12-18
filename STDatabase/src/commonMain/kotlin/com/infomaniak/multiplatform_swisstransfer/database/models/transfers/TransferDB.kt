@@ -44,7 +44,7 @@ class TransferDB() : Transfer, RealmObject {
     override var recipientsEmails: RealmSet<String> = realmSetOf()
 
     private var transferDirectionValue: String = ""
-    private var transferStatusValue: String = TransferStatus.UNKNOWN.name
+    private var transferStatusValue: String = TransferStatus.NOT_YET_FETCHED.name
 
     @Ignore
     override val transferDirection: TransferDirection get() = TransferDirection.valueOf(transferDirectionValue)
