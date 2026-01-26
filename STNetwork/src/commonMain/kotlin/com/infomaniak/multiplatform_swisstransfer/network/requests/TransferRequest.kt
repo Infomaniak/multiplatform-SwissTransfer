@@ -48,7 +48,7 @@ internal class TransferRequest(
             url = createUrl(ApiRoutes.getTransfer(linkUUID)),
             appendHeaders = {
                 if (password?.isNotEmpty() == true) {
-                    append(HttpHeaders.Authorization, Base64.Default.encode(password.encodeToByteArray()))
+                    append(HttpHeaders.Authorization, Base64.encode(password.encodeToByteArray()))
                 }
             }
         )
