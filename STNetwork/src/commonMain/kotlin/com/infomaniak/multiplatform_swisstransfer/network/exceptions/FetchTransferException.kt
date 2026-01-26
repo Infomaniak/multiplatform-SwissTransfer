@@ -89,6 +89,11 @@ sealed class FetchTransferException(
     class WrongPasswordFetchTransferException(requestContextId: String) :
         FetchTransferException(401, "Wrong password for this Transfer", requestContextId)
 
+    class TransferCancelledException(requestContextId: String) :
+        FetchTransferException(409, "Transfer cancelled", requestContextId)
+
+    class DownloadLimitReached(requestContextId: String) : FetchTransferException(429, "Download limit reached", requestContextId)
+
     companion object {
 
         private const val ERROR_VIRUS_CHECK = "wait_virus_check"
@@ -127,6 +132,25 @@ sealed class FetchTransferException(
          */
         internal fun ApiErrorException.toFetchTransferException() = when {
             errorCode == 404 -> NotFoundFetchTransferException(requestContextId)
+            else -> this
+        }
+
+        /**
+         * Extension function to convert an instance of [ApiException.ApiV2ErrorException] to a specific [FetchTransferException]
+         * based on its error code.
+         *
+         * Useful to translate some correctly formatted api error exceptions as our custom type of errors we handle everywhere.
+         *
+         * @receiver An instance of [ApiException.ApiV2ErrorException].
+         * @return An instance of [FetchTransferException] or the original [ApiException.ApiV2ErrorException] if we cannot map it
+         * to a [FetchTransferException].
+         */
+        internal fun ApiV2ErrorException.toFetchTransferException() = when (code) {
+            "access_denied", "invalid_password" -> PasswordNeededFetchTransferException(requestContextId)
+            "object_not_found" -> NotFoundFetchTransferException(requestContextId)
+            "transfer_cancelled" -> TransferCancelledException(requestContextId)
+            "transfer_expired" -> ExpiredDateFetchTransferException(requestContextId)
+            "download_limit_reached" -> DownloadLimitReached(requestContextId)
             else -> this
         }
     }
