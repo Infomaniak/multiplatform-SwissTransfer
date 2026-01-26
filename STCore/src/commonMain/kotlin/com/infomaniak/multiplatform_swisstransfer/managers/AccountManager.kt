@@ -49,6 +49,8 @@ class AccountManager internal constructor(
     // We cache the current user to avoid creating database instances when it's the same user
     private var currentUser: STUser? = null
 
+    val isAuthenticated get() = currentUserId.let { it != null && it > 0 }
+
     /**
      * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
