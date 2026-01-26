@@ -26,7 +26,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
-import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseForError
 import com.infomaniak.multiplatform_swisstransfer.network.utils.getRequestContextId
 import io.ktor.client.HttpClient
@@ -43,6 +42,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.request
 import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.network.UnresolvedAddressException
 import io.ktor.utils.io.CancellationException
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
@@ -121,7 +121,8 @@ class ApiClientProvider internal constructor(
                 }
                 handleResponseExceptionWithRequest { cause, request ->
                     when (cause) {
-                        is IOException -> throw NetworkException("Network error: ${cause.message}")
+                        is UnresolvedAddressException,
+                        is IOException -> throw NetworkException("Network error: ${cause.message}", cause)
                         is ApiException, is CancellationException -> throw cause
                         else -> {
                             val response = runCatching { request.call.response }.getOrNull()

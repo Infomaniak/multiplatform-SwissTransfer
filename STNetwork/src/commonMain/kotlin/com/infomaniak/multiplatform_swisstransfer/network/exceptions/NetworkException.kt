@@ -22,4 +22,4 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  *
  * @param message A detailed message describing the network error.
  */
-class NetworkException(message: String) : Exception(message)
+class NetworkException(message: String, cause: Throwable?) : Exception(message, cause)
