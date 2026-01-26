@@ -20,12 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ApiResponse<T>(
-    val result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
-    val data: T? = null,
-)
-
-data class ApiResponseForError(
-    val responseStatus: ApiResponseStatus = ApiResponseStatus.ERROR,
-    val error: ApiErrorV2
+data class ApiErrorV2(
+    val code: String,
+    val description: String,
 )
