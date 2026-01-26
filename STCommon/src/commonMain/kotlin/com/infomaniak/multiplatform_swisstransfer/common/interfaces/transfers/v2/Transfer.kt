@@ -21,13 +21,13 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 
 interface Transfer {
-    val linkUUID: String
+    val id: String
     val senderEmail: String
     val title: String?
     val message: String?
     val createdAt: Long
     val expiresAt: Long
-    val files: List<File>
+    val files: List<File> get() = emptyList()
     val totalSize: Long
 
     //region Only local
