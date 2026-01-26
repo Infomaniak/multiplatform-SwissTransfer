@@ -23,6 +23,8 @@ interface File {
     val size: Long
     val mimeType: String? get() = null
 
+    // Local
+    val thumbnailPath: String? get() = null
     // utils
     val name get() = path.substringAfterLast("/")
 }
