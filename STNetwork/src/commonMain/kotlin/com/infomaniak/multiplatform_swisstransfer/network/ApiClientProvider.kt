@@ -91,7 +91,7 @@ class ApiClientProvider internal constructor(
             }
             install(HttpRequestRetry) {
                 retryOnExceptionIf(maxRetries = MAX_RETRY) { _, cause ->
-                    cause.isNetworkException()
+                    cause.isRetryableNetworkException()
                 }
                 delayMillis { retry ->
                     retry * 500L
@@ -160,7 +160,7 @@ class ApiClientProvider internal constructor(
         )
     }
 
-    private fun Throwable.isNetworkException() = this is IOException
+    private fun Throwable.isRetryableNetworkException() = this is IOException
 
     companion object {
         private const val MAX_RETRY = 3

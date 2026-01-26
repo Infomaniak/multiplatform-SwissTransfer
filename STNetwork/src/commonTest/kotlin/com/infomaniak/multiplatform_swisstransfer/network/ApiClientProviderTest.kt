@@ -32,7 +32,6 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.expect
