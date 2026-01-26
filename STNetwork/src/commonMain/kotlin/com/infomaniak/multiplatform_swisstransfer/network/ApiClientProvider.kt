@@ -22,12 +22,16 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportI
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportLevel
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
+import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
+import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseForError
 import com.infomaniak.multiplatform_swisstransfer.network.utils.getRequestContextId
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
+import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
@@ -101,14 +105,21 @@ class ApiClientProvider internal constructor(
 
                     addSentryUrlBreadcrumb(response, statusCode, requestContextId)
 
+                    response.body<ApiResponse<Nothing>>()
+
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
-                        val apiError = runCatching {
-                            json.decodeFromString<ApiError>(bodyResponse)
+                        runCatching {
+                            if (bodyResponse.isFromApiV2()) {
+                                val error = json.decodeFromString<ApiResponseForError>(bodyResponse).error
+                                throw ApiV2ErrorException(error.code, error.description, requestContextId)
+                            } else {
+                                val error = json.decodeFromString<ApiError>(bodyResponse)
+                                throw ApiErrorException(error.errorCode, error.message, requestContextId)
+                            }
                         }.getOrElse {
                             throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null, requestContextId)
                         }
-                        throw ApiErrorException(apiError.errorCode, apiError.message, requestContextId)
                     }
                 }
                 handleResponseExceptionWithRequest { cause, request ->
@@ -155,5 +166,8 @@ class ApiClientProvider internal constructor(
 
     companion object {
         private const val MAX_RETRY = 3
+
+        //TODO[API-V2]: Delete once the v1 api has been removed
+        private fun String.isFromApiV2() = contains("\"result\": \"error\"")
     }
 }
