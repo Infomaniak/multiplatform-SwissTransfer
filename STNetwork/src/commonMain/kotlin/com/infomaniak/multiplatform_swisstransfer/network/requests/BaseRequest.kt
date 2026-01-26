@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -47,6 +48,13 @@ internal open class BaseRequest(
         }.build()
     }
 
+    protected fun createV2Url(path: String, vararg queries: Pair<String, String>): Url {
+        val baseUrl = Url(ApiRoutes.apiBaseUrlV2(environment) + path)
+        return URLBuilder(baseUrl).apply {
+            queries.forEach { parameters.append(it.first, it.second) }
+        }.build()
+    }
+
     protected suspend inline fun <reified R> get(
         url: Url,
         crossinline appendHeaders: HeadersBuilder.() -> Unit = {},
@@ -54,7 +62,7 @@ internal open class BaseRequest(
     ): R {
         return httpClient.get(url) {
             headers { appendHeaders() }
-        }.decode<R>()
+        }.body<R>()
     }
 
     protected suspend inline fun <reified R> post(
