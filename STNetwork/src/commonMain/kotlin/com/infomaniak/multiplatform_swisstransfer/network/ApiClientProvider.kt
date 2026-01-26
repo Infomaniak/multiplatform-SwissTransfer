@@ -31,7 +31,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseForE
 import com.infomaniak.multiplatform_swisstransfer.network.utils.getRequestContextId
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
@@ -104,8 +103,6 @@ class ApiClientProvider internal constructor(
                     val statusCode = response.status.value
 
                     addSentryUrlBreadcrumb(response, statusCode, requestContextId)
-
-                    response.body<ApiResponse<Nothing>>()
 
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
