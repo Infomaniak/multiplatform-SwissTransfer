@@ -29,6 +29,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransf
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.NotFoundFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.PasswordNeededFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.TransferCancelledException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.WrongPasswordFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
@@ -57,6 +58,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         NetworkException::class,
         UnknownException::class,
         PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
         NotFoundFetchTransferException::class,
         TransferCancelledException::class,
         ExpiredDateFetchTransferException::class,
@@ -68,11 +70,12 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
 
     @Throws(
         CancellationException::class,
-        ApiErrorException::class,
+        ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
         PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
         NotFoundFetchTransferException::class,
         TransferCancelledException::class,
         ExpiredDateFetchTransferException::class,
@@ -84,11 +87,12 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
 
     @Throws(
         CancellationException::class,
-        ApiErrorException::class,
+        ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
         PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
         NotFoundFetchTransferException::class,
         TransferCancelledException::class,
         ExpiredDateFetchTransferException::class,
@@ -100,11 +104,12 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
 
     @Throws(
         CancellationException::class,
-        ApiErrorException::class,
+        ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
         PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
         NotFoundFetchTransferException::class,
         TransferCancelledException::class,
         ExpiredDateFetchTransferException::class,
