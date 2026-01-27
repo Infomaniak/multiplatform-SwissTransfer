@@ -114,7 +114,8 @@ class ApiClientProvider internal constructor(
                                 val error = json.decodeFromString<ApiError>(bodyResponse)
                                 throw ApiErrorException(error.errorCode, error.message, requestContextId)
                             }
-                        }.getOrElse {
+                        }.getOrElse { exception ->
+                            if (exception is ApiException) throw exception
                             throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null, requestContextId)
                         }
                     }
