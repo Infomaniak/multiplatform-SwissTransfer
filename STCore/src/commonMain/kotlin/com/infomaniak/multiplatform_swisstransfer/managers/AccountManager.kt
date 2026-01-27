@@ -68,7 +68,6 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun removeUser(userId: Int) {
 
-        appSettingsController.removeData()
         uploadController.removeData()
         transferController.removeData()
 

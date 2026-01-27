@@ -76,7 +76,6 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     }
 
     suspend fun closeAllDatabases() {
-        closeAppSettingsDb()
         closeUploadsDb()
         closeTransfersDb()
     }
