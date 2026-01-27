@@ -146,7 +146,8 @@ sealed class FetchTransferException(
          * to a [FetchTransferException].
          */
         internal fun ApiV2ErrorException.toFetchTransferException() = when (code) {
-            "access_denied", "invalid_password" -> PasswordNeededFetchTransferException(requestContextId)
+            "access_denied" -> PasswordNeededFetchTransferException(requestContextId)
+            "invalid_password" -> WrongPasswordFetchTransferException(requestContextId)
             "object_not_found" -> NotFoundFetchTransferException(requestContextId)
             "transfer_cancelled" -> TransferCancelledException(requestContextId)
             "transfer_expired" -> ExpiredDateFetchTransferException(requestContextId)
