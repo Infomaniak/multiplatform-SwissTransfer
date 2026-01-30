@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
@@ -46,18 +47,18 @@ class AccountManager internal constructor(
     private val mutex = Mutex()
 
     // We store the currentUserId to avoid creating database instances when it's the same user
-    private var currentUserId: Int? = null
+    private var currentUser: STUser? = null
 
     /**
      * Loads the default User account and initializes Realm Transfers for the default UserID defined in Constants.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun loadUser(userId: Int) {
+    suspend fun loadUser(user: STUser) {
         mutex.withLock {
-            if (currentUserId != userId) {
+            if (currentUser?.id != user.id) {
                 appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-                realmProvider.openTransfersDb(userId)
-                currentUserId = userId
+                realmProvider.openTransfersDb(user.id)
+                currentUser = user
             }
         }
     }
