@@ -25,6 +25,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -79,6 +80,13 @@ internal open class BaseRequest(
 
     protected suspend inline fun <reified R> put(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
         return httpClient.put(url) {
+            contentType(ContentType.Application.Json)
+            setBody(data)
+        }.decode<R>()
+    }
+
+    protected suspend inline fun <reified R> patch(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
+        return httpClient.patch(url) {
             contentType(ContentType.Application.Json)
             setBody(data)
         }.decode<R>()
