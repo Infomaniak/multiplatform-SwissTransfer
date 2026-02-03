@@ -31,6 +31,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransf
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.TransferCancelledException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.WrongPasswordFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.TransferRequest
@@ -41,15 +42,24 @@ import kotlin.coroutines.cancellation.CancellationException
 class TransferV2Repository internal constructor(private val transferRequest: TransferRequest) {
 
     // for Obj-C https://youtrack.jetbrains.com/issue/KT-68288/KMP-Support-Kotlin-default-parameters-into-Swift-default-parameters-and-Objective-C-somehow-possibly-a-JvmOverloads-like
-    constructor(environment: ApiEnvironment) : this(ApiClientProvider(), environment)
-    constructor(apiClientProvider: ApiClientProvider = ApiClientProvider(), environment: ApiEnvironment) : this(
+    constructor(environment: ApiEnvironment, token: () -> String) : this(ApiClientProvider(), environment, token)
+    constructor(
+        apiClientProvider: ApiClientProvider = ApiClientProvider(),
+        environment: ApiEnvironment,
+        token: () -> String,
+    ) : this(
         environment = environment,
         json = apiClientProvider.json,
         httpClient = apiClientProvider.httpClient,
+        token = token,
     )
 
-    internal constructor(environment: ApiEnvironment, json: Json, httpClient: HttpClient) :
-            this(TransferRequest(environment, json, httpClient))
+    internal constructor(
+        environment: ApiEnvironment,
+        json: Json,
+        httpClient: HttpClient,
+        token: () -> String,
+    ) : this(TransferRequest(environment, json, httpClient, token))
 
     @Throws(
         CancellationException::class,
@@ -57,6 +67,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
+        UnauthorizedException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
         NotFoundFetchTransferException::class,
@@ -74,6 +85,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
+        UnauthorizedException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
         NotFoundFetchTransferException::class,
