@@ -25,6 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.http.HeadersBuilder
+import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -33,13 +34,17 @@ internal class TransferRequest(
     environment: ApiEnvironment,
     json: Json,
     httpClient: HttpClient,
+    val token: () -> String,
 ) : BaseRequest(environment, json, httpClient) {
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponse<TransferApi> {
         return get(
             url = createV2Url(ApiRoutes.getTransfer(linkUUID)),
-            appendHeaders = { appendPasswordIfNeeded(password) }
+            appendHeaders = {
+                append(HttpHeaders.Authorization, "Bearer ${token()}")
+                appendPasswordIfNeeded(password)
+            }
         )
     }
 
