@@ -40,5 +40,13 @@ internal object ApiRoutes {
     const val resendEmailCode = "$verifyEmailCode/resend"
     const val finishUpload = "uploadComplete"
     const val cancelUpload = "cancelUpload"
+
+    fun createTransfer() = "transfers"
+    fun uploadDirectly(transferId: String, fileId: String) = "transfers/$transferId/files/$fileId"
+    fun uploadChunk(transferId: String, fileId: String, chunkIndex: Int): String {
+        return "${uploadDirectly(transferId, fileId)}/chunks/$chunkIndex"
+    }
+
+    fun finishTransfer(transferId: String) = "transfers/$transferId"
     //endregion
 }
