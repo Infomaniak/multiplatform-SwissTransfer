@@ -46,11 +46,11 @@ class AccountManager internal constructor(
 
     private val mutex = Mutex()
 
-    // We store the currentUserId to avoid creating database instances when it's the same user
+    // We cache the current user to avoid creating database instances when it's the same user
     private var currentUser: STUser? = null
 
     /**
-     * Loads the default User account and initializes Realm Transfers for the default UserID defined in Constants.
+     * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
@@ -58,8 +58,8 @@ class AccountManager internal constructor(
             if (currentUser?.id != user.id) {
                 appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
                 realmProvider.openTransfersDb(user.id)
-                currentUser = user
             }
+            currentUser = user
         }
     }
 
