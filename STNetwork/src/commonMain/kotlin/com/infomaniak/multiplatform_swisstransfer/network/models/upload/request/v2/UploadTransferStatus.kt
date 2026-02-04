@@ -18,7 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2
 
 internal enum class UploadTransferStatus(val apiValue: String) {
-    COMPLETED("completed"),
-    CANCELLED("cancelled"),
-    FAILED("failed"),
+    Completed("completed"),
+    Cancelled("cancelled"),
+    Failed("failed"),
 }
