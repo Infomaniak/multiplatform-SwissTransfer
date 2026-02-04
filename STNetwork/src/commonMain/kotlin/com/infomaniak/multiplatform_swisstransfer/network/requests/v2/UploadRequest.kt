@@ -30,12 +30,11 @@ import com.infomaniak.multiplatform_swisstransfer.network.utils.longTimeout
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.plugins.retry
-import io.ktor.client.request.header
+import io.ktor.client.request.headers
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -45,8 +44,8 @@ internal class UploadRequest(
     environment: ApiEnvironment,
     json: Json,
     httpClient: HttpClient,
-    val token: () -> String,
-) : BaseRequest(environment, json, httpClient) {
+    token: () -> String,
+) : BaseRequest(environment, json, httpClient, token) {
 
     suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponse<Transfer> {
         val nullableJson = Json(json) {
@@ -55,9 +54,7 @@ internal class UploadRequest(
         return post(
             url = createV2Url(ApiRoutes.createTransfer()),
             data = nullableJson.encodeToString(createTransfer),
-            appendHeaders = {
-                append(HttpHeaders.Authorization, "Bearer ${token()}")
-            }
+            appendHeaders = { appendBearer() }
         )
     }
 
@@ -89,7 +86,7 @@ internal class UploadRequest(
 
     suspend fun updateTransferStatus(transferId: String, status: UploadTransferStatus): Boolean {
         val response = httpClient.patch(createV2Url(ApiRoutes.finishTransfer(transferId))) {
-            header(HttpHeaders.Authorization, "Bearer ${token()}")
+            headers { appendBearer() }
             contentType(ContentType.Application.Json)
             setBody(mapOf("status" to status.apiValue))
         }
