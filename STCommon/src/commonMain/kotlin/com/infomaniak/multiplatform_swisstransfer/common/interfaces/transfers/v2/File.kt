@@ -25,6 +25,7 @@ interface File {
 
     // Local
     val thumbnailPath: String? get() = null
+    val isFolder: Boolean get() = false
     // utils
     val name get() = path.substringAfterLast("/")
 }
