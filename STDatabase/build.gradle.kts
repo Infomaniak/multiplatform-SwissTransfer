@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.realm)
     alias(libs.plugins.skie)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
     id("infomaniak.kotlinMultiplatform")
     id("infomaniak.publishPlugin")
 }
@@ -12,6 +14,9 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":STCommon"))
             implementation(libs.realm.base)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -20,10 +25,19 @@ kotlin {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 android {
     compileOptions { isCoreLibraryDesugaringEnabled = true }
 }
 
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspMacosArm64", libs.androidx.room.compiler)
 }
