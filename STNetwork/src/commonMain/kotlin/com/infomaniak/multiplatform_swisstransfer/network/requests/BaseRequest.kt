@@ -31,6 +31,7 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HeadersBuilder
+import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
@@ -40,6 +41,7 @@ internal open class BaseRequest(
     protected val environment: ApiEnvironment,
     protected val json: Json,
     protected val httpClient: HttpClient,
+    private val token: () -> String,
 ) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
@@ -54,6 +56,10 @@ internal open class BaseRequest(
         return URLBuilder(baseUrl).apply {
             queries.forEach { parameters.append(it.first, it.second) }
         }.build()
+    }
+
+    protected fun HeadersBuilder.appendBearer() {
+        append(HttpHeaders.Authorization, "Bearer ${token()}")
     }
 
     protected suspend inline fun <reified R> get(
