@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
@@ -37,6 +38,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
+    private val appDatabase: AppDatabase,
     private val appSettingsController: AppSettingsController,
     private val emailLanguageUtils: EmailLanguageUtils,
     private val uploadController: UploadController,
@@ -67,12 +69,15 @@ class AccountManager internal constructor(
      * Delete specified User data
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun removeUser(userId: Int) {
-
-        appSettingsController.removeData()
-        uploadController.removeData()
-        transferController.removeData()
-
-        realmProvider.closeAllDatabases()
+    suspend fun logoutCurrentUser(newSTUser: STUser?) {
+        val user = currentUser ?: return
+        if (user is STUser.AuthUser) {
+            appDatabase.getTransferDao().deleteTransfers(user.id)
+        } else {
+            uploadController.removeData()
+            transferController.removeData()
+            realmProvider.closeAllDatabases()
+        }
+        currentUser = newSTUser
     }
 }
