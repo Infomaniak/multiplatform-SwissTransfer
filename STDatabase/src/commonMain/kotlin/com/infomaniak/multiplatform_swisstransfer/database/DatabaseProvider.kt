@@ -36,7 +36,7 @@ expect class DatabaseProvider {
     fun getRoomDatabaseBuilder(inMemory: Boolean): RoomDatabase.Builder<AppDatabase>
 }
 
-fun DatabaseProvider.getRoomDatabase(inMemory: Boolean = false): AppDatabase {
+fun DatabaseProvider.getAppDatabase(inMemory: Boolean = false): AppDatabase {
     return getRoomDatabaseBuilder(inMemory)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
