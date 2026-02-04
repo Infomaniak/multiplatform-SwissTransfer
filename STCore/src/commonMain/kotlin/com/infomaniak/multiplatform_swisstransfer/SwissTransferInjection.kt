@@ -20,12 +20,14 @@ package com.infomaniak.multiplatform_swisstransfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.database.DatabaseConfig
+import com.infomaniak.multiplatform_swisstransfer.database.DatabaseProvider
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTokensController
+import com.infomaniak.multiplatform_swisstransfer.database.getAppDatabase
 import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
 import com.infomaniak.multiplatform_swisstransfer.managers.FileManager
@@ -67,6 +69,7 @@ class SwissTransferInjection(
 ) {
 
     private val realmProvider by lazy { RealmProvider(databaseRootDirectory) }
+    private val appDatabase by lazy { DatabaseProvider(databaseConfig).getAppDatabase() }
     private val apiClientProvider by lazy { ApiClientProvider(userAgent, crashReport) }
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
@@ -95,6 +98,7 @@ class SwissTransferInjection(
     /** A manager used to orchestrate Accounts operations. */
     val accountManager by lazy {
         AccountManager(
+            appDatabase = appDatabase,
             appSettingsController = appSettingsController,
             emailLanguageUtils = emailLanguageUtils,
             uploadController = uploadController,
