@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+import com.infomaniak.multiplatform_swisstransfer.database.DatabaseConfig
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
@@ -62,6 +63,7 @@ class SwissTransferInjection(
     private val userAgent: String,
     private val databaseRootDirectory: String? = null,
     private val crashReport: CrashReportInterface,
+    private val databaseConfig: DatabaseConfig,
 ) {
 
     private val realmProvider by lazy { RealmProvider(databaseRootDirectory) }
