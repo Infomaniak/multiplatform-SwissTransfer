@@ -63,12 +63,13 @@ object DummyTransferForV2 {
     val transfers = listOf(transfer1, transfer2, transfer3, transfer4)
 
     fun createDummyFile(
-        fileName: String,
+        path: String,
         mimeType: String? = null,
+        id: String = "$path|whatever",
     ): File = object : File {
-        override val id: String = "$fileName|whatever"
+        override val id: String = id
         override val mimeType: String? = mimeType
-        override val path: String = fileName
+        override val path: String = path
         override val size: Long = 10_000_000L
         override val thumbnailPath: String? = null
     }

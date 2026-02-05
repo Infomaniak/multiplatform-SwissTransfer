@@ -22,6 +22,10 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
         }
+        androidUnitTest.dependencies {
+            implementation(libs.android.test)
+            implementation(libs.robolectric)
+        }
     }
 }
 
