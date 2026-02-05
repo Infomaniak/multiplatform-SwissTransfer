@@ -22,6 +22,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
@@ -33,12 +34,15 @@ import kotlinx.coroutines.IO
 expect class DatabaseProvider {
     constructor(databaseConfig: DatabaseConfig)
 
-    fun getRoomDatabaseBuilder(inMemory: Boolean): RoomDatabase.Builder<AppDatabase>
+    internal fun getRoomDatabaseBuilder(inMemory: Boolean): RoomDatabase.Builder<AppDatabase>
 }
 
-fun DatabaseProvider.getAppDatabase(inMemory: Boolean = false): AppDatabase {
+fun DatabaseProvider.getAppDatabase(
+    inMemory: Boolean = false,
+    driver: SQLiteDriver = BundledSQLiteDriver(),
+): AppDatabase {
     return getRoomDatabaseBuilder(inMemory)
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(driver)
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 }
