@@ -77,10 +77,10 @@ interface TransferDao {
     ): Flow<Int>
 
     @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND id=:transferId LIMIT 1")
-    fun getTransfer(userId: Long, transferId: String): Flow<TransferDB>
+    fun getTransfer(userId: Long, transferId: String): Flow<TransferDB?>
 
     @Query("SELECT * FROM FileDB WHERE id=:fileId LIMIT 1")
-    fun getFile(fileId: String): Flow<FileDB>
+    fun getFile(fileId: String): Flow<FileDB?>
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND folderId IS NULL")
     suspend fun getTransferRootFiles(transferId: String): List<FileDB>
