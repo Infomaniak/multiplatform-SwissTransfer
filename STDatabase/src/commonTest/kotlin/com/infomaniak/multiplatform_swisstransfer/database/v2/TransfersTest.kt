@@ -61,6 +61,28 @@ class TransfersTest : RobolectricTestsBase() {
     }
 
     @Test
+    fun getTransfersExcludesPendingUploads() = runTest {
+        // Insert a completed transfer
+        insertTransfer(DummyTransferForV2.transfer1, TransferDirection.SENT, null)
+        // Insert a pending upload
+        val uploadTransfer = TransferDB(
+            transfer = DummyTransferForV2.transfer2,
+            linkId = null,
+            userOwnerId = userId,
+        ).copy(
+            id = "upload1",
+            transferDirection = TransferDirection.SENT,
+            transferStatus = TransferStatus.PENDING_UPLOAD,
+        )
+        appDatabase.getTransferDao().upsertTransfer(uploadTransfer)
+
+        val transfers = appDatabase.getTransferDao().getTransfers(userId)
+        // Should only return the completed transfer, not the pending upload
+        assertEquals(1, transfers.count())
+        assertEquals(DummyTransferForV2.transfer1.id, transfers.first().id)
+    }
+
+    @Test
     fun canGetValidTransfers() = runTest {
         addTwoRandomTransfersInDatabase()
 
