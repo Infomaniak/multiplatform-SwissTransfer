@@ -57,7 +57,7 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
         mutex.withLock {
-            if (currentUser?.id != user.id) {
+            if (currentUser?.id != user.id && user is STUser.GuestUser) {
                 appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
                 realmProvider.openTransfersDb(user.id)
             }
@@ -78,6 +78,8 @@ class AccountManager internal constructor(
             transferController.removeData()
             realmProvider.closeAllDatabases()
         }
-        currentUser = newSTUser
+        mutex.withLock {
+            currentUser = newSTUser
+        }
     }
 }
