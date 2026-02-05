@@ -48,6 +48,24 @@ data class TransferDB(
     @Ignore
     override var files: List<File> = emptyList()
         internal set
+
+    constructor(transfer: Transfer, linkId: String?, userOwnerId: Long) : this(
+        id = transfer.id,
+        senderEmail = transfer.senderEmail,
+        title = transfer.title,
+        message = transfer.message,
+        createdAt = transfer.createdAt,
+        expiresAt = transfer.expiresAt,
+        totalSize = transfer.totalSize,
+        password = transfer.password,
+        transferDirection = transfer.transferDirection,
+        transferStatus = transfer.transferStatus,
+        recipientsEmails = transfer.recipientsEmails,
+        linkId = linkId,
+        userOwnerId = userOwnerId
+    ) {
+        this.files = transfer.files
+    }
 }
 
 internal data class TransferWithFiles(

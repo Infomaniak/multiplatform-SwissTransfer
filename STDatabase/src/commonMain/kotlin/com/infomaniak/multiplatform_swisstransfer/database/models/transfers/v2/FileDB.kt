@@ -46,4 +46,14 @@ data class FileDB(
     val children: List<FileDB> = emptyList()
     @Ignore
     val folder: FileDB? = null
+
+    constructor(file: File, transferId: String, folderId: String?) : this(
+        id = file.id,
+        path = file.path,
+        size = file.size,
+        mimeType = file.mimeType,
+        isFolder = file.isFolder,
+        transferId = transferId,
+        folderId = folderId
+    )
 }
