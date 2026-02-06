@@ -42,7 +42,7 @@ data class TransferDB(
     override val transferDirection: TransferDirection,
     override val transferStatus: TransferStatus,
     override val recipientsEmails: Set<String> = emptySet(),
-    val linkId: String? = null,
+    override val linkId: String? = null,
     val userOwnerId: Long,
 ) : Transfer {
     @Ignore
