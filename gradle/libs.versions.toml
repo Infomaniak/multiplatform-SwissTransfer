@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.0"
+coreKtx = "1.7.0"
 coroutines = "1.10.2"
 desugar_jdk_libs = "2.1.5"
 kotlin = "2.2.0"
@@ -9,6 +10,7 @@ ksp = "2.3.0"
 ktor = "3.3.0"
 nmcp = "1.4.4"
 realmKotlin = "3.2.8-2"
+robolectric = "4.16.1"
 room = "2.8.4"
 skie = "0.10.6"
 sqlite = "2.6.2"
@@ -34,8 +36,10 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 realm-base = { module = "com.infomaniak.realm.kotlin:library-base", version.ref = "realmKotlin" }
 skie-gradle-plugin = { module = "co.touchlab.skie:gradle-plugin-api", version.ref = "skie" }
 #Test
+android-test = { module = "androidx.test:core-ktx", version.ref = "coreKtx" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
