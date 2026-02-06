@@ -40,7 +40,7 @@ internal class TransferRequest(
     environment: ApiEnvironment,
     json: Json,
     httpClient: HttpClient,
-) : BaseRequest(environment, json, httpClient) {
+) : BaseRequest(environment, json, httpClient, token = { "" }) {
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponse<TransferApi> {
