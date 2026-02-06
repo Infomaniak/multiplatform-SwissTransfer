@@ -35,10 +35,10 @@ import kotlin.time.ExperimentalTime
 interface TransferDao {
 
     @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus ORDER BY createdAt DESC")
-    suspend fun getTransfers(
+    fun getTransfers(
         userId: Long,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
-    ): List<TransferDB>
+    ): Flow<List<TransferDB>>
 
     @OptIn(ExperimentalTime::class)
     @Query(
@@ -46,12 +46,12 @@ interface TransferDao {
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
         ORDER BY createdAt DESC """
     )
-    suspend fun getValidTransfers(
+    fun getValidTransfers(
         userId: Long,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
-    ): List<TransferDB>
+    ): Flow<List<TransferDB>>
 
     @OptIn(ExperimentalTime::class)
     @Query(
@@ -59,12 +59,12 @@ interface TransferDao {
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
         ORDER BY createdAt DESC """
     )
-    suspend fun getExpiredTransfers(
+    fun getExpiredTransfers(
         userId: Long,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
-    ): List<TransferDB>
+    ): Flow<List<TransferDB>>
 
     @Query(
         """SELECT count(*) FROM TransferDB 
@@ -86,7 +86,10 @@ interface TransferDao {
     suspend fun getTransferRootFiles(transferId: String): List<FileDB>
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND folderId=:folderId")
-    suspend fun getTransferFolderFiles(transferId: String, folderId: String?): List<FileDB>
+    fun getTransferFolderFiles(transferId: String, folderId: String?): Flow<List<FileDB>>
+
+    @Query("SELECT * FROM FileDB WHERE folderId=:folderId")
+    fun getFilesByFolderId(folderId: String): Flow<List<FileDB>>
 
     //TODO[API-V2]: suspend fun getNotReadyTransfers(userId: Long): List<TransferDB>
 
