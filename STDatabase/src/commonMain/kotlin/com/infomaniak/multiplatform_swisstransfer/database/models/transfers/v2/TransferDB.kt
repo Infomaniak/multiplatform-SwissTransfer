@@ -17,11 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2
 
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import androidx.room.Relation
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
@@ -66,16 +64,4 @@ data class TransferDB(
     ) {
         this.files = transfer.files
     }
-}
-
-internal data class TransferWithFiles(
-    @Embedded
-    val transfer: TransferDB,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "transferId"
-    )
-    val files: List<FileDB>
-) {
-    fun toTransferDB(): TransferDB = transfer.apply { files = this@TransferWithFiles.files }
 }
