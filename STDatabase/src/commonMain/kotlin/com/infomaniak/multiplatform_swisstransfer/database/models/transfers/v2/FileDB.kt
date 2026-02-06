@@ -35,10 +35,11 @@ data class FileDB(
     @PrimaryKey
     override val id: String,
     override val path: String,
-    override val size: Long,
+    override var size: Long,
     override val mimeType: String?,
     //Local
     override val isFolder: Boolean,
+    override val thumbnailPath: String? = null,
     val transferId: String,
     val folderId: String? = null,
 ) : File {
