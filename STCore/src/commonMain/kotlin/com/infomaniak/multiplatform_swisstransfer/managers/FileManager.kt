@@ -19,11 +19,18 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
+import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
+import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUiList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class FileManager(private val fileController: FileController) {
+class FileManager(
+    private val accountManager: AccountManager,
+    private val appDatabase: AppDatabase,
+    private val fileController: FileController,
+) {
 
     /**
      * Retrieves a flow of files contained in a folder with the specified folderUuid.
@@ -32,6 +39,9 @@ class FileManager(private val fileController: FileController) {
      * @return A flow of lists of [FileUi] objects representing the files in the transfer.
      */
     fun getFilesFromTransfer(folderUuid: String): Flow<List<FileUi>> {
+        if (accountManager.currentUser is STUser.AuthUser) {
+            return appDatabase.getTransferDao().getFilesByFolderId(folderId = folderUuid).map { it.toFileUiList() }
+        }
         return fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } }
     }
 }

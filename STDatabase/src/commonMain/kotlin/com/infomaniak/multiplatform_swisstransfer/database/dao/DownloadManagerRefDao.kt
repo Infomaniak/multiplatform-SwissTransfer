@@ -15,12 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.data
+package com.infomaniak.multiplatform_swisstransfer.database.dao
 
-sealed interface STUser {
-    val id: Long
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Upsert
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.DownloadManagerRef
+import kotlinx.coroutines.flow.Flow
 
-    //TODO[ST-v2]: switch to data object if iOS uses the same guest user id (-1)
-    data class GuestUser(override val id: Long) : STUser
-    data class AuthUser(override val id: Long, val token: String) : STUser
+@Dao
+interface DownloadManagerRefDao {
+
+    @Query("SELECT downloadManagerUniqueId FROM DownloadManagerRef WHERE id=:id")
+    fun getDownloadManagerId(id: String): Flow<Long?>
+
+    @Upsert
+    suspend fun update(downloadManagerRef: DownloadManagerRef)
+
+    @Query("DELETE FROM DownloadManagerRef WHERE id=:id")
+    suspend fun delete(id: String)
+
+    @Query("DELETE FROM DownloadManagerRef WHERE userOwnerId=:userId")
+    suspend fun deleteAll(userId: Long)
+
 }

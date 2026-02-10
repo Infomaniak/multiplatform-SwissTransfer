@@ -88,6 +88,9 @@ interface TransferDao {
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND folderId=:folderId")
     fun getTransferFolderFiles(transferId: String, folderId: String?): Flow<List<FileDB>>
 
+    @Query("SELECT * FROM FileDB WHERE transferId=:transferId")
+    suspend fun getTransferFiles(transferId: String): List<FileDB>
+
     @Query("SELECT * FROM FileDB WHERE folderId=:folderId")
     fun getFilesByFolderId(folderId: String): Flow<List<FileDB>>
 

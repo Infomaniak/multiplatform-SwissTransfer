@@ -24,8 +24,12 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
+import com.infomaniak.multiplatform_swisstransfer.database.dao.DownloadManagerRefDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.DownloadManagerRef
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import kotlinx.coroutines.Dispatchers
@@ -48,12 +52,14 @@ fun DatabaseProvider.getAppDatabase(
 }
 
 @Database(
-    entities = [TransferDB::class, FileDB::class],
+    entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class],
     version = 1
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
+    abstract fun getAppSettingsDao(): AppSettingsDao
+    abstract fun getDownloadManagerRef(): DownloadManagerRefDao
     abstract fun getTransferDao(): TransferDao
     abstract fun getUploadDao(): UploadDao
 }

@@ -15,12 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.data
+package com.infomaniak.multiplatform_swisstransfer.database.dao
 
-sealed interface STUser {
-    val id: Long
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Update
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
+import kotlinx.coroutines.flow.Flow
 
-    //TODO[ST-v2]: switch to data object if iOS uses the same guest user id (-1)
-    data class GuestUser(override val id: Long) : STUser
-    data class AuthUser(override val id: Long, val token: String) : STUser
+@Dao
+interface AppSettingsDao {
+
+    @Query("SELECT * FROM AppSettingsDB LIMIT 1")
+    fun getAppSettings(): Flow<AppSettingsDB?>
+
+    @Update
+    fun update(appSettingsDB: AppSettingsDB)
 }

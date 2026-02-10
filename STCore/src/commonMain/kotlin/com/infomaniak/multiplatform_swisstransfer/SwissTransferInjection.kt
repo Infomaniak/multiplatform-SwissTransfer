@@ -84,10 +84,10 @@ class SwissTransferInjection(
     private val emailLanguageUtils by lazy { EmailLanguageUtils() }
 
     /** A manager used to orchestrate Transfers operations. */
-    val transferManager by lazy { TransferManager(transferController, transferRepository) }
+    val transferManager by lazy { TransferManager(accountManager, appDatabase, transferController, transferRepository) }
 
     /** A manager used to orchestrate Files operations. */
-    val fileManager by lazy { FileManager(fileController) }
+    val fileManager by lazy { FileManager(accountManager, appDatabase, fileController) }
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
@@ -110,6 +110,8 @@ class SwissTransferInjection(
     /** A manager used to orchestrate Uploads operations. */
     val uploadManager by lazy {
         UploadManager(
+            appDatabase,
+            accountManager,
             uploadController,
             uploadRepository,
             transferManager,
