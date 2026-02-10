@@ -47,12 +47,14 @@ internal class TransferRequest(
         )
     }
 
-    suspend fun presignedDownloadUrl(linkId: String, fileId: String, password: String?) {
-        return get(
-            url = createV2Url(ApiRoutes.presignedDownloadUrl(linkId, fileId)),
-            appendHeaders = { appendPasswordIfNeeded(password) }
-        )
-    }
+    suspend fun presignedDownloadUrl(
+        linkId: String,
+        fileId: String,
+        password: String?
+    ): Unit = get(
+        url = createV2Url(ApiRoutes.presignedDownloadUrl(linkId, fileId)),
+        appendHeaders = { appendPasswordIfNeeded(password) }
+    )
 
     suspend fun deleteTransfer(transferId: String): Boolean {
         val response = httpClient.delete(
