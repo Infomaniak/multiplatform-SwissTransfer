@@ -123,6 +123,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         CancellationException::class,
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
+        DownloadLimitReached::class,
         NetworkException::class,
         UnknownException::class,
         PasswordNeededFetchTransferException::class,
