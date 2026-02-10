@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.File as FileV2
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 
@@ -40,6 +41,17 @@ data class FileUi(
         path = file.path,
         isFolder = file.isFolder,
         fileSize = file.receivedSizeInBytes,
+        mimeType = file.mimeType,
+        localPath = null,
+        thumbnailPath = file.thumbnailPath,
+    )
+
+    constructor(file: FileV2) : this(
+        uid = file.id,
+        fileName = file.name,
+        path = file.path,
+        isFolder = file.isFolder,
+        fileSize = file.size,
         mimeType = file.mimeType,
         localPath = null,
         thumbnailPath = file.thumbnailPath,

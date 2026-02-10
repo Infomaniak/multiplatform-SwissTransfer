@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer as TransferV2
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
@@ -47,6 +48,21 @@ data class TransferUi(
         password = transfer.password,
         recipientsEmails = transfer.recipientsEmails.mapTo(destination = mutableSetOf(), transform = { it }),
         files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList(),
+        direction = transfer.transferDirection,
+        transferStatus = transfer.transferStatus,
+    )
+
+    constructor(transfer: TransferV2, files: List<FileUi>) : this(
+        uuid = transfer.id,
+        createdDateTimestamp = transfer.createdAt,
+        expirationDateTimestamp = transfer.expiresAt,
+        sizeUploaded = transfer.totalSize,
+        downloadLimit = 0, // TODO: Not available in v2 model
+        downloadLeft = 1,  // TODO: Not available in v2 model
+        message = transfer.message,
+        password = transfer.password,
+        recipientsEmails = transfer.recipientsEmails,
+        files = files,
         direction = transfer.transferDirection,
         transferStatus = transfer.transferStatus,
     )
