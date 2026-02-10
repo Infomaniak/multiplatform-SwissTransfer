@@ -28,7 +28,7 @@ internal object ApiRoutes {
     fun getTransfer(linkUUID: String): String = "links/$linkUUID"
 
     fun disableLinks(): String = "disableLinks"
-    fun presignedDownloadUrl(linkId: String, fileId: String) = "/links/$linkId/files/$fileId"
+    fun presignedDownloadUrl(linkId: String, fileId: String) = "links/$linkId/files/$fileId"
     fun v2DeleteTransfer(transferId: String) = "/transfers/$transferId"
 
     fun generateDownloadToken() = "generateDownloadToken"
