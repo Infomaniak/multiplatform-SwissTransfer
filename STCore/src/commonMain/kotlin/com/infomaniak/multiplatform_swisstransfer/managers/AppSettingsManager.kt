@@ -24,7 +24,9 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferType
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -36,14 +38,25 @@ import kotlin.coroutines.cancellation.CancellationException
  * performed on a background thread.
  **/
 class AppSettingsManager internal constructor(
+    private val appDatabase: AppDatabase,
     private val appSettingsController: AppSettingsController,
 ) {
+
+    private val appSettingsDao get() = appDatabase.getAppSettingsDao()
 
     /**
      * A [Flow] that emits the current [AppSettings] object whenever it changes.
      */
     val appSettings: Flow<AppSettings?>
-        get() = appSettingsController.getAppSettingsFlow()
+        get() {
+            val appSettings = appSettingsDao.getAppSettings()
+            if (appSettings == null) {
+                val oldAppSettings = appSettingsController.getAppSettings()
+                if (oldAppSettings != null) {
+                    AppSettingsDB(oldAppSettings)
+                }
+            }
+        }
 
     fun getAppSettings(): AppSettings? = appSettingsController.getAppSettings()
 

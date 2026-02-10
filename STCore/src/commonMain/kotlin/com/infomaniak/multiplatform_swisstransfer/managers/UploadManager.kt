@@ -25,6 +25,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
+import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
@@ -44,6 +46,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRep
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import com.infomaniak.multiplatform_swisstransfer.utils.addTransferByLinkUUID
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -60,14 +63,25 @@ import kotlin.coroutines.cancellation.CancellationException
  * @property uploadTokensManager Manager that handle uploads' token operation
  */
 class UploadManager(
+    private val appDatabase: AppDatabase,
+    private val accountManager: AccountManager,
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
     private val emailLanguageUtils: EmailLanguageUtils,
     private val uploadTokensManager: UploadTokensManager,
 ) {
+    private val currentUserId: Long?
+        get() = (accountManager.currentUser as? STUser.AuthUser)?.id
+    private val uploadDao get() = appDatabase.getUploadDao()
 
-    val lastUploadFlow get() = uploadController.getLastUploadFlow()
+    val lastUploadFlow: Flow<UploadSession?>
+        get() {
+            currentUserId?.let {
+                return uploadDao.getLastUploadTransferFlow()
+            }
+            return uploadController.getLastUploadFlow()
+        }
 
     /**
      * Retrieves all upload sessions from the database.
@@ -77,6 +91,9 @@ class UploadManager(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getUploads(): List<UploadSession> = withContext(Dispatchers.Default) {
+        currentUserId?.let {
+            return@withContext uploadDao.getAllUploadsTransfers() //TODO
+        }
         return@withContext uploadController.getAllUploads()
     }
 
