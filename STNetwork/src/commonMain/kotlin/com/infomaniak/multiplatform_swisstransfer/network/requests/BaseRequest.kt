@@ -45,18 +45,20 @@ internal open class BaseRequest(
 ) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
-        val baseUrl = Url(ApiRoutes.apiBaseUrl(environment) + path)
-        return URLBuilder(baseUrl).apply {
-            queries.forEach { parameters.append(it.first, it.second) }
-        }.build()
+        return createUrl(ApiRoutes.apiBaseUrl(environment), path, queries)
     }
 
     protected fun createV2Url(path: String, vararg queries: Pair<String, String>): Url {
-        val baseUrl = Url(ApiRoutes.apiBaseUrlV2(environment) + path)
-        return URLBuilder(baseUrl).apply {
-            queries.forEach { parameters.append(it.first, it.second) }
-        }.build()
+        return createUrl(ApiRoutes.apiBaseUrlV2(environment), path, queries)
     }
+
+    private fun createUrl(
+        baseUrl: String,
+        path: String,
+        queries: Array<out Pair<String, String>>
+    ): Url = URLBuilder(Url(baseUrl + path)).apply {
+        queries.forEach { parameters.append(it.first, it.second) }
+    }.build()
 
     protected fun HeadersBuilder.appendBearer() {
         append(HttpHeaders.Authorization, "Bearer ${token()}")
