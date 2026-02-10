@@ -63,7 +63,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
 
     @Throws(
         CancellationException::class,
-        ApiErrorException::class,
+        ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         NetworkException::class,
         UnknownException::class,
