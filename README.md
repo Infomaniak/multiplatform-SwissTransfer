@@ -124,7 +124,7 @@ platform (Android or iOS).
 
 ## Usage
 
-Here’s a brief example of how to use the `SwissTransferInjection` class from the Core module:
+Here’s a brief example of how to use the `SwissTransferInjection` clas[Info.plist](release/STNetwork/build/XCFrameworks/release/STNetwork.xcframework/Info.plist)s from the Core module:
 
 ```kotlin
 val core = SwissTransferInjection(userAgent = "app_user_agent")

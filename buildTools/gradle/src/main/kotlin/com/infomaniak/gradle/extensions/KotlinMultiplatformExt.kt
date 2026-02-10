@@ -60,7 +60,7 @@ private fun KotlinMultiplatformExtension.setup(
     ).forEach {
         it.binaries.framework {
             baseName = xcframeworkName
-            binaryOption("bundleId", "com.infomaniak.multiplatform_swisstransfer.${xcframeworkName}")
+            binaryOption("bundleId", "com.infomaniak.multiplatform-swisstransfer.${xcframeworkName}")
             xcf.add(this)
             isStatic = true
 

@@ -24,6 +24,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpHeaders
 import io.ktor.utils.io.CancellationException
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -39,7 +40,7 @@ internal fun HttpRequestBuilder.longTimeout() {
     }
 }
 
-internal fun HttpResponse.getRequestContextId() = headers[CONTENT_REQUEST_ID_HEADER] ?: ""
+internal fun HttpResponse.getRequestContextId() = headers[HttpHeaders.XRequestId] ?: ""
 
 internal suspend inline fun <reified R> HttpResponse.decode(): R = runCatching {
     body<R>()
