@@ -34,6 +34,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.TransferRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
@@ -110,7 +111,11 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         ExpiredDateFetchTransferException::class,
         DownloadLimitReached::class,
     )
-    suspend fun presignedDownloadUrl(linkId: String, fileId: String, password: String?) = withTransferErrorHandling {
+    suspend fun presignedDownloadUrl(
+        linkId: String,
+        fileId: String,
+        password: String?
+    ): ApiResponse<PresignedUrlResponse> = withTransferErrorHandling {
         transferRequest.presignedDownloadUrl(linkId, fileId, password)
     }
 
