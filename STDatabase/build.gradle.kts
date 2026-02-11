@@ -14,7 +14,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":STCommon"))
             implementation(libs.realm.base)
-            implementation(libs.androidx.room.runtime)
+            api(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.kotlinx.serialization.json)
         }
