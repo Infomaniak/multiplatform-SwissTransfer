@@ -24,8 +24,8 @@ internal class Converters {
     private val json = Json.Default
 
     @TypeConverter
-    fun fromSetToString(list: Set<String>): String {
-        return json.encodeToString(list)
+    fun fromSetToString(set: Set<String>): String {
+        return json.encodeToString(set)
     }
 
     @TypeConverter
