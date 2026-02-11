@@ -32,7 +32,7 @@ internal object ApiRoutes {
     fun v2DeleteTransfer(transferId: String) = "transfers/$transferId"
 
     fun generateDownloadToken() = "generateDownloadToken"
-    //endRegion
+    //endregion
 
     //region Upload
     const val initUpload = "mobile/containers"
