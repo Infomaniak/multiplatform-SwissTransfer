@@ -23,4 +23,4 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
-actual open class RobolectricTestsBase
+actual abstract class RobolectricTestsBase
