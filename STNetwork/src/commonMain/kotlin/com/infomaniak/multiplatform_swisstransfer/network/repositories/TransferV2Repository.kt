@@ -31,7 +31,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransf
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.WrongPasswordFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
-import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
+import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.TransferRequest
@@ -75,7 +75,10 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         ExpiredDateFetchTransferException::class,
         DownloadLimitReached::class,
     )
-    suspend fun getTransferByLinkUUID(linkUUID: String, password: String?): ApiResponse<TransferApi> = withTransferErrorHandling {
+    suspend fun getTransferByLinkUUID(
+        linkUUID: String,
+        password: String?
+    ): ApiResponseV2Success<TransferApi> = withTransferErrorHandling {
         transferRequest.getTransfer(linkUUID, password)
     }
 
@@ -93,7 +96,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         ExpiredDateFetchTransferException::class,
         DownloadLimitReached::class,
     )
-    suspend fun getTransferByUrl(url: String, password: String?): ApiResponse<TransferApi> {
+    suspend fun getTransferByUrl(url: String, password: String?): ApiResponseV2Success<TransferApi> {
         return getTransferByLinkUUID(extractUUID(url), password)
     }
 
@@ -114,7 +117,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         linkId: String,
         fileId: String,
         password: String?
-    ): ApiResponse<PresignedUrlResponse> = withTransferErrorHandling {
+    ): ApiResponseV2Success<PresignedUrlResponse> = withTransferErrorHandling {
         transferRequest.presignedDownloadUrl(linkId, fileId, password)
     }
 

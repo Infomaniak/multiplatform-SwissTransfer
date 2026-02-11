@@ -31,7 +31,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadError
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferExpired
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferFailed
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.toUploadErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
+import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
@@ -73,7 +73,7 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         UnauthorizedException::class,
         TooManyRequestException::class,
     )
-    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponse<Transfer> {
+    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<Transfer> {
         return withUploadErrorHandling {
             uploadRequest.createTransfer(createTransfer)
         }
@@ -87,7 +87,7 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         UnknownException::class,
         NotFoundException::class,
     )
-    suspend fun getPresignedUploadUrl(transferId: String, fileId: String): ApiResponse<PresignedUrlResponse> {
+    suspend fun getPresignedUploadUrl(transferId: String, fileId: String): ApiResponseV2Success<PresignedUrlResponse> {
         return withUploadErrorHandling {
             uploadRequest.getPresignedUploadUrl(transferId, fileId)
         }
@@ -105,7 +105,7 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         transferId: String,
         fileId: String,
         chunkIndex: Int,
-    ): ApiResponse<PresignedUrlResponse> {
+    ): ApiResponseV2Success<PresignedUrlResponse> {
         return withUploadErrorHandling {
             uploadRequest.getPresignedUploadChunkUrl(transferId, fileId, chunkIndex)
         }

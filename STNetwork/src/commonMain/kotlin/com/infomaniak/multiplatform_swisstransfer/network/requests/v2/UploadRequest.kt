@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.requests.v2
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
-import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
+import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
@@ -47,7 +47,7 @@ internal class UploadRequest(
     token: () -> String,
 ) : BaseRequest(environment, json, httpClient, token) {
 
-    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponse<Transfer> {
+    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<Transfer> {
         val nullableJson = Json(json) {
             explicitNulls = false
         }
@@ -58,7 +58,7 @@ internal class UploadRequest(
         )
     }
 
-    suspend fun getPresignedUploadUrl(transferId: String, fileId: String): ApiResponse<PresignedUrlResponse> {
+    suspend fun getPresignedUploadUrl(transferId: String, fileId: String): ApiResponseV2Success<PresignedUrlResponse> {
         return post(
             url = createV2Url(ApiRoutes.uploadDirectly(transferId, fileId)),
             data = null,
@@ -69,7 +69,7 @@ internal class UploadRequest(
         transferId: String,
         fileId: String,
         chunkIndex: Int,
-    ): ApiResponse<PresignedUrlResponse> {
+    ): ApiResponseV2Success<PresignedUrlResponse> {
         return post(
             url = createV2Url(ApiRoutes.uploadChunk(transferId, fileId, chunkIndex)),
             data = null,
