@@ -17,4 +17,4 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.v2
 
-expect open class RobolectricTestsBase()
+expect abstract class RobolectricTestsBase()

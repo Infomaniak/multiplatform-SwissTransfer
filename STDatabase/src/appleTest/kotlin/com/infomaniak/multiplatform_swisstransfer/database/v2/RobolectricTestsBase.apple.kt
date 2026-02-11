@@ -17,4 +17,4 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.v2
 
-actual open class RobolectricTestsBase
+actual abstract class RobolectricTestsBase
