@@ -73,9 +73,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         UnauthorizedException::class,
         TooManyRequestException::class,
     )
-    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<Transfer> {
+    suspend fun createTransfer(createTransfer: CreateTransfer): Transfer {
         return withUploadErrorHandling {
-            uploadRequest.createTransfer(createTransfer)
+            uploadRequest.createTransfer(createTransfer).data
         }
     }
 
@@ -87,9 +87,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         UnknownException::class,
         NotFoundException::class,
     )
-    suspend fun getPresignedUploadUrl(transferId: String, fileId: String): ApiResponseV2Success<PresignedUrlResponse> {
+    suspend fun getPresignedUploadUrl(transferId: String, fileId: String): PresignedUrlResponse {
         return withUploadErrorHandling {
-            uploadRequest.getPresignedUploadUrl(transferId, fileId)
+            uploadRequest.getPresignedUploadUrl(transferId, fileId).data
         }
     }
 
@@ -105,9 +105,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         transferId: String,
         fileId: String,
         chunkIndex: Int,
-    ): ApiResponseV2Success<PresignedUrlResponse> {
+    ): PresignedUrlResponse {
         return withUploadErrorHandling {
-            uploadRequest.getPresignedUploadChunkUrl(transferId, fileId, chunkIndex)
+            uploadRequest.getPresignedUploadChunkUrl(transferId, fileId, chunkIndex).data
         }
     }
 

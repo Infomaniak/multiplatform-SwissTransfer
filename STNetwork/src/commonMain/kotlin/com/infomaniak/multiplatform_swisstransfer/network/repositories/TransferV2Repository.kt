@@ -78,8 +78,8 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
     suspend fun getTransferByLinkUUID(
         linkUUID: String,
         password: String?
-    ): ApiResponseV2Success<TransferApi> = withTransferErrorHandling {
-        transferRequest.getTransfer(linkUUID, password)
+    ): TransferApi = withTransferErrorHandling {
+        transferRequest.getTransfer(linkUUID, password).data
     }
 
     @Throws(
@@ -96,7 +96,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         ExpiredDateFetchTransferException::class,
         DownloadLimitReached::class,
     )
-    suspend fun getTransferByUrl(url: String, password: String?): ApiResponseV2Success<TransferApi> {
+    suspend fun getTransferByUrl(url: String, password: String?): TransferApi {
         return getTransferByLinkUUID(extractUUID(url), password)
     }
 
@@ -117,8 +117,8 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         linkId: String,
         fileId: String,
         password: String?
-    ): ApiResponseV2Success<PresignedUrlResponse> = withTransferErrorHandling {
-        transferRequest.presignedDownloadUrl(linkId, fileId, password)
+    ): String = withTransferErrorHandling {
+        transferRequest.presignedDownloadUrl(linkId, fileId, password).data.url
     }
 
     @Throws(
