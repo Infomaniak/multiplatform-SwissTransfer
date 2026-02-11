@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ApiResponse<T>(
-    val result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
-    val data: T? = null,
+data class ApiResponseForError(
+    val responseStatus: ApiResponseStatus = ApiResponseStatus.ERROR,
+    val error: ApiErrorV2
 )
