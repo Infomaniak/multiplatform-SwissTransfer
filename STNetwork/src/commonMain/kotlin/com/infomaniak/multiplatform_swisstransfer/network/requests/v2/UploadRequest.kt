@@ -108,19 +108,6 @@ internal class UploadRequest(
 
     suspend fun uploadChunk(
         cephUrl: String,
-        data: ByteArray,
-        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
-    ): String? {
-        val response = httpClient.post(urlString = cephUrl) {
-            longTimeout()
-            setBody(data)
-            onUpload { bytesSentTotal, contentLength -> onUpload(bytesSentTotal, contentLength ?: 0) }
-        }
-        return if (response.status.isSuccess()) response.headers["Etag"] else null
-    }
-
-    suspend fun uploadChunk(
-        cephUrl: String,
         data: OutgoingContent.WriteChannelContent,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): String? {
