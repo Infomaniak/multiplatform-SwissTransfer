@@ -147,35 +147,6 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
         fileUUID: String,
         chunkIndex: Int,
         isLastChunk: Boolean,
-        isRetry: Boolean,
-        data: ByteArray,
-        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
-    ) {
-        uploadRequest.uploadChunk(
-            uploadHost = uploadHost,
-            containerUUID = containerUUID,
-            fileUUID = fileUUID,
-            chunkIndex = chunkIndex,
-            isLastChunk = isLastChunk,
-            isRetry = isRetry,
-            data = data,
-            onUpload = onUpload
-        )
-    }
-
-    @Throws(
-        CancellationException::class,
-        ApiErrorException::class,
-        UnexpectedApiErrorFormatException::class,
-        NetworkException::class,
-        UnknownException::class,
-    )
-    suspend fun uploadChunk(
-        uploadHost: String,
-        containerUUID: String,
-        fileUUID: String,
-        chunkIndex: Int,
-        isLastChunk: Boolean,
         data: OutgoingContent.WriteChannelContent,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ) {
