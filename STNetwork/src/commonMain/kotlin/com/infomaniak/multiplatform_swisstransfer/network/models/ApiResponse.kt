@@ -25,6 +25,7 @@ data class ApiResponse<T>(
     val data: T? = null,
 )
 
+@Serializable
 data class ApiResponseForError(
     val responseStatus: ApiResponseStatus = ApiResponseStatus.ERROR,
     val error: ApiErrorV2
