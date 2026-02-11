@@ -204,20 +204,6 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
     )
     suspend fun uploadChunkToEtag(
         cephUrl: String,
-        data: ByteArray,
-        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
-    ): String? = withUploadErrorHandling {
-        uploadRequest.uploadChunk(cephUrl, data, onUpload)
-    }
-
-    @Throws(
-        CancellationException::class,
-        NetworkException::class,
-        UnexpectedApiErrorFormatException::class,
-        UnknownException::class,
-    )
-    suspend fun uploadChunkToEtag(
-        cephUrl: String,
         data: OutgoingContent.WriteChannelContent,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): String? = withUploadErrorHandling {
