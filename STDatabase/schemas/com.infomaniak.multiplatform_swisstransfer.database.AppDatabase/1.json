@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e46aad3c08feb2d7a18b87e2fd959dfe",
+    "identityHash": "53552e1c6a78205feeaf944f7da6005a",
     "entities": [
       {
         "tableName": "TransferDB",
@@ -146,6 +146,17 @@
             "id"
           ]
         },
+        "indices": [
+          {
+            "name": "index_FileDB_transferId",
+            "unique": false,
+            "columnNames": [
+              "transferId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_FileDB_transferId` ON `${TABLE_NAME}` (`transferId`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "TransferDB",
@@ -163,7 +174,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e46aad3c08feb2d7a18b87e2fd959dfe')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '53552e1c6a78205feeaf944f7da6005a')"
     ]
   }
 }
