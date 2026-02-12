@@ -71,7 +71,7 @@ internal open class BaseRequest(
     ): R {
         return httpClient.get(url) {
             headers { appendHeaders() }
-        }.body<R>()
+        }.decode<R>()
     }
 
     protected suspend inline fun <reified R> post(
