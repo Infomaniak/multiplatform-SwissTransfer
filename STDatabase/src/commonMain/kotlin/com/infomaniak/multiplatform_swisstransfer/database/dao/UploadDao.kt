@@ -38,6 +38,6 @@ interface UploadDao {
         status: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): TransferDB?
 
-    @Query("SELECT count(*) FROM transferdb WHERE transferStatus=:status")
+    @Query("SELECT count(*) FROM TransferDB WHERE transferStatus=:status")
     suspend fun getUploadsCount(status: TransferStatus = TransferStatus.PENDING_UPLOAD): Long
 }

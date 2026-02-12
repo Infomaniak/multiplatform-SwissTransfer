@@ -103,11 +103,11 @@ interface TransferDao {
     suspend fun deleteTransfer(transferDB: TransferDB)
 
     @OptIn(ExperimentalTime::class)
-    @Query("DELETE FROM transferdb WHERE expiresAt < :expiryTime")
+    @Query("DELETE FROM TransferDB WHERE expiresAt < :expiryTime")
     suspend fun deleteExpiredTransfers(
         expiryTime: Long = Clock.System.now().epochSeconds - (DAYS_SINCE_EXPIRATION * DateUtils.SECONDS_IN_A_DAY),
     )
 
-    @Query("DELETE FROM transferdb WHERE userOwnerId=:userId")
+    @Query("DELETE FROM TransferDB WHERE userOwnerId=:userId")
     suspend fun deleteTransfers(userId: Long)
 }
