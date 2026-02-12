@@ -37,7 +37,6 @@ internal class TransferRequest(
     token: () -> String,
 ) : BaseRequest(environment, json, httpClient, token) {
 
-    @OptIn(ExperimentalEncodingApi::class)
     suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponseV2Success<TransferApi> {
         return get(
             url = createV2Url(ApiRoutes.getTransfer(linkUUID)),
