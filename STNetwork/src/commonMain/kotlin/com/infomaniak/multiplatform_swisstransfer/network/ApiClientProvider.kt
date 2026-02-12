@@ -116,7 +116,7 @@ class ApiClientProvider internal constructor(
                             }
                         }.getOrElse { exception ->
                             if (exception is ApiException) throw exception
-                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null, requestContextId)
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, exception, requestContextId)
                         }
                     }
                 }
