@@ -21,7 +21,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ApiResponseV2Success<T>(
+internal data class ApiResponseV2Success<T>(
     val result: Status,
     val data: T,
 ) {
