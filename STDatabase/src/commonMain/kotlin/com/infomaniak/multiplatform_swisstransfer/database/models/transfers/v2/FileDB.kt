@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Ignore
@@ -40,6 +41,7 @@ data class FileDB(
     //Local
     override val isFolder: Boolean,
     override val thumbnailPath: String? = null,
+    @ColumnInfo(index = true)
     val transferId: String,
     val folderId: String? = null,
 ) : File {
