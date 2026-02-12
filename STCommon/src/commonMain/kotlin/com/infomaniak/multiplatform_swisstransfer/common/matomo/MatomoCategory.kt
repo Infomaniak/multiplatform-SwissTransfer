@@ -21,11 +21,13 @@ enum class MatomoCategory(val value: String) {
 
     //region Common
     AppUpdate("appUpdate"),
+    DeleteTransferHistory("deleteTransferHistory"),
+    MyAccount("myAccount"),
     NewTransfer("newTransfer"),
     NewTransferData("newTransferData"),
     ReceivedTransfer("receivedTransfer"),
     SentTransfer("sentTransfer"),
-    DeleteTransferHistory("deleteTransferHistory"),
+    Settings("settings"),
     SettingsGlobalDownloadLimit("settingsGlobalDownloadLimit"),
     SettingsGlobalEmailLanguage("settingsGlobalEmailLanguage"),
     SettingsGlobalTheme("settingsGlobalTheme"),
@@ -34,6 +36,7 @@ enum class MatomoCategory(val value: String) {
     SettingsLocalEmailLanguage("settingsLocalEmailLanguage"),
     SettingsLocalPassword("settingsLocalPassword"),
     SettingsLocalValidityPeriod("settingsLocalValidityPeriod"),
+    SwitchUserBottomSheet("switchUserBottomSheet"),
     TransferType("transferType"),
     //endregion
 
