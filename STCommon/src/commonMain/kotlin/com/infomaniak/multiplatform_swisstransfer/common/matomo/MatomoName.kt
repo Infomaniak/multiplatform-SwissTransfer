@@ -42,6 +42,7 @@ enum class MatomoName(val value: String) {
     Italian("italian"),
     Light("light"),
     Link("link"),
+    Login("login"),
     Logout("logout"),
     Mail("mail"),
     OneDay("1day"),
