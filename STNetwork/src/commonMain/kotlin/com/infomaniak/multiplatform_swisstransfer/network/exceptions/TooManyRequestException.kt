@@ -17,4 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
-class TooManyRequestException : ApiException(errorMessage = "", cause = null, requestContextId = "")
+class TooManyRequestException(requestContextId: String) : ApiException(
+    errorMessage = "",
+    cause = null,
+    requestContextId = requestContextId
+)

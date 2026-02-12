@@ -23,4 +23,8 @@ package com.infomaniak.multiplatform_swisstransfer.network.exceptions
  * This exception indicates that the request requires a valid Bearer token for authentication,
  * but either no token was provided or the token was invalid/expired.
  */
-class UnauthorizedException() : ApiException(errorMessage = "", cause = null, requestContextId = "")
+class UnauthorizedException(requestContextId: String) : ApiException(
+    errorMessage = "",
+    cause = null,
+    requestContextId = requestContextId
+)
