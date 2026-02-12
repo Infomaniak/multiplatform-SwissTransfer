@@ -17,18 +17,22 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.exceptions
 
-sealed class UploadErrorsException : ApiException.ApiV2ErrorException(code = "", description = "", requestContextId = "") {
+sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV2ErrorException(
+    code = "",
+    description = "",
+    requestContextId = requestContextId
+) {
 
-    class NotFoundException() : UploadErrorsException()
-    class TransferCancelled() : UploadErrorsException()
-    class TransferExpired() : UploadErrorsException()
-    class TransferFailed() : UploadErrorsException()
+    class NotFoundException(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class TransferCancelled(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class TransferExpired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class TransferFailed(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
 }
 
 internal fun ApiException.ApiV2ErrorException.toUploadErrorsException() = when (code) {
-    "object_not_found" -> UploadErrorsException.NotFoundException()
-    "transfer_cancelled" -> UploadErrorsException.TransferCancelled()
-    "transfer_expired" -> UploadErrorsException.TransferExpired()
-    "transfer_failed" -> UploadErrorsException.TransferFailed()
+    "object_not_found" -> UploadErrorsException.NotFoundException(requestContextId)
+    "transfer_cancelled" -> UploadErrorsException.TransferCancelled(requestContextId)
+    "transfer_expired" -> UploadErrorsException.TransferExpired(requestContextId)
+    "transfer_failed" -> UploadErrorsException.TransferFailed(requestContextId)
     else -> this
 }

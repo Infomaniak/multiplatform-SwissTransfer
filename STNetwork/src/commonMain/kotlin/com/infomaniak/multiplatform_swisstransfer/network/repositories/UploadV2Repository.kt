@@ -31,7 +31,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadError
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferExpired
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferFailed
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.toUploadErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
@@ -214,8 +213,8 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         block()
     }.getOrElse { exception ->
         throw when (exception) {
-            is ApiV2ErrorException if exception.code == "not_authorized" -> UnauthorizedException()
-            is ApiV2ErrorException if exception.code == "too_many_request" -> TooManyRequestException()
+            is ApiV2ErrorException if exception.code == "not_authorized" -> UnauthorizedException(exception.requestContextId)
+            is ApiV2ErrorException if exception.code == "too_many_request" -> TooManyRequestException(exception.requestContextId)
             is ApiV2ErrorException -> exception.toUploadErrorsException()
             else -> exception
         }
