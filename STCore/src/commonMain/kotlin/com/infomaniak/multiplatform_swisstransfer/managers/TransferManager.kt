@@ -215,13 +215,14 @@ class TransferManager internal constructor(
             if (transfer != null) {
                 if (uniqueDownloadManagerId == null) {
                     appDatabase.getDownloadManagerRef().delete(
-                        id = DownloadManagerRefV2.buildPrimaryKeyForRealm(transferUUID, fileUid)
+                        transferId = transferUUID,
+                        fileId = fileUid ?: ""
                     )
                 } else {
                     appDatabase.getDownloadManagerRef().update(
                         DownloadManagerRefV2(
                             transferId = transferUUID,
-                            fileUid = fileUid,
+                            fileId = fileUid ?: "",
                             downloadManagerUniqueId = uniqueDownloadManagerId,
                             userOwnerId = it
                         )
@@ -237,10 +238,9 @@ class TransferManager internal constructor(
      * Gives the id to retrieve a previous download assigned to Android's DownloadManager.
      */
     fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> {
+        //TODO: Maybe migrate all that data from Realm, to avoid having to merge the 2 flows.
         currentUserId?.let {
-            return appDatabase.getDownloadManagerRef().getDownloadManagerId(
-                id = DownloadManagerRefV2.buildPrimaryKeyForRealm(transferUUID, fileUid)
-            )
+            return appDatabase.getDownloadManagerRef().getDownloadManagerId(transferId = transferUUID, fileId = fileUid ?: "")
         }
         return transferController.downloadManagerIdFor(transferUUID, fileUid)
     }

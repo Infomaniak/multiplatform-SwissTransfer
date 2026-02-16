@@ -26,14 +26,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DownloadManagerRefDao {
 
-    @Query("SELECT downloadManagerUniqueId FROM DownloadManagerRef WHERE id=:id")
-    fun getDownloadManagerId(id: String): Flow<Long?>
+    @Query("SELECT downloadManagerUniqueId FROM DownloadManagerRef WHERE transferId=:transferId AND fileId=:fileId")
+    fun getDownloadManagerId(transferId: String, fileId: String = ""): Flow<Long?>
 
     @Upsert
     suspend fun update(downloadManagerRef: DownloadManagerRef)
 
-    @Query("DELETE FROM DownloadManagerRef WHERE id=:id")
-    suspend fun delete(id: String)
+    @Query("DELETE FROM DownloadManagerRef WHERE transferId=:transferId AND fileId=:fileId")
+    suspend fun delete(transferId: String, fileId: String = "")
 
     @Query("DELETE FROM DownloadManagerRef WHERE userOwnerId=:userId")
     suspend fun deleteAll(userId: Long)
