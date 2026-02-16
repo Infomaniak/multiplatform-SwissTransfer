@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Update
+import androidx.room.Upsert
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import kotlinx.coroutines.flow.Flow
 
@@ -29,6 +29,6 @@ interface AppSettingsDao {
     @Query("SELECT * FROM AppSettingsDB LIMIT 1")
     fun getAppSettings(): Flow<AppSettingsDB?>
 
-    @Update
-    fun update(appSettingsDB: AppSettingsDB)
+    @Upsert
+    suspend fun put(appSettingsDB: AppSettingsDB)
 }

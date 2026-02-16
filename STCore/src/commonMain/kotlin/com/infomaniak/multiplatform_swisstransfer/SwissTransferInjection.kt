@@ -37,6 +37,7 @@ import com.infomaniak.multiplatform_swisstransfer.managers.UploadManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadTokensManager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 
@@ -74,6 +75,7 @@ class SwissTransferInjection(
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
+    private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, { TODO("Get token") }) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider, crashReport) }
     private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
@@ -84,13 +86,13 @@ class SwissTransferInjection(
     private val emailLanguageUtils by lazy { EmailLanguageUtils() }
 
     /** A manager used to orchestrate Transfers operations. */
-    val transferManager by lazy { TransferManager(accountManager, appDatabase, transferController, transferRepository) }
+    val transferManager by lazy { TransferManager(accountManager, appDatabase, transferController, transferRepository, transferV2Repository) }
 
     /** A manager used to orchestrate Files operations. */
     val fileManager by lazy { FileManager(accountManager, appDatabase, fileController) }
 
     /** A manager used to orchestrate AppSettings operations. */
-    val appSettingsManager by lazy { AppSettingsManager(appSettingsController) }
+    val appSettingsManager by lazy { AppSettingsManager(appDatabase, appSettingsController) }
 
     /** A manager used to orchestrate uploads' tokens operations (email token or attestation token). */
     val uploadTokensManager by lazy { UploadTokensManager(uploadTokensController) }

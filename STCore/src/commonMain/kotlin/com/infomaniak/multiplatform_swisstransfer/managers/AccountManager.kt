@@ -103,17 +103,8 @@ private suspend fun AppDatabase.isMigrationNeeded(): Boolean {
     return appSettings?.dataMigrated != true
 }
 
-private fun makeMigrationFromOldDB(appSettingsController: AppSettingsController, appDatabase: AppDatabase) {
-    appSettingsController.getAppSettings()?.let {
-        val appSettingsDB = AppSettingsDB(
-            theme = it.theme,
-            validityPeriod = it.validityPeriod,
-            downloadLimit = it.downloadLimit,
-            emailLanguage = it.emailLanguage,
-            lastTransferType = it.lastTransferType,
-            lastAuthorEmail = it.lastAuthorEmail,
-            dataMigrated = true,
-        )
-        appDatabase.getAppSettingsDao().update(appSettingsDB)
-    }
+private suspend fun makeMigrationFromOldDB(appSettingsController: AppSettingsController, appDatabase: AppDatabase) {
+    val oldAppSettings = appSettingsController.getAppSettings() ?: return
+    val appSettingsDB = AppSettingsDB(oldAppSettings, dataMigrated = true)
+    appDatabase.getAppSettingsDao().put(appSettingsDB)
 }

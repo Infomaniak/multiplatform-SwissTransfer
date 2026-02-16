@@ -29,7 +29,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 @Entity
 data class AppSettingsDB(
     @PrimaryKey
-    private val id: String = "Default",
+    internal val id: String = "Default",
     override val theme: Theme = Theme.SYSTEM,
     override val validityPeriod: ValidityPeriod = ValidityPeriod.THIRTY,
     override val downloadLimit: DownloadLimit = DownloadLimit.TWO_HUNDRED_FIFTY,
@@ -47,12 +47,13 @@ data class AppSettingsDB(
         emailLanguage = emailLanguage,
     )
 
-    constructor(appSettings: AppSettings) : this(
+    constructor(appSettings: AppSettings, dataMigrated: Boolean = false) : this(
         theme = appSettings.theme,
         validityPeriod = appSettings.validityPeriod,
         downloadLimit = appSettings.downloadLimit,
         emailLanguage = appSettings.emailLanguage,
         lastTransferType = appSettings.lastTransferType,
         lastAuthorEmail = appSettings.lastAuthorEmail,
+        dataMigrated = dataMigrated
     )
 }

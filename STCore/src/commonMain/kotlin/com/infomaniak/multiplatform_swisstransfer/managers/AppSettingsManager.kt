@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
@@ -26,9 +28,11 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferType
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
-import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -47,16 +51,13 @@ class AppSettingsManager internal constructor(
     /**
      * A [Flow] that emits the current [AppSettings] object whenever it changes.
      */
-    val appSettings: Flow<AppSettings?>
-        get() {
-            val appSettings = appSettingsDao.getAppSettings()
-            if (appSettings == null) {
-                val oldAppSettings = appSettingsController.getAppSettings()
-                if (oldAppSettings != null) {
-                    AppSettingsDB(oldAppSettings)
-                }
-            }
-        }
+    /**
+     * A [Flow] that emits the current [AppSettings] object whenever it changes.
+     */
+    val appSettings: Flow<AppSettings?> = appSettingsDao.getAppSettings().transformLatest { appSettings ->
+        if (appSettings != null) emit(appSettings)
+        else emitAll(appSettingsController.getAppSettingsFlow())
+    }
 
     fun getAppSettings(): AppSettings? = appSettingsController.getAppSettings()
 
