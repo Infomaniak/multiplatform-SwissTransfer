@@ -20,30 +20,34 @@ package com.infomaniak.gradle.plugins
 import com.infomaniak.gradle.utils.Versions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
+import org.gradle.plugins.signing.Sign
+import org.gradle.plugins.signing.SigningExtension
+import org.gradle.plugins.signing.SigningPlugin
 
 class PublishPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
+        target.plugins.apply(SigningPlugin::class.java)
         target.plugins.apply("maven-publish")
+        target.plugins.apply("com.gradleup.nmcp")
 
         // Create the PublishExtension and add it to the project
         val extension = target.extensions.create<PublishExtension>(PublishExtension.EXTENSION_NAME)
 
-        // We use the group just below to match jitpack convention (based on GitHub repo id)
-        target.group = "com.github.Infomaniak.multiplatform-SwissTransfer"
-
-        // This is the group name we are going to use in the future.
-        // target.group = "com.github.infomaniak.multiplatform_swisstransfer" //TODO: Use that once we host this out of jitpack.io
+        target.group = "com.infomaniak.multiplatform_swisstransfer"
         target.version = Versions.mavenVersionName
 
         target.afterEvaluate {
             val mavenName = extension.mavenName ?: target.name
 
-            target.extensions.configure<org.gradle.api.publish.PublishingExtension> {
+            target.extensions.configure<PublishingExtension> {
                 publications {
                     withType<MavenPublication> {
                         pom {
@@ -70,7 +74,8 @@ class PublishPlugin : Plugin<Project> {
                             }
                             developers {
                                 developer {
-                                    id.set("infomaniak")
+                                    id.set("Infomaniak")
+                                    email.set("mobile+libraries@infomaniak-dev.ch")
                                     name.set("Infomaniak Development Team")
                                     url.set("https://www.infomaniak.com/")
                                 }
@@ -79,6 +84,30 @@ class PublishPlugin : Plugin<Project> {
                     }
                 }
             }
+
+            target.extensions.configure<SigningExtension> {
+                val keyId: String = getPropertyValue(project, "GPG_key_id") ?: return@configure
+                val ringFile: String = getPropertyValue(project, "GPG_private_key")?.replace('#', '\n') ?: return@configure
+                val password: String = getPropertyValue(project, "GPG_private_password") ?: return@configure
+
+                isRequired = true
+                useInMemoryPgpKeys(keyId, ringFile, password)
+                sign(project.extensions.getByType<PublishingExtension>().publications)
+
+                // Workaround for a Gradle bug, the issue is still open.
+                // https://github.com/gradle/gradle/issues/26091#issuecomment-1722947958
+                tasks.withType<AbstractPublishToMaven>().configureEach {
+                    val signingTasks = tasks.withType<Sign>()
+                    mustRunAfter(signingTasks)
+                }
+            }
         }
     }
+}
+
+private fun getPropertyValue(project: Project, propertyName: String): String? {
+    if (project.hasProperty(propertyName)) return project.property(propertyName) as String
+
+    val systemValue: String? = System.getenv(propertyName)
+    return systemValue
 }
