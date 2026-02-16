@@ -18,35 +18,11 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity
-class DownloadManagerRef private constructor(
-    @PrimaryKey
-    val id: String,
+@Entity(primaryKeys = ["transferId", "fileId"])
+data class DownloadManagerRef(
     val transferId: String,
-    @Suppress("unused") // We prefer to keep it in the database.
-    val fileId: String?,
+    val fileId: String,
     val downloadManagerUniqueId: Long,
     val userOwnerId: Long,
-) {
-
-    constructor(
-        transferId: String,
-        fileUid: String?,
-        downloadManagerUniqueId: Long,
-        userOwnerId: Long,
-    ) : this(
-        id = buildPrimaryKeyForRealm(transferId, fileUid),
-        transferId = transferId,
-        fileId = fileUid,
-        downloadManagerUniqueId = downloadManagerUniqueId,
-        userOwnerId = userOwnerId,
-    )
-
-    companion object Companion {
-        fun buildPrimaryKeyForRealm(transferId: String, fileId: String?): String {
-            return if (fileId == null) transferId else "$transferId $fileId"
-        }
-    }
-}
+)
