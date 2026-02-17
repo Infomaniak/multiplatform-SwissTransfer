@@ -5,6 +5,102 @@
     "identityHash": "3802f1313df6c8c8e691e75e221bd42d",
     "entities": [
       {
+        "tableName": "AppSettingsDB",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `theme` TEXT NOT NULL, `validityPeriod` TEXT NOT NULL, `downloadLimit` TEXT NOT NULL, `emailLanguage` TEXT NOT NULL, `lastTransferType` TEXT NOT NULL, `lastAuthorEmail` TEXT, `dataMigrated` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "theme",
+            "columnName": "theme",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "validityPeriod",
+            "columnName": "validityPeriod",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downloadLimit",
+            "columnName": "downloadLimit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "emailLanguage",
+            "columnName": "emailLanguage",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastTransferType",
+            "columnName": "lastTransferType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAuthorEmail",
+            "columnName": "lastAuthorEmail",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dataMigrated",
+            "columnName": "dataMigrated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "DownloadManagerRef",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transferId` TEXT NOT NULL, `fileId` TEXT NOT NULL, `downloadManagerUniqueId` INTEGER NOT NULL, `userOwnerId` INTEGER NOT NULL, PRIMARY KEY(`transferId`, `fileId`))",
+        "fields": [
+          {
+            "fieldPath": "transferId",
+            "columnName": "transferId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileId",
+            "columnName": "fileId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downloadManagerUniqueId",
+            "columnName": "downloadManagerUniqueId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userOwnerId",
+            "columnName": "userOwnerId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "transferId",
+            "fileId"
+          ]
+        }
+      },
+      {
         "tableName": "TransferDB",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `senderEmail` TEXT NOT NULL, `title` TEXT, `message` TEXT, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `totalSize` INTEGER NOT NULL, `password` TEXT, `transferDirection` TEXT NOT NULL, `transferStatus` TEXT NOT NULL, `recipientsEmails` TEXT NOT NULL, `linkId` TEXT, `userOwnerId` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
