@@ -42,6 +42,7 @@ data class TransferDB(
     override val recipientsEmails: Set<String> = emptySet(),
     override val linkId: String? = null,
     val userOwnerId: Long,
+    //TODO[ST-v2]: Add language
 ) : Transfer {
     @Ignore
     override var files: List<File> = emptyList()
