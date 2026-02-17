@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.common.matomo
 enum class MatomoCategory(val value: String) {
 
     //region Common
+    Account("account"),
     AppUpdate("appUpdate"),
     DeleteTransferHistory("deleteTransferHistory"),
     MyAccount("myAccount"),
