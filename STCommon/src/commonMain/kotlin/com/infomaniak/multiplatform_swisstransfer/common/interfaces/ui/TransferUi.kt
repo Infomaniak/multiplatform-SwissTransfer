@@ -57,8 +57,8 @@ data class TransferUi(
         createdDateTimestamp = transfer.createdAt,
         expirationDateTimestamp = transfer.expiresAt,
         sizeUploaded = transfer.totalSize,
-        downloadLimit = 0, // TODO: Not available in v2 model
-        downloadLeft = 1,  // TODO: Not available in v2 model
+        downloadLimit = 0, // TODO: Not available in v2 model yet
+        downloadLeft = 1,  // TODO: Not available in v2 model yet
         message = transfer.message,
         password = transfer.password,
         recipientsEmails = transfer.recipientsEmails,
