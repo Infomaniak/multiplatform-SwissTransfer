@@ -77,9 +77,9 @@ class UploadManager(
 
     val lastUploadFlow: Flow<UploadSession?>
         get() {
-            currentUserId?.let {
-                return uploadDao.getLastUploadTransferFlow()
-            }
+            // currentUserId?.let {
+            //     return uploadDao.getLastUploadTransferFlow()
+            // }
             return uploadController.getLastUploadFlow()
         }
 
@@ -91,9 +91,9 @@ class UploadManager(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getUploads(): List<UploadSession> = withContext(Dispatchers.Default) {
-        currentUserId?.let {
-            return@withContext uploadDao.getAllUploadsTransfers() //TODO
-        }
+        // currentUserId?.let {
+        //     return@withContext uploadDao.getAllUploadsTransfers() //TODO
+        // }
         return@withContext uploadController.getAllUploads()
     }
 
