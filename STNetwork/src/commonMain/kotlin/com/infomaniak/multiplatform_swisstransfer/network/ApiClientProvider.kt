@@ -22,9 +22,11 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportI
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportLevel
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
+import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseForError
 import com.infomaniak.multiplatform_swisstransfer.network.utils.getRequestContextId
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -40,6 +42,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.request
 import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.network.UnresolvedAddressException
 import io.ktor.utils.io.CancellationException
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
@@ -88,7 +91,7 @@ class ApiClientProvider internal constructor(
             }
             install(HttpRequestRetry) {
                 retryOnExceptionIf(maxRetries = MAX_RETRY) { _, cause ->
-                    cause.isNetworkException()
+                    cause.isRetryableNetworkException()
                 }
                 delayMillis { retry ->
                     retry * 500L
@@ -103,17 +106,24 @@ class ApiClientProvider internal constructor(
 
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
-                        val apiError = runCatching {
-                            json.decodeFromString<ApiError>(bodyResponse)
-                        }.getOrElse {
-                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, null, requestContextId)
+                        runCatching {
+                            if (bodyResponse.isFromApiV2()) {
+                                val error = json.decodeFromString<ApiResponseForError>(bodyResponse).error
+                                throw ApiV2ErrorException(error.code, error.description, requestContextId)
+                            } else {
+                                val error = json.decodeFromString<ApiError>(bodyResponse)
+                                throw ApiErrorException(error.errorCode, error.message, requestContextId)
+                            }
+                        }.getOrElse { exception ->
+                            if (exception is ApiException) throw exception
+                            throw UnexpectedApiErrorFormatException(statusCode, bodyResponse, exception, requestContextId)
                         }
-                        throw ApiErrorException(apiError.errorCode, apiError.message, requestContextId)
                     }
                 }
                 handleResponseExceptionWithRequest { cause, request ->
                     when (cause) {
-                        is IOException -> throw NetworkException("Network error: ${cause.message}")
+                        is UnresolvedAddressException,
+                        is IOException -> throw NetworkException("Network error: ${cause.message}", cause)
                         is ApiException, is CancellationException -> throw cause
                         else -> {
                             val response = runCatching { request.call.response }.getOrNull()
@@ -151,9 +161,12 @@ class ApiClientProvider internal constructor(
         )
     }
 
-    private fun Throwable.isNetworkException() = this is IOException
+    private fun Throwable.isRetryableNetworkException() = this is IOException
 
     companion object {
         private const val MAX_RETRY = 3
+
+        //TODO[API-V2]: Delete once the v1 api has been removed
+        private fun String.isFromApiV2() = contains("\"result\": \"error\"")
     }
 }

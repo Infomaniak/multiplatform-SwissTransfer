@@ -37,7 +37,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.contentType
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
@@ -45,7 +44,7 @@ internal class UploadRequest(
     environment: ApiEnvironment,
     json: Json,
     httpClient: HttpClient,
-) : BaseRequest(environment, json, httpClient) {
+) : BaseRequest(environment, json, httpClient, token = { "" }) {
 
     suspend fun initUpload(
         initUploadBody: InitUploadBody,

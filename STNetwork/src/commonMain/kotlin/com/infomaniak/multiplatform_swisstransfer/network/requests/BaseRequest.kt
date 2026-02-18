@@ -21,14 +21,17 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HeadersBuilder
+import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
@@ -38,13 +41,27 @@ internal open class BaseRequest(
     protected val environment: ApiEnvironment,
     protected val json: Json,
     protected val httpClient: HttpClient,
+    private val token: () -> String,
 ) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
-        val baseUrl = Url(ApiRoutes.apiBaseUrl(environment) + path)
-        return URLBuilder(baseUrl).apply {
-            queries.forEach { parameters.append(it.first, it.second) }
-        }.build()
+        return createUrl(ApiRoutes.apiBaseUrl(environment), path, queries)
+    }
+
+    protected fun createV2Url(path: String, vararg queries: Pair<String, String>): Url {
+        return createUrl(ApiRoutes.apiBaseUrlV2(environment), path, queries)
+    }
+
+    private fun createUrl(
+        baseUrl: String,
+        path: String,
+        queries: Array<out Pair<String, String>>
+    ): Url = URLBuilder(Url(baseUrl + path)).apply {
+        queries.forEach { parameters.append(it.first, it.second) }
+    }.build()
+
+    protected fun HeadersBuilder.appendBearer() {
+        append(HttpHeaders.Authorization, "Bearer ${token()}")
     }
 
     protected suspend inline fun <reified R> get(
@@ -71,6 +88,13 @@ internal open class BaseRequest(
 
     protected suspend inline fun <reified R> put(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
         return httpClient.put(url) {
+            contentType(ContentType.Application.Json)
+            setBody(data)
+        }.decode<R>()
+    }
+
+    protected suspend inline fun <reified R> patch(url: Url, data: Any?, httpClient: HttpClient = this.httpClient): R {
+        return httpClient.patch(url) {
             contentType(ContentType.Application.Json)
             setBody(data)
         }.decode<R>()

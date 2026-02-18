@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.exceptions
+package com.infomaniak.multiplatform_swisstransfer.network.utils
 
-/**
- * Thrown when a network-related error occurs, such as connectivity issues or timeouts.
- *
- * @param message A detailed message describing the network error.
- */
-class NetworkException(message: String, cause: Throwable?) : Exception(message, cause)
+import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+
+object SharedApiV2Routes {
+
+    fun shareTransfer(environment: ApiEnvironment, linkUUID: String): String = "${environment.baseUrlV2}/d/$linkUUID"
+}

@@ -40,7 +40,7 @@ internal class TransferRequest(
     environment: ApiEnvironment,
     json: Json,
     httpClient: HttpClient,
-) : BaseRequest(environment, json, httpClient) {
+) : BaseRequest(environment, json, httpClient, token = { "" }) {
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponse<TransferApi> {
@@ -48,7 +48,7 @@ internal class TransferRequest(
             url = createUrl(ApiRoutes.getTransfer(linkUUID)),
             appendHeaders = {
                 if (password?.isNotEmpty() == true) {
-                    append(HttpHeaders.Authorization, Base64.Default.encode(password.encodeToByteArray()))
+                    append(HttpHeaders.Authorization, Base64.encode(password.encodeToByteArray()))
                 }
             }
         )

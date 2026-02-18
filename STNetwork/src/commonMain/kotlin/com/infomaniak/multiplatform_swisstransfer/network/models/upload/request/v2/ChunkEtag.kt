@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.exceptions
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2
 
-/**
- * Thrown when a network-related error occurs, such as connectivity issues or timeouts.
- *
- * @param message A detailed message describing the network error.
- */
-class NetworkException(message: String, cause: Throwable?) : Exception(message, cause)
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ChunkEtag(
+    val etag: String,
+    @SerialName("chunk_index")
+    val chunkIndex: Int, // Start with index 1
+)

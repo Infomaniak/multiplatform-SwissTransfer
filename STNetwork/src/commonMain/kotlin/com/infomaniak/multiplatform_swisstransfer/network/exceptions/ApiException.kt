@@ -50,6 +50,22 @@ sealed class ApiException(
     ) : ApiException(errorMessage, null, requestContextId)
 
     /**
+     * Thrown when an API(v2) call fails due to an error identified by a specific error code.
+     *
+     * This exception is used to represent errors returned by an API, with an associated error code
+     * and message describing the problem.
+     *
+     * @property code The specific error code returned by the API.
+     * @property errorMessage The detailed error message explaining the cause of the failure.
+     * @param requestContextId The request context id send by the backend to track the call
+     */
+    open class ApiV2ErrorException(
+        val code: String,
+        val description: String,
+        requestContextId: String,
+    ) : ApiException(description, null, requestContextId)
+
+    /**
      * Thrown when an API call returns an error in an unexpected format that cannot be parsed.
      *
      * This exception indicates that the API response format is different from what was expected,
