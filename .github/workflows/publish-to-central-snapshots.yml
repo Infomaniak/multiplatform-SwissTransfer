@@ -2,6 +2,11 @@
 name: Publish to Maven Central Snapshots
 on:
   workflow_dispatch:
+    inputs:
+      perform-a-gradle-clean:
+        description: "Perform a Gradle clean"
+        type: boolean
+        default: false
 jobs:
   build:
     runs-on: [ self-hosted, Android ]
@@ -15,6 +20,9 @@ jobs:
           java-version: 21
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+      - name: Perform a Gradle clean, as requested
+        if: ${{ github.event.inputs.perform-a-gradle-clean == 'true' }}
+        run: ./gradlew clean
       - name: Publish the snapshots
         run: ./gradlew publishAggregationToCentralSnapshots
 env:
