@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
@@ -29,14 +30,16 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * AccountManager is responsible for orchestrating Accounts operations using Realm for local data management.
+ * AccountManager is responsible for orchestrating Accounts operations, with the database(s).
  *
+ * @property appDatabase The provider for managing Room database operations.
  * @property appSettingsController The controller for managing AppSettings operations.
  * @property uploadController The controller for managing Upload operations.
  * @property transferController The controller for managing Transfers operation.
  * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
+    private val appDatabase: AppDatabase,
     private val appSettingsController: AppSettingsController,
     private val emailLanguageUtils: EmailLanguageUtils,
     private val uploadController: UploadController,
@@ -55,7 +58,7 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
         mutex.withLock {
-            if (currentUser?.id != user.id) {
+            if (currentUser?.id != user.id && user is STUser.GuestUser) {
                 appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
                 realmProvider.openTransfersDb(user.id)
             }
@@ -67,12 +70,17 @@ class AccountManager internal constructor(
      * Delete specified User data
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun removeUser(userId: Int) {
-
-        appSettingsController.removeData()
-        uploadController.removeData()
-        transferController.removeData()
-
-        realmProvider.closeAllDatabases()
+    suspend fun logoutCurrentUser(newSTUser: STUser?) {
+        val user = currentUser ?: return
+        if (user is STUser.AuthUser) {
+            appDatabase.getTransferDao().deleteTransfers(user.id)
+        } else {
+            uploadController.removeData()
+            transferController.removeData()
+            realmProvider.closeAllDatabases()
+        }
+        mutex.withLock {
+            currentUser = newSTUser
+        }
     }
 }

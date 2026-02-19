@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.models
+package com.infomaniak.multiplatform_swisstransfer.database.v2
 
-enum class TransferStatus {
-    NOT_YET_FETCHED, UNKNOWN, READY, WAIT_VIRUS_CHECK, VIRUS_DETECTED, EXPIRED_DATE, EXPIRED_DOWNLOAD_QUOTA, PENDING_UPLOAD
-}
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
+actual abstract class RobolectricTestsBase
