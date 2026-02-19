@@ -71,7 +71,7 @@ object FileUtilsForApiV2 {
                     mimeType = null,
                     isFolder = true,
                     transferId = transferId,
-                    folderId = parentId
+                    parentId = parentId
                 ).also {
                     folderByPath[folderPath] = it
                     out += it
