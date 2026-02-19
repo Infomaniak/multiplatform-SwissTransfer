@@ -41,14 +41,12 @@ object DummyTransferForV2 {
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }
 
-    // Transfer with downloadCounterCredit greater than 0.
     val transfer3 = object : Transfer by transfer1 {
         override val id: String = "transfer3"
         override var expiresAt: Long = 4_102_441_200L // 01/01/2100
         override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
     }
 
-    // Transfer with downloadCounterCredit equal to 0.
     val transfer4 = object : Transfer by transfer1 {
         override val id: String = "transfer4"
         override var expiresAt: Long = 4_102_441_200L // 01/01/2100
