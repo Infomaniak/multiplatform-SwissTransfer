@@ -30,8 +30,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * AccountManager is responsible for orchestrating Accounts operations using Realm for local data management.
+ * AccountManager is responsible for orchestrating Accounts operations, with the database(s).
  *
+ * @property appDatabase The provider for managing Room database operations.
  * @property appSettingsController The controller for managing AppSettings operations.
  * @property uploadController The controller for managing Upload operations.
  * @property transferController The controller for managing Transfers operation.
