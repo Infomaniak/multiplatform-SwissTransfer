@@ -22,41 +22,33 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 
 object DummyTransferForV2 {
-    val expired: Transfer
-    val notExpired: Transfer
 
-    val transfer1 = object : Transfer {
-        override val id: String = "transferLinkUUID1"
+    private fun transfer(
+        id: String,
+        expiresAt: Long,
+        transferStatus: TransferStatus = TransferStatus.READY,
+    ): Transfer = object : Transfer {
+        override val id: String = id
         override val senderEmail: String = ""
-        override val title: String = ""
-        override val message: String = ""
+        override val title: String? = null
+        override val message: String? = null
         override val createdAt: Long = 0
-        override val expiresAt: Long = 1_730_458_842L // 01/11/2024
+        override val expiresAt: Long = expiresAt
         override val totalSize: Long = 0
+        override val transferStatus: TransferStatus = transferStatus
     }
 
-    val transfer2 = object : Transfer by transfer1 {
-        override val id: String = "transfer2"
-        override var expiresAt: Long = 4_102_441_200L // 01/01/2100
-        override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
-    }
+    private const val `2024-11-01` = 1_730_458_842L
+    private const val `2100-01-01` = 4_102_441_200L
 
-    val transfer3 = object : Transfer by transfer1 {
-        override val id: String = "transfer3"
-        override var expiresAt: Long = 4_102_441_200L // 01/01/2100
-        override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
-    }
+    val transfer1 = transfer("transferLinkUUID1", `2024-11-01`)
 
-    val transfer4 = object : Transfer by transfer1 {
-        override val id: String = "transfer4"
-        override var expiresAt: Long = 4_102_441_200L // 01/01/2100
-        override val transferStatus: TransferStatus = TransferStatus.WAIT_VIRUS_CHECK
-    }
+    val transfer2 = transfer("transfer2", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
+    val transfer3 = transfer("transfer3", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
+    val transfer4 = transfer("transfer4", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
 
-    init {
-        expired = transfer1
-        notExpired = transfer2
-    }
+    val expired: Transfer = transfer1
+    val notExpired: Transfer = transfer2
 
     val transfers = listOf(transfer1, transfer2, transfer3, transfer4)
 
