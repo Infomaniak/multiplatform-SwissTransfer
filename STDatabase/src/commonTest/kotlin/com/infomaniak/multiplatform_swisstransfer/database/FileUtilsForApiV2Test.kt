@@ -78,7 +78,7 @@ class FileUtilsForApiV2Test {
         assertEquals(700L, folder2.size, "folder2 size should be 700 (300 + 400)")
         assertEquals(50L, randomFolder.size, "randomFolder size should be 50")
 
-        val folder1Children = treeApiV2.filter { it.folderId == folder1.id && !it.isFolder }
+        val folder1Children = treeApiV2.filter { it.parentFolderId == folder1.id && !it.isFolder }
         assertEquals(2, folder1Children.size, "folder1 should have 2 direct file children")
     }
 
@@ -127,9 +127,9 @@ class FileUtilsForApiV2Test {
         assertNotNull(folderB, "folder 'a/b' should exist")
         assertNotNull(folderC, "folder 'a/b/c' should exist")
 
-        assertEquals(null, folderA.folderId, "folder 'a' should have no parent")
-        assertEquals(folderA.id, folderB.folderId, "folder 'a/b' should have 'a' as parent")
-        assertEquals(folderB.id, folderC.folderId, "folder 'a/b/c' should have 'a/b' as parent")
+        assertEquals(null, folderA.parentFolderId, "folder 'a' should have no parent")
+        assertEquals(folderA.id, folderB.parentFolderId, "folder 'a/b' should have 'a' as parent")
+        assertEquals(folderB.id, folderC.parentFolderId, "folder 'a/b/c' should have 'a/b' as parent")
     }
 
     private fun checkFolders(path: String, size: Long) {

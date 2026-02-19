@@ -47,22 +47,8 @@ object FileUtilsForApiV2 {
         if (lastSlash <= 0) return null // No parent folder (root file)
 
         var parentId: String? = null
-        val pathBuilder = StringBuilder(lastSlash)
 
-        var currentIndex = 0
-        while (currentIndex < lastSlash) {
-            val nextSlash = filePath.indexOf('/', currentIndex).takeIf { it != -1 } ?: lastSlash
-
-            // Skip duplicated separators
-            if (nextSlash == currentIndex) {
-                currentIndex++
-                continue
-            }
-
-            if (pathBuilder.isNotEmpty()) pathBuilder.append('/')
-            pathBuilder.append(filePath, currentIndex, nextSlash)
-
-            val folderPath = pathBuilder.toString()
+        filePath.loopOverParentFolders { folderPath ->
             val folder = folderByPath[folderPath] ?: generateFolderId(transferId).let { newId ->
                 FileDB(
                     id = newId,
@@ -71,7 +57,7 @@ object FileUtilsForApiV2 {
                     mimeType = null,
                     isFolder = true,
                     transferId = transferId,
-                    folderId = parentId
+                    parentFolderId = parentId
                 ).also {
                     folderByPath[folderPath] = it
                     out += it
@@ -81,9 +67,27 @@ object FileUtilsForApiV2 {
             folder.size += fileSize
 
             parentId = folder.id
-            currentIndex = nextSlash + 1
         }
+
         return parentId
+    }
+
+    /**
+     * Will loop over parent folders based on an input path in the form of a string
+     *
+     * "abc/def/ghi/jkl.txt" will give "abc" then "abc/def" and then "abc/def/ghi"
+     */
+    private fun String.loopOverParentFolders(action: (String) -> Unit) {
+        val directoryPath = this.substringBeforeLast('/', "")
+        if (directoryPath.isEmpty()) return
+
+        var index = directoryPath.indexOf('/')
+        while (index != -1) {
+            action(directoryPath.substring(0, index))
+            index = directoryPath.indexOf('/', index + 1)
+        }
+
+        action(directoryPath)
     }
 
     @OptIn(ExperimentalUuidApi::class)

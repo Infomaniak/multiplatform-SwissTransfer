@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "53552e1c6a78205feeaf944f7da6005a",
+    "identityHash": "226c1818fe7bd62507d35a3f56ef2f27",
     "entities": [
       {
         "tableName": "TransferDB",
@@ -92,7 +92,7 @@
       },
       {
         "tableName": "FileDB",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `path` TEXT NOT NULL, `size` INTEGER NOT NULL, `mimeType` TEXT, `isFolder` INTEGER NOT NULL, `thumbnailPath` TEXT, `transferId` TEXT NOT NULL, `folderId` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`transferId`) REFERENCES `TransferDB`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `path` TEXT NOT NULL, `size` INTEGER NOT NULL, `mimeType` TEXT, `isFolder` INTEGER NOT NULL, `thumbnailPath` TEXT, `transferId` TEXT NOT NULL, `parentFolderId` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`transferId`) REFERENCES `TransferDB`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -135,8 +135,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "folderId",
-            "columnName": "folderId",
+            "fieldPath": "parentFolderId",
+            "columnName": "parentFolderId",
             "affinity": "TEXT"
           }
         ],
@@ -174,7 +174,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '53552e1c6a78205feeaf944f7da6005a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '226c1818fe7bd62507d35a3f56ef2f27')"
     ]
   }
 }

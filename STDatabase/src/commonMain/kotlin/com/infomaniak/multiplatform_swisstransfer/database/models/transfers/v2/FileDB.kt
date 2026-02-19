@@ -43,7 +43,7 @@ data class FileDB(
     override val thumbnailPath: String? = null,
     @ColumnInfo(index = true)
     val transferId: String,
-    val folderId: String? = null,
+    val parentFolderId: String? = null,
 ) : File {
     @Ignore
     val children: List<FileDB> = emptyList()
@@ -57,6 +57,6 @@ data class FileDB(
         mimeType = file.mimeType,
         isFolder = file.isFolder,
         transferId = transferId,
-        folderId = folderId
+        parentFolderId = folderId
     )
 }
