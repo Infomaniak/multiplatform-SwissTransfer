@@ -25,6 +25,12 @@ import kotlin.uuid.Uuid
 
 object FileUtilsForApiV2 {
 
+    /**
+     * Takes a list of [files] that may be in a folder structure, according to their paths,
+     * and returns a set of [FileDB] objects that includes all these files, plus all the distinct
+     * folders, as [FileDB] instances with their [FileDB.isFolder] property set to `true`,
+     * and with their size reflecting the total size of their content.
+     */
     fun getFileDbTree(transferId: String, files: List<File>): Set<FileDB> {
         val folderByPath = HashMap<String, FileDB>(files.size)
         val out = ArraySet<FileDB>(files.size * 2)
