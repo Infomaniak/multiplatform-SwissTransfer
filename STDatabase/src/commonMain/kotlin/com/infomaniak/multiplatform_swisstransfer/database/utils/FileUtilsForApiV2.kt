@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.utils
 
 import androidx.collection.ArraySet
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.File
+import com.infomaniak.multiplatform_swisstransfer.database.forEachSubstring
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -87,17 +88,9 @@ object FileUtilsForApiV2 {
      * - `"abc/def"`
      * - `"abc/def/ghi"`
      */
-    private inline fun String.loopOverParentFolders(action: (String) -> Unit) {
-        val directoryPath = this.substringBeforeLast('/', "")
-        if (directoryPath.isEmpty()) return
-
-        var index = directoryPath.indexOf('/')
-        while (index != -1) {
-            action(directoryPath.substring(0, index))
-            index = directoryPath.indexOf('/', index + 1)
-        }
-
-        action(directoryPath)
+    private inline fun String.loopOverParentFolders(action: (folderPath: String) -> Unit) {
+        val directoryPath = substringBeforeLast('/', "").ifEmpty { return }
+        directoryPath.forEachSubstring(delimiter = '/') { action(it) }
     }
 
     @OptIn(ExperimentalUuidApi::class)
