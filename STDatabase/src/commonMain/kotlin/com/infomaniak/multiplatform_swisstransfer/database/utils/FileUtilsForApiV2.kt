@@ -82,7 +82,10 @@ object FileUtilsForApiV2 {
     /**
      * Will loop over parent folders based on an input path in the form of a string
      *
-     * "abc/def/ghi/jkl.txt" will give "abc" then "abc/def" and then "abc/def/ghi"
+     * `"abc/def/ghi/jkl.txt"` will lead [action] to be called in order with this:
+     * - `"abc"`
+     * - `"abc/def"`
+     * - `"abc/def/ghi"`
      */
     private inline fun String.loopOverParentFolders(action: (String) -> Unit) {
         val directoryPath = this.substringBeforeLast('/', "")
