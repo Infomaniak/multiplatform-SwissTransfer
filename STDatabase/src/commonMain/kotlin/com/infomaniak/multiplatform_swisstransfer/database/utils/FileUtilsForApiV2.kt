@@ -55,7 +55,8 @@ object FileUtilsForApiV2 {
         var parentId: String? = null
 
         filePath.loopOverParentFolders { folderPath ->
-            val folder = folderByPath[folderPath] ?: generateFolderId(transferId).let { newId ->
+            val folder: FileDB = folderByPath.getOrPut(folderPath) {
+                val newId = generateFolderId(transferId)
                 FileDB(
                     id = newId,
                     path = folderPath,
