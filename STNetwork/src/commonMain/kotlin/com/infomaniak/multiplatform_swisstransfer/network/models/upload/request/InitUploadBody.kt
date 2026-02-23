@@ -41,7 +41,7 @@ class InitUploadBody(
     val recipientsEmails: String = "",
 ) {
     constructor(uploadSession: UploadSession) : this(
-        duration = uploadSession.duration.value.toString(),
+        duration = uploadSession.duration.days.toString(),
         authorEmail = uploadSession.authorEmail,
         authorEmailToken = uploadSession.authorEmailToken,
         password = uploadSession.password,
@@ -55,7 +55,7 @@ class InitUploadBody(
     )
 
     constructor(req: UploadSessionRequest, authorEmailToken: String?) : this(
-        duration = req.validityPeriod.value.toString(),
+        duration = req.validityPeriod.days.toString(),
         authorEmail = req.authorEmail,
         authorEmailToken = authorEmailToken,
         password = req.password,
