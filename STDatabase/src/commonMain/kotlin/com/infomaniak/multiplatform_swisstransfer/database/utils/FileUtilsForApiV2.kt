@@ -37,13 +37,17 @@ object FileUtilsForApiV2 {
         val out = ArraySet<FileDB>(files.size * 2)
 
         for (file in files) {
-            val parentId = ensureFolders(file.path, file.size, transferId, folderByPath, out)
+            val parentId = updateFoldersAndGetParentId(file.path, file.size, transferId, folderByPath, out)
             out += FileDB(file, transferId, parentId)
         }
         return out
     }
 
-    private fun ensureFolders(
+    /**
+     * Gets or puts the parent folders that this [filePath] references in both [folderByPath] & [out],
+     * updates their size while doing so, then, returns the id of the nearest (deepest/immediate) parent folder.
+     */
+    private fun updateFoldersAndGetParentId(
         filePath: String,
         fileSize: Long,
         transferId: String,
