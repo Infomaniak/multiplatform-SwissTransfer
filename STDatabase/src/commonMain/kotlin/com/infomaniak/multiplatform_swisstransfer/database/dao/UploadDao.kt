@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.Flow
 interface UploadDao {
 
     @Query("SELECT * FROM TransferDB WHERE transferStatus=:status ORDER BY createdAt DESC LIMIT 1")
-    fun getLastUploadTransferFlow(status: TransferStatus = TransferStatus.PENDING_UPLOAD): Flow<TransferDB?>
+    fun lastUploadTransferFlow(status: TransferStatus = TransferStatus.PENDING_UPLOAD): Flow<TransferDB?>
 
     @Query("SELECT * FROM TransferDB WHERE transferStatus=:status ORDER BY createdAt DESC")
     suspend fun getAllUploadsTransfers(status: TransferStatus = TransferStatus.PENDING_UPLOAD): List<TransferDB>

@@ -104,7 +104,7 @@ class TransferManager internal constructor(
     @Throws(RealmException::class)
     fun getAllTransfers(): Flow<List<TransferUi>> {
         currentUserId?.let { userId ->
-            return transferDao.getTransfers(userId).toTransferUiListFlow(transferDao)
+            return transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao)
         }
         return transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) }
     }
@@ -121,8 +121,8 @@ class TransferManager internal constructor(
     @Throws(RealmException::class)
     fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> {
         currentUserId?.let { userId ->
-            return transferDao.getValidTransfers(userId, transferDirection)
-                .combine(transferDao.getExpiredTransfers(userId, transferDirection)) { valid, expired ->
+            return transferDao.validTransfersFlow(userId, transferDirection)
+                .combine(transferDao.expiredTransfersFlow(userId, transferDirection)) { valid, expired ->
                     SortedTransfers(
                         valid.toTransferUiList(transferDao),
                         expired.toTransferUiList(transferDao)
@@ -138,7 +138,7 @@ class TransferManager internal constructor(
     @Throws(RealmException::class)
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> {
         currentUserId?.let { userId ->
-            return transferDao.getTransfersCount(userId, transferDirection).map { it.toLong() }
+            return transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() }
         }
         return transferController.getTransfersCountFlow(transferDirection)
     }
@@ -147,7 +147,7 @@ class TransferManager internal constructor(
     @Throws(RealmException::class)
     fun getTransferFlow(transferUUID: String): Flow<TransferUi?> {
         currentUserId?.let { userId ->
-            return transferDao.getTransfer(userId, transferUUID).mapLatest { transferDB ->
+            return transferDao.transferFlow(userId, transferUUID).mapLatest { transferDB ->
                 transferDB?.toTransferUi(transferDao)
             }
         }
@@ -211,7 +211,7 @@ class TransferManager internal constructor(
         uniqueDownloadManagerId: Long?
     ) {
         currentUserId?.let {
-            val transfer = transferDao.getTransfer(userId = it, transferId = transferUUID).first()
+            val transfer = transferDao.transferFlow(userId = it, transferId = transferUUID).first()
             if (transfer != null) {
                 if (uniqueDownloadManagerId == null) {
                     appDatabase.getDownloadManagerRef().delete(
@@ -268,7 +268,7 @@ class TransferManager internal constructor(
     )
     suspend fun fetchTransfer(transferUUID: String) {
         currentUserId?.let {
-            val transfer = transferDao.getTransfer(userId = it, transferUUID).first() ?: return
+            val transfer = transferDao.transferFlow(userId = it, transferUUID).first() ?: return
             val transferLinkId = transfer.linkId ?: return
             val remoteTransfer = transferV2Repository.getTransferByLinkUUID(transferLinkId, transfer.password)
             //TODO[ST-v2]: Update transfer status here
@@ -309,7 +309,7 @@ class TransferManager internal constructor(
     //TODO[ST-v2]: Check if this method is still used
     suspend fun updateTransferFilesThumbnails(transferUUID: String, thumbnailRootPath: String) {
         currentUserId?.let {
-            val transfer = transferDao.getTransfer(userId = it, transferUUID).first() ?: return
+            val transfer = transferDao.transferFlow(userId = it, transferUUID).first() ?: return
             //TODO[ST-v2]: Optimize with One transaction instead
             transferDao.getTransferFiles(transferUUID).forEach { it ->
                 val fileDB = it.copy(thumbnailPath = "$thumbnailRootPath/${it.id}")
@@ -329,7 +329,7 @@ class TransferManager internal constructor(
      */
     suspend fun getTransferByUUID(transferUUID: String): TransferUi? {
         currentUserId?.let { userId ->
-            return transferDao.getTransfer(userId, transferUUID).first()?.toTransferUi(transferDao)
+            return transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
         }
         return transferController.getTransfer(transferUUID)?.let(::TransferUi)
     }
@@ -460,7 +460,7 @@ class TransferManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String): Unit = withContext(Dispatchers.Default) {
         currentUserId?.let { userId ->
-            val transfer = transferDao.getTransfer(userId, transferUUID).first() ?: return@withContext
+            val transfer = transferDao.transferFlow(userId, transferUUID).first() ?: return@withContext
             transferDao.deleteTransfer(transfer)
             return@withContext
         }
