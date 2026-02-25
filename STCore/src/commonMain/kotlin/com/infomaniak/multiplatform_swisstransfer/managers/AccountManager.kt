@@ -49,7 +49,7 @@ class AccountManager internal constructor(
     private val realmProvider: RealmProvider,
 ) {
 
-    private val mutex = Mutex()
+    private val userSwitchMutex = Mutex()
 
     // We cache the current user to avoid creating database instances when it's the same user
     var currentUser: STUser? = null
@@ -60,7 +60,7 @@ class AccountManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
-        mutex.withLock {
+        userSwitchMutex.withLock {
             if (currentUser?.id != user.id) loadDatabase(user)
             currentUser = user
         }
@@ -79,7 +79,7 @@ class AccountManager internal constructor(
             transferController.removeData()
             realmProvider.closeAllDatabases()
         }
-        mutex.withLock {
+        userSwitchMutex.withLock {
             currentUser = newSTUser
         }
     }
