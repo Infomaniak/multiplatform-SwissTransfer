@@ -94,7 +94,14 @@ interface TransferDao {
     @Query("SELECT * FROM FileDB WHERE parentId=:folderId")
     fun filesByFolderIdFlow(folderId: String): Flow<List<FileDB>>
 
-    //TODO[API-V2]: suspend fun getNotReadyTransfers(userId: Long): List<TransferDB>
+    @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND transferStatus='PENDING_UPLOAD' LIMIT 1")
+    suspend fun getPendingTransfer(userId: Long): TransferDB?
+
+    @Query("DELETE FROM TransferDB WHERE userOwnerId=:userId AND transferStatus='PENDING_UPLOAD'")
+    suspend fun deleteAnyPendingTransfer(userId: Long)
+
+    @Query("UPDATE TransferDB SET transferStatus='READY' WHERE userOwnerId=:userId AND id=:transferId AND transferStatus='PENDING_UPLOAD'")
+    suspend fun markPendingTransferAsReady(userId: Long, transferId: String)
 
     @Upsert
     suspend fun upsertTransfer(transferDB: TransferDB)
@@ -104,6 +111,9 @@ interface TransferDao {
 
     @Delete
     suspend fun deleteTransfer(transferDB: TransferDB)
+
+    @Query("DELETE FROM TransferDB WHERE id=:transferId")
+    suspend fun deleteTransfer(transferId: String)
 
     @OptIn(ExperimentalTime::class)
     @Query("DELETE FROM TransferDB WHERE expiresAt < :expiryTime")
