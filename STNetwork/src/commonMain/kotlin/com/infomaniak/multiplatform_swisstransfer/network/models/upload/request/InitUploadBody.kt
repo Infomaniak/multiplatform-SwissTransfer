@@ -22,7 +22,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.Uploa
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Serializable
