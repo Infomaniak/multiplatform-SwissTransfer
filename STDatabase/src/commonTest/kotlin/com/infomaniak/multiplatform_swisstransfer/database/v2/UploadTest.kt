@@ -79,7 +79,7 @@ class UploadTest : RobolectricTestsBase() {
         appDatabase.getTransferDao().upsertTransfer(upload1)
         appDatabase.getTransferDao().upsertTransfer(upload2)
 
-        val lastUpload = appDatabase.getUploadDao().getLastUploadTransferFlow().first()
+        val lastUpload = appDatabase.getUploadDao().lastUploadTransferFlow().first()
         assertNotNull(lastUpload)
         assertEquals("upload2", lastUpload.id) // Most recent
     }
