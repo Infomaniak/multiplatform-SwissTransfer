@@ -72,12 +72,13 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun logoutCurrentUser(newSTUser: STUser?) {
         val user = currentUser ?: return
-        if (user is STUser.AuthUser) {
-            appDatabase.getTransferDao().deleteTransfers(user.id)
-        } else {
-            uploadController.removeData()
-            transferController.removeData()
-            realmProvider.closeAllDatabases()
+        when (user) {
+            is STUser.AuthUser -> appDatabase.getTransferDao().deleteTransfers(user.id)
+            STUser.GuestUser -> {
+                uploadController.removeData()
+                transferController.removeData()
+                realmProvider.closeAllDatabases()
+            }
         }
         userSwitchMutex.withLock {
             currentUser = newSTUser
