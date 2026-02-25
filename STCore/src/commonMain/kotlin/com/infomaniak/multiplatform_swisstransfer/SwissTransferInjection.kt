@@ -17,8 +17,10 @@
  */
 package com.infomaniak.multiplatform_swisstransfer
 
+import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.DatabaseConfig
 import com.infomaniak.multiplatform_swisstransfer.database.DatabaseProvider
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
@@ -35,10 +37,12 @@ import com.infomaniak.multiplatform_swisstransfer.managers.InMemoryUploadManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadTokensManager
+import com.infomaniak.multiplatform_swisstransfer.managers.UploadV2Manager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2Repository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 
 /**
@@ -69,13 +73,19 @@ class SwissTransferInjection(
     private val databaseConfig: DatabaseConfig,
 ) {
 
+    private val requireToken: () -> String = {
+        (accountManager.currentUser as? STUser.AuthUser)?.token
+            ?: throw UnknownException(Exception("No user logged in"))
+    }
+
     private val realmProvider by lazy { RealmProvider(databaseRootDirectory) }
     private val appDatabase by lazy { DatabaseProvider(databaseConfig).getAppDatabase() }
     private val apiClientProvider by lazy { ApiClientProvider(userAgent, crashReport) }
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
+    private val uploadV2Repository by lazy { UploadV2Repository(apiClientProvider, environment, requireToken) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
-    private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, { TODO("Get token") }) }
+    private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, requireToken) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider, crashReport) }
     private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
@@ -106,6 +116,16 @@ class SwissTransferInjection(
             uploadController = uploadController,
             transferController = transferController,
             realmProvider = realmProvider,
+        )
+    }
+
+    val uploadV2Manager by lazy {
+        UploadV2Manager(
+            accountManager = accountManager,
+            uploadRepository = uploadV2Repository,
+            transferManager = transferManager,
+            uploadDao = appDatabase.getUploadDao(),
+            transferDao = appDatabase.getTransferDao(),
         )
     }
 
