@@ -40,7 +40,7 @@ class FileManager(
      */
     fun getFilesFromTransfer(folderUuid: String): Flow<List<FileUi>> {
         if (accountManager.currentUser is STUser.AuthUser) {
-            return appDatabase.getTransferDao().getFilesByFolderId(folderId = folderUuid).map { it.toFileUiList() }
+            return appDatabase.getTransferDao().filesByFolderIdFlow(folderId = folderUuid).map { it.toFileUiList() }
         }
         return fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } }
     }
