@@ -20,7 +20,8 @@ package com.infomaniak.multiplatform_swisstransfer.data
 sealed interface STUser {
     val id: Long
 
-    //TODO[ST-v2]: switch to data object if iOS uses the same guest user id (-1)
-    data class GuestUser(override val id: Long) : STUser
+    data object GuestUser : STUser {
+        override val id: Long get() = -1
+    }
     data class AuthUser(override val id: Long, val token: String) : STUser
 }
