@@ -55,7 +55,8 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  *
  * @property environment Customize client api base url, for example [ApiEnvironment.Prod]
  * @property userAgent Customize client api userAgent.
- * @property databaseRootDirectory Customize root directory for realm, eg. iOS app group container.
+ * @property legacyDatabaseRootDirectory Customize root directory for realm, eg. iOS app group container.
+ * @property databaseNameOrPath Full file path on iOS, just name (without extension) on Android.
  * @property crashReport A crash report interface used to report errors and add breadcrumbs.
  * @property transferManager A manager used to orchestrate transfer operations.
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
@@ -68,9 +69,9 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 class SwissTransferInjection(
     private val environment: ApiEnvironment,
     private val userAgent: String,
-    private val databaseRootDirectory: String? = null,
+    private val legacyDatabaseRootDirectory: String? = null,
+    private val databaseNameOrPath: String? = null,
     private val crashReport: CrashReportInterface,
-    private val databaseConfig: DatabaseConfig,
 ) {
 
     private val requireToken: () -> String = {
@@ -78,8 +79,11 @@ class SwissTransferInjection(
             ?: throw UnknownException(Exception("No user logged in"))
     }
 
-    private val realmProvider by lazy { RealmProvider(databaseRootDirectory) }
-    private val appDatabase by lazy { DatabaseProvider(databaseConfig).getAppDatabase() }
+    private val realmProvider by lazy { RealmProvider(legacyDatabaseRootDirectory) }
+    private val appDatabase by lazy {
+        val databaseConfig = DatabaseConfig(databaseNameOrPath = databaseNameOrPath ?: "")
+        DatabaseProvider(databaseConfig).getAppDatabase()
+    }
     private val apiClientProvider by lazy { ApiClientProvider(userAgent, crashReport) }
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }

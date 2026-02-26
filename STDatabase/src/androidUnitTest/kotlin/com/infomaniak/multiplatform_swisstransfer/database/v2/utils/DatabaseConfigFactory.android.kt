@@ -22,14 +22,15 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import com.infomaniak.multiplatform_swisstransfer.database.DatabaseConfig
+import splitties.init.injectAsAppCtx
 
 actual object DatabaseConfigFactory {
 
     actual fun createTestDatabaseConfig(): DatabaseConfig {
         val appContext = ApplicationProvider.getApplicationContext<Application>()
+        appContext.injectAsAppCtx()
         return DatabaseConfig(
-            appContext = appContext,
-            databaseRootDirectory = appContext.cacheDir.absolutePath
+            databaseNameOrPath = appContext.cacheDir.absolutePath
         )
     }
 
