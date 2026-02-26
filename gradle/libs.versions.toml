@@ -13,6 +13,7 @@ realmKotlin = "3.2.8-2"
 robolectric = "4.16.1"
 room = "2.8.4"
 skie = "0.10.6"
+splitties = "3.0.0"
 sqlite = "2.6.2"
 
 [libraries]
@@ -35,6 +36,7 @@ ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 realm-base = { module = "com.infomaniak.realm.kotlin:library-base", version.ref = "realmKotlin" }
 skie-gradle-plugin = { module = "co.touchlab.skie:gradle-plugin-api", version.ref = "skie" }
+splitties-appctx = { module = "com.louiscad.splitties:splitties-appctx", version.ref = "splitties" }
 #Test
 android-test = { module = "androidx.test:core-ktx", version.ref = "coreKtx" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
