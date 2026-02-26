@@ -17,7 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
-expect class DatabaseConfig private constructor() {
-    var databaseRootDirectory: String
-        private set
-}
+/**
+ * @property databaseNameOrPath Full file path on iOS, just name (without extension) on Android.
+ */
+class DatabaseConfig(val databaseNameOrPath: String)
