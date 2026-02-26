@@ -22,6 +22,7 @@ enum class MatomoScreen(val value: String) {
     DownloadLimitSetting("DownloadLimitSettingView"),
     DownloadQuotasExpiredTransfer("DownloadQuotasExpiredTransferView"),
     EmailLanguageSetting("EmailLanguageSettingView"),
+    MyAccount("MyAccountView"),
     NewTransfer("NewTransferView"),
     NewTransferFileList("NewTransferFileListView"),
     NotificationsSettings("NotificationsSettingsView"),

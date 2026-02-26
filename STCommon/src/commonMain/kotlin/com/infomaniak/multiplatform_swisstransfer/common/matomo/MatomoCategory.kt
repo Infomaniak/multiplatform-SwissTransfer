@@ -20,12 +20,15 @@ package com.infomaniak.multiplatform_swisstransfer.common.matomo
 enum class MatomoCategory(val value: String) {
 
     //region Common
+    Account("account"),
     AppUpdate("appUpdate"),
+    DeleteTransferHistory("deleteTransferHistory"),
+    MyAccount("myAccount"),
     NewTransfer("newTransfer"),
     NewTransferData("newTransferData"),
     ReceivedTransfer("receivedTransfer"),
     SentTransfer("sentTransfer"),
-    DeleteTransferHistory("deleteTransferHistory"),
+    Settings("settings"),
     SettingsGlobalDownloadLimit("settingsGlobalDownloadLimit"),
     SettingsGlobalEmailLanguage("settingsGlobalEmailLanguage"),
     SettingsGlobalTheme("settingsGlobalTheme"),
@@ -34,6 +37,7 @@ enum class MatomoCategory(val value: String) {
     SettingsLocalEmailLanguage("settingsLocalEmailLanguage"),
     SettingsLocalPassword("settingsLocalPassword"),
     SettingsLocalValidityPeriod("settingsLocalValidityPeriod"),
+    SwitchUserBottomSheet("switchUserBottomSheet"),
     TransferType("transferType"),
     //endregion
 

@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.gradle.utils
 
-import org.gradle.api.JavaVersion
-
-internal object Versions {
-    const val mavenVersionName = "6.2.0"
-
-    const val minSdk = 24
-    const val compileSdk = 35
-    const val skieMaxArgumentCount = 7
-
-    val javaVersion = JavaVersion.VERSION_17
+plugins {
+    base
 }
