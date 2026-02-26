@@ -20,6 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
@@ -33,6 +34,7 @@ import kotlin.coroutines.cancellation.CancellationException
  */
 class SharedApiUrlCreator internal constructor(
     private val environment: ApiEnvironment,
+    private val appDatabase: AppDatabase,
     private val fileController: FileController,
     private val transferController: TransferController,
     private val uploadController: UploadController,
@@ -56,6 +58,15 @@ class SharedApiUrlCreator internal constructor(
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFileUrl(transferUUID: String, fileUUID: String): String? {
+        // V2 Try to look up the file in Room
+        val transferDao = appDatabase.getTransferDao()
+        val v2File = transferDao.getFile(fileUUID)
+        if (v2File != null) {
+            val linkId = transferDao.getTransfer(v2File.transferId)?.linkId ?: return null
+            return SharedApiV2Routes.downloadFile(environment, linkId, fileUUID)
+        }
+
+        // V1 Try to fall back to Realm
         val transfer = transferController.getTransfer(transferUUID) ?: return null
         val file = fileController.getFile(fileUUID) ?: return null
         val token = transfer.notEmptyPassword?.let { generateToken(transfer, password = it, fileUUID) ?: return null }

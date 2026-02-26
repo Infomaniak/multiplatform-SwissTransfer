@@ -168,6 +168,7 @@ class SwissTransferInjection(
     val sharedApiUrlCreator by lazy {
         SharedApiUrlCreator(
             environment,
+            appDatabase,
             fileController,
             transferController,
             uploadController,
