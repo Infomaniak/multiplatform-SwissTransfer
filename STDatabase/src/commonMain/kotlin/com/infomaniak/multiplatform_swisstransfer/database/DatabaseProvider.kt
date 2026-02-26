@@ -64,8 +64,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getUploadDao(): UploadDao
 }
 
-// The Room compiler generates the `actual` implementations.
-@Suppress("KotlinNoActualForExpect")
+// The Room compiler generates the `actual` implementations. Avoid error before 1st build.
+@Suppress("KotlinNoActualForExpect", "RedundantSuppression")
 internal expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
     override fun initialize(): AppDatabase
 }
