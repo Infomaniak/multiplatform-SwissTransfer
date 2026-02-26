@@ -94,7 +94,7 @@ object FileUtilsForApiV2 {
      */
     private inline fun String.loopOverParentFolders(action: (folderPath: String) -> Unit) {
         val directoryPath = substringBeforeLast('/', "").ifEmpty { return }
-        directoryPath.forEachSubstring(delimiter = '/') { action(it) }
+        directoryPath.forEachSubstring(delimiter = '/', action)
     }
 
     @OptIn(ExperimentalUuidApi::class)
