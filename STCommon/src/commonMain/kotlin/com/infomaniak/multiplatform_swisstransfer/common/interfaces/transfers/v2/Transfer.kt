@@ -32,8 +32,9 @@ interface Transfer {
 
     //region Only local
     val password: String? get() = null
-    val transferDirection: TransferDirection? get() = null
-    val transferStatus: TransferStatus? get() = null
+    val transferDirection: TransferDirection get() = TransferDirection.RECEIVED
+    val transferStatus: TransferStatus get() = TransferStatus.READY
     val recipientsEmails: Set<String> get() = emptySet()
+    val linkId: String? get() = null
     //endregion
 }
