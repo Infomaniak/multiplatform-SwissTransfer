@@ -24,6 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
@@ -101,8 +102,14 @@ class UploadV2Manager(
             },
             recipients = request.recipientsEmails.toList()
         )
-        uploadRepository.createTransfer(transferCreationPayload).also {
-            val transferToPersist = TransferDB(transfer = it, linkId = null, userOwnerId = userId)
+        uploadRepository.createTransfer(transferCreationPayload).also { apiTransfer ->
+            val transferToPersist = TransferDB(transfer = apiTransfer, linkId = null, userOwnerId = userId)
+            val filesToInsert = FileUtilsForApiV2.getFileDbTree(
+                transferId = apiTransfer.id,
+                files = apiTransfer.files
+            )
+
+            filesToInsert.forEach { file -> transferDao.upsertFile(file) }
             transferDao.upsertTransfer(transferToPersist)
         }
     }
