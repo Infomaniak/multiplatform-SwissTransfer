@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkedFileUploadFinalizationPayload
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
@@ -79,7 +80,7 @@ internal class UploadRequest(
     suspend fun finalizeTransferFile(transferId: String, fileId: String, etags: List<ChunkEtag>): Boolean {
         val response = httpClient.patch(createV2Url(ApiRoutes.uploadDirectly(transferId, fileId))) {
             contentType(ContentType.Application.Json)
-            setBody(etags)
+            setBody(ChunkedFileUploadFinalizationPayload(etags))
         }
         return response.status.isSuccess()
     }
