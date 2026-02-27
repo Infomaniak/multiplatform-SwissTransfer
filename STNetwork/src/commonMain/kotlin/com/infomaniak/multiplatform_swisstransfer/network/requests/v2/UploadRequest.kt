@@ -17,9 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests.v2
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
@@ -47,7 +47,7 @@ internal class UploadRequest(
     token: () -> String,
 ) : BaseRequest(environment, json, httpClient, token) {
 
-    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<Transfer> {
+    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<TransferApi> {
         val nullableJson = Json(json) {
             explicitNulls = false
         }
