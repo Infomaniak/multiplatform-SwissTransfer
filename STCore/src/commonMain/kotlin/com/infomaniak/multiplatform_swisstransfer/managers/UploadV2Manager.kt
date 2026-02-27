@@ -89,7 +89,7 @@ class UploadV2Manager(
             title = null, //TODO[ST-v2]: Add title
             message = request.message,
             password = request.password,
-            language = request.languageCode.code,
+            language = request.languageCode.code.substringBefore('_'),
             expiresInDays = request.validityPeriod.days,
             maxDownload = request.downloadCountLimit.value,
             files = request.filesMetadata.map {
