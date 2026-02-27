@@ -17,10 +17,14 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import androidx.room.immediateTransaction
+import androidx.room.useReaderConnection
+import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
@@ -51,6 +55,7 @@ class UploadV2Manager(
     private val accountManager: AccountManager,
     private val uploadRepository: UploadV2Repository,
     private val transferManager: TransferManager,
+    private val appDatabase: AppDatabase,
     private val uploadDao: UploadDao,
     private val transferDao: TransferDao,
 ) {
@@ -108,9 +113,12 @@ class UploadV2Manager(
                 transferId = apiTransfer.id,
                 files = apiTransfer.files
             )
-
-            filesToInsert.forEach { file -> transferDao.upsertFile(file) }
-            transferDao.upsertTransfer(transferToPersist)
+            appDatabase.useWriterConnection {
+                it.immediateTransaction {
+                    transferDao.upsertTransfer(transferToPersist)
+                    filesToInsert.forEach { file -> transferDao.upsertFile(file) }
+                }
+            }
         }
     }
 
