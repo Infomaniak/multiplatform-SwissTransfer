@@ -300,7 +300,7 @@ class UploadV2Manager(
     ).url
 
     /**
-     * Finalizes an upload session and adds the transfer to the database if it was complete.
+     * Cancels an upload session and remove the transfer from the database.
      *
      * @throws NetworkException If there is a network error.
      * @throws ApiV2ErrorException If there is a general API error.
@@ -315,28 +315,35 @@ class UploadV2Manager(
         UnknownException::class,
         CancellationException::class,
     )
-    suspend fun finalizeTransfer(transferId: String, conclusion: UploadConclusion): Boolean {
-        val userId = requireCurrentUserId()
-
-        val finalizationSucceeded = when (conclusion) {
-            UploadConclusion.Cancelled -> return uploadRepository.cancelTransfer(transferId).also { operationSucceeded ->
-                transferDao.deleteTransfer(transferId = transferId)
-            }
-            UploadConclusion.Failed -> return uploadRepository.markTransferAsFailed(transferId).also {
-                transferDao.deleteTransfer(transferId = transferId)
-            }
-            UploadConclusion.Complete -> {
-                uploadRepository.finalizeTransfer(transferId)
-            }
-        }
-        if (finalizationSucceeded.not()) return false
-        transferDao.markPendingTransferAsReady(userId = userId, transferId = transferId)
-        return true
+    suspend fun cancelTransfer(transferId: String, failed: Boolean): Boolean {
+        return when (failed) {
+            true -> uploadRepository.markTransferAsFailed(transferId)
+            false -> uploadRepository.cancelTransfer(transferId)
+        }.also { transferDao.deleteTransfer(transferId = transferId) }
     }
 
-    enum class UploadConclusion {
-        Complete,
-        Cancelled,
-        Failed,
+    /**
+     * Finalizes an upload session and adds the transfer to the database.
+     *
+     * @see com.infomaniak.multiplatform_swisstransfer.SharedApiUrlCreator.shareTransferV2Url
+     *
+     * @throws NetworkException If there is a network error.
+     * @throws ApiV2ErrorException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        CancellationException::class,
+    )
+    suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
+        val userId = requireCurrentUserId()
+        return uploadRepository.finalizeTransferAndGetLinkUuid(transferId).also {
+            transferDao.markPendingTransferAsReady(userId = userId, transferId = transferId)
+        }
     }
 }

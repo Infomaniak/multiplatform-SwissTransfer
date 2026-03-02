@@ -138,9 +138,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         TransferExpired::class,
         TransferCancelled::class,
     )
-    suspend fun finalizeTransfer(transferId: String): Boolean {
+    suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
         return withUploadErrorHandling {
-            uploadRequest.updateTransferStatus(transferId, UploadTransferStatus.Completed)
+            uploadRequest.finalizeTransferAndGetLinkUuid(transferId).data.linkUuid
         }
     }
 
@@ -159,7 +159,7 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
     )
     suspend fun cancelTransfer(transferId: String): Boolean {
         return withUploadErrorHandling {
-            uploadRequest.updateTransferStatus(transferId, UploadTransferStatus.Cancelled)
+            uploadRequest.abortTransfer(transferId, UploadTransferStatus.Cancelled)
         }
     }
 
@@ -178,7 +178,7 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
     )
     suspend fun markTransferAsFailed(transferId: String): Boolean {
         return withUploadErrorHandling {
-            uploadRequest.updateTransferStatus(transferId, UploadTransferStatus.Failed)
+            uploadRequest.abortTransfer(transferId, UploadTransferStatus.Failed)
         }
     }
 
