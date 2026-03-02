@@ -24,9 +24,11 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkedFileUploadFinalizationPayload
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.CompletionResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.BaseRequest
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
+import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
 import com.infomaniak.multiplatform_swisstransfer.network.utils.longTimeout
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
@@ -85,7 +87,15 @@ internal class UploadRequest(
         return response.status.isSuccess()
     }
 
-    suspend fun updateTransferStatus(transferId: String, status: UploadTransferStatus): Boolean {
+    suspend fun finalizeTransferAndGetLinkUuid(transferId: String): ApiResponseV2Success<CompletionResponse> {
+        return httpClient.patch(url = createV2Url(ApiRoutes.finishTransfer(transferId))) {
+            headers { appendBearer() }
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("status" to UploadTransferStatus.Completed.apiValue))
+        }.decode()
+    }
+
+    suspend fun abortTransfer(transferId: String, status: UploadTransferStatus.Aborted): Boolean {
         val response = httpClient.patch(createV2Url(ApiRoutes.finishTransfer(transferId))) {
             headers { appendBearer() }
             contentType(ContentType.Application.Json)
