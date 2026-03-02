@@ -15,11 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2
 
-internal sealed class UploadTransferStatus(val apiValue: String) {
-    data object Completed : UploadTransferStatus("completed")
-    sealed class Aborted(apiValue: String) : UploadTransferStatus(apiValue)
-    data object Cancelled : Aborted("cancelled")
-    data object Failed : Aborted("failed")
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+internal data class CompletionResponse(val linkUuid: String)
