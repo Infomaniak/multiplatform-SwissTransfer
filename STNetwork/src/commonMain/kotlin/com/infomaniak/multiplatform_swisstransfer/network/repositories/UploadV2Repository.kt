@@ -31,6 +31,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadError
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferExpired
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferFailed
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.toUploadErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
@@ -72,7 +73,7 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         UnauthorizedException::class,
         TooManyRequestException::class,
     )
-    suspend fun createTransfer(createTransfer: CreateTransfer): Transfer {
+    suspend fun createTransfer(createTransfer: CreateTransfer): TransferApi {
         return withUploadErrorHandling {
             uploadRequest.createTransfer(createTransfer).data
         }
