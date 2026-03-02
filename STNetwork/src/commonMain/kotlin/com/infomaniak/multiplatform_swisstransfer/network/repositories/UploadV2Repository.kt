@@ -18,7 +18,6 @@
 package com.infomaniak.multiplatform_swisstransfer.network.repositories
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
