@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TransferApi(
     override val id: String,
-    @SerialName("sender_email")
+    @SerialName("sender")
     override val senderEmail: String,
     override val title: String? = null,
     override val message: String? = null,
