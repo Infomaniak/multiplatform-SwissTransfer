@@ -55,6 +55,8 @@ class AccountManager internal constructor(
     var currentUser: STUser? = null
         private set
 
+    val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
+
     /**
      * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
