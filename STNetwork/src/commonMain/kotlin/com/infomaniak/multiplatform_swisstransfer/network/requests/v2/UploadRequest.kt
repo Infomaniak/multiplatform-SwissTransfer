@@ -33,7 +33,7 @@ import io.ktor.client.plugins.onUpload
 import io.ktor.client.plugins.retry
 import io.ktor.client.request.headers
 import io.ktor.client.request.patch
-import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.content.OutgoingContent
@@ -99,7 +99,7 @@ internal class UploadRequest(
         data: OutgoingContent.WriteChannelContent,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ) {
-        httpClient.post(urlString = cephUrl) {
+        httpClient.put(urlString = cephUrl) {
             retry { noRetry() }
             longTimeout()
             setBody(data)
@@ -112,7 +112,7 @@ internal class UploadRequest(
         data: OutgoingContent.WriteChannelContent,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): String? {
-        val response = httpClient.post(urlString = cephUrl) {
+        val response = httpClient.put(urlString = cephUrl) {
             retry { noRetry() }
             longTimeout()
             setBody(data)
