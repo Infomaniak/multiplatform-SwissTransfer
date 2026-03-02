@@ -18,7 +18,6 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import androidx.room.immediateTransaction
-import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
