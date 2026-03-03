@@ -139,7 +139,7 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
     )
     suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
         return withUploadErrorHandling {
-            uploadRequest.finalizeTransferAndGetLinkUuid(transferId).data.linkUuid
+            uploadRequest.finalizeTransferAndGetLinkUuid(transferId).data.link.id
         }
     }
 
