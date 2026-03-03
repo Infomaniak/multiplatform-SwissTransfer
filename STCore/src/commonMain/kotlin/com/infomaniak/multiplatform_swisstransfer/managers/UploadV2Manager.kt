@@ -22,6 +22,7 @@ import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
@@ -107,7 +108,12 @@ class UploadV2Manager(
             recipients = request.recipientsEmails.toList()
         )
         uploadRepository.createTransfer(transferCreationPayload).also { apiTransfer ->
-            val transferToPersist = TransferDB(transfer = apiTransfer, linkId = null, userOwnerId = userId)
+            val transferToPersist = TransferDB(
+                transfer = apiTransfer.copy(),
+                linkId = null,
+                direction = TransferDirection.SENT,
+                userOwnerId = userId,
+            )
             val filesToInsert = FileUtilsForApiV2.getFileDbTree(
                 transferId = apiTransfer.id,
                 files = apiTransfer.files

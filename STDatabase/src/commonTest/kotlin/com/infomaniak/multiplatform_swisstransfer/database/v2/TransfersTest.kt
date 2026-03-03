@@ -67,6 +67,7 @@ class TransfersTest : RobolectricTestsBase() {
         // Insert a pending upload
         val uploadTransfer = TransferDB(
             transfer = DummyTransferForV2.transfer2,
+            direction = TransferDirection.SENT,
             linkId = null,
             userOwnerId = userId,
         ).copy(

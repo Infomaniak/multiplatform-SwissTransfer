@@ -37,7 +37,7 @@ data class TransferDB(
     override val totalSize: Long,
     // Local
     override val password: String? = null,
-    override val transferDirection: TransferDirection,
+    val transferDirection: TransferDirection,
     override val transferStatus: TransferStatus,
     override val recipientsEmails: Set<String> = emptySet(),
     override val linkId: String? = null,
@@ -48,7 +48,12 @@ data class TransferDB(
     override var files: List<File> = emptyList()
         internal set
 
-    constructor(transfer: Transfer, linkId: String?, userOwnerId: Long) : this(
+    constructor(
+        transfer: Transfer,
+        direction: TransferDirection,
+        linkId: String?,
+        userOwnerId: Long
+    ) : this(
         id = transfer.id,
         senderEmail = transfer.senderEmail,
         title = transfer.title,
@@ -57,7 +62,7 @@ data class TransferDB(
         expiresAt = transfer.expiresAt,
         totalSize = transfer.totalSize,
         password = transfer.password,
-        transferDirection = transfer.transferDirection,
+        transferDirection = direction,
         transferStatus = transfer.transferStatus,
         recipientsEmails = transfer.recipientsEmails,
         linkId = linkId,
