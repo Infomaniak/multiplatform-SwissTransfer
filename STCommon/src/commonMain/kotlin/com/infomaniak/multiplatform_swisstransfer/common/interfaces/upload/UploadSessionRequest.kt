@@ -20,8 +20,10 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
+import kotlinx.serialization.Serializable
 
-class UploadSessionRequest(
+@Serializable // Only used for short-term storage, for iOS.
+data class UploadSessionRequest(
     val validityPeriod: ValidityPeriod,
     val authorEmail: String,
     val password: String,
