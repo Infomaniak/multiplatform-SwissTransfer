@@ -58,6 +58,8 @@ fun DatabaseProvider.getAppDatabase(
 @TypeConverters(Converters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
+    abstract fun getAppSettingsDao(): AppSettingsDao
+    abstract fun getDownloadManagerRef(): DownloadManagerRefDao
     abstract fun getTransferDao(): TransferDao
     abstract fun getUploadDao(): UploadDao
 }
