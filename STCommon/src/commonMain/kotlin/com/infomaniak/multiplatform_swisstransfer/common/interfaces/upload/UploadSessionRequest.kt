@@ -27,6 +27,7 @@ data class UploadSessionRequest(
     val validityPeriod: ValidityPeriod,
     val authorEmail: String,
     val password: String,
+    val title: String?,
     val message: String,
     val sizeOfUpload: Long,
     val downloadCountLimit: DownloadLimit,
