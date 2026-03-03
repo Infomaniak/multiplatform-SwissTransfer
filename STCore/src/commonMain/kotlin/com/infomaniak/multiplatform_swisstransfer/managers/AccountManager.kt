@@ -24,7 +24,9 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -50,7 +52,8 @@ class AccountManager internal constructor(
     private val mutex = Mutex()
 
     // We cache the current user to avoid creating database instances when it's the same user
-    private var currentUser: STUser? = null
+    var currentUser: STUser? = null
+        private set
 
     /**
      * Loads the specified user account and ensures database Transfers are initialized for that user.
@@ -58,10 +61,7 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
         mutex.withLock {
-            if (currentUser?.id != user.id && user is STUser.GuestUser) {
-                appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-                realmProvider.openTransfersDb(user.id)
-            }
+            if (currentUser?.id != user.id) loadDatabase(user)
             currentUser = user
         }
     }
@@ -82,5 +82,38 @@ class AccountManager internal constructor(
         mutex.withLock {
             currentUser = newSTUser
         }
+    }
+
+    private suspend fun loadDatabase(user: STUser) {
+        when (user) {
+            is STUser.GuestUser -> {
+                appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
+                realmProvider.openTransfersDb(user.id)
+            }
+            is STUser.AuthUser if currentUser is STUser.GuestUser && appDatabase.isMigrationNeeded() -> {
+                makeMigrationFromOldDB(appSettingsController, appDatabase)
+            }
+            else -> Unit
+        }
+    }
+}
+
+private suspend fun AppDatabase.isMigrationNeeded(): Boolean {
+    val appSettings = getAppSettingsDao().getAppSettings().first()
+    return appSettings?.dataMigrated != true
+}
+
+private fun makeMigrationFromOldDB(appSettingsController: AppSettingsController, appDatabase: AppDatabase) {
+    appSettingsController.getAppSettings()?.let {
+        val appSettingsDB = AppSettingsDB(
+            theme = it.theme,
+            validityPeriod = it.validityPeriod,
+            downloadLimit = it.downloadLimit,
+            emailLanguage = it.emailLanguage,
+            lastTransferType = it.lastTransferType,
+            lastAuthorEmail = it.lastAuthorEmail,
+            dataMigrated = true,
+        )
+        appDatabase.getAppSettingsDao().update(appSettingsDB)
     }
 }
