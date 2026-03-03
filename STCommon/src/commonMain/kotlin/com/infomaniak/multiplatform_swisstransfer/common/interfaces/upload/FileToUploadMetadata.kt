@@ -24,4 +24,5 @@ data class FileToUploadMetadata(
     val name: String,
     val size: Long,
     val mimeType: String,
+    val localPath: String = "",
 )
