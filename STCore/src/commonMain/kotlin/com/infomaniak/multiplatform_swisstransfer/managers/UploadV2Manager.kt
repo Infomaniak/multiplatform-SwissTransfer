@@ -101,7 +101,7 @@ class UploadV2Manager(
         transferDao.deleteAnyPendingTransfer(userId)
 
         val transferCreationPayload = CreateTransfer(
-            title = null, //TODO[ST-v2]: Add title
+            title = request.title,
             message = request.message,
             password = request.password,
             language = request.languageCode.code.substringBefore('_'),
