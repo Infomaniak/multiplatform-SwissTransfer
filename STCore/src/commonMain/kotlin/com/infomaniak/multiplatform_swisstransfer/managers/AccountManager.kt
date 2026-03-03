@@ -21,12 +21,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
-import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
-import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -35,15 +31,12 @@ import kotlin.coroutines.cancellation.CancellationException
  * AccountManager is responsible for orchestrating Accounts operations, with the database(s).
  *
  * @property appDatabase The provider for managing Room database operations.
- * @property appSettingsController The controller for managing AppSettings operations.
  * @property uploadController The controller for managing Upload operations.
  * @property transferController The controller for managing Transfers operation.
  * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
     private val appDatabase: AppDatabase,
-    private val appSettingsController: AppSettingsController,
-    private val emailLanguageUtils: EmailLanguageUtils,
     private val uploadController: UploadController,
     private val transferController: TransferController,
     private val realmProvider: RealmProvider,
@@ -88,26 +81,6 @@ class AccountManager internal constructor(
     }
 
     private suspend fun loadDatabase(user: STUser) {
-        when (user) {
-            is STUser.GuestUser -> {
-                appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-                realmProvider.openTransfersDb(user.id)
-            }
-            is STUser.AuthUser if currentUser is STUser.GuestUser && appDatabase.isMigrationNeeded() -> {
-                makeMigrationFromOldDB(appSettingsController, appDatabase)
-            }
-            else -> Unit
-        }
+        if (user is STUser.GuestUser) realmProvider.openTransfersDb(user.id)
     }
-}
-
-private suspend fun AppDatabase.isMigrationNeeded(): Boolean {
-    val appSettings = getAppSettingsDao().getAppSettings().first()
-    return appSettings?.dataMigrated != true
-}
-
-private suspend fun makeMigrationFromOldDB(appSettingsController: AppSettingsController, appDatabase: AppDatabase) {
-    val oldAppSettings = appSettingsController.getAppSettings() ?: return
-    val appSettingsDB = AppSettingsDB(oldAppSettings, dataMigrated = true)
-    appDatabase.getAppSettingsDao().put(appSettingsDB)
 }

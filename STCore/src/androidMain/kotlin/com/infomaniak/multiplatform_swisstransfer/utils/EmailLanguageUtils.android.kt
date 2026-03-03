@@ -22,7 +22,7 @@ import java.util.Locale
 
 actual class EmailLanguageUtils actual constructor() {
 
-    actual fun getEmailLanguageFromLocal(): EmailLanguage {
+    actual fun getEmailLanguageFromLocale(): EmailLanguage {
         return when (Locale.getDefault().language) {
             "fr" -> EmailLanguage.FRENCH
             "de" -> EmailLanguage.GERMAN
