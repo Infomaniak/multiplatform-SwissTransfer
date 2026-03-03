@@ -20,5 +20,5 @@ package com.infomaniak.multiplatform_swisstransfer.utils
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 
 expect class EmailLanguageUtils() {
-    fun getEmailLanguageFromLocal(): EmailLanguage
+    fun getEmailLanguageFromLocale(): EmailLanguage
 }
