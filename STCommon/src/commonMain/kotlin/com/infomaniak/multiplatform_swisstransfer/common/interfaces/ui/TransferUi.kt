@@ -24,6 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 
 data class TransferUi(
     val uuid: String,
+    val linkId: String?,
     val createdDateTimestamp: Long,
     val expirationDateTimestamp: Long,
     val sizeUploaded: Long,
@@ -38,6 +39,7 @@ data class TransferUi(
 ) {
     constructor(transfer: Transfer) : this(
         uuid = transfer.linkUUID,
+        linkId = null,
         createdDateTimestamp = transfer.createdDateTimestamp,
         expirationDateTimestamp = transfer.expiredDateTimestamp,
         sizeUploaded = transfer.container?.sizeUploaded ?: 0,

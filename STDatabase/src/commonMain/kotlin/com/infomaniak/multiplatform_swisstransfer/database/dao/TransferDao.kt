@@ -100,8 +100,12 @@ interface TransferDao {
     @Query("DELETE FROM TransferDB WHERE userOwnerId=:userId AND transferStatus='PENDING_UPLOAD'")
     suspend fun deleteAnyPendingTransfer(userId: Long)
 
-    @Query("UPDATE TransferDB SET transferStatus='READY' WHERE userOwnerId=:userId AND id=:transferId AND transferStatus='PENDING_UPLOAD'")
-    suspend fun markPendingTransferAsReady(userId: Long, transferId: String)
+    @Query(
+        "UPDATE TransferDB " +
+                "SET transferStatus='READY', linkId=:linkId " +
+                "WHERE userOwnerId=:userId AND id=:transferId AND transferStatus='PENDING_UPLOAD'"
+    )
+    suspend fun markPendingTransferAsReady(userId: Long, transferId: String, linkId: String)
 
     @Upsert
     suspend fun upsertTransfer(transferDB: TransferDB)
