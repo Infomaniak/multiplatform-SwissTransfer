@@ -349,7 +349,7 @@ class UploadV2Manager(
     suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
         val userId = requireCurrentUserId()
         return uploadRepository.finalizeTransferAndGetLinkUuid(transferId).also {
-            transferDao.markPendingTransferAsReady(userId = userId, transferId = transferId)
+            transferDao.markPendingTransferAsReady(userId = userId, transferId = transferId, linkId = it)
         }
     }
 }
