@@ -52,7 +52,7 @@ class TransferV2RepositoryTest {
               "result": "success",
               "data": {
                 "id": "c96350da-4d8c-4c43-aa6a-40f2d2b31eac",
-                "sender_email": "example@ik.me",
+                "sender": "example@ik.me",
                 "title": "Coucou",
                 "message": "Voici ce que tu m'as demandé",
                 "created_at": 1771324513,
