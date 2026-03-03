@@ -20,4 +20,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.models.upload.respons
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class CompletionResponse(val linkUuid: String)
+internal data class CompletionResponse(val link: LinkWrapper) {
+    @Serializable
+    data class LinkWrapper(val id: String)
+}
