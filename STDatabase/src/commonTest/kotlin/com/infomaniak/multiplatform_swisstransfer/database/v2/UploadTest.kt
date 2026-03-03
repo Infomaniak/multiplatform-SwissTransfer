@@ -146,12 +146,12 @@ class UploadTest : RobolectricTestsBase() {
         createdAt: Long = 0,
     ): TransferDB = TransferDB(
         transfer = DummyTransferForV2.transfer1,
+        direction = TransferDirection.SENT,
         linkId = null,
         userOwnerId = userId,
     ).copy(
         id = id,
         createdAt = createdAt,
-        transferDirection = TransferDirection.SENT,
         transferStatus = TransferStatus.PENDING_UPLOAD,
     )
 
@@ -160,11 +160,11 @@ class UploadTest : RobolectricTestsBase() {
         status: TransferStatus,
     ): TransferDB = TransferDB(
         transfer = DummyTransferForV2.transfer1,
+        direction = TransferDirection.SENT,
         linkId = null,
         userOwnerId = userId,
     ).copy(
         id = id,
-        transferDirection = TransferDirection.SENT,
         transferStatus = status,
     )
     //endregion
