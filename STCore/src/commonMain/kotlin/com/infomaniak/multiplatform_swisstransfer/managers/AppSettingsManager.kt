@@ -27,12 +27,18 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferType
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
+import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
+import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -44,9 +50,11 @@ import kotlin.coroutines.cancellation.CancellationException
 class AppSettingsManager internal constructor(
     private val appDatabase: AppDatabase,
     private val appSettingsController: AppSettingsController,
+    private val realmProvider: RealmProvider,
+    private val emailLanguageUtils: EmailLanguageUtils,
 ) {
 
-    private val appSettingsDao get() = appDatabase.getAppSettingsDao()
+    private val dao get() = appDatabase.getAppSettingsDao()
 
     /**
      * A [Flow] that emits the current [AppSettings] object whenever it changes.
@@ -54,24 +62,23 @@ class AppSettingsManager internal constructor(
     /**
      * A [Flow] that emits the current [AppSettings] object whenever it changes.
      */
-    val appSettings: Flow<AppSettings?> = appSettingsDao.getAppSettings().transformLatest { appSettings ->
+    val appSettings: Flow<AppSettings?> = dao.getAppSettings().transformLatest { appSettings ->
         if (appSettings != null) emit(appSettings)
-        else emitAll(appSettingsController.getAppSettingsFlow())
+        else Migrator.migrateOrCreateAppSettings(appSettingsController, dao, realmProvider, emailLanguageUtils)
     }
 
-    fun getAppSettings(): AppSettings? = appSettingsController.getAppSettings()
+    suspend fun getAppSettings(): AppSettings? = appSettings.first()
 
     /**
      * Asynchronously sets the application theme.
      *
      * @param theme The new theme to apply.
      *
-     * @throws RealmException If the provided theme is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setTheme(theme: Theme): Unit = withContext(Dispatchers.Default) {
-        appSettingsController.setTheme(theme)
+    @Throws(CancellationException::class)
+    suspend fun setTheme(theme: Theme) {
+        dao.updateTheme(theme)
     }
 
     /**
@@ -79,12 +86,11 @@ class AppSettingsManager internal constructor(
      *
      * @param validityPeriod The new validity period.
      *
-     * @throws RealmException If the provided validity period is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod): Unit = withContext(Dispatchers.Default) {
-        appSettingsController.setValidityPeriod(validityPeriod)
+    @Throws(CancellationException::class)
+    suspend fun setValidityPeriod(validityPeriod: ValidityPeriod) {
+        dao.updateValidityPeriod(validityPeriod)
     }
 
     /**
@@ -92,12 +98,11 @@ class AppSettingsManager internal constructor(
      *
      * @param downloadLimit The new download limit.
      *
-     * @throws RealmException If the provided download limit is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setDownloadLimit(downloadLimit: DownloadLimit): Unit = withContext(Dispatchers.Default) {
-        appSettingsController.setDownloadLimit(downloadLimit)
+    @Throws(CancellationException::class)
+    suspend fun setDownloadLimit(downloadLimit: DownloadLimit) {
+        dao.updateDownloadLimit(downloadLimit)
     }
 
     /**
@@ -105,12 +110,11 @@ class AppSettingsManager internal constructor(
      *
      * @param emailLanguage The new email language.
      *
-     * @throws RealmException If the provided email language is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailLanguage(emailLanguage: EmailLanguage): Unit = withContext(Dispatchers.Default) {
-        appSettingsController.setEmailLanguage(emailLanguage)
+    @Throws(CancellationException::class)
+    suspend fun setEmailLanguage(emailLanguage: EmailLanguage) {
+        dao.updateEmailLanguage(emailLanguage)
     }
 
     /**
@@ -118,12 +122,11 @@ class AppSettingsManager internal constructor(
      *
      * @param transferType The last type of transfer selected.
      *
-     * @throws RealmException If the provided type of transfer is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setLastTransferType(transferType: TransferType): Unit = withContext(Dispatchers.Default) {
-        appSettingsController.setLastTransferType(transferType)
+    @Throws(CancellationException::class)
+    suspend fun setLastTransferType(transferType: TransferType) {
+        dao.updateLastTransferType(transferType)
     }
 
     /**
@@ -131,11 +134,44 @@ class AppSettingsManager internal constructor(
      *
      * @param authorEmail The last email of the transfer author entered.
      *
-     * @throws RealmException If the provided email is invalid.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setLastAuthorEmail(authorEmail: String?): Unit = withContext(Dispatchers.Default) {
-        appSettingsController.setLastAuthorEmail(authorEmail)
+    @Throws(CancellationException::class)
+    suspend fun setLastAuthorEmail(authorEmail: String?) {
+        dao.updateLastAuthorEmail(authorEmail)
+    }
+
+    private object Migrator {
+        private val mutex = Mutex()
+
+        suspend fun migrateOrCreateAppSettings(
+            appSettingsController: AppSettingsController,
+            dao: AppSettingsDao,
+            realmProvider: RealmProvider,
+            emailLanguageUtils: EmailLanguageUtils
+        ) {
+            mutex.withLock {
+                val hasMigrated = dao.getAppSettings().first() != null
+                if (hasMigrated) return
+                try {
+                    val oldAppSettings = appSettingsController.getAppSettings()?.toNewAppSettingsDB()
+                    val settings = oldAppSettings
+                        ?: AppSettingsDB(emailLanguage = emailLanguageUtils.getEmailLanguageFromLocale())
+                    dao.put(settings)
+                    appSettingsController.removeData()
+                } finally {
+                    realmProvider.closeAppSettingsDb()
+                }
+            }
+        }
+
+        private fun AppSettings.toNewAppSettingsDB(): AppSettingsDB = AppSettingsDB(
+            theme = theme,
+            validityPeriod = validityPeriod,
+            downloadLimit = downloadLimit,
+            emailLanguage = emailLanguage,
+            lastTransferType = lastTransferType,
+            lastAuthorEmail = lastAuthorEmail,
+        )
     }
 }

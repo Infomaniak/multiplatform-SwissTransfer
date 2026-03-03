@@ -23,7 +23,7 @@ import platform.Foundation.currentLocale
 import platform.Foundation.languageCode
 
 actual class EmailLanguageUtils actual constructor() {
-    actual fun getEmailLanguageFromLocal(): EmailLanguage {
+    actual fun getEmailLanguageFromLocale(): EmailLanguage {
         val currentLocale = NSLocale.currentLocale
         return when (currentLocale.languageCode) {
             "fr" -> EmailLanguage.FRENCH

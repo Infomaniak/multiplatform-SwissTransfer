@@ -91,7 +91,7 @@ class SwissTransferInjection(
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
     private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, requireToken) }
 
-    private val appSettingsController by lazy { AppSettingsController(realmProvider, crashReport) }
+    private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
     private val uploadController by lazy { UploadController(realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
@@ -106,7 +106,7 @@ class SwissTransferInjection(
     val fileManager by lazy { FileManager(accountManager, appDatabase, fileController) }
 
     /** A manager used to orchestrate AppSettings operations. */
-    val appSettingsManager by lazy { AppSettingsManager(appDatabase, appSettingsController) }
+    val appSettingsManager by lazy { AppSettingsManager(appDatabase, appSettingsController, realmProvider, emailLanguageUtils) }
 
     /** A manager used to orchestrate uploads' tokens operations (email token or attestation token). */
     val uploadTokensManager by lazy { UploadTokensManager(uploadTokensController) }
@@ -115,8 +115,6 @@ class SwissTransferInjection(
     val accountManager by lazy {
         AccountManager(
             appDatabase = appDatabase,
-            appSettingsController = appSettingsController,
-            emailLanguageUtils = emailLanguageUtils,
             uploadController = uploadController,
             transferController = transferController,
             realmProvider = realmProvider,
