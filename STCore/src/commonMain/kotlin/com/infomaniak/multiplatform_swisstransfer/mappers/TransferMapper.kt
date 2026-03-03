@@ -31,6 +31,7 @@ internal suspend fun TransferDB.toTransferUi(transferDao: TransferDao): Transfer
 
     return TransferUi(
         uuid = this.id,
+        linkId = this.linkId,
         createdDateTimestamp = this.createdAt,
         expirationDateTimestamp = this.expiresAt,
         sizeUploaded = this.totalSize,
