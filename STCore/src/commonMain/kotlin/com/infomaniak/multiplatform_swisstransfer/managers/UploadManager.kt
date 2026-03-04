@@ -250,61 +250,6 @@ class UploadManager(
     }
 
     /**
-     * Uploads a chunk of data for a file in an upload session.
-     *
-     * @param uuid The UUID of the upload session.
-     * @param fileUUID The UUID of the file being uploaded.
-     * @param chunkIndex The index of the chunk being uploaded.
-     * @param isLastChunk True if this is the last chunk of the file, false otherwise.
-     * @param data The chunk data to upload.
-     *
-     * @throws CancellationException If the operation is cancelled.
-     * @throws ApiErrorException If there is a general API error.
-     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
-     * @throws NetworkException If there is a network error.
-     * @throws UnknownException If an unknown error occurs.
-     * @throws RealmException If an error occurs during database access.
-     * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
-     * @throws NullPropertyException If remoteUploadHost or remoteContainer is null.
-     */
-    @Throws(
-        CancellationException::class,
-        ApiErrorException::class,
-        UnexpectedApiErrorFormatException::class,
-        NetworkException::class,
-        UnknownException::class,
-        RealmException::class,
-        NotFoundException::class,
-        NullPropertyException::class,
-    )
-    suspend fun uploadChunk(
-        uuid: String,
-        fileUUID: String,
-        chunkIndex: Int,
-        isLastChunk: Boolean,
-        data: ByteArray,
-        onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
-    ): Unit = withContext(Dispatchers.Default) {
-        val uploadSession = uploadController.getUploadByUUID(uuid)
-            ?: throw NotFoundException("${UploadSession::class.simpleName} not found in DB with uuid = $uuid")
-        val remoteUploadHost = uploadSession.remoteUploadHost
-            ?: throw NullPropertyException("Remote upload host cannot be null")
-        val remoteContainer = uploadSession.remoteContainer
-            ?: throw NullPropertyException("Remote container cannot be null")
-
-        uploadRepository.uploadChunk(
-            uploadHost = remoteUploadHost,
-            containerUUID = remoteContainer.uuid,
-            fileUUID = fileUUID,
-            chunkIndex = chunkIndex,
-            isLastChunk = isLastChunk,
-            isRetry = false,
-            data = data,
-            onUpload = onUpload,
-        )
-    }
-
-    /**
      * Finishes an upload session and add the transfer to the database.
      *
      * @param uuid The UUID of the upload session.
