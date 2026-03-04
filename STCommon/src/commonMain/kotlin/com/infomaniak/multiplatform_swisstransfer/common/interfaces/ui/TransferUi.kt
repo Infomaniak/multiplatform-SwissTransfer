@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Tr
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer as TransferV2
 
 data class TransferUi(
     val uuid: String,
@@ -35,8 +36,13 @@ data class TransferUi(
     val recipientsEmails: Set<String> = emptySet(),
     val files: List<FileUi>,
     val direction: TransferDirection? = null,
-    val transferStatus: TransferStatus? = null
+    val transferStatus: TransferStatus? = null,
+    val apiSource: ApiSource,
 ) {
+    enum class ApiSource {
+        V1, V2
+    }
+
     constructor(transfer: Transfer) : this(
         uuid = transfer.linkUUID,
         linkId = null,
@@ -51,5 +57,6 @@ data class TransferUi(
         files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList(),
         direction = transfer.transferDirection,
         transferStatus = transfer.transferStatus,
+        apiSource = ApiSource.V1,
     )
 }
