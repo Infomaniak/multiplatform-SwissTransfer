@@ -25,6 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.*
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
@@ -243,43 +244,44 @@ class TransferManager internal constructor(
      * Designed to keep a reference to the id from Android's DownloadManager.
      */
     suspend fun writeDownloadManagerId(
-        transferUUID: String,
+        transfer: TransferUi,
         fileUid: String?,
         uniqueDownloadManagerId: Long?
     ) {
-        currentUserId?.let {
-            val transfer = transferDao.transferFlow(userId = it, transferId = transferUUID).first()
-            if (transfer != null) {
+        val transferId = transfer.uuid
+        when (transfer.apiSource) {
+            V1 -> {
+                transferController.writeDownloadManagerId(transferId, fileUid, uniqueDownloadManagerId)
+            }
+            V2 -> {
                 if (uniqueDownloadManagerId == null) {
                     appDatabase.getDownloadManagerRef().delete(
-                        transferId = transferUUID,
+                        transferId = transferId,
                         fileId = fileUid ?: ""
                     )
                 } else {
                     appDatabase.getDownloadManagerRef().update(
                         DownloadManagerRefV2(
-                            transferId = transferUUID,
+                            transferId = transferId,
                             fileId = fileUid ?: "",
                             downloadManagerUniqueId = uniqueDownloadManagerId,
-                            userOwnerId = it
+                            userOwnerId = currentUserId ?: return
                         )
                     )
                 }
-                return
             }
         }
-        transferController.writeDownloadManagerId(transferUUID, fileUid, uniqueDownloadManagerId)
     }
 
     /**
      * Gives the id to retrieve a previous download assigned to Android's DownloadManager.
      */
-    fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> {
-        //TODO: Maybe migrate all that data from Realm, to avoid having to merge the 2 flows.
-        currentUserId?.let {
-            return appDatabase.getDownloadManagerRef().getDownloadManagerId(transferId = transferUUID, fileId = fileUid ?: "")
+    fun downloadManagerIdFor(transfer: TransferUi, fileUid: String?): Flow<Long?> {
+        //TODO[ST-v2]: Maybe migrate all that data from Realm, to avoid this condition.
+        return when (transfer.apiSource) {
+            V1 -> transferController.downloadManagerIdFor(transfer.uuid, fileUid)
+            V2 -> appDatabase.getDownloadManagerRef().getDownloadManagerId(transferId = transfer.uuid, fileId = fileUid ?: "")
         }
-        return transferController.downloadManagerIdFor(transferUUID, fileUid)
     }
 
     /**
