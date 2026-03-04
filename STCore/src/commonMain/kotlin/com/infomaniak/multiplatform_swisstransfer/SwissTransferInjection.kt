@@ -70,7 +70,7 @@ class SwissTransferInjection(
     private val environment: ApiEnvironment,
     private val userAgent: String,
     private val legacyDatabaseRootDirectory: String? = null,
-    private val databaseNameOrPath: String? = null,
+    private val databaseNameOrPath: String,
     private val crashReport: CrashReportInterface,
 ) {
 
@@ -81,7 +81,7 @@ class SwissTransferInjection(
 
     private val realmProvider by lazy { RealmProvider(legacyDatabaseRootDirectory) }
     private val appDatabase by lazy {
-        val databaseConfig = DatabaseConfig(databaseNameOrPath = databaseNameOrPath ?: "")
+        val databaseConfig = DatabaseConfig(databaseNameOrPath = databaseNameOrPath)
         DatabaseProvider(databaseConfig).getAppDatabase()
     }
     private val apiClientProvider by lazy { ApiClientProvider(userAgent, crashReport) }
@@ -125,6 +125,7 @@ class SwissTransferInjection(
             appDatabase = appDatabase,
             uploadController = uploadController,
             transferController = transferController,
+            appSettingsManager = appSettingsManager,
             realmProvider = realmProvider,
         )
     }
