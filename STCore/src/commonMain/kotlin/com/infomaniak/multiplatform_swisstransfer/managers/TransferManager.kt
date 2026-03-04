@@ -17,6 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
@@ -24,13 +26,12 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferU
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
-import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
@@ -484,11 +485,20 @@ class TransferManager internal constructor(
             transfer = transferApi,
             linkId = linkId,
             userOwnerId = userId,
-            direction = TransferDirection.RECEIVED
-        ).copy(password = password)
-        transferDao.upsertTransfer(transferDB)
-        transferApi.files.forEach { file ->
-            transferDao.upsertFile(FileDB(file, transferId = transferApi.id, folderId = null))
+            direction = TransferDirection.RECEIVED,
+            password = password,
+        )
+
+        val filesToInsert = FileUtilsForApiV2.getFileDbTree(
+            transferId = transferApi.id,
+            files = transferApi.files
+        )
+
+        appDatabase.useWriterConnection {
+            it.immediateTransaction {
+                transferDao.upsertTransfer(transferDB)
+                filesToInsert.forEach { file -> transferDao.upsertFile(file) }
+            }
         }
     }
 
