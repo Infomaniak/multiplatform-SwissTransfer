@@ -21,10 +21,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
-import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -33,35 +31,32 @@ import kotlin.coroutines.cancellation.CancellationException
  * AccountManager is responsible for orchestrating Accounts operations, with the database(s).
  *
  * @property appDatabase The provider for managing Room database operations.
- * @property appSettingsController The controller for managing AppSettings operations.
  * @property uploadController The controller for managing Upload operations.
  * @property transferController The controller for managing Transfers operation.
  * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
     private val appDatabase: AppDatabase,
-    private val appSettingsController: AppSettingsController,
-    private val emailLanguageUtils: EmailLanguageUtils,
     private val uploadController: UploadController,
     private val transferController: TransferController,
     private val realmProvider: RealmProvider,
 ) {
 
-    private val mutex = Mutex()
+    private val userSwitchMutex = Mutex()
 
     // We cache the current user to avoid creating database instances when it's the same user
-    private var currentUser: STUser? = null
+    var currentUser: STUser? = null
+        private set
+
+    val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
 
     /**
      * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
-        mutex.withLock {
-            if (currentUser?.id != user.id && user is STUser.GuestUser) {
-                appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-                realmProvider.openTransfersDb(user.id)
-            }
+        userSwitchMutex.withLock {
+            if (currentUser?.id != user.id) loadDatabase(user)
             currentUser = user
         }
     }
@@ -72,15 +67,20 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun logoutCurrentUser(newSTUser: STUser?) {
         val user = currentUser ?: return
-        if (user is STUser.AuthUser) {
-            appDatabase.getTransferDao().deleteTransfers(user.id)
-        } else {
-            uploadController.removeData()
-            transferController.removeData()
-            realmProvider.closeAllDatabases()
+        when (user) {
+            is STUser.AuthUser -> appDatabase.getTransferDao().deleteTransfers(user.id)
+            STUser.GuestUser -> {
+                uploadController.removeData()
+                transferController.removeData()
+                realmProvider.closeAllDatabases()
+            }
         }
-        mutex.withLock {
+        userSwitchMutex.withLock {
             currentUser = newSTUser
         }
+    }
+
+    private suspend fun loadDatabase(user: STUser) {
+        if (user is STUser.GuestUser) realmProvider.openTransfersDb(user.id)
     }
 }

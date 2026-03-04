@@ -19,16 +19,15 @@ package com.infomaniak.multiplatform_swisstransfer.database
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import splitties.init.appCtx
 
 actual class DatabaseProvider actual constructor(val databaseConfig: DatabaseConfig) {
     actual fun getRoomDatabaseBuilder(inMemory: Boolean): RoomDatabase.Builder<AppDatabase> {
         return when {
-            inMemory -> Room.inMemoryDatabaseBuilder(
-                context = databaseConfig.appContext,
-            )
+            inMemory -> Room.inMemoryDatabaseBuilder(context = appCtx)
             else -> Room.databaseBuilder<AppDatabase>(
-                context = databaseConfig.appContext,
-                name = databaseConfig.databaseRootDirectory,
+                context = appCtx,
+                name = databaseConfig.databaseNameOrPath,
             )
         }
     }

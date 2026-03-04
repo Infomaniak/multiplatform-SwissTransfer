@@ -141,7 +141,7 @@ class InMemoryUploadManager(
         UnknownException::class,
     )
     suspend fun resendEmailCode(address: String): Unit = withContext(Dispatchers.Default) {
-        val language = emailLanguageUtils.getEmailLanguageFromLocal()
+        val language = emailLanguageUtils.getEmailLanguageFromLocale()
         uploadRepository.resendEmailCode(ResendEmailCodeBody(address, language.code))
     }
 

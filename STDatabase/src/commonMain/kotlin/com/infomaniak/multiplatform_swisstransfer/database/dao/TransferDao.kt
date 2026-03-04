@@ -35,7 +35,7 @@ import kotlin.time.ExperimentalTime
 interface TransferDao {
 
     @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus ORDER BY createdAt DESC")
-    fun getTransfers(
+    fun transfersFlow(
         userId: Long,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<List<TransferDB>>
@@ -46,7 +46,7 @@ interface TransferDao {
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
         ORDER BY createdAt DESC """
     )
-    fun getValidTransfers(
+    fun validTransfersFlow(
         userId: Long,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
@@ -59,7 +59,7 @@ interface TransferDao {
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
         ORDER BY createdAt DESC """
     )
-    fun getExpiredTransfers(
+    fun expiredTransfersFlow(
         userId: Long,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
@@ -70,28 +70,42 @@ interface TransferDao {
         """SELECT count(*) FROM TransferDB 
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction"""
     )
-    fun getTransfersCount(
+    fun transfersCountFlow(
         userId: Long,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<Int>
 
     @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND id=:transferId LIMIT 1")
-    fun getTransfer(userId: Long, transferId: String): Flow<TransferDB?>
+    fun transferFlow(userId: Long, transferId: String): Flow<TransferDB?>
 
     @Query("SELECT * FROM FileDB WHERE id=:fileId LIMIT 1")
-    fun getFile(fileId: String): Flow<FileDB?>
+    fun fileFlow(fileId: String): Flow<FileDB?>
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId IS NULL")
     suspend fun getTransferRootFiles(transferId: String): List<FileDB>
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId=:folderId")
-    fun getTransferFolderFiles(transferId: String, folderId: String?): Flow<List<FileDB>>
+    fun transferFolderFilesFlow(transferId: String, folderId: String?): Flow<List<FileDB>>
+
+    @Query("SELECT * FROM FileDB WHERE transferId=:transferId")
+    suspend fun getTransferFiles(transferId: String): List<FileDB>
 
     @Query("SELECT * FROM FileDB WHERE parentId=:folderId")
-    fun getFilesByFolderId(folderId: String): Flow<List<FileDB>>
+    fun filesByFolderIdFlow(folderId: String): Flow<List<FileDB>>
 
-    //TODO[API-V2]: suspend fun getNotReadyTransfers(userId: Long): List<TransferDB>
+    @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND transferStatus='PENDING_UPLOAD' LIMIT 1")
+    suspend fun getPendingTransfer(userId: Long): TransferDB?
+
+    @Query("DELETE FROM TransferDB WHERE userOwnerId=:userId AND transferStatus='PENDING_UPLOAD'")
+    suspend fun deleteAnyPendingTransfer(userId: Long)
+
+    @Query(
+        "UPDATE TransferDB " +
+                "SET transferStatus='READY', linkId=:linkId " +
+                "WHERE userOwnerId=:userId AND id=:transferId AND transferStatus='PENDING_UPLOAD'"
+    )
+    suspend fun markPendingTransferAsReady(userId: Long, transferId: String, linkId: String)
 
     @Upsert
     suspend fun upsertTransfer(transferDB: TransferDB)
@@ -101,6 +115,9 @@ interface TransferDao {
 
     @Delete
     suspend fun deleteTransfer(transferDB: TransferDB)
+
+    @Query("DELETE FROM TransferDB WHERE id=:transferId")
+    suspend fun deleteTransfer(transferId: String)
 
     @OptIn(ExperimentalTime::class)
     @Query("DELETE FROM TransferDB WHERE expiresAt < :expiryTime")

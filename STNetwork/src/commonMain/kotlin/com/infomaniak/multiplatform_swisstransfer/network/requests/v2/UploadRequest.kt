@@ -17,22 +17,25 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.requests.v2
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkedFileUploadFinalizationPayload
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.CompletionResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.BaseRequest
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
+import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
 import com.infomaniak.multiplatform_swisstransfer.network.utils.longTimeout
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.plugins.retry
 import io.ktor.client.request.headers
 import io.ktor.client.request.patch
-import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.content.OutgoingContent
@@ -47,7 +50,7 @@ internal class UploadRequest(
     token: () -> String,
 ) : BaseRequest(environment, json, httpClient, token) {
 
-    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<Transfer> {
+    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<TransferApi> {
         val nullableJson = Json(json) {
             explicitNulls = false
         }
@@ -79,12 +82,20 @@ internal class UploadRequest(
     suspend fun finalizeTransferFile(transferId: String, fileId: String, etags: List<ChunkEtag>): Boolean {
         val response = httpClient.patch(createV2Url(ApiRoutes.uploadDirectly(transferId, fileId))) {
             contentType(ContentType.Application.Json)
-            setBody(etags)
+            setBody(ChunkedFileUploadFinalizationPayload(etags))
         }
         return response.status.isSuccess()
     }
 
-    suspend fun updateTransferStatus(transferId: String, status: UploadTransferStatus): Boolean {
+    suspend fun finalizeTransferAndGetLinkUuid(transferId: String): ApiResponseV2Success<CompletionResponse> {
+        return httpClient.patch(url = createV2Url(ApiRoutes.finishTransfer(transferId))) {
+            headers { appendBearer() }
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("status" to UploadTransferStatus.Completed.apiValue))
+        }.decode()
+    }
+
+    suspend fun abortTransfer(transferId: String, status: UploadTransferStatus.Aborted): Boolean {
         val response = httpClient.patch(createV2Url(ApiRoutes.finishTransfer(transferId))) {
             headers { appendBearer() }
             contentType(ContentType.Application.Json)
@@ -98,7 +109,7 @@ internal class UploadRequest(
         data: OutgoingContent.WriteChannelContent,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ) {
-        httpClient.post(urlString = cephUrl) {
+        httpClient.put(urlString = cephUrl) {
             retry { noRetry() }
             longTimeout()
             setBody(data)
@@ -111,7 +122,7 @@ internal class UploadRequest(
         data: OutgoingContent.WriteChannelContent,
         onUpload: suspend (bytesSentTotal: Long, chunkSize: Long) -> Unit,
     ): String? {
-        val response = httpClient.post(urlString = cephUrl) {
+        val response = httpClient.put(urlString = cephUrl) {
             retry { noRetry() }
             longTimeout()
             setBody(data)

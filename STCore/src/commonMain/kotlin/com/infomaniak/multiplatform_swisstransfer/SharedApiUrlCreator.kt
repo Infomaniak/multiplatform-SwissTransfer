@@ -25,6 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferC
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
+import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiV2Routes
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -40,6 +41,11 @@ class SharedApiUrlCreator internal constructor(
     val createUploadContainerUrl: String = SharedApiRoutes.createUploadContainer(environment)
 
     fun shareTransferUrl(transferUUID: String) = SharedApiRoutes.shareTransfer(environment, transferUUID)
+
+    /**
+     * @see com.infomaniak.multiplatform_swisstransfer.managers.UploadV2Manager.finalizeTransferAndGetLinkUuid
+     */
+    fun shareTransferV2Url(linkUUID: String) = SharedApiV2Routes.shareTransfer(environment, linkUUID)
 
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFilesUrl(transferUUID: String): String? {

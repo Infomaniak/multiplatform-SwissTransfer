@@ -25,7 +25,7 @@ actual class DatabaseProvider actual constructor(val databaseConfig: DatabaseCon
         return when {
             inMemory -> Room.inMemoryDatabaseBuilder<AppDatabase>()
             else -> Room.databaseBuilder<AppDatabase>(
-                name = databaseConfig.databaseRootDirectory,
+                name = databaseConfig.databaseNameOrPath,
             )
         }
     }

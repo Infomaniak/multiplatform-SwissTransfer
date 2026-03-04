@@ -34,7 +34,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 internal class TransferRequest(
     environment: ApiEnvironment,
@@ -42,7 +41,6 @@ internal class TransferRequest(
     httpClient: HttpClient,
 ) : BaseRequest(environment, json, httpClient, token = { "" }) {
 
-    @OptIn(ExperimentalEncodingApi::class)
     suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponse<TransferApi> {
         return get(
             url = createUrl(ApiRoutes.getTransfer(linkUUID)),
