@@ -29,6 +29,9 @@ interface DownloadManagerRefDao {
     @Query("SELECT downloadManagerUniqueId FROM DownloadManagerRef WHERE transferId=:transferId AND fileId=:fileId")
     fun getDownloadManagerId(transferId: String, fileId: String = ""): Flow<Long?>
 
+    //TODO[Nit]: We might not want to support empty fileId since downloading an entire transfer or
+    // folder is purposefully NOT supported in the v2 API, except if we want to use this for v1 downloads too.
+
     @Upsert
     suspend fun update(downloadManagerRef: DownloadManagerRef)
 
