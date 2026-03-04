@@ -31,4 +31,5 @@ interface AppSettings {
 
     val lastTransferType: TransferType
     val lastAuthorEmail: String?
+    val idOfAccountWithGuestData: Long?
 }

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f2add7ce9c7fe713862a586f61c8685b",
+    "identityHash": "d70e7f13f5355ab969659ba9acdbfb0e",
     "entities": [
       {
         "tableName": "AppSettingsDB",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `theme` TEXT NOT NULL, `validityPeriod` TEXT NOT NULL, `downloadLimit` TEXT NOT NULL, `emailLanguage` TEXT NOT NULL, `lastTransferType` TEXT NOT NULL, `lastAuthorEmail` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `theme` TEXT NOT NULL, `validityPeriod` TEXT NOT NULL, `downloadLimit` TEXT NOT NULL, `emailLanguage` TEXT NOT NULL, `lastTransferType` TEXT NOT NULL, `lastAuthorEmail` TEXT, `idOfAccountWithGuestData` INTEGER, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -48,6 +48,11 @@
             "fieldPath": "lastAuthorEmail",
             "columnName": "lastAuthorEmail",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idOfAccountWithGuestData",
+            "columnName": "idOfAccountWithGuestData",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -264,7 +269,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f2add7ce9c7fe713862a586f61c8685b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd70e7f13f5355ab969659ba9acdbfb0e')"
     ]
   }
 }
