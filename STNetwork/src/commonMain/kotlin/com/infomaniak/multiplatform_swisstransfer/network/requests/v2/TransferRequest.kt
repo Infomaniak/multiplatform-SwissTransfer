@@ -41,7 +41,6 @@ internal class TransferRequest(
         return get(
             url = createV2Url(ApiRoutes.getTransfer(linkUUID)),
             appendHeaders = {
-                appendBearer()
                 appendPasswordIfNeeded(password)
             }
         )

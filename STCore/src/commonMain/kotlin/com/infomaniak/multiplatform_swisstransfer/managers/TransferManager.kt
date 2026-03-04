@@ -17,6 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
@@ -28,21 +30,27 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiList
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiListFlow
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.DownloadLimitReached
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.ExpiredDateFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.NotFoundFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.PasswordNeededFetchTransferException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.TransferCancelledException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.VirusCheckFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.VirusDetectedFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.WrongPasswordFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
@@ -64,6 +72,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.DownloadManagerRef as DownloadManagerRefV2
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi as TransferApiV2
 
 /**
  * TransferManager is responsible for orchestrating data transfer operations
@@ -84,6 +93,7 @@ class TransferManager internal constructor(
     private val transferV2Repository: TransferV2Repository,
 ) {
 
+    private val v2UrlRegex = "^https://.+/dl/[^?]+"
     private val minDurationBetweenAutoUpdates = 15.minutes
     private var lastUpdateDate: TimeMark = TimeSource.Monotonic.markNow() - (minDurationBetweenAutoUpdates + 1.seconds)
 
@@ -92,6 +102,8 @@ class TransferManager internal constructor(
         get() = (accountManager.currentUser as? STUser.AuthUser)?.id
 
     private val transferDao get() = appDatabase.getTransferDao()
+
+    fun isV2Url(url: String) = v2UrlRegex.toRegex().matches(url)
 
     /**
      * Retrieves a flow of all transfers.
@@ -419,6 +431,10 @@ class TransferManager internal constructor(
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
      * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
+     * @throws ApiV2ErrorException
+     * @throws DownloadLimitReached
+     * @throws TransferCancelledException
+     * @throws UnauthorizedException
      */
     @Throws(
         CancellationException::class,
@@ -434,8 +450,21 @@ class TransferManager internal constructor(
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
+        ApiV2ErrorException::class,
+        DownloadLimitReached::class,
+        TransferCancelledException::class,
+        UnauthorizedException::class,
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
+        if (isV2Url(url)) {
+            val linkUUID = extractLinkUUIDFromURL(url)
+            if (linkUUID != null) {
+                val transferApi = transferV2Repository.getTransferByUrl(url, password)
+                addTransferV2(linkUUID, transferApi, password)
+                return@withContext transferApi.id
+            }
+        }
+
         val transferApi = transferRepository.getTransferByUrl(url, password).data ?: return@withContext null
         transferApi.validateDownloadCounterCreditOrThrow()
         val transfer = transferController.getTransfer(transferApi.linkUUID)
@@ -443,6 +472,34 @@ class TransferManager internal constructor(
             addTransfer(transferApi, TransferDirection.RECEIVED, password)
         }
         return@withContext transferApi.linkUUID
+    }
+
+    private fun extractLinkUUIDFromURL(url: String): String? {
+        val maybeLinkUUID = url.substringAfterLast('/')
+        return maybeLinkUUID.takeIf { it.isNotEmpty() }
+    }
+
+    private suspend fun addTransferV2(linkId: String, transferApi: TransferApiV2, password: String?) {
+        val userId = currentUserId ?: STUser.GuestUser.id
+        val transferDB = TransferDB(
+            transfer = transferApi,
+            linkId = linkId,
+            userOwnerId = userId,
+            direction = TransferDirection.RECEIVED,
+            password = password,
+        )
+
+        val filesToInsert = FileUtilsForApiV2.getFileDbTree(
+            transferId = transferApi.id,
+            files = transferApi.files
+        )
+
+        appDatabase.useWriterConnection {
+            it.immediateTransaction {
+                transferDao.upsertTransfer(transferDB)
+                filesToInsert.forEach { file -> transferDao.upsertFile(file) }
+            }
+        }
     }
 
     private fun TransferApi.validateDownloadCounterCreditOrThrow() {

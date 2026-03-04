@@ -52,7 +52,8 @@ data class TransferDB(
         transfer: Transfer,
         direction: TransferDirection,
         linkId: String?,
-        userOwnerId: Long
+        userOwnerId: Long,
+        password: String? = transfer.password,
     ) : this(
         id = transfer.id,
         senderEmail = transfer.senderEmail,
@@ -61,7 +62,7 @@ data class TransferDB(
         createdAt = transfer.createdAt,
         expiresAt = transfer.expiresAt,
         totalSize = transfer.totalSize,
-        password = transfer.password,
+        password = password,
         transferDirection = direction,
         transferStatus = transfer.transferStatus,
         recipientsEmails = transfer.recipientsEmails,
