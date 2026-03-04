@@ -58,9 +58,6 @@ class AppSettingsManager internal constructor(
     /**
      * A [Flow] that emits the current [AppSettings] object whenever it changes.
      */
-    /**
-     * A [Flow] that emits the current [AppSettings] object whenever it changes.
-     */
     val appSettings: Flow<AppSettings?> = dao.getAppSettings().transformLatest { appSettings ->
         if (appSettings != null) emit(appSettings)
         else Migrator.migrateOrCreateAppSettings(appSettingsController, dao, realmProvider, emailLanguageUtils)
