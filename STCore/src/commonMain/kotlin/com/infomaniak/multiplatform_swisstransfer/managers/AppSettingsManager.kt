@@ -53,7 +53,7 @@ class AppSettingsManager internal constructor(
     private val emailLanguageUtils: EmailLanguageUtils,
 ) {
 
-    private val dao get() = appDatabase.getAppSettingsDao()
+    private val dao: AppSettingsDao get() = appDatabase.getAppSettingsDao()
 
     /**
      * A [Flow] that emits the current [AppSettings] object whenever it changes.
