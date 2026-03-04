@@ -37,6 +37,12 @@ interface AppSettingsDao {
     @Upsert
     suspend fun put(appSettingsDB: AppSettingsDB)
 
+    @Query("SELECT idOfAccountWithGuestData FROM AppSettingsDB LIMIT 1")
+    suspend fun idOfAccountWithGuestData(): Long?
+
+    @Query("UPDATE AppSettingsDB SET idOfAccountWithGuestData = :idOfAccountWithGuestData")
+    suspend fun updateIdOfAccountWithGuestData(idOfAccountWithGuestData: Long?)
+
     @Query("UPDATE AppSettingsDB SET theme = :theme")
     suspend fun updateTheme(theme: Theme)
 

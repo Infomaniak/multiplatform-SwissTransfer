@@ -70,6 +70,8 @@ class AppSettingsDB() : RealmObject, AppSettings {
 
     override var lastAuthorEmail: String? = null
 
+    override val idOfAccountWithGuestData: Long? get() = null // Not needed for the legacy version.
+
     companion object {
         val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY
         val DEFAULT_DOWNLOAD_LIMIT = DownloadLimit.TWO_HUNDRED_FIFTY

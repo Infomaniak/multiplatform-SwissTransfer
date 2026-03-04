@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
@@ -23,6 +25,15 @@ import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -39,14 +50,34 @@ class AccountManager internal constructor(
     private val appDatabase: AppDatabase,
     private val uploadController: UploadController,
     private val transferController: TransferController,
+    private val appSettingsManager: AppSettingsManager,
     private val realmProvider: RealmProvider,
 ) {
 
     private val userSwitchMutex = Mutex()
 
+    private val _currentUserFlow = MutableStateFlow<STUser?>(value = null)
+    val currentUserFlow: StateFlow<STUser?> = _currentUserFlow.asStateFlow()
+
     // We cache the current user to avoid creating database instances when it's the same user
-    var currentUser: STUser? = null
+    var currentUser: STUser? by _currentUserFlow::value
         private set
+
+    val showGuestData: Flow<Boolean> = currentUserFlow.transformLatest { currentUser ->
+        when (currentUser) {
+            STUser.GuestUser -> emit(true)
+            is STUser.AuthUser -> emitAll(appSettingsManager.appSettings.map { appSettings ->
+                appSettings?.idOfAccountWithGuestData == currentUser.id
+            })
+            null -> emit(false)
+        }
+    }.distinctUntilChanged()
+
+    fun shouldShowGuestData(targetUser: STUser.AuthUser): Flow<Boolean> {
+        return appSettingsManager.appSettings.map { appSettings ->
+            appSettings?.idOfAccountWithGuestData == targetUser.id
+        }
+    }
 
     val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
 
@@ -56,6 +87,10 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
         userSwitchMutex.withLock {
+            val authenticatedUser = (currentUser as? STUser.AuthUser)
+            if (authenticatedUser != null) {
+                appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = authenticatedUser.id)
+            }
             if (currentUser?.id != user.id) loadDatabase(user)
             currentUser = user
         }
@@ -77,6 +112,9 @@ class AccountManager internal constructor(
         }
         userSwitchMutex.withLock {
             currentUser = newSTUser
+            if (newSTUser !is STUser.AuthUser) {
+                appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = null)
+            }
         }
     }
 
