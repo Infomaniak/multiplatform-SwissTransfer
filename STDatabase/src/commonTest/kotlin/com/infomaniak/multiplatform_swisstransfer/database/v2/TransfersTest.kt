@@ -64,6 +64,7 @@ class TransfersTest : RobolectricTestsBase() {
     fun getTransfersExcludesPendingUploads() = runTest {
         // Insert a completed transfer
         insertTransfer(DummyTransferForV2.transfer1, TransferDirection.SENT, null)
+
         // Insert a pending upload
         val uploadTransfer = TransferDB(
             transfer = DummyTransferForV2.transfer2,
@@ -289,10 +290,29 @@ class TransfersTest : RobolectricTestsBase() {
         appDatabase.getTransferDao().upsertFile(folderFile1)
         appDatabase.getTransferDao().upsertFile(folderFile2)
 
-        // Test getTransferRootFiles
+        // Test getTransferRootFiles (single transfer)
         val rootFiles = appDatabase.getTransferDao().getTransferRootFiles(transfer.id)
         assertEquals(1, rootFiles.count())
         assertEquals(rootFile.id, rootFiles.first().id)
+
+        // Test getTransferRootFiles with list of transferIds returns Map grouped by transferId
+        val transfer2 = DummyTransferForV2.transfer2
+        insertTransfer(transfer2, TransferDirection.SENT, null)
+
+        val rootFile2 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "root2.txt", mimeType = "text/plain"),
+            transferId = transfer2.id,
+            folderId = null,
+        )
+        appDatabase.getTransferDao().upsertFile(rootFile2)
+
+        val filesByTransfer = appDatabase.getTransferDao().getTransferRootFiles(listOf(transfer.id, transfer2.id))
+
+        assertEquals(2, filesByTransfer.size, "Map should contain entries for both transfers")
+        assertEquals(1, filesByTransfer[transfer.id]?.size, "First transfer should have 1 root file")
+        assertEquals(1, filesByTransfer[transfer2.id]?.size, "Second transfer should have 1 root file")
+        assertEquals(rootFile.id, filesByTransfer[transfer.id]?.first()?.id)
+        assertEquals(rootFile2.id, filesByTransfer[transfer2.id]?.first()?.id)
 
         // Test getTransferFolderFiles
         val folderFiles = appDatabase.getTransferDao().transferFolderFilesFlow(transfer.id, "folder1").first()
