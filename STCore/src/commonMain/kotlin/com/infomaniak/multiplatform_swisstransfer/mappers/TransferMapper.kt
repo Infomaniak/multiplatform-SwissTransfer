@@ -23,9 +23,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferU
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 
@@ -66,13 +64,11 @@ internal fun FileDB.toFileUi(): FileUi = FileUi(
 )
 
 internal suspend fun List<TransferDB>.toTransferUiList(transferDao: TransferDao): List<TransferUi> {
-    val filesByTransfer = coroutineScope {
-        buildMap {
-            this@toTransferUiList.chunked(1000)
-                .map { async { transferDao.getTransferRootFiles(it.map { transfer -> transfer.id }) } }
-                .awaitAll()
-                .forEach { putAll(it) }
-        }
+    val filesByTransfer: Map<String, List<FileDB>> = buildMap {
+        this@toTransferUiList.chunked(1000).map { transfers ->
+            val transferIds = transfers.map { transfer -> transfer.id }
+            transferDao.getTransferRootFiles(transferIds)
+        }.forEach { putAll(it) }
     }
     return this.map {
         it.toTransferUi(
@@ -82,7 +78,7 @@ internal suspend fun List<TransferDB>.toTransferUiList(transferDao: TransferDao)
     }
 }
 
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 internal fun Flow<List<TransferDB>>.toTransferUiListFlow(transferDao: TransferDao): Flow<List<TransferUi>> {
     return this.mapLatest { it.toTransferUiList(transferDao) }
 }
