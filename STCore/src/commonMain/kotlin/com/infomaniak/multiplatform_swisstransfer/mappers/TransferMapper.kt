@@ -23,12 +23,18 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferU
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 
-internal suspend fun TransferDB.toTransferUi(transferDao: TransferDao): TransferUi {
+internal suspend fun TransferDB.toTransferUi(
+    transferDao: TransferDao,
+    files: List<FileDB> = emptyList(),
+): TransferUi {
     // Fetch files for this transfer
-    val files = transferDao.getTransferRootFiles(this.id)
+    val files = files.ifEmpty { transferDao.getTransferRootFiles(this.id) }
 
     return TransferUi(
         uuid = this.id,
@@ -60,7 +66,20 @@ internal fun FileDB.toFileUi(): FileUi = FileUi(
 )
 
 internal suspend fun List<TransferDB>.toTransferUiList(transferDao: TransferDao): List<TransferUi> {
-    return this.map { it.toTransferUi(transferDao) }
+    val filesByTransfer = coroutineScope {
+        buildMap {
+            this@toTransferUiList.chunked(1000)
+                .map { async { transferDao.getTransferRootFiles(it.map { transfer -> transfer.id }) } }
+                .awaitAll()
+                .forEach { putAll(it) }
+        }
+    }
+    return this.map {
+        it.toTransferUi(
+            transferDao = transferDao,
+            files = filesByTransfer[it.id] ?: emptyList()
+        )
+    }
 }
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
