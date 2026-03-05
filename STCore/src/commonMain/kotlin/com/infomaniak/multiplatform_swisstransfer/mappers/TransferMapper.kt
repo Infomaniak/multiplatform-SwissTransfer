@@ -64,6 +64,9 @@ internal fun FileDB.toFileUi(): FileUi = FileUi(
 )
 
 internal suspend fun List<TransferDB>.toTransferUiList(transferDao: TransferDao): List<TransferUi> {
+    // To avoid overloading the DB with a huge amount of small queries, we are:
+    // 1. Prefetching the files from all the transfers in one query (per 100 transfers).
+    // 2. Using this map to get the files when mapping each TransferDB to TransferUi.
     val filesByTransfer: Map<String, List<FileDB>> = buildMap {
         this@toTransferUiList.chunked(100).map { transfers ->
             val transferIds = transfers.map { transfer -> transfer.id }
