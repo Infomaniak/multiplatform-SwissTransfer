@@ -114,7 +114,7 @@ class SwissTransferInjection(
     val fileManager by lazy { FileManager(accountManager, appDatabase, fileController) }
 
     /** A manager used to orchestrate AppSettings operations. */
-    val appSettingsManager by lazy { AppSettingsManager(appDatabase, appSettingsController, realmProvider, emailLanguageUtils) }
+    val appSettingsManager by lazy { AppSettingsManager(appDatabase, appSettingsController, emailLanguageUtils) }
 
     /** A manager used to orchestrate uploads' tokens operations (email token or attestation token). */
     val uploadTokensManager by lazy { UploadTokensManager(uploadTokensController) }

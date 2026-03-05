@@ -28,7 +28,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferType
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
-import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
@@ -49,7 +48,6 @@ import kotlin.coroutines.cancellation.CancellationException
 class AppSettingsManager internal constructor(
     private val appDatabase: AppDatabase,
     private val appSettingsController: AppSettingsController,
-    private val realmProvider: RealmProvider,
     private val emailLanguageUtils: EmailLanguageUtils,
 ) {
 
@@ -60,7 +58,7 @@ class AppSettingsManager internal constructor(
      */
     val appSettings: Flow<AppSettings?> = dao.getAppSettings().transformLatest { appSettings ->
         if (appSettings != null) emit(appSettings)
-        else Migrator.migrateOrCreateAppSettings(appSettingsController, dao, realmProvider, emailLanguageUtils)
+        else Migrator.migrateOrCreateAppSettings(appSettingsController, dao, emailLanguageUtils)
     }
 
     suspend fun getAppSettings(): AppSettings? = appSettings.first()
@@ -163,22 +161,17 @@ class AppSettingsManager internal constructor(
         suspend fun migrateOrCreateAppSettings(
             appSettingsController: AppSettingsController,
             dao: AppSettingsDao,
-            realmProvider: RealmProvider,
             emailLanguageUtils: EmailLanguageUtils
         ) {
             mutex.withLock {
                 //TODO[Nit]: Is not an actual migration (it's only one of the 2 cases). Also, could be a DB transaction.
                 val hasMigrated = dao.getAppSettings().first() != null
                 if (hasMigrated) return
-                try {
-                    val oldAppSettings = appSettingsController.getAppSettings()?.toNewAppSettingsDB()
-                    val settings = oldAppSettings
-                        ?: AppSettingsDB(emailLanguage = emailLanguageUtils.getEmailLanguageFromLocale())
-                    dao.put(settings)
-                    appSettingsController.removeData()
-                } finally {
-                    realmProvider.closeAppSettingsDb()
-                }
+                val oldAppSettings = appSettingsController.getAppSettings()?.toNewAppSettingsDB()
+                val settings = oldAppSettings
+                    ?: AppSettingsDB(emailLanguage = emailLanguageUtils.getEmailLanguageFromLocale())
+                dao.put(settings)
+                appSettingsController.removeOnlyAppSettingsTableData()
             }
         }
 
