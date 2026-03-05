@@ -19,7 +19,8 @@
 
 package com.infomaniak.multiplatform_swisstransfer.managers
 
-import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
@@ -32,14 +33,12 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettin
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -54,11 +53,8 @@ class AppSettingsManager internal constructor(
     private val emailLanguageUtils: EmailLanguageUtils,
 ) {
 
-    private val dao get() = appDatabase.getAppSettingsDao()
+    private val dao: AppSettingsDao get() = appDatabase.getAppSettingsDao()
 
-    /**
-     * A [Flow] that emits the current [AppSettings] object whenever it changes.
-     */
     /**
      * A [Flow] that emits the current [AppSettings] object whenever it changes.
      */
@@ -141,6 +137,26 @@ class AppSettingsManager internal constructor(
         dao.updateLastAuthorEmail(authorEmail)
     }
 
+    /**
+     * Sets which account will be able to see guest data too.
+     * It's designed to be the first logged-in account.
+     *
+     * This link can be removed when no accounts
+     */
+    internal suspend fun updateLinkGuestToAccountIfNeeded(accountId: Long?) {
+        appDatabase.useWriterConnection {
+            it.immediateTransaction {
+                val currentlyLinkedAccountId = dao.idOfAccountWithGuestData()
+                if (currentlyLinkedAccountId == accountId) return@immediateTransaction // Nothing to do.
+                val notLinkedYet = currentlyLinkedAccountId == null
+                val linkRemoval = accountId == null
+                if (notLinkedYet || linkRemoval) { // Don't break existing link.
+                    dao.updateIdOfAccountWithGuestData(accountId)
+                }
+            }
+        }
+    }
+
     private object Migrator {
         private val mutex = Mutex()
 
@@ -151,6 +167,7 @@ class AppSettingsManager internal constructor(
             emailLanguageUtils: EmailLanguageUtils
         ) {
             mutex.withLock {
+                //TODO[Nit]: Is not an actual migration (it's only one of the 2 cases). Also, could be a DB transaction.
                 val hasMigrated = dao.getAppSettings().first() != null
                 if (hasMigrated) return
                 try {

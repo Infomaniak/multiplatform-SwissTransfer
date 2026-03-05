@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
@@ -23,8 +25,11 @@ import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUiList
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transformLatest
 
 class FileManager(
     private val accountManager: AccountManager,
@@ -38,10 +43,20 @@ class FileManager(
      * @param folderUuid The UUID of the folder within the transfer.
      * @return A flow of lists of [FileUi] objects representing the files in the transfer.
      */
-    fun getFilesFromTransfer(folderUuid: String): Flow<List<FileUi>> {
-        if (accountManager.currentUser is STUser.AuthUser) {
-            return appDatabase.getTransferDao().filesByFolderIdFlow(folderId = folderUuid).map { it.toFileUiList() }
+    fun getFilesFromTransfer(
+        folderUuid: String
+    ): Flow<List<FileUi>> = accountManager.currentUserFlow.transformLatest { currentUser ->
+        when (currentUser) {
+            is STUser.AuthUser -> {
+                emitAll(appDatabase.getTransferDao().filesByFolderIdFlow(folderId = folderUuid).map { it.toFileUiList() })
+            }
+            else -> emit(emptyList())
         }
-        return fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } }
+    }.transformLatest { files ->
+        if (files.isEmpty()) {
+            emitAll(fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } })
+        } else {
+            emit(files)
+        }
     }
 }

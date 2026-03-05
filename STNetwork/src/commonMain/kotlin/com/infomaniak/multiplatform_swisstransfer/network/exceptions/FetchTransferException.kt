@@ -152,6 +152,8 @@ sealed class FetchTransferException(
             "transfer_cancelled" -> TransferCancelledException(requestContextId)
             "transfer_expired" -> ExpiredDateFetchTransferException(requestContextId)
             "download_limit_reached" -> DownloadLimitReached(requestContextId)
+            "transfer_scan_virus_pending" -> VirusCheckFetchTransferException(requestContextId)
+            "transfer_virus_detected" -> VirusDetectedFetchTransferException(requestContextId)
             else -> this
         }
     }

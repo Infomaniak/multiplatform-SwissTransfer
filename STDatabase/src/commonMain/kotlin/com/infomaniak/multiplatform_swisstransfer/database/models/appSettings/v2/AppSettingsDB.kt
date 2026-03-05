@@ -36,7 +36,7 @@ data class AppSettingsDB(
     override val emailLanguage: EmailLanguage = EmailLanguage.ENGLISH,
     override val lastTransferType: TransferType = TransferType.LINK,
     override val lastAuthorEmail: String? = null,
-    //TODO[ST-v2]: id of account with guest data
+    override val idOfAccountWithGuestData: Long? = null,
 ) : AppSettings {
 
     constructor() : this(theme = Theme.SYSTEM)

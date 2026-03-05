@@ -28,6 +28,8 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransf
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.NotFoundFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.PasswordNeededFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.TransferCancelledException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.VirusCheckFetchTransferException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.VirusDetectedFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.WrongPasswordFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
@@ -72,6 +74,8 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         TransferCancelledException::class,
         ExpiredDateFetchTransferException::class,
         DownloadLimitReached::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
     )
     suspend fun getTransferByLinkUUID(
         linkUUID: String,
@@ -93,6 +97,8 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         TransferCancelledException::class,
         ExpiredDateFetchTransferException::class,
         DownloadLimitReached::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
     )
     suspend fun getTransferByUrl(url: String, password: String?): TransferApi {
         return getTransferByLinkUUID(extractUUID(url), password)

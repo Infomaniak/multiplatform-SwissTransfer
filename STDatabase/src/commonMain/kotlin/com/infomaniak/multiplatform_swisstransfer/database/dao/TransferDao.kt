@@ -113,8 +113,14 @@ interface TransferDao {
     )
     suspend fun markPendingTransferAsReady(userId: Long, transferId: String, linkId: String)
 
+    @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND transferStatus NOT IN ('READY', 'PENDING_UPLOAD')")
+    suspend fun getUploadedButNotReadyTransfers(userId: Long): List<TransferDB>
+
     @Upsert
     suspend fun upsertTransfer(transferDB: TransferDB)
+
+    @Query("UPDATE TransferDB SET transferStatus=:transferStatus WHERE id=:transferId")
+    suspend fun updateStatus(transferId: String, transferStatus: TransferStatus)
 
     @Upsert
     suspend fun upsertFile(fileDB: FileDB)
