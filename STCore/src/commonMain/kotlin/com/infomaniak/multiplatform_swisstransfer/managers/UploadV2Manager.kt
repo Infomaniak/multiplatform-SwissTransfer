@@ -358,7 +358,6 @@ class UploadV2Manager(
         CancellationException::class,
     )
     suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
-        val userId = requireCurrentUserId()
         return uploadRepository.finalizeTransferAndGetLinkUuid(transferId).also {
             transferDao.markPendingTransferAsReady(transferId = transferId, linkId = it)
         }
