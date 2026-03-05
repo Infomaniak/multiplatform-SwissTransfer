@@ -28,7 +28,6 @@ import io.ktor.client.request.delete
 import io.ktor.http.HeadersBuilder
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 internal class TransferRequest(
     environment: ApiEnvironment,
