@@ -17,6 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable // Only used for short-term storage, for iOS.
 enum class EmailLanguage(val value: String, val code: String) {
     ENGLISH("english", "en_GB"),
     FRENCH("french", "fr_FR"),

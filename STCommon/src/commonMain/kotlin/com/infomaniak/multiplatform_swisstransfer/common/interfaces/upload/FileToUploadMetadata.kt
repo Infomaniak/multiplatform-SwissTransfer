@@ -17,8 +17,12 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
 
+import kotlinx.serialization.Serializable
+
+@Serializable // Only used for short-term storage, for iOS.
 data class FileToUploadMetadata(
     val name: String,
     val size: Long,
     val mimeType: String,
+    val localPath: String = "", // Only used on iOS
 )

@@ -17,6 +17,9 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable // Only used for short-term storage, for iOS.
 enum class DownloadLimit(val value: Int) {
     TWO_HUNDRED_FIFTY(250),
     ONE_HUNDRED(100),
