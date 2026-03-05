@@ -92,8 +92,8 @@ interface TransferDao {
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId IS NULL")
     suspend fun getTransferRootFiles(transferId: String): List<FileDB>
 
-    @Query("SELECT * FROM FileDB WHERE transferId IN (:transferId) AND parentId IS NULL")
-    suspend fun getTransferRootFiles(transferId: List<String>): Map<@MapColumn(columnName = "transferId") String, List<FileDB>>
+    @Query("SELECT * FROM FileDB WHERE transferId IN (:transferIds) AND parentId IS NULL")
+    suspend fun getTransferRootFiles(transferIds: List<String>): Map<@MapColumn(columnName = "transferId") String, List<FileDB>>
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId=:folderId")
     fun transferFolderFilesFlow(transferId: String, folderId: String?): Flow<List<FileDB>>
