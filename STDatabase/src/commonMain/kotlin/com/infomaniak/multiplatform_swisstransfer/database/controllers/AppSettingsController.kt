@@ -40,4 +40,9 @@ class AppSettingsController(private val realmProvider: RealmProvider) {
     suspend fun removeData() = runThrowingRealm {
         realm.write { deleteAll() }
     }
+
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun removeOnlyAppSettingsTableData() {
+        realm.write { delete(AppSettingsDB::class) }
+    }
 }
