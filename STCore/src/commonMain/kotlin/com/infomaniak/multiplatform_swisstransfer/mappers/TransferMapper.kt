@@ -65,7 +65,7 @@ internal fun FileDB.toFileUi(): FileUi = FileUi(
 
 internal suspend fun List<TransferDB>.toTransferUiList(transferDao: TransferDao): List<TransferUi> {
     val filesByTransfer: Map<String, List<FileDB>> = buildMap {
-        this@toTransferUiList.chunked(1000).map { transfers ->
+        this@toTransferUiList.chunked(100).map { transfers ->
             val transferIds = transfers.map { transfer -> transfer.id }
             transferDao.getTransferRootFiles(transferIds)
         }.forEach { putAll(it) }
