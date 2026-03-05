@@ -119,7 +119,7 @@ class UploadV2Manager(
         )
         uploadRepository.createTransfer(transferCreationPayload).also { apiTransfer ->
             val transferToPersist = TransferDB(
-                transfer = apiTransfer.copy(),
+                transfer = apiTransfer,
                 linkId = null,
                 direction = TransferDirection.SENT,
                 userOwnerId = userId,
