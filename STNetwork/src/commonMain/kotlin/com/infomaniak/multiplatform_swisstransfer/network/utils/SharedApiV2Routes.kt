@@ -21,7 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 
 object SharedApiV2Routes {
 
-    fun shareTransfer(environment: ApiEnvironment, linkUUID: String): String = "${environment.baseUrlV2}/d/$linkUUID"
+    fun shareTransfer(environment: ApiEnvironment, linkUUID: String): String = "${environment.baseUrlV2}/dl/$linkUUID"
 
     fun downloadFile(environment: ApiEnvironment, linkId: String, fileId: String): String {
         return "${ApiRoutes.apiBaseUrlV2(environment)}${ApiRoutes.presignedDownloadUrl(linkId, fileId)}?redirect=true"

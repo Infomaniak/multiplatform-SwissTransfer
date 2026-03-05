@@ -23,6 +23,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
@@ -118,10 +119,11 @@ class UploadV2Manager(
         )
         uploadRepository.createTransfer(transferCreationPayload).also { apiTransfer ->
             val transferToPersist = TransferDB(
-                transfer = apiTransfer.copy(),
+                transfer = apiTransfer,
                 linkId = null,
                 direction = TransferDirection.SENT,
                 userOwnerId = userId,
+                status = TransferStatus.PENDING_UPLOAD,
             )
             val filesToInsert = FileUtilsForApiV2.getFileDbTree(
                 transferId = apiTransfer.id,
@@ -358,7 +360,7 @@ class UploadV2Manager(
     suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
         val userId = requireCurrentUserId()
         return uploadRepository.finalizeTransferAndGetLinkUuid(transferId).also {
-            transferDao.markPendingTransferAsReady(userId = userId, transferId = transferId, linkId = it)
+            transferDao.markPendingTransferAsReady(transferId = transferId, linkId = it)
         }
     }
 }
