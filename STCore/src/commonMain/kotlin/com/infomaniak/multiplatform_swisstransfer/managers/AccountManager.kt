@@ -122,6 +122,6 @@ class AccountManager internal constructor(
     }
 
     private suspend fun loadDatabase(user: STUser) {
-        if (user is STUser.GuestUser) realmProvider.openTransfersDb(user.id)
+        realmProvider.openTransfersDb(user.id)
     }
 }
