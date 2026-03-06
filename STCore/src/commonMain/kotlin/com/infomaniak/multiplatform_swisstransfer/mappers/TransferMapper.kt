@@ -48,7 +48,7 @@ internal suspend fun TransferDB.toTransferUi(
         files = files.map { it.toFileUi() },
         direction = this.transferDirection,
         transferStatus = this.transferStatus,
-        apiSource = ApiSource.V2
+        apiSource = ApiSource.V2,
     )
 }
 
@@ -76,7 +76,7 @@ internal suspend fun List<TransferDB>.toTransferUiList(transferDao: TransferDao)
     return this.map {
         it.toTransferUi(
             transferDao = transferDao,
-            files = filesByTransfer[it.id] ?: emptyList()
+            files = filesByTransfer[it.id] ?: emptyList(),
         )
     }
 }
