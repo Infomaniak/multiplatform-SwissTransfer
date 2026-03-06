@@ -17,7 +17,10 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.models
 
-enum class ValidityPeriod(val value: Int) {
+import kotlinx.serialization.Serializable
+
+@Serializable // Only used for short-term storage, for iOS.
+enum class ValidityPeriod(val days: Int) {
     THIRTY(30),
     FIFTEEN(15),
     SEVEN(7),

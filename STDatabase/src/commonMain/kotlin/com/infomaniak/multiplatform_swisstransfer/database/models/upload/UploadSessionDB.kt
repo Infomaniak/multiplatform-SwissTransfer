@@ -33,7 +33,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 class UploadSessionDB() : UploadSession, RealmObject {
     @PrimaryKey
     override var uuid: String = RealmUUID.random().toString()
-    private var _duration: Int = AppSettingsDB.DEFAULT_VALIDITY_PERIOD.value
+    private var _duration: Int = AppSettingsDB.DEFAULT_VALIDITY_PERIOD.days
     override var authorEmail: String = ""
     override var authorEmailToken: String? = null
     override var password: String = ""
@@ -47,7 +47,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
     override var remoteContainer: UploadContainerDB? = null
     override var remoteUploadHost: String? = null
 
-    override val duration: ValidityPeriod get() = ValidityPeriod.entries.first { it.value == _duration }
+    override val duration: ValidityPeriod get() = ValidityPeriod.entries.first { it.days == _duration }
     override val numberOfDownload: DownloadLimit get() = DownloadLimit.entries.first { it.value == _numberOfDownload }
     override var language: EmailLanguage
         get() = EmailLanguage.entries.first { it.code == _language }
@@ -57,7 +57,7 @@ class UploadSessionDB() : UploadSession, RealmObject {
 
     constructor(uploadSession: UploadSession) : this() {
         if (uploadSession.uuid.isNotEmpty()) this.uuid = uploadSession.uuid
-        this._duration = uploadSession.duration.value
+        this._duration = uploadSession.duration.days
         this.authorEmail = uploadSession.authorEmail
         this.authorEmailToken = uploadSession.authorEmailToken
         this.password = uploadSession.password

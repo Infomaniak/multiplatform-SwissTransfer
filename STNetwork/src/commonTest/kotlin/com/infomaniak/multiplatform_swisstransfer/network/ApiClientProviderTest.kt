@@ -18,6 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer.network
 
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiError
 import com.infomaniak.multiplatform_swisstransfer.network.utils.CONTENT_REQUEST_ID_HEADER
 import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
@@ -31,10 +32,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.headersOf
+import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.expect
 
 class ApiClientProviderTest {
@@ -73,6 +76,42 @@ class ApiClientProviderTest {
         }
     }
 
+    @Test
+    fun unresolvedAddressExceptionConvertedToNetworkException() {
+        val apiClientProvider = ApiClientProvider(
+            createFailingEngine(UnresolvedAddressException()),
+            userAgent = TEST_USER_AGENT
+        )
+
+        val result = runCatching {
+            runBlocking {
+                post<Any>(apiClientProvider = apiClientProvider, url = Url("http://invalid-hostname.com"), data = null)
+            }
+        }
+
+        val exception = result.exceptionOrNull()
+        assertEquals(NetworkException::class, exception!!::class)
+        assertEquals(UnresolvedAddressException::class, exception.cause!!::class)
+    }
+
+    @Test
+    fun ioExceptionConvertedToNetworkException() {
+        val apiClientProvider = ApiClientProvider(
+            createFailingEngine(IOException("Connection refused")),
+            userAgent = TEST_USER_AGENT
+        )
+
+        val result = runCatching {
+            runBlocking {
+                post<Any>(apiClientProvider = apiClientProvider, url = Url("http://localhost:8080"), data = null)
+            }
+        }
+
+        val exception = result.exceptionOrNull()
+        assertEquals(NetworkException::class, exception!!::class)
+        assertEquals(IOException::class, exception.cause!!::class)
+    }
+
     private suspend inline fun <reified R> post(apiClientProvider: ApiClientProvider, url: Url, data: Any?): R {
         return apiClientProvider.httpClient.post(url) {
             contentType(ContentType.Application.Json)
@@ -89,6 +128,10 @@ class ApiClientProviderTest {
                 CONTENT_REQUEST_ID_HEADER to listOf(TEST_CONTENT_REQUEST_ID),
             ),
         )
+    }
+
+    private fun createFailingEngine(throwable: Throwable) = MockEngine { _ ->
+        throw throwable
     }
 
     companion object {

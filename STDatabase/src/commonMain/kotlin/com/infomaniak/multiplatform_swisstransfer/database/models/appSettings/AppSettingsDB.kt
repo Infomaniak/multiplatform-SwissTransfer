@@ -39,11 +39,11 @@ class AppSettingsDB() : RealmObject, AppSettings {
             _theme = value.value
         }
 
-    private var _validityPeriod: Int = ValidityPeriod.THIRTY.value
+    private var _validityPeriod: Int = ValidityPeriod.THIRTY.days
     override var validityPeriod: ValidityPeriod
-        get() = ValidityPeriod.entries.find { it.value == _validityPeriod } ?: DEFAULT_VALIDITY_PERIOD
+        get() = ValidityPeriod.entries.find { it.days == _validityPeriod } ?: DEFAULT_VALIDITY_PERIOD
         set(value) {
-            _validityPeriod = value.value
+            _validityPeriod = value.days
         }
 
     private var _downloadLimit: Int = DownloadLimit.TWO_HUNDRED_FIFTY.value
@@ -69,6 +69,8 @@ class AppSettingsDB() : RealmObject, AppSettings {
         }
 
     override var lastAuthorEmail: String? = null
+
+    override val idOfAccountWithGuestData: Long? get() = null // Not needed for the legacy version.
 
     companion object {
         val DEFAULT_VALIDITY_PERIOD = ValidityPeriod.THIRTY

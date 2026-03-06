@@ -62,7 +62,7 @@ sealed class DeepLinkType {
     }
 
     companion object {
-        private const val URL_WITH_UUID_BASE_REGEX = "^https://.+/d/(?<uuid>[^?]+)"
+        private const val URL_WITH_UUID_BASE_REGEX = "^https://.+/d(?:l)?/(?<uuid>[^?]+)"
 
         fun fromURL(url: String): DeepLinkType? {
             return DeleteTransfer.fromURL(url)

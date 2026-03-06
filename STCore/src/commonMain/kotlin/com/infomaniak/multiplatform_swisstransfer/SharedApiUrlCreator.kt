@@ -19,12 +19,16 @@ package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.*
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
+import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiV2Routes
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -32,6 +36,7 @@ import kotlin.coroutines.cancellation.CancellationException
  */
 class SharedApiUrlCreator internal constructor(
     private val environment: ApiEnvironment,
+    private val appDatabase: AppDatabase,
     private val fileController: FileController,
     private val transferController: TransferController,
     private val uploadController: UploadController,
@@ -41,6 +46,11 @@ class SharedApiUrlCreator internal constructor(
 
     fun shareTransferUrl(transferUUID: String) = SharedApiRoutes.shareTransfer(environment, transferUUID)
 
+    /**
+     * @see com.infomaniak.multiplatform_swisstransfer.managers.UploadV2Manager.finalizeTransferAndGetLinkUuid
+     */
+    fun shareTransferV2Url(linkUUID: String) = SharedApiV2Routes.shareTransfer(environment, linkUUID)
+
     @Throws(RealmException::class, CancellationException::class)
     suspend fun downloadFilesUrl(transferUUID: String): String? {
         val transfer = transferController.getTransfer(transferUUID) ?: return null
@@ -49,15 +59,22 @@ class SharedApiUrlCreator internal constructor(
     }
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun downloadFileUrl(transferUUID: String, fileUUID: String): String? {
-        val transfer = transferController.getTransfer(transferUUID) ?: return null
-        val file = fileController.getFile(fileUUID) ?: return null
-        val token = transfer.notEmptyPassword?.let { generateToken(transfer, password = it, fileUUID) ?: return null }
-        val folderPath = file.path ?: file.fileName
-        return when {
-            file.isFolder -> SharedApiRoutes.downloadFolder(transfer.downloadHost, transfer.linkUUID, folderPath, token)
-            else -> SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUUID, fileUUID, token)
+    suspend fun downloadFileUrl(transfer: TransferUi, fileUUID: String): String? = when (transfer.apiSource) {
+        V1 -> {
+            val transfer = transferController.getTransfer(transfer.uuid) ?: return null
+            val file = fileController.getFile(fileUUID) ?: return null
+            val token = transfer.notEmptyPassword?.let { generateToken(transfer, password = it, fileUUID) ?: return null }
+            val folderPath = file.path ?: file.fileName
+            when {
+                file.isFolder -> SharedApiRoutes.downloadFolder(transfer.downloadHost, transfer.linkUUID, folderPath, token)
+                else -> SharedApiRoutes.downloadFile(transfer.downloadHost, transfer.linkUUID, fileUUID, token)
+            }
         }
+        V2 -> SharedApiV2Routes.downloadFile(
+            environment = environment,
+            linkId = transfer.linkId!!, // Should never be null for non pending upload v2 transfers
+            fileId = fileUUID
+        )
     }
 
     @Throws(RealmException::class)

@@ -15,36 +15,58 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.infomaniak.multiplatform_swisstransfer.managers
 
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.*
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
+import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
+import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
+import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiList
+import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiListFlow
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.DownloadLimitReached
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.ExpiredDateFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.NotFoundFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.PasswordNeededFetchTransferException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.TransferCancelledException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.VirusCheckFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.VirusDetectedFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.WrongPasswordFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -54,6 +76,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.DownloadManagerRef as DownloadManagerRefV2
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi as TransferApiV2
 
 /**
  * TransferManager is responsible for orchestrating data transfer operations
@@ -67,12 +91,23 @@ import kotlin.time.TimeSource
  * @property transferRepository The provider for transfer data from api.
  */
 class TransferManager internal constructor(
+    private val accountManager: AccountManager,
+    private val appDatabase: AppDatabase,
     private val transferController: TransferController,
     private val transferRepository: TransferRepository,
+    private val transferV2Repository: TransferV2Repository,
 ) {
 
+    private val v2UrlRegex = "^https://.+/dl/[^?]+"
     private val minDurationBetweenAutoUpdates = 15.minutes
     private var lastUpdateDate: TimeMark = TimeSource.Monotonic.markNow() - (minDurationBetweenAutoUpdates + 1.seconds)
+
+    private val currentUserId: Long?
+        get() = (accountManager.currentUser as? STUser.AuthUser)?.id
+
+    private val transferDao get() = appDatabase.getTransferDao()
+
+    fun isV2Url(url: String) = v2UrlRegex.toRegex().matches(url)
 
     /**
      * Retrieves a flow of all transfers.
@@ -83,9 +118,11 @@ class TransferManager internal constructor(
      * @return A `Flow` that emits the list of all transfers.
      */
     @Throws(RealmException::class)
-    fun getAllTransfers(): Flow<List<TransferUi>> {
-        return transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) }
-    }
+    fun getAllTransfers(): Flow<List<TransferUi>> = userDependentFlow(
+        flowForAuthUser = { userId -> transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao) },
+        flowForGuestUser = { transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) } },
+        merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
+    )
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
@@ -97,23 +134,45 @@ class TransferManager internal constructor(
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
     @Throws(RealmException::class)
-    fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> {
-        return transferController.getValidTransfersFlow(transferDirection)
-            .combine(transferController.getExpiredTransfersFlow(transferDirection)) { valid, expired ->
+    fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> = userDependentFlow(
+        flowForAuthUser = { userId ->
+            combine(
+                transferDao.validTransfersFlow(userId, transferDirection),
+                transferDao.expiredTransfersFlow(userId, transferDirection)
+            ) { valid, expired ->
+                SortedTransfers(
+                    valid.toTransferUiList(transferDao),
+                    expired.toTransferUiList(transferDao)
+                )
+            }
+        },
+        flowForGuestUser = {
+            combine(
+                transferController.getValidTransfersFlow(transferDirection),
+                transferController.getExpiredTransfersFlow(transferDirection)
+            ) { valid, expired ->
                 SortedTransfers(valid.mapToList(::TransferUi), expired.mapToList(::TransferUi))
             }
-    }
+        },
+        merge = { a, b -> a + b }
+    )
 
     @Throws(RealmException::class)
-    fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> {
-        return transferController.getTransfersCountFlow(transferDirection)
-    }
+    fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
+        flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
+        flowForGuestUser = { transferController.getTransfersCountFlow(transferDirection) },
+        merge = { a, b -> a + b }
+    )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Throws(RealmException::class)
-    fun getTransferFlow(transferUUID: String): Flow<TransferUi?> {
-        return transferController.getTransferFlow(transferUUID)
-            .map { transfer -> transfer?.let(::TransferUi) }
-    }
+    fun getTransferFlow(transferUUID: String): Flow<TransferUi?> = userDependentFlow(
+        flowForAuthUser = { userId ->
+            transferDao.transferFlow(userId, transferUUID).mapLatest { transferDB -> transferDB?.toTransferUi(transferDao) }
+        },
+        flowForGuestUser = { transferController.getTransferFlow(transferUUID).map { transfer -> transfer?.let(::TransferUi) } },
+        merge = { a, b -> a ?: b }
+    )
 
     /**
      * Fetch all transfers in database to update their status
@@ -123,6 +182,13 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun tryUpdatingAllTransfers(): Unit = withContext(Dispatchers.Default) {
+        if (!showGuestData()) {
+            //TODO[API-V2] Do it for v2 transfers too when needed.
+            // We probably don't need it yet since we don't have download count yet,
+            // and `fetchWaitingTransfers` (below) already updates v2 transfers for the virus check related statuses.
+            return@withContext
+        }
+
         val nextUpdate = lastUpdateDate + minDurationBetweenAutoUpdates
         if (nextUpdate.hasNotPassedNow()) return@withContext
 
@@ -133,7 +199,7 @@ class TransferManager internal constructor(
                 launch {
                     semaphore.withPermit {
                         runCatching {
-                            fetchTransfer(transfer)
+                            fetchV1Transfer(transfer.linkUUID)
                         }.onFailure { exception ->
                             if (exception is CancellationException) throw exception
                         }
@@ -150,9 +216,24 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
+        when (val userId = currentUserId) {
+            null -> Unit
+            else -> launch {
+                transferDao.getUploadedButNotReadyTransfers(userId).forEach { transfer ->
+                    launch {
+                        runCatching {
+                            fetchV2Transfer(transfer)
+                        }.onFailure { exception ->
+                            if (exception is CancellationException) throw exception
+                        }
+                    }
+                }
+            }
+        }
+        if (!showGuestData()) return@withContext
         transferController.getNotReadyTransfers().forEach { transfer ->
             runCatching {
-                fetchTransfer(transfer)
+                fetchV1Transfer(transfer.linkUUID)
             }.onFailure { exception ->
                 if (exception is CancellationException) throw exception
             }
@@ -163,18 +244,44 @@ class TransferManager internal constructor(
      * Designed to keep a reference to the id from Android's DownloadManager.
      */
     suspend fun writeDownloadManagerId(
-        transferUUID: String,
+        transfer: TransferUi,
         fileUid: String?,
         uniqueDownloadManagerId: Long?
     ) {
-        transferController.writeDownloadManagerId(transferUUID, fileUid, uniqueDownloadManagerId)
+        val transferId = transfer.uuid
+        when (transfer.apiSource) {
+            V1 -> {
+                transferController.writeDownloadManagerId(transferId, fileUid, uniqueDownloadManagerId)
+            }
+            V2 -> {
+                if (uniqueDownloadManagerId == null) {
+                    appDatabase.getDownloadManagerRef().delete(
+                        transferId = transferId,
+                        fileId = fileUid ?: ""
+                    )
+                } else {
+                    appDatabase.getDownloadManagerRef().update(
+                        DownloadManagerRefV2(
+                            transferId = transferId,
+                            fileId = fileUid ?: "",
+                            downloadManagerUniqueId = uniqueDownloadManagerId,
+                            userOwnerId = currentUserId ?: return
+                        )
+                    )
+                }
+            }
+        }
     }
 
     /**
      * Gives the id to retrieve a previous download assigned to Android's DownloadManager.
      */
-    fun downloadManagerIdFor(transferUUID: String, fileUid: String?): Flow<Long?> {
-        return transferController.downloadManagerIdFor(transferUUID, fileUid)
+    fun downloadManagerIdFor(transfer: TransferUi, fileUid: String?): Flow<Long?> {
+        //TODO[ST-v2]: Maybe migrate all that data from Realm, to avoid this condition.
+        return when (transfer.apiSource) {
+            V1 -> transferController.downloadManagerIdFor(transfer.uuid, fileUid)
+            V2 -> appDatabase.getDownloadManagerRef().getDownloadManagerId(transferId = transfer.uuid, fileId = fileUid ?: "")
+        }
     }
 
     /**
@@ -199,16 +306,18 @@ class TransferManager internal constructor(
         WrongPasswordFetchTransferException::class,
     )
     suspend fun fetchTransfer(transferUUID: String) {
-        val localTransfer = transferController.getTransfer(transferUUID)
-            ?: throw NotFoundException("No transfer found in DB with uuid = $transferUUID")
-
-        fetchTransfer(localTransfer)
+        when (val transfer = transferDao.getTransfer(transferId = transferUUID)) {
+            null -> fetchV1Transfer(transferUUID)
+            else -> fetchV2Transfer(transfer)
+        }
     }
 
     /**
-     * Update the local transfer with remote api
+     * Update the local transfer with remote API
      */
-    private suspend fun fetchTransfer(transfer: Transfer) {
+    private suspend fun fetchV1Transfer(transferUUID: String) {
+        val transfer = transferController.getTransfer(transferUUID)
+            ?: throw NotFoundException("No transfer found in DB with uuid = $transferUUID")
         runCatching {
             val remoteTransfer = transferRepository.getTransferByLinkUUID(transfer.linkUUID, transfer.password).data ?: return
             transferController.update(remoteTransfer)
@@ -231,8 +340,40 @@ class TransferManager internal constructor(
         }
     }
 
+    /**
+     * Update the local transfer with remote API
+     */
+    private suspend fun fetchV2Transfer(transfer: TransferDB) {
+        val transferId = transfer.id
+        runCatching {
+            val transferLinkId = transfer.linkId ?: return
+            transferV2Repository.getTransferByLinkUUID(transferLinkId, transfer.password) // Check the transfer on the backend.
+            if (transfer.transferStatus != TransferStatus.READY) {
+                transferDao.updateStatus(transferId, TransferStatus.READY)
+            }
+        }.onFailure { exception ->
+            val newStatus: TransferStatus = when (exception) {
+                is VirusCheckFetchTransferException -> TransferStatus.WAIT_VIRUS_CHECK
+                is VirusDetectedFetchTransferException -> TransferStatus.VIRUS_DETECTED
+                is ExpiredDateFetchTransferException, is NotFoundFetchTransferException -> TransferStatus.EXPIRED_DATE
+                else -> throw exception
+            }
+            transferDao.updateStatus(transferId, newStatus)
+        }
+    }
+
     suspend fun updateTransferFilesThumbnails(transferUUID: String, thumbnailRootPath: String) {
-        transferController.updateTransferFilesThumbnails(transferUUID, thumbnailRootPath)
+        when (transferDao.getTransfer(transferUUID)) {
+            null -> transferController.updateTransferFilesThumbnails(transferUUID, thumbnailRootPath)
+            else -> appDatabase.useWriterConnection {
+                it.immediateTransaction {
+                    transferDao.getTransferFiles(transferUUID).forEach { file ->
+                        val fileDB = file.copy(thumbnailPath = "$thumbnailRootPath/${file.id}")
+                        transferDao.upsertFile(fileDB)
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -243,6 +384,9 @@ class TransferManager internal constructor(
      * @return A transfer matching the specified transferUUID or null.
      */
     suspend fun getTransferByUUID(transferUUID: String): TransferUi? {
+        currentUserId?.let { userId ->
+            return transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
+        }
         return transferController.getTransfer(transferUUID)?.let(::TransferUi)
     }
 
@@ -331,6 +475,10 @@ class TransferManager internal constructor(
      * @throws NotFoundFetchTransferException If the transfer doesn't exist
      * @throws PasswordNeededFetchTransferException If the transfer is protected by a password
      * @throws WrongPasswordFetchTransferException If we entered a wrong password for a transfer
+     * @throws ApiV2ErrorException
+     * @throws DownloadLimitReached
+     * @throws TransferCancelledException
+     * @throws UnauthorizedException
      */
     @Throws(
         CancellationException::class,
@@ -346,8 +494,21 @@ class TransferManager internal constructor(
         NotFoundFetchTransferException::class,
         PasswordNeededFetchTransferException::class,
         WrongPasswordFetchTransferException::class,
+        ApiV2ErrorException::class,
+        DownloadLimitReached::class,
+        TransferCancelledException::class,
+        UnauthorizedException::class,
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
+        if (isV2Url(url)) {
+            val linkUUID = extractLinkUUIDFromURL(url)
+            if (linkUUID != null) {
+                val transferApi = transferV2Repository.getTransferByUrl(url, password)
+                addTransferV2(linkUUID, transferApi, password)
+                return@withContext transferApi.id
+            }
+        }
+
         val transferApi = transferRepository.getTransferByUrl(url, password).data ?: return@withContext null
         transferApi.validateDownloadCounterCreditOrThrow()
         val transfer = transferController.getTransfer(transferApi.linkUUID)
@@ -355,6 +516,34 @@ class TransferManager internal constructor(
             addTransfer(transferApi, TransferDirection.RECEIVED, password)
         }
         return@withContext transferApi.linkUUID
+    }
+
+    private fun extractLinkUUIDFromURL(url: String): String? {
+        val maybeLinkUUID = url.substringAfterLast('/')
+        return maybeLinkUUID.takeIf { it.isNotEmpty() }
+    }
+
+    private suspend fun addTransferV2(linkId: String, transferApi: TransferApiV2, password: String?) {
+        val userId = currentUserId ?: STUser.GuestUser.id
+        val transferDB = TransferDB(
+            transfer = transferApi,
+            linkId = linkId,
+            userOwnerId = userId,
+            direction = TransferDirection.RECEIVED,
+            password = password,
+        )
+
+        val filesToInsert = FileUtilsForApiV2.getFileDbTree(
+            transferId = transferApi.id,
+            files = transferApi.files
+        )
+
+        appDatabase.useWriterConnection {
+            it.immediateTransaction {
+                transferDao.upsertTransfer(transferDB)
+                filesToInsert.forEach { file -> transferDao.upsertFile(file) }
+            }
+        }
     }
 
     private fun TransferApi.validateDownloadCounterCreditOrThrow() {
@@ -371,7 +560,10 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteTransfer(transferUUID: String): Unit = withContext(Dispatchers.Default) {
-        transferController.deleteTransfer(transferUUID)
+        when (val transfer = transferDao.getTransfer(transferUUID)) {
+            null -> transferController.deleteTransfer(transferUUID)
+            else -> transferDao.deleteTransfer(transfer)
+        }
     }
 
     /**
@@ -408,7 +600,8 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteExpiredTransfers() = withContext(Dispatchers.Default) {
-        transferController.deleteExpiredTransfers()
+        currentUserId?.let { transferDao.deleteExpiredTransfers() }
+        if (showGuestData()) transferController.deleteExpiredTransfers()
     }
 
     private suspend fun addTransfer(
@@ -424,7 +617,11 @@ class TransferManager internal constructor(
         }
     }
 
-    internal suspend fun createTransferLocally(linkUUID: String, uploadSession: UploadSession, transferStatus: TransferStatus) {
+    internal suspend fun createTransferLocally(
+        linkUUID: String,
+        uploadSession: UploadSession,
+        transferStatus: TransferStatus
+    ) {
         runCatching {
             transferController.generateAndInsert(linkUUID, uploadSession, transferStatus)
         }.onFailure {
@@ -432,8 +629,41 @@ class TransferManager internal constructor(
         }
     }
 
+    private suspend fun showGuestData(): Boolean = accountManager.showGuestData.first()
+
+    private fun <T> userDependentFlow(
+        flowForAuthUser: (userId: Long) -> Flow<T>,
+        flowForGuestUser: () -> Flow<T>,
+        merge: suspend (authUserData: T, guestUserData: T) -> T,
+    ): Flow<T> = accountManager.currentUserFlow.flatMapLatest { currentUser ->
+        when (currentUser) {
+            is STUser.AuthUser -> {
+                accountManager.shouldShowGuestData(currentUser).flatMapLatest { shouldShowGuestData ->
+                    when {
+                        shouldShowGuestData -> {
+                            combine(
+                                flowForAuthUser(currentUser.id),
+                                flowForGuestUser()
+                            ) { authUserData, guestUserData -> merge(authUserData, guestUserData) }
+                        }
+                        else -> flowForAuthUser(currentUser.id)
+                    }
+                }
+            }
+            STUser.GuestUser -> flowForGuestUser()
+            null -> emptyFlow()
+        }
+    }
+
     data class SortedTransfers(
         val validTransfers: List<TransferUi>,
         val expiredTransfers: List<TransferUi>,
-    )
+    ) {
+        internal operator fun plus(other: SortedTransfers): SortedTransfers {
+            return SortedTransfers(
+                validTransfers = validTransfers + other.validTransfers,
+                expiredTransfers = expiredTransfers + other.expiredTransfers
+            )
+        }
+    }
 }

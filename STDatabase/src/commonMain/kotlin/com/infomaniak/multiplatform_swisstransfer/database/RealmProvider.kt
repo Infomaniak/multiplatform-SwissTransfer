@@ -43,7 +43,7 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     internal var transfersAsync = CompletableDeferred<Realm>()
     private suspend fun transfers(): Realm = transfersAsync.await()
 
-    suspend fun openTransfersDb(userId: Int) {
+    suspend fun openTransfersDb(userId: Long) {
         if (!transfersAsync.isActive) {
             closeTransfersDb()
             transfersAsync = CompletableDeferred()
@@ -110,7 +110,7 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         .migration(UPLOAD_MIGRATION)
         .build()
 
-    private fun realmTransfersConfiguration(userId: Int) = RealmConfiguration
+    private fun realmTransfersConfiguration(userId: Long) = RealmConfiguration
         .Builder(schema = setOf(TransferDB::class, ContainerDB::class, FileDB::class, DownloadManagerRef::class))
         .customDirectoryIfNeeded()
         .name(transferRealmName(userId))
@@ -119,7 +119,7 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         .migration(TRANSFERS_MIGRATION)
         .build()
 
-    private fun transferRealmName(userId: Int) = "Transfers-$userId.realm"
+    private fun transferRealmName(userId: Long) = "Transfers-$userId.realm"
 
     private fun RealmConfiguration.Builder.loadDataInMemoryIfNeeded(): RealmConfiguration.Builder {
         return apply { if (loadDataInMemory) inMemory() }

@@ -15,50 +15,83 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
-import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * AccountManager is responsible for orchestrating Accounts operations using Realm for local data management.
+ * AccountManager is responsible for orchestrating Accounts operations, with the database(s).
  *
- * @property appSettingsController The controller for managing AppSettings operations.
+ * @property appDatabase The provider for managing Room database operations.
  * @property uploadController The controller for managing Upload operations.
  * @property transferController The controller for managing Transfers operation.
  * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
-    private val appSettingsController: AppSettingsController,
-    private val emailLanguageUtils: EmailLanguageUtils,
+    private val appDatabase: AppDatabase,
     private val uploadController: UploadController,
     private val transferController: TransferController,
+    private val appSettingsManager: AppSettingsManager,
     private val realmProvider: RealmProvider,
 ) {
 
-    private val mutex = Mutex()
+    private val userSwitchMutex = Mutex()
 
-    // We store the currentUserId to avoid creating database instances when it's the same user
-    private var currentUserId: Int? = null
+    private val _currentUserFlow = MutableStateFlow<STUser?>(value = null)
+    val currentUserFlow: StateFlow<STUser?> = _currentUserFlow.asStateFlow()
+
+    // We cache the current user to avoid creating database instances when it's the same user
+    var currentUser: STUser? by _currentUserFlow::value
+        private set
+
+    val showGuestData: Flow<Boolean> = currentUserFlow.transformLatest { currentUser ->
+        when (currentUser) {
+            STUser.GuestUser -> emit(true)
+            is STUser.AuthUser -> emitAll(appSettingsManager.appSettings.map { appSettings ->
+                appSettings?.idOfAccountWithGuestData == currentUser.id
+            })
+            null -> emit(false)
+        }
+    }.distinctUntilChanged()
+
+    fun shouldShowGuestData(targetUser: STUser.AuthUser): Flow<Boolean> {
+        return appSettingsManager.appSettings.map { appSettings ->
+            appSettings?.idOfAccountWithGuestData == targetUser.id
+        }
+    }
+
+    val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
 
     /**
-     * Loads the default User account and initializes Realm Transfers for the default UserID defined in Constants.
+     * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun loadUser(userId: Int) {
-        mutex.withLock {
-            if (currentUserId != userId) {
-                appSettingsController.initAppSettings(emailLanguageUtils.getEmailLanguageFromLocal())
-                realmProvider.openTransfersDb(userId)
-                currentUserId = userId
+    suspend fun loadUser(user: STUser) {
+        userSwitchMutex.withLock {
+            if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
+                appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
+            if (currentUser?.id != user.id) loadDatabase(user)
+            currentUser = user
         }
     }
 
@@ -66,12 +99,25 @@ class AccountManager internal constructor(
      * Delete specified User data
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun removeUser(userId: Int) {
+    suspend fun logoutCurrentUser(newSTUser: STUser?) {
+        val user = currentUser ?: return
+        when (user) {
+            is STUser.AuthUser -> appDatabase.getTransferDao().deleteTransfers(user.id)
+            STUser.GuestUser -> {
+                uploadController.removeData()
+                transferController.removeData()
+                realmProvider.closeAllDatabases()
+            }
+        }
+        userSwitchMutex.withLock {
+            currentUser = newSTUser
+            if (newSTUser !is STUser.AuthUser) {
+                appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = null)
+            }
+        }
+    }
 
-        appSettingsController.removeData()
-        uploadController.removeData()
-        transferController.removeData()
-
-        realmProvider.closeAllDatabases()
+    private suspend fun loadDatabase(user: STUser) {
+        realmProvider.openTransfersDb(user.id)
     }
 }

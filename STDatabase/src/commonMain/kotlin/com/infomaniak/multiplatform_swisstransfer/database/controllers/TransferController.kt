@@ -263,9 +263,9 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
     //endregion
 
-    private companion object {
+    internal companion object {
 
-        private const val DAYS_SINCE_EXPIRATION = 15
+        internal const val DAYS_SINCE_EXPIRATION = 15
 
         @OptIn(ExperimentalTime::class)
         private val expiredDateQuery = "${TransferDB::expiredDateTimestamp.name} < ${Clock.System.now().epochSeconds}"

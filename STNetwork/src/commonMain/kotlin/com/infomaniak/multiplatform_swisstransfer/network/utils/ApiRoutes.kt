@@ -22,14 +22,17 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 internal object ApiRoutes {
 
     fun apiBaseUrl(environment: ApiEnvironment) = "${environment.baseUrl}/api/"
+    fun apiBaseUrlV2(environment: ApiEnvironment) = "${environment.baseUrlV2}/api/1/"
 
     //region Transfer
     fun getTransfer(linkUUID: String): String = "links/$linkUUID"
 
     fun disableLinks(): String = "disableLinks"
+    fun presignedDownloadUrl(linkId: String, fileId: String) = "links/$linkId/files/$fileId"
+    fun v2DeleteTransfer(transferId: String) = "transfers/$transferId"
 
     fun generateDownloadToken() = "generateDownloadToken"
-    //endRegion
+    //endregion
 
     //region Upload
     const val initUpload = "mobile/containers"
@@ -37,5 +40,13 @@ internal object ApiRoutes {
     const val resendEmailCode = "$verifyEmailCode/resend"
     const val finishUpload = "uploadComplete"
     const val cancelUpload = "cancelUpload"
+
+    fun createTransfer() = "transfers"
+    fun uploadDirectly(transferId: String, fileId: String) = "transfers/$transferId/files/$fileId"
+    fun uploadChunk(transferId: String, fileId: String, chunkIndex: Int): String {
+        return "${uploadDirectly(transferId, fileId)}/chunks/$chunkIndex"
+    }
+
+    fun finishTransfer(transferId: String) = "transfers/$transferId"
     //endregion
 }
