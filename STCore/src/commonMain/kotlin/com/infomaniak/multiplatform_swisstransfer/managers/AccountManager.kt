@@ -110,11 +110,7 @@ class AccountManager internal constructor(
             }
         }
         userSwitchMutex.withLock {
-            if (newSTUser == null) {
-                currentUser = null
-            } else {
-                loadUser(newSTUser)
-            }
+            currentUser = newSTUser
             if (newSTUser !is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = null)
             }
