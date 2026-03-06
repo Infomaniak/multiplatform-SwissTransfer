@@ -87,9 +87,8 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
         userSwitchMutex.withLock {
-            val authenticatedUser = (currentUser as? STUser.AuthUser)
-            if (authenticatedUser != null) {
-                appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = authenticatedUser.id)
+            if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
+                appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
             if (currentUser?.id != user.id) loadDatabase(user)
             currentUser = user
@@ -111,7 +110,11 @@ class AccountManager internal constructor(
             }
         }
         userSwitchMutex.withLock {
-            currentUser = newSTUser
+            if (newSTUser == null) {
+                currentUser = null
+            } else {
+                loadUser(newSTUser)
+            }
             if (newSTUser !is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = null)
             }
