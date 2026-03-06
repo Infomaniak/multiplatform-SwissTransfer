@@ -121,6 +121,7 @@ class UploadV2Manager(
             val transferToPersist = TransferDB(
                 transfer = apiTransfer,
                 linkId = null,
+                password = transferCreationPayload.password,
                 direction = TransferDirection.SENT,
                 userOwnerId = userId,
                 status = TransferStatus.PENDING_UPLOAD,
