@@ -21,7 +21,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Tr
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer as TransferV2
 
 data class TransferUi(
     val uuid: String,
@@ -31,6 +30,7 @@ data class TransferUi(
     val sizeUploaded: Long,
     val downloadLimit: Int,
     val downloadLeft: Int,
+    val title: String?,
     val message: String?,
     val password: String?,
     val recipientsEmails: Set<String> = emptySet(),
@@ -51,6 +51,7 @@ data class TransferUi(
         sizeUploaded = transfer.container?.sizeUploaded ?: 0,
         downloadLimit = transfer.container?.downloadLimit ?: 0,
         downloadLeft = transfer.downloadCounterCredit,
+        title = null,
         message = transfer.container?.message,
         password = transfer.password,
         recipientsEmails = transfer.recipientsEmails.mapTo(destination = mutableSetOf(), transform = { it }),

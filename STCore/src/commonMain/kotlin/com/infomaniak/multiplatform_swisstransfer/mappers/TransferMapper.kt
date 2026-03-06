@@ -42,6 +42,7 @@ internal suspend fun TransferDB.toTransferUi(
         sizeUploaded = this.totalSize,
         downloadLimit = 1, // TODO[API-V2]: Not available in v2 model
         downloadLeft = 1,  // TODO[API-V2]: Not available in v2 model
+        title = this.title,
         message = this.message,
         password = this.password,
         recipientsEmails = this.recipientsEmails,
