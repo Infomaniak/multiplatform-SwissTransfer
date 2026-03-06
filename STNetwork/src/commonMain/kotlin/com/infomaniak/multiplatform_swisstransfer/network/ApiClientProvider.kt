@@ -107,7 +107,7 @@ class ApiClientProvider internal constructor(
                     if (statusCode >= 300) {
                         val bodyResponse = response.bodyAsText()
                         runCatching {
-                            if (bodyResponse.isFromApiV2()) {
+                            if (response.request.url.toString().isFromApiV2()) {
                                 val error = json.decodeFromString<ApiResponseForError>(bodyResponse).error
                                 throw ApiV2ErrorException(error.code, error.description, requestContextId)
                             } else {
@@ -167,6 +167,6 @@ class ApiClientProvider internal constructor(
         private const val MAX_RETRY = 3
 
         //TODO[API-V2]: Delete once the v1 api has been removed
-        private fun String.isFromApiV2() = contains("\"result\": \"error\"")
+        private fun String.isFromApiV2() = contains("api/1")
     }
 }
