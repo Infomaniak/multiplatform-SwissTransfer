@@ -23,12 +23,16 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferU
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 
-internal suspend fun TransferDB.toTransferUi(transferDao: TransferDao): TransferUi {
+internal suspend fun TransferDB.toTransferUi(
+    transferDao: TransferDao,
+    files: List<FileDB> = emptyList(),
+): TransferUi {
     // Fetch files for this transfer
-    val files = transferDao.getTransferRootFiles(this.id)
+    val files = files.ifEmpty { transferDao.getTransferRootFiles(this.id) }
 
     return TransferUi(
         uuid = this.id,
@@ -44,7 +48,7 @@ internal suspend fun TransferDB.toTransferUi(transferDao: TransferDao): Transfer
         files = files.map { it.toFileUi() },
         direction = this.transferDirection,
         transferStatus = this.transferStatus,
-        apiSource = ApiSource.V2
+        apiSource = ApiSource.V2,
     )
 }
 
@@ -60,10 +64,24 @@ internal fun FileDB.toFileUi(): FileUi = FileUi(
 )
 
 internal suspend fun List<TransferDB>.toTransferUiList(transferDao: TransferDao): List<TransferUi> {
-    return this.map { it.toTransferUi(transferDao) }
+    // To avoid overloading the DB with a huge amount of small queries, we are:
+    // 1. Prefetching the files from all the transfers in one query (per 100 transfers).
+    // 2. Using this map to get the files when mapping each TransferDB to TransferUi.
+    val filesByTransfer: Map<String, List<FileDB>> = buildMap {
+        this@toTransferUiList.chunked(100).map { transfers ->
+            val transferIds = transfers.map { transfer -> transfer.id }
+            transferDao.getTransferRootFiles(transferIds)
+        }.forEach { putAll(it) }
+    }
+    return this.map {
+        it.toTransferUi(
+            transferDao = transferDao,
+            files = filesByTransfer[it.id] ?: emptyList(),
+        )
+    }
 }
 
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 internal fun Flow<List<TransferDB>>.toTransferUiListFlow(transferDao: TransferDao): Flow<List<TransferUi>> {
     return this.mapLatest { it.toTransferUiList(transferDao) }
 }

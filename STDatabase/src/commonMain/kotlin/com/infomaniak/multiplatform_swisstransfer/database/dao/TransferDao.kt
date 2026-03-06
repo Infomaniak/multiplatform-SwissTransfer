@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.MapColumn
 import androidx.room.Query
 import androidx.room.Upsert
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
@@ -90,6 +91,9 @@ interface TransferDao {
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId IS NULL")
     suspend fun getTransferRootFiles(transferId: String): List<FileDB>
+
+    @Query("SELECT * FROM FileDB WHERE transferId IN (:transferIds) AND parentId IS NULL")
+    suspend fun getTransferRootFiles(transferIds: List<String>): Map<@MapColumn(columnName = "transferId") String, List<FileDB>>
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId=:folderId")
     fun transferFolderFilesFlow(transferId: String, folderId: String?): Flow<List<FileDB>>
