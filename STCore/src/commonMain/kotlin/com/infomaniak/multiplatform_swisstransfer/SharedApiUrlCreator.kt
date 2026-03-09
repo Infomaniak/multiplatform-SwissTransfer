@@ -20,7 +20,8 @@ package com.infomaniak.multiplatform_swisstransfer
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.*
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V1
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V2
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController

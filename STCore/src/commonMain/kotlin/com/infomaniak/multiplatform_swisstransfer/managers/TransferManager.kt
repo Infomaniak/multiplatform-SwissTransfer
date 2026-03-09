@@ -25,7 +25,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.*
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V1
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V2
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
@@ -444,8 +445,32 @@ class TransferManager internal constructor(
     ): Unit = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data ?: return@withContext
         transferApi.validateDownloadCounterCreditOrThrow()
-
         addTransfer(transferApi, transferDirection, password, recipientsEmails)
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
+        NotFoundFetchTransferException::class,
+        TransferCancelledException::class,
+        ExpiredDateFetchTransferException::class,
+        DownloadLimitReached::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
+    )
+    suspend fun addTransferByLinkUUIDApiV2(
+        linkId: String,
+        password: String?,
+    ): Unit = withContext(Dispatchers.Default) {
+        val transferApi = transferV2Repository.getTransferByLinkUUID(linkId, password)
+        // TODO[Api-v2]: Handle download credit when will it be available on API v2
+        addTransferV2(linkId, transferApi, password)
     }
 
     /**
