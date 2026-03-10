@@ -493,7 +493,7 @@ class TransferManager internal constructor(
         password: String?,
     ): Unit = withContext(Dispatchers.Default) {
         val transferApi = transferV2Repository.getTransferByLinkUUID(linkId, password)
-        // TODO[Api-v2]: Handle download credit when will it be available on API v2
+        // TODO[Api-v2]: Handle download credit once it is available on API v2
         addTransferV2(linkId, transferApi, password)
     }
 
