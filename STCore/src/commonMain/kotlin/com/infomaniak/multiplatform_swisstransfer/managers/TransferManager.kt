@@ -464,7 +464,7 @@ class TransferManager internal constructor(
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
     )
-    suspend fun addTransferByLinkUUIDApiV2(
+    suspend fun addTransferByLinkIdApiV2(
         linkId: String,
         password: String?,
     ): Unit = withContext(Dispatchers.Default) {
