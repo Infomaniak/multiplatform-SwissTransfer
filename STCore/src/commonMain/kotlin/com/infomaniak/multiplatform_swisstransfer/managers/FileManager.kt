@@ -25,11 +25,14 @@ import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUiList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.cancellation.CancellationException
 
 class FileManager(
     private val accountManager: AccountManager,
@@ -58,5 +61,28 @@ class FileManager(
         } else {
             emit(files)
         }
+    }
+
+    /**
+     * Retrieves all files (not folders) for a given transfer.
+     *
+     * @param transferId The ID of the transfer.
+     * @return A list of [FileUi] objects representing all files in the transfer.
+     */
+    @Throws(CancellationException::class)
+    suspend fun getTransferFilesOnly(transferId: String): List<FileUi> = withContext(Dispatchers.Default) {
+        appDatabase.getTransferDao().getTransferFilesOnly(transferId).toFileUiList()
+    }
+
+    /**
+     * Retrieves all files under a specific folder path, including subfolders (not folders).
+     *
+     * @param transferId The ID of the transfer.
+     * @param folderPath The path of the folder to search under (e.g., "documents").
+     * @return A list of [FileUi] objects representing files in the folder and its subfolders.
+     */
+    @Throws(CancellationException::class)
+    suspend fun getFilesUnderPath(transferId: String, folderPath: String): List<FileUi> = withContext(Dispatchers.Default) {
+        appDatabase.getTransferDao().getFilesUnderPath(transferId, folderPath).toFileUiList()
     }
 }
