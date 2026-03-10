@@ -92,6 +92,9 @@ interface TransferDao {
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND NOT isFolder")
     suspend fun getTransferFilesOnly(transferId: String): List<FileDB>
 
+    @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND path LIKE :folderPath || '/%' AND NOT isFolder")
+    suspend fun getFilesUnderPath(transferId: String, folderPath: String): List<FileDB>
+
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId IS NULL")
     suspend fun getTransferRootFiles(transferId: String): List<FileDB>
 

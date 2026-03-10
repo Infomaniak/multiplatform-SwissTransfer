@@ -400,6 +400,62 @@ class TransfersTest : RobolectricTestsBase() {
         assertEquals(3, allFiles.size, "Should return all files in the transfer")
         assertTrue(allFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3")))
     }
+
+    @Test
+    fun canGetFilesUnderPath() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        // Files in target folder "documents"
+        val docFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents/file1.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+        val docFile2 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents/file2.txt", mimeType = "text/plain", id = "file2"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
+        // File in subfolder
+        val subFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(
+                path = "documents/subfolder/photo.jpg",
+                mimeType = "image/jpeg",
+                id = "file3"
+            ),
+            transferId = transfer.id,
+            folderId = "subfolder1",
+        )
+
+        // File outside target folder (should not be returned)
+        val otherFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documentsother/file.txt", mimeType = "text/plain", id = "file4"),
+            transferId = transfer.id,
+            folderId = "otherFolder",
+        )
+
+        // Folder itself (should not be returned - NOT isFolder)
+        val folderItself = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents", mimeType = null, id = "folder1"),
+            transferId = transfer.id,
+            folderId = null,
+        ).copy(isFolder = true)
+
+        appDatabase.getTransferDao().upsertFile(docFile1)
+        appDatabase.getTransferDao().upsertFile(docFile2)
+        appDatabase.getTransferDao().upsertFile(subFile)
+        appDatabase.getTransferDao().upsertFile(otherFile)
+        appDatabase.getTransferDao().upsertFile(folderItself)
+
+        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
+
+        assertEquals(3, folderFiles.size, "Should return files in folder and subfolders")
+        assertTrue(folderFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3")))
+        assertTrue(folderFiles.none { it.id == "file4" }, "Should not include files outside the folder path")
+        assertTrue(folderFiles.none { it.isFolder }, "Should not include folders")
+    }
     //endregion
 
     //region Helper methods
