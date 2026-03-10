@@ -448,6 +448,30 @@ class TransferManager internal constructor(
         addTransfer(transferApi, transferDirection, password, recipientsEmails)
     }
 
+    /**
+     * Retrieves a transfer using the provided link ID (API V2) and saves it to the database.
+     *
+     * This function fetches a transfer from the API v2 using the `linkId`, and after the transfer
+     * is successfully retrieved, it is saved to the database as a received transfer.
+     *
+     * @param linkId The link ID used to identify the transfer to retrieve.
+     * @param password The password for the transfer, if it is password protected.
+     *
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiV2ErrorException If there is an error related to the API v2 during transfer retrieval.
+     * @throws UnexpectedApiErrorFormatException Unparsable api error response.
+     * @throws NetworkException If there is a network issue during the transfer retrieval.
+     * @throws UnknownException Any error not already handled by the above ones.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws PasswordNeededFetchTransferException If the transfer requires a password but none was provided.
+     * @throws WrongPasswordFetchTransferException If the provided password is incorrect.
+     * @throws NotFoundFetchTransferException If the transfer was not found.
+     * @throws TransferCancelledException If the transfer has been cancelled.
+     * @throws ExpiredDateFetchTransferException If the transfer is expired.
+     * @throws DownloadLimitReached If the download limit has been reached.
+     * @throws VirusCheckFetchTransferException If the virus check is in progress.
+     * @throws VirusDetectedFetchTransferException If a virus has been detected.
+     */
     @Throws(
         CancellationException::class,
         ApiV2ErrorException::class,
