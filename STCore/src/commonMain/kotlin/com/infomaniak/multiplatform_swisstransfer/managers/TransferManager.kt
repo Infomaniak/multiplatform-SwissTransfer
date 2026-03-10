@@ -457,6 +457,8 @@ class TransferManager internal constructor(
      * @param linkId The link ID used to identify the transfer to retrieve.
      * @param password The password for the transfer, if it is password protected.
      *
+     * @return The transferId of the added transfer
+     *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiV2ErrorException If there is an error related to the API v2 during transfer retrieval.
      * @throws UnexpectedApiErrorFormatException Unparsable api error response.
@@ -491,10 +493,11 @@ class TransferManager internal constructor(
     suspend fun addTransferByLinkIdApiV2(
         linkId: String,
         password: String?,
-    ): Unit = withContext(Dispatchers.Default) {
+    ): String = withContext(Dispatchers.Default) {
         val transferApi = transferV2Repository.getTransferByLinkUUID(linkId, password)
         // TODO[Api-v2]: Handle download credit once it is available on API v2
         addTransferV2(linkId, transferApi, password)
+        return@withContext transferApi.id
     }
 
     /**
