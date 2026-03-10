@@ -35,6 +35,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TransfersTest : RobolectricTestsBase() {
 
@@ -359,6 +360,45 @@ class TransfersTest : RobolectricTestsBase() {
         assertNotNull(result)
         assertEquals("new/path.txt", result.path)
         assertEquals(10_000_000L, result.size)
+    }
+
+    @Test
+    fun canGetTransferFilesOnly() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        val rootFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "root.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = null,
+        )
+        val folderFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "folder/file1.txt", mimeType = "text/plain", id = "file2"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+        val folderFile2 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "folder/subfolder/file2.txt", mimeType = "text/plain", id = "file3"),
+            transferId = transfer.id,
+            folderId = "subfolder1",
+        )
+
+        // SubFolder should not be returned
+        val subfolder = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "folder/subfolder", mimeType = null, id = "subfolder"),
+            transferId = transfer.id,
+            folderId = "subfolder1",
+        ).copy(isFolder = true)
+
+        appDatabase.getTransferDao().upsertFile(rootFile)
+        appDatabase.getTransferDao().upsertFile(folderFile1)
+        appDatabase.getTransferDao().upsertFile(folderFile2)
+        appDatabase.getTransferDao().upsertFile(subfolder)
+
+        val allFiles = appDatabase.getTransferDao().getTransferFilesOnly(transfer.id)
+
+        assertEquals(3, allFiles.size, "Should return all files in the transfer")
+        assertTrue(allFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3")))
     }
     //endregion
 
