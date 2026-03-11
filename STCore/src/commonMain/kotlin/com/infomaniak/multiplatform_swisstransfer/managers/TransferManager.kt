@@ -25,7 +25,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmExcepti
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.*
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V1
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V2
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
@@ -444,8 +445,59 @@ class TransferManager internal constructor(
     ): Unit = withContext(Dispatchers.Default) {
         val transferApi = transferRepository.getTransferByLinkUUID(linkUUID, password).data ?: return@withContext
         transferApi.validateDownloadCounterCreditOrThrow()
-
         addTransfer(transferApi, transferDirection, password, recipientsEmails)
+    }
+
+    /**
+     * Retrieves a transfer using the provided link ID (API V2) and saves it to the database.
+     *
+     * This function fetches a transfer from the API v2 using the `linkId`, and after the transfer
+     * is successfully retrieved, it is saved to the database as a received transfer.
+     *
+     * @param linkId The link ID used to identify the transfer to retrieve.
+     * @param password The password for the transfer, if it is password protected.
+     *
+     * @return The transferId of the added transfer
+     *
+     * @throws CancellationException If the operation is cancelled.
+     * @throws ApiV2ErrorException If there is an error related to the API v2 during transfer retrieval.
+     * @throws UnexpectedApiErrorFormatException Unparsable api error response.
+     * @throws NetworkException If there is a network issue during the transfer retrieval.
+     * @throws UnknownException Any error not already handled by the above ones.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws PasswordNeededFetchTransferException If the transfer requires a password but none was provided.
+     * @throws WrongPasswordFetchTransferException If the provided password is incorrect.
+     * @throws NotFoundFetchTransferException If the transfer was not found.
+     * @throws TransferCancelledException If the transfer has been cancelled.
+     * @throws ExpiredDateFetchTransferException If the transfer is expired.
+     * @throws DownloadLimitReached If the download limit has been reached.
+     * @throws VirusCheckFetchTransferException If the virus check is in progress.
+     * @throws VirusDetectedFetchTransferException If a virus has been detected.
+     */
+    @Throws(
+        CancellationException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        NetworkException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        PasswordNeededFetchTransferException::class,
+        WrongPasswordFetchTransferException::class,
+        NotFoundFetchTransferException::class,
+        TransferCancelledException::class,
+        ExpiredDateFetchTransferException::class,
+        DownloadLimitReached::class,
+        VirusCheckFetchTransferException::class,
+        VirusDetectedFetchTransferException::class,
+    )
+    suspend fun addTransferByLinkIdApiV2(
+        linkId: String,
+        password: String?,
+    ): String = withContext(Dispatchers.Default) {
+        val transferApi = transferV2Repository.getTransferByLinkUUID(linkId, password)
+        // TODO[Api-v2]: Handle download credit once it is available on API v2
+        addTransferV2(linkId, transferApi, password)
+        return@withContext transferApi.id
     }
 
     /**
