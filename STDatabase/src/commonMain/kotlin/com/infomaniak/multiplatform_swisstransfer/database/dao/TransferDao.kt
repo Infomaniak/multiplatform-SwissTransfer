@@ -92,6 +92,20 @@ interface TransferDao {
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND NOT isFolder")
     suspend fun getTransferFilesOnly(transferId: String): List<FileDB>
 
+    /**
+     * Returns all files located under the given folder path.
+     *
+     * This uses a lexicographical prefix range instead of `LIKE 'path/%'`:
+     *
+     *   `path >= folderPath + '/' AND path < folderPath + '/\uFFFF'`
+     *
+     * Since SQLite compares TEXT values lexicographically, every path starting
+     * with `folderPath/` falls within this range. The character `\uFFFF` acts as a
+     * maximal Unicode value to cap the upper bound of the prefix.
+     *
+     * This approach avoids issues with `LIKE` wildcards (`%`, `_`) and allows
+     * SQLite to efficiently use an index on `(transferId, path)` for a range scan.
+     */
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND path >= :folderPath || '/' AND path < :folderPath || '/\uFFFF' AND NOT isFolder")
     suspend fun getFilesUnderPath(transferId: String, folderPath: String): List<FileDB>
 
