@@ -436,6 +436,36 @@ class TransfersTest : RobolectricTestsBase() {
             folderId = "otherFolder",
         )
 
+        // With LIKE 'doc%ments/%', this would also match "docABCments/file.txt"
+        // But with lexicographical range, % is treated as a literal character, so only exact "doc%ments/" prefix matches
+        val folderWithPercent = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "doc%ments/file.txt", mimeType = "text/plain", id = "file4b"),
+            transferId = transfer.id,
+            folderId = "folderPercent",
+        )
+
+        // File with % in name - tests protection against SQL LIKE wildcard injection
+        val fileWithWildcardPercent = FileDB(
+            file = DummyTransferForV2.createDummyFile(
+                path = "documents/100%_complete.txt",
+                mimeType = "text/plain",
+                id = "file5"
+            ),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
+        // File with _ in name - tests protection against SQL LIKE wildcard injection
+        val fileWithWildcardUnderscore = FileDB(
+            file = DummyTransferForV2.createDummyFile(
+                path = "documents/file_name_v1.txt",
+                mimeType = "text/plain",
+                id = "file6"
+            ),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
         // Folder itself (should not be returned - NOT isFolder)
         val folderItself = FileDB(
             file = DummyTransferForV2.createDummyFile(path = "documents", mimeType = null, id = "folder1"),
@@ -447,14 +477,25 @@ class TransfersTest : RobolectricTestsBase() {
         appDatabase.getTransferDao().upsertFile(docFile2)
         appDatabase.getTransferDao().upsertFile(subFile)
         appDatabase.getTransferDao().upsertFile(otherFile)
+        appDatabase.getTransferDao().upsertFile(folderWithPercent)
+        appDatabase.getTransferDao().upsertFile(fileWithWildcardPercent)
+        appDatabase.getTransferDao().upsertFile(fileWithWildcardUnderscore)
         appDatabase.getTransferDao().upsertFile(folderItself)
 
         val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
 
-        assertEquals(3, folderFiles.size, "Should return files in folder and subfolders")
-        assertTrue(folderFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3")))
+        // folderWithPercent (doc%ments/file.txt) must NOT be returned - % is literal in range comparison
+        assertTrue(
+            folderFiles.none { it.id == "file4b" },
+            "Should not match 'doc%ments' when searching 'documents' - % is literal"
+        )
+
+        assertEquals(5, folderFiles.size, "Should return files in folder and subfolders")
+        assertTrue(folderFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3", "file5", "file6")))
         assertTrue(folderFiles.none { it.id == "file4" }, "Should not include files outside the folder path")
         assertTrue(folderFiles.none { it.isFolder }, "Should not include folders")
+        assertTrue(folderFiles.any { it.path.contains("%") }, "Should correctly handle files with % in name")
+        assertTrue(folderFiles.any { it.path.contains("_") }, "Should correctly handle files with _ in name")
     }
     //endregion
 
