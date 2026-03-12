@@ -111,7 +111,7 @@ interface TransferDao {
     @Query(
         """SELECT * FROM FileDB
         WHERE transferId=:transferId
-            AND path >= :folderPath || '/' AND path < :folderPath || '/' || char($MAX_VALID_UNICODE)
+            AND path >= :folderPath || '/' AND path <= :folderPath || '/' || char($MAX_VALID_UNICODE)
             AND NOT isFolder"""
     )
     suspend fun getFilesUnderPath(transferId: String, folderPath: String): List<FileDB>
