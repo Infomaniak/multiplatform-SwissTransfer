@@ -87,10 +87,11 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
         userSwitchMutex.withLock {
+            if (currentUser?.id == user.id) return
             if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
-            if (currentUser?.id != user.id) loadDatabase(user)
+            loadGuestDatabaseIfNeeded()
             currentUser = user
         }
     }
@@ -117,7 +118,9 @@ class AccountManager internal constructor(
         }
     }
 
-    private suspend fun loadDatabase(user: STUser) {
-        realmProvider.openTransfersDb(user.id)
+    private suspend fun loadGuestDatabaseIfNeeded() {
+        if (realmProvider.isTransfersDbOpen().not()) {
+            realmProvider.openTransfersDb(STUser.GuestUser.id)
+        }
     }
 }
