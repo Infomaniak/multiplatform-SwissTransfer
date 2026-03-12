@@ -86,9 +86,8 @@ class AccountManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) {
-        if (currentUser?.id == user.id) return
-
         userSwitchMutex.withLock {
+            if (currentUser?.id == user.id) return
             if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
