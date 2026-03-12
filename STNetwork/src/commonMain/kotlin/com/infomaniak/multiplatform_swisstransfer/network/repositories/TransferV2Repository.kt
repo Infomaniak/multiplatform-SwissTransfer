@@ -33,7 +33,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransf
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException.WrongPasswordFetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
-import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferLinkResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.TransferRequest
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
@@ -80,7 +80,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
     suspend fun getTransferByLinkUUID(
         linkUUID: String,
         password: String?
-    ): TransferApi = withTransferErrorHandling {
+    ): TransferLinkResponse = withTransferErrorHandling {
         transferRequest.getTransfer(linkUUID, password).data
     }
 
@@ -100,7 +100,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         VirusCheckFetchTransferException::class,
         VirusDetectedFetchTransferException::class,
     )
-    suspend fun getTransferByUrl(url: String, password: String?): TransferApi {
+    suspend fun getTransferByUrl(url: String, password: String?): TransferLinkResponse {
         return getTransferByLinkUUID(extractUUID(url), password)
     }
 

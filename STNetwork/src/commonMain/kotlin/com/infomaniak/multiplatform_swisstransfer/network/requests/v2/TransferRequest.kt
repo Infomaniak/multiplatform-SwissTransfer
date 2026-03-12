@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.network.requests.v2
 
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
-import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferLinkResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.BaseRequest
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
@@ -36,9 +36,9 @@ internal class TransferRequest(
     token: () -> String,
 ) : BaseRequest(environment, json, httpClient, token) {
 
-    suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponseV2Success<TransferApi> {
+    suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponseV2Success<TransferLinkResponse> {
         return get(
-            url = createV2Url(ApiRoutes.getTransfer(linkUUID)),
+            url = createV2Url(ApiRoutes.getTransfer(linkUUID), "with" to "transfer"),
             appendHeaders = {
                 appendPasswordIfNeeded(password)
             }
