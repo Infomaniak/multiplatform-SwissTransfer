@@ -35,6 +35,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TransfersTest : RobolectricTestsBase() {
 
@@ -359,6 +360,173 @@ class TransfersTest : RobolectricTestsBase() {
         assertNotNull(result)
         assertEquals("new/path.txt", result.path)
         assertEquals(10_000_000L, result.size)
+    }
+
+    @Test
+    fun canGetTransferFilesOnly() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        val rootFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "root.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = null,
+        )
+        val folderFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "folder/file1.txt", mimeType = "text/plain", id = "file2"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+        val folderFile2 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "folder/subfolder/file2.txt", mimeType = "text/plain", id = "file3"),
+            transferId = transfer.id,
+            folderId = "subfolder1",
+        )
+
+        // SubFolder should not be returned
+        val subfolder = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "folder/subfolder", mimeType = null, id = "subfolder"),
+            transferId = transfer.id,
+            folderId = "subfolder1",
+        ).copy(isFolder = true)
+
+        appDatabase.getTransferDao().upsertFile(rootFile)
+        appDatabase.getTransferDao().upsertFile(folderFile1)
+        appDatabase.getTransferDao().upsertFile(folderFile2)
+        appDatabase.getTransferDao().upsertFile(subfolder)
+
+        val allFiles = appDatabase.getTransferDao().getTransferFilesOnly(transfer.id)
+
+        assertEquals(3, allFiles.size, "Should return all files in the transfer")
+        assertTrue(allFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3")))
+    }
+
+    @Test
+    fun canGetFilesUnderPath() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        // Files in target folder "documents"
+        val docFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents/file1.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+        val docFile2 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents/file2.txt", mimeType = "text/plain", id = "file2"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
+        // File in subfolder
+        val subFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(
+                path = "documents/subfolder/photo.jpg",
+                mimeType = "image/jpeg",
+                id = "file3"
+            ),
+            transferId = transfer.id,
+            folderId = "subfolder1",
+        )
+
+        // File outside target folder (should not be returned)
+        val otherFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documentsother/file.txt", mimeType = "text/plain", id = "file4"),
+            transferId = transfer.id,
+            folderId = "otherFolder",
+        )
+
+        // File with % in name - tests protection against SQL LIKE wildcard injection
+        val fileWithWildcardPercent = FileDB(
+            file = DummyTransferForV2.createDummyFile(
+                path = "documents/100%_complete.txt",
+                mimeType = "text/plain",
+                id = "file5"
+            ),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
+        // File with _ in name - tests protection against SQL LIKE wildcard injection
+        val fileWithWildcardUnderscore = FileDB(
+            file = DummyTransferForV2.createDummyFile(
+                path = "documents/file_name_v1.txt",
+                mimeType = "text/plain",
+                id = "file6"
+            ),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
+        // Folder itself (should not be returned - NOT isFolder)
+        val folderItself = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents", mimeType = null, id = "folder1"),
+            transferId = transfer.id,
+            folderId = null,
+        ).copy(isFolder = true)
+
+        appDatabase.getTransferDao().upsertFile(docFile1)
+        appDatabase.getTransferDao().upsertFile(docFile2)
+        appDatabase.getTransferDao().upsertFile(subFile)
+        appDatabase.getTransferDao().upsertFile(otherFile)
+        appDatabase.getTransferDao().upsertFile(fileWithWildcardPercent)
+        appDatabase.getTransferDao().upsertFile(fileWithWildcardUnderscore)
+        appDatabase.getTransferDao().upsertFile(folderItself)
+
+        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
+
+        assertEquals(5, folderFiles.size, "Should return files in folder and subfolders")
+        assertTrue(folderFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3", "file5", "file6")))
+        assertTrue(folderFiles.none { it.id == "file4" }, "Should not include files outside the folder path")
+        assertTrue(folderFiles.none { it.isFolder }, "Should not include folders")
+        assertTrue(folderFiles.any { it.path.contains("%") }, "Should correctly handle files with % in name")
+        assertTrue(folderFiles.any { it.path.contains("_") }, "Should correctly handle files with _ in name")
+    }
+
+    @Test
+    fun testGetFilesUnderPathWithWildcard() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        val docFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents%/file1.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+        val otherFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documentsother/file.txt", mimeType = "text/plain", id = "file4"),
+            transferId = transfer.id,
+            folderId = "otherFolder",
+        )
+
+        appDatabase.getTransferDao().upsertFile(docFile1)
+        appDatabase.getTransferDao().upsertFile(otherFile)
+
+        // With LIKE 'documents%', this would also match "documentsother/file.txt"
+        // But with lexicographical range, % is treated as a literal character, so only the exact "documents%" prefix matches
+        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents%")
+
+        assertEquals(1, folderFiles.size, "Should return only 1 file")
+        assertTrue(folderFiles.any { it.id == "file1" }, "The % should be treated as a literal character, not a wildcard")
+    }
+
+    @Test
+    fun testGetFilesUnderPathWithEmoji() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        val docFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents/😅test.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
+        appDatabase.getTransferDao().upsertFile(docFile1)
+
+        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
+
+        assertEquals(1, folderFiles.size, "Should return only 1 file")
+        assertTrue(folderFiles.any { it.id == "file1" }, "The % should be treated as a literal character, not a wildcard")
     }
     //endregion
 
