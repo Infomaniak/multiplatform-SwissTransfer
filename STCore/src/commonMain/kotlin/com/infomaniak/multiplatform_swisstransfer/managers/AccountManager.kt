@@ -90,7 +90,7 @@ class AccountManager internal constructor(
             if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
-            if (currentUser?.id != user.id) loadDatabase(user)
+            if (currentUser?.id != user.id) loadGuestDatabaseIfNeeded()
             currentUser = user
         }
     }
@@ -117,7 +117,9 @@ class AccountManager internal constructor(
         }
     }
 
-    private suspend fun loadDatabase(user: STUser) {
-        realmProvider.openTransfersDb(user.id)
+    private suspend fun loadGuestDatabaseIfNeeded() {
+        if (realmProvider.isTransfersDbOpen().not()) {
+            realmProvider.openTransfersDb(STUser.GuestUser.id)
+        }
     }
 }

@@ -51,6 +51,8 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         transfersAsync.complete(Realm.open(realmTransfersConfiguration(userId)))
     }
 
+    fun isTransfersDbOpen(): Boolean = transfersAsync.isActive.not()
+
     internal suspend inline fun <T> withTransfersDb(block: (Realm) -> T): T {
         runThrowingRealm {
             return block(transfers())
