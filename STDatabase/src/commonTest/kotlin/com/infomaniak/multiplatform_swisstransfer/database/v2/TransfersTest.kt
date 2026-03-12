@@ -436,14 +436,6 @@ class TransfersTest : RobolectricTestsBase() {
             folderId = "otherFolder",
         )
 
-        // With LIKE 'doc%ments/%', this would also match "docABCments/file.txt"
-        // But with lexicographical range, % is treated as a literal character, so only exact "doc%ments/" prefix matches
-        val folderWithPercent = FileDB(
-            file = DummyTransferForV2.createDummyFile(path = "doc%ments/file.txt", mimeType = "text/plain", id = "file4b"),
-            transferId = transfer.id,
-            folderId = "folderPercent",
-        )
-
         // File with % in name - tests protection against SQL LIKE wildcard injection
         val fileWithWildcardPercent = FileDB(
             file = DummyTransferForV2.createDummyFile(
@@ -477,18 +469,11 @@ class TransfersTest : RobolectricTestsBase() {
         appDatabase.getTransferDao().upsertFile(docFile2)
         appDatabase.getTransferDao().upsertFile(subFile)
         appDatabase.getTransferDao().upsertFile(otherFile)
-        appDatabase.getTransferDao().upsertFile(folderWithPercent)
         appDatabase.getTransferDao().upsertFile(fileWithWildcardPercent)
         appDatabase.getTransferDao().upsertFile(fileWithWildcardUnderscore)
         appDatabase.getTransferDao().upsertFile(folderItself)
 
         val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
-
-        // folderWithPercent (doc%ments/file.txt) must NOT be returned - % is literal in range comparison
-        assertTrue(
-            folderFiles.none { it.id == "file4b" },
-            "Should not match 'doc%ments' when searching 'documents' - % is literal"
-        )
 
         assertEquals(5, folderFiles.size, "Should return files in folder and subfolders")
         assertTrue(folderFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3", "file5", "file6")))
@@ -496,6 +481,33 @@ class TransfersTest : RobolectricTestsBase() {
         assertTrue(folderFiles.none { it.isFolder }, "Should not include folders")
         assertTrue(folderFiles.any { it.path.contains("%") }, "Should correctly handle files with % in name")
         assertTrue(folderFiles.any { it.path.contains("_") }, "Should correctly handle files with _ in name")
+    }
+
+    @Test
+    fun testGetFilesUnderPathWithWildcard() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        val docFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents%/file1.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+        val otherFile = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documentsother/file.txt", mimeType = "text/plain", id = "file4"),
+            transferId = transfer.id,
+            folderId = "otherFolder",
+        )
+
+        appDatabase.getTransferDao().upsertFile(docFile1)
+        appDatabase.getTransferDao().upsertFile(otherFile)
+
+        // With LIKE 'documents%', this would also match "documentsother/file.txt"
+        // But with lexicographical range, % is treated as a literal character, so only the exact "documents%" prefix matches
+        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents%")
+
+        assertEquals(1, folderFiles.size, "Should return only 1 file")
+        assertTrue(folderFiles.any { it.id == "file1" }, "The % should be treated as a literal character, not a wildcard")
     }
     //endregion
 
