@@ -509,6 +509,25 @@ class TransfersTest : RobolectricTestsBase() {
         assertEquals(1, folderFiles.size, "Should return only 1 file")
         assertTrue(folderFiles.any { it.id == "file1" }, "The % should be treated as a literal character, not a wildcard")
     }
+
+    @Test
+    fun testGetFilesUnderPathWithEmoji() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+        insertTransfer(transfer, TransferDirection.SENT, null)
+
+        val docFile1 = FileDB(
+            file = DummyTransferForV2.createDummyFile(path = "documents/😅test.txt", mimeType = "text/plain", id = "file1"),
+            transferId = transfer.id,
+            folderId = "folder1",
+        )
+
+        appDatabase.getTransferDao().upsertFile(docFile1)
+
+        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
+
+        assertEquals(1, folderFiles.size, "Should return only 1 file")
+        assertTrue(folderFiles.any { it.id == "file1" }, "The % should be treated as a literal character, not a wildcard")
+    }
     //endregion
 
     //region Helper methods

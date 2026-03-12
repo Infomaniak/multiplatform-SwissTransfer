@@ -28,6 +28,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController.Companion.DAYS_SINCE_EXPIRATION
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.database.utils.MAX_VALID_UNICODE
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -97,16 +98,22 @@ interface TransferDao {
      *
      * This uses a lexicographical prefix range instead of `LIKE 'path/%'`:
      *
-     *   `path >= folderPath + '/' AND path < folderPath + '/\uFFFF'`
+     *   `path >= :folderPath || '/' AND path < :folderPath || '/' || char(MAX_VALID_UNICODE)`
      *
      * Since SQLite compares TEXT values lexicographically, every path starting
-     * with `folderPath/` falls within this range. The character `\uFFFF` acts as a
-     * maximal Unicode value to cap the upper bound of the prefix.
+     * with `folderPath/` falls within this range. The [MAX_VALID_UNICODE] constant
+     * (0x10FFFF, the maximum valid Unicode code point) acts as a maximal value
+     * to cap the upper bound of the prefix.
      *
      * This approach avoids issues with `LIKE` wildcards (`%`, `_`) and allows
      * SQLite to efficiently use an index on `(transferId, path)` for a range scan.
      */
-    @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND path >= :folderPath || '/' AND path < :folderPath || '/\uFFFF' AND NOT isFolder")
+    @Query(
+        """SELECT * FROM FileDB
+        WHERE transferId=:transferId
+            AND path >= :folderPath || '/' AND path < :folderPath || '/' || char($MAX_VALID_UNICODE)
+            AND NOT isFolder"""
+    )
     suspend fun getFilesUnderPath(transferId: String, folderPath: String): List<FileDB>
 
     @Query("SELECT * FROM FileDB WHERE transferId=:transferId AND parentId IS NULL")
