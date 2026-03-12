@@ -385,10 +385,10 @@ class TransferManager internal constructor(
      * @return A transfer matching the specified transferUUID or null.
      */
     suspend fun getTransferByUUID(transferUUID: String): TransferUi? {
-        currentUserId?.let { userId ->
-            return transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
+        val transferUiFromV2 = currentUserId?.let { userId ->
+            transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
         }
-        return transferController.getTransfer(transferUUID)?.let(::TransferUi)
+        return transferUiFromV2 ?: transferController.getTransfer(transferUUID)?.let(::TransferUi)
     }
 
     /**
