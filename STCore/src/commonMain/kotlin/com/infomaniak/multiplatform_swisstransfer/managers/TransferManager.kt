@@ -247,28 +247,39 @@ class TransferManager internal constructor(
     suspend fun writeDownloadManagerId(
         transfer: TransferUi,
         fileUid: String?,
-        uniqueDownloadManagerId: Long?
+        uniqueDownloadManagerId: Long?,
     ) {
         val transferId = transfer.uuid
         when (transfer.apiSource) {
-            V1 -> {
-                transferController.writeDownloadManagerId(transferId, fileUid, uniqueDownloadManagerId)
-            }
-            V2 -> {
-                if (uniqueDownloadManagerId == null) {
-                    appDatabase.getDownloadManagerRef().delete(
-                        transferId = transferId,
-                        fileId = fileUid ?: ""
-                    )
-                } else {
-                    appDatabase.getDownloadManagerRef().update(
-                        DownloadManagerRefV2(
-                            transferId = transferId,
-                            fileId = fileUid ?: "",
-                            downloadManagerUniqueId = uniqueDownloadManagerId,
-                            userOwnerId = currentUserId ?: return
-                        )
-                    )
+            V1 -> transferController.writeDownloadManagerId(transferId, fileUid, uniqueDownloadManagerId)
+            V2 -> writeDownloadManagerForV2(transferId, fileUid, uniqueDownloadManagerId)
+        }
+    }
+
+    /**
+     * Persists references to Android's DownloadManager IDs or removes them if the download is cancelled.
+     *
+     * For each [DownloadManagerArgs] in the list:
+     * - If [DownloadManagerArgs.uniqueDownloadManagerId] is null, deletes the reference
+     * - Otherwise, inserts or updates the reference with the new ID
+     *
+     * The list is chunked into batches of [batchLimit] to avoid blocking the database writer for too long.
+     *
+     * @param downloadManagerArgs List of transfer/file/downloadID mappings to persist.
+     *                            Processed in chunks of [batchLimit] to maintain UI responsiveness.
+     *
+     * @throws IllegalStateException If called when no user is logged in.
+     */
+    suspend fun writeDownloadManagerIdsForV2(
+        downloadManagerArgs: List<DownloadManagerArgs>,
+        batchLimit: Int = 500,
+    ) {
+        downloadManagerArgs.chunked(batchLimit).forEach { batch ->
+            appDatabase.useWriterConnection {
+                it.immediateTransaction {
+                    batch.forEach { args ->
+                        writeDownloadManagerForV2(args.transferId, args.fileId, args.uniqueDownloadManagerId)
+                    }
                 }
             }
         }
@@ -669,6 +680,24 @@ class TransferManager internal constructor(
         }
     }
 
+    private suspend fun writeDownloadManagerForV2(transferId: String, fileUid: String?, uniqueDownloadManagerId: Long?) {
+        if (uniqueDownloadManagerId == null) {
+            appDatabase.getDownloadManagerRef().delete(
+                transferId = transferId,
+                fileId = fileUid ?: "",
+            )
+        } else {
+            appDatabase.getDownloadManagerRef().update(
+                DownloadManagerRefV2(
+                    transferId = transferId,
+                    fileId = fileUid ?: "",
+                    downloadManagerUniqueId = uniqueDownloadManagerId,
+                    userOwnerId = currentUserId ?: return
+                )
+            )
+        }
+    }
+
     internal suspend fun createTransferLocally(
         linkUUID: String,
         uploadSession: UploadSession,
@@ -718,4 +747,6 @@ class TransferManager internal constructor(
             )
         }
     }
+
+    data class DownloadManagerArgs(val transferId: String, val fileId: String?, val uniqueDownloadManagerId: Long?)
 }
