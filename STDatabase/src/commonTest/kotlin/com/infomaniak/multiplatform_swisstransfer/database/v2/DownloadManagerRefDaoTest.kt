@@ -49,10 +49,10 @@ class DownloadManagerRefDaoTest : RobolectricTestsBase() {
     @Test
     fun getDownloadManagerId_withExistingRef_returnsId() = runTest {
         val ref = createDownloadManagerRef("transfer1", "file1", 123L)
+
         appDatabase.getDownloadManagerRef().update(ref)
 
         val result = appDatabase.getDownloadManagerRef().getDownloadManagerId("transfer1", "file1").first()
-
         assertNotNull(result)
         assertEquals(123L, result)
     }
