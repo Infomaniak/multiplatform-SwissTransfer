@@ -65,7 +65,7 @@ class DownloadManagerRefDaoTest : RobolectricTestsBase() {
     }
 
     @Test
-    fun getDownloadManagerId_withDefaultFileId_returnsIdForEmptyFileId() = runTest {
+    fun getDownloadManagerId_withEmptyFileId_returnsIdForEmptyFileId() = runTest {
         val ref = createDownloadManagerRef("transfer1", "", 456L)
         appDatabase.getDownloadManagerRef().update(ref)
 
@@ -172,7 +172,7 @@ class DownloadManagerRefDaoTest : RobolectricTestsBase() {
     }
 
     @Test
-    fun delete_withDefaultFileId_deletesRefWithEmptyFileId() = runTest {
+    fun delete_withEmptyFileId_deletesRefWithEmptyFileId() = runTest {
         val ref = createDownloadManagerRef("transfer1", "", 456L)
         appDatabase.getDownloadManagerRef().update(ref)
 
