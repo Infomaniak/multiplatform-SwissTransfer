@@ -268,12 +268,16 @@ class TransferManager internal constructor(
      * @param downloadManagerArgs List of transfer/file/downloadID mappings to persist.
      *                            Processed in chunks of [batchLimit] to maintain UI responsiveness.
      *
+     * @throws IllegalArgumentException If batchLimit is smaller than 0 or equals to 0
      * @throws IllegalStateException If called when no user is logged in.
      */
+    @Throws(IllegalStateException::class, IllegalArgumentException::class)
     suspend fun writeDownloadManagerIdsForV2(
         downloadManagerArgs: List<DownloadManagerArgs>,
         batchLimit: Int = 500,
     ) {
+        require(batchLimit > 0) { "batchLimit must be greater than 0" }
+        if (currentUserId == null) error("No user logged in")
         downloadManagerArgs.chunked(batchLimit).forEach { batch ->
             appDatabase.useWriterConnection {
                 it.immediateTransaction {
