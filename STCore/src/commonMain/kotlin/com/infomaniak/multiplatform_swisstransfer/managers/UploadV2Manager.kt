@@ -247,11 +247,36 @@ class UploadV2Manager(
         val succeeded = uploadRepository.finalizeTransferFile(
             transferId = transferId,
             fileId = fileId,
-            etags = etags
+            etags = etags,
         )
         if (!succeeded) {
             throw UnknownException(Exception("Unknown error while finalizing the file with id $fileId in transfer $transferId"))
         }
+    }
+
+    /**
+     * Finalizes a file uploaded directly without chunks.
+     * @param transferId The id of the transfer created in [prepareTransfer].
+     * @param fileId The id of the file being uploaded.
+     *
+     * @throws NetworkException If there is a network error.
+     * @throws ApiV2ErrorException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+    )
+    suspend fun finalizeDirectFileUploaded(
+        transferId: String,
+        fileId: String,
+    ) {
+        finalizeFileUploadedInChunks(transferId, fileId, etags = emptyList())
     }
 
     /**

@@ -85,7 +85,9 @@ internal class UploadRequest(
         val response = httpClient.patch(createV2Url(ApiRoutes.uploadDirectly(transferId, fileId))) {
             contentType(ContentType.Application.Json)
             headers { appendBearer() } // TODO: Remove this for release, this temporary for checking isStaff, back-end
-            setBody(ChunkedFileUploadFinalizationPayload(etags))
+            if (etags.isNotEmpty()) {
+                setBody(ChunkedFileUploadFinalizationPayload(etags))
+            }
         }
         return response.status.isSuccess()
     }
