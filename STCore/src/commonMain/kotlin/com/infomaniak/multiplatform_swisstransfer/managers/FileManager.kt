@@ -24,6 +24,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
+import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUi
 import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUiList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,6 +62,16 @@ class FileManager(
         } else {
             emit(files)
         }
+    }
+
+    /**
+     * Retrieves a single file by its unique identifier.
+     *
+     * @param fileId The unique identifier of the file.
+     * @return A [FileUi] object representing the file, or null if not found.
+     */
+    suspend fun getFileUi(fileId: String): FileUi? {
+        return appDatabase.getTransferDao().getFile(fileId)?.toFileUi()
     }
 
     /**

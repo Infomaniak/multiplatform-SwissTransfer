@@ -55,7 +55,7 @@ internal suspend fun TransferDB.toTransferUi(
 
 internal fun FileDB.toFileUi(): FileUi = FileUi(
     uid = this.id,
-    fileName = this.path.substringAfterLast("/"),
+    fileName = this.name,
     path = this.path,
     isFolder = this.isFolder,
     fileSize = this.size,
