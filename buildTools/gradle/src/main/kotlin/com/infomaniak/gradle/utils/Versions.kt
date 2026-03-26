@@ -20,7 +20,7 @@ package com.infomaniak.gradle.utils
 import org.gradle.api.JavaVersion
 
 internal object Versions {
-    const val mavenVersionName = "7.1.1-SNAPSHOT"
+    const val mavenVersionName = "7.1.1"
 
     const val minSdk = 24
     const val compileSdk = 35
