@@ -23,6 +23,7 @@ import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V1
@@ -58,10 +59,12 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.Unauthorize
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
+import io.realm.kotlin.internal.interop.ErrorCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -94,6 +97,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.Tra
 class TransferManager internal constructor(
     private val accountManager: AccountManager,
     private val appDatabase: AppDatabase,
+    private val crashReport: CrashReportInterface,
     private val transferController: TransferController,
     private val transferRepository: TransferRepository,
     private val transferV2Repository: TransferV2Repository,
@@ -123,7 +127,7 @@ class TransferManager internal constructor(
         flowForAuthUser = { userId -> transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao) },
         flowForGuestUser = { transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) } },
         merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
-    )
+    ).catchDbExceptions()
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
@@ -156,14 +160,14 @@ class TransferManager internal constructor(
             }
         },
         merge = { a, b -> a + b }
-    )
+    ).catchDbExceptions()
 
     @Throws(RealmException::class)
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
         flowForGuestUser = { transferController.getTransfersCountFlow(transferDirection) },
         merge = { a, b -> a + b }
-    )
+    ).catchDbExceptions()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Throws(RealmException::class)
@@ -173,7 +177,7 @@ class TransferManager internal constructor(
         },
         flowForGuestUser = { transferController.getTransferFlow(transferUUID).map { transfer -> transfer?.let(::TransferUi) } },
         merge = { a, b -> a ?: b }
-    )
+    ).catchDbExceptions()
 
     /**
      * Fetch all transfers in database to update their status
@@ -715,6 +719,22 @@ class TransferManager internal constructor(
     }
 
     private suspend fun showGuestData(): Boolean = accountManager.showGuestData.first()
+
+    private fun <T> Flow<T>.catchDbExceptions() = catch { throwable ->
+        if (throwable.shouldIgnoreRealmError().not()) {
+            crashReport.capture("Failure to load transfers", throwable)
+        }
+    }
+
+    /** Ignore all errors due to voluntary Realm closure
+     * @return true if the error is recognized, otherwise false
+     **/
+    private fun Throwable.shouldIgnoreRealmError(): Boolean = message?.run {
+        contains(ErrorCode.RLM_ERR_CLOSED_REALM.name)
+                || contains(ErrorCode.RLM_ERR_INVALIDATED_OBJECT.name)
+                || contains(ErrorCode.RLM_ERR_INVALID_TABLE_REF.name)
+                || contains(ErrorCode.RLM_ERR_STALE_ACCESSOR.name)
+    } ?: false
 
     private fun <T> userDependentFlow(
         flowForAuthUser: (userId: Long) -> Flow<T>,

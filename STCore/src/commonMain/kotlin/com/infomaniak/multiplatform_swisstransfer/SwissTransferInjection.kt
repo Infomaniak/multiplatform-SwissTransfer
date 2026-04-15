@@ -104,6 +104,7 @@ class SwissTransferInjection(
         TransferManager(
             accountManager,
             appDatabase,
+            crashReport,
             transferController,
             transferRepository,
             transferV2Repository,
