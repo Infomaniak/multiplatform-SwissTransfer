@@ -721,7 +721,7 @@ class TransferManager internal constructor(
     private suspend fun showGuestData(): Boolean = accountManager.showGuestData.first()
 
     private fun <T> Flow<T>.catchDbExceptions() = catch { throwable ->
-        if (throwable.shouldIgnoreRealmError().not()) {
+        if (throwable.isExpectedRealmError().not()) {
             crashReport.capture("Failure to load transfers", throwable)
         }
     }
@@ -729,7 +729,7 @@ class TransferManager internal constructor(
     /** Ignore all errors due to voluntary Realm closure
      * @return true if the error is recognized, otherwise false
      **/
-    private fun Throwable.shouldIgnoreRealmError(): Boolean = message?.run {
+    private fun Throwable.isExpectedRealmError(): Boolean = message?.run {
         contains(ErrorCode.RLM_ERR_CLOSED_REALM.name)
                 || contains(ErrorCode.RLM_ERR_INVALIDATED_OBJECT.name)
                 || contains(ErrorCode.RLM_ERR_INVALID_TABLE_REF.name)
