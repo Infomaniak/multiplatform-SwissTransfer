@@ -37,6 +37,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
+import com.infomaniak.multiplatform_swisstransfer.database.utils.isExpectedRealmError
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
@@ -59,7 +60,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.Unauthorize
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
-import io.realm.kotlin.internal.interop.ErrorCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -725,16 +725,6 @@ class TransferManager internal constructor(
             crashReport.capture("Failure to load transfers", throwable)
         }
     }
-
-    /** Ignore all errors due to voluntary Realm closure
-     * @return true if the error is recognized, otherwise false
-     **/
-    private fun Throwable.isExpectedRealmError(): Boolean = message?.run {
-        contains(ErrorCode.RLM_ERR_CLOSED_REALM.name)
-                || contains(ErrorCode.RLM_ERR_INVALIDATED_OBJECT.name)
-                || contains(ErrorCode.RLM_ERR_INVALID_TABLE_REF.name)
-                || contains(ErrorCode.RLM_ERR_STALE_ACCESSOR.name)
-    } ?: false
 
     private fun <T> userDependentFlow(
         flowForAuthUser: (userId: Long) -> Flow<T>,
