@@ -122,7 +122,6 @@ class TransferManager internal constructor(
      *
      * @return A `Flow` that emits the list of all transfers.
      */
-    @Throws(RealmException::class)
     fun getAllTransfers(): Flow<List<TransferUi>> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao) },
         flowForGuestUser = { transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) } },
@@ -138,7 +137,6 @@ class TransferManager internal constructor(
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
-    @Throws(RealmException::class)
     fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> = userDependentFlow(
         flowForAuthUser = { userId ->
             combine(
@@ -162,7 +160,6 @@ class TransferManager internal constructor(
         merge = { a, b -> a + b }
     ).catchDbExceptions()
 
-    @Throws(RealmException::class)
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
         flowForGuestUser = { transferController.getTransfersCountFlow(transferDirection) },
@@ -170,7 +167,6 @@ class TransferManager internal constructor(
     ).catchDbExceptions()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @Throws(RealmException::class)
     fun getTransferFlow(transferUUID: String): Flow<TransferUi?> = userDependentFlow(
         flowForAuthUser = { userId ->
             transferDao.transferFlow(userId, transferUUID).mapLatest { transferDB -> transferDB?.toTransferUi(transferDao) }
