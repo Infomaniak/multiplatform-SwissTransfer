@@ -23,6 +23,7 @@ import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V1
@@ -36,6 +37,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
+import com.infomaniak.multiplatform_swisstransfer.database.utils.isExpectedRealmError
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
@@ -62,6 +64,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -94,6 +97,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.Tra
 class TransferManager internal constructor(
     private val accountManager: AccountManager,
     private val appDatabase: AppDatabase,
+    private val crashReport: CrashReportInterface,
     private val transferController: TransferController,
     private val transferRepository: TransferRepository,
     private val transferV2Repository: TransferV2Repository,
@@ -118,12 +122,11 @@ class TransferManager internal constructor(
      *
      * @return A `Flow` that emits the list of all transfers.
      */
-    @Throws(RealmException::class)
     fun getAllTransfers(): Flow<List<TransferUi>> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao) },
         flowForGuestUser = { transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) } },
         merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
-    )
+    ).catchDbExceptions()
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
@@ -134,7 +137,6 @@ class TransferManager internal constructor(
      * @param transferDirection The direction of the transfers to retrieve (e.g., [TransferDirection.SENT] or [TransferDirection.RECEIVED]).
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
-    @Throws(RealmException::class)
     fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> = userDependentFlow(
         flowForAuthUser = { userId ->
             combine(
@@ -156,24 +158,22 @@ class TransferManager internal constructor(
             }
         },
         merge = { a, b -> a + b }
-    )
+    ).catchDbExceptions()
 
-    @Throws(RealmException::class)
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
         flowForGuestUser = { transferController.getTransfersCountFlow(transferDirection) },
         merge = { a, b -> a + b }
-    )
+    ).catchDbExceptions()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @Throws(RealmException::class)
     fun getTransferFlow(transferUUID: String): Flow<TransferUi?> = userDependentFlow(
         flowForAuthUser = { userId ->
             transferDao.transferFlow(userId, transferUUID).mapLatest { transferDB -> transferDB?.toTransferUi(transferDao) }
         },
         flowForGuestUser = { transferController.getTransferFlow(transferUUID).map { transfer -> transfer?.let(::TransferUi) } },
         merge = { a, b -> a ?: b }
-    )
+    ).catchDbExceptions()
 
     /**
      * Fetch all transfers in database to update their status
@@ -715,6 +715,12 @@ class TransferManager internal constructor(
     }
 
     private suspend fun showGuestData(): Boolean = accountManager.showGuestData.first()
+
+    private fun <T> Flow<T>.catchDbExceptions() = catch { throwable ->
+        if (throwable.isExpectedRealmError().not()) {
+            crashReport.capture("Failure to load transfers", throwable)
+        }
+    }
 
     private fun <T> userDependentFlow(
         flowForAuthUser: (userId: Long) -> Flow<T>,
