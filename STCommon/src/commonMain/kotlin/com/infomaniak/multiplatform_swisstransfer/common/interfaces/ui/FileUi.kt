@@ -22,6 +22,11 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 
+/**
+ * @property localPath Platform-specific local storage path:
+ * - On Android: Stores the Content URI string to allow re-opening the file during a new transfer.
+ * - On iOS: References the file in the app's local storage for use between app extensions and the main process.
+ */
 data class FileUi(
     val uid: String,
     val fileName: String,
