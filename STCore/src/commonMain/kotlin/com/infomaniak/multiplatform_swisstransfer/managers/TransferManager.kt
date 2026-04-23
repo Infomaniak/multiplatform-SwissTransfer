@@ -525,7 +525,7 @@ class TransferManager internal constructor(
      *
      * @param url The URL associated with the transfer to retrieve.
      *
-     * @return The transferUUID of the added transfer, otherwise null if the api doesn't return the transfer
+     * @return The [TransferUi] of the added transfer, otherwise null if the api doesn't return the transfer
      *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiErrorException If there is an error related to the API during transfer retrieval.
