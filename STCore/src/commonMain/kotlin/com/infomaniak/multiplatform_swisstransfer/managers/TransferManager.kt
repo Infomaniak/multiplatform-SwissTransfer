@@ -564,7 +564,7 @@ class TransferManager internal constructor(
         TransferCancelledException::class,
         UnauthorizedException::class,
     )
-    suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
+    suspend fun addTransferByUrl(url: String, password: String? = null): TransferUi? = withContext(Dispatchers.Default) {
         if (isV2Url(url)) {
             val linkUUID = extractLinkUUIDFromURL(url)
             if (linkUUID != null) {
@@ -572,7 +572,7 @@ class TransferManager internal constructor(
                 if (transferDao.getTransfer(transferApi.id) == null) {
                     addTransferV2(linkUUID, transferApi, password)
                 }
-                return@withContext transferApi.id
+                return@withContext transferDao.getTransfer(transferApi.id)?.toTransferUi(transferDao)
             }
         }
 
@@ -582,7 +582,7 @@ class TransferManager internal constructor(
         if (transfer == null) {
             addTransfer(transferApi, TransferDirection.RECEIVED, password)
         }
-        return@withContext transferApi.linkUUID
+        return@withContext transferController.getTransfer(transferApi.linkUUID)?.let(::TransferUi)
     }
 
     private fun extractLinkUUIDFromURL(url: String): String? {
