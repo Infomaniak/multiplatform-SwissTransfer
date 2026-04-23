@@ -18,11 +18,11 @@
 package com.infomaniak.multiplatform_swisstransfer.network.utils
 
 object ApiUrlMatcher {
-    private const val v1UrlRegex = "^https://.+/d/[^?]+"
-    private const val v2UrlRegex = "^https://.+/dl/[^?]+"
+    private val v1UrlRegex = Regex("^https://.+/d/[^?]+")
+    private val v2UrlRegex = Regex("^https://.+/dl/[^?]+")
 
-    fun isV1Url(url: String) = url.contains("/d/") && v1UrlRegex.toRegex().matches(url)
-    fun isV2Url(url: String) = url.contains("/dl/") && v2UrlRegex.toRegex().matches(url)
+    fun isV1Url(url: String) = url.contains("/d/") && v1UrlRegex.matches(url)
+    fun isV2Url(url: String) = url.contains("/dl/") && v2UrlRegex.matches(url)
 
     fun extractUUID(url: String) = url.substringAfterLast("/")
 }

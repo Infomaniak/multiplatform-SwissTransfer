@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlin.test.Test
@@ -41,7 +42,7 @@ class TransferV2RepositoryTest {
     @Test
     fun canExtractLinkUUIDFromUrl() {
         val url = "https://www.swisstransfer.com/d/fa7d299d-1001-4668-83a4-2a9b61aa59e8"
-        val result = transferRepository.extractUUID(url)
+        val result = ApiUrlMatcher.extractUUID(url)
         assertEquals("fa7d299d-1001-4668-83a4-2a9b61aa59e8", result)
     }
 
