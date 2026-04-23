@@ -60,6 +60,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.Unauthorize
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher.isV2Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -103,7 +104,6 @@ class TransferManager internal constructor(
     private val transferV2Repository: TransferV2Repository,
 ) {
 
-    private val v2UrlRegex = "^https://.+/dl/[^?]+"
     private val minDurationBetweenAutoUpdates = 15.minutes
     private var lastUpdateDate: TimeMark = TimeSource.Monotonic.markNow() - (minDurationBetweenAutoUpdates + 1.seconds)
 
@@ -111,8 +111,6 @@ class TransferManager internal constructor(
         get() = (accountManager.currentUser as? STUser.AuthUser)?.id
 
     private val transferDao get() = appDatabase.getTransferDao()
-
-    fun isV2Url(url: String) = v2UrlRegex.toRegex().matches(url)
 
     /**
      * Retrieves a flow of all transfers.

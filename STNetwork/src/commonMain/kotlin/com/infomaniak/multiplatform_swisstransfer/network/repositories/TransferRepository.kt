@@ -33,6 +33,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.requests.TransferRequest
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher.extractUUID
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNull
@@ -128,6 +129,4 @@ class TransferRepository internal constructor(private val transferRequest: Trans
         return transferRequest.deleteTransfer(linkUUID, token)
     }
 
-
-    internal fun extractUUID(url: String) = url.substringAfterLast("/")
 }
