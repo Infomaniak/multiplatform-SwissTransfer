@@ -140,6 +140,30 @@ class TransfersTest : RobolectricTestsBase() {
             message = "The transfer should be `transfer1`",
         )
     }
+
+    @Test
+    fun canGetTransferByLinkId() = runTest {
+        val transfer1 = DummyTransferForV2.transfer1
+        val transfer2 = DummyTransferForV2.transfer2
+        val expectedLinkId = "linkId"
+
+        insertTransfer(transfer1, TransferDirection.RECEIVED, password = null, linkId = expectedLinkId)
+        insertTransfer(transfer2, TransferDirection.RECEIVED, password = null)
+
+        val transferDBResult = appDatabase.getTransferDao().getTransferByLinkId(expectedLinkId)
+        assertNotNull(transferDBResult)
+        assertEquals(expectedLinkId, transferDBResult.linkId)
+    }
+
+    @Test
+    fun getTransferByLinkId_returnsNull_whenLinkIdDoesNotMatch() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+
+        insertTransfer(transfer, TransferDirection.RECEIVED, password = null)
+
+        val transferDBResult = appDatabase.getTransferDao().getTransferByLinkId("linkId")
+        assertNull(transferDBResult)
+    }
     //endregion
 
     //region Upsert data
@@ -543,6 +567,7 @@ class TransfersTest : RobolectricTestsBase() {
         transfer: Transfer,
         transferDirection: TransferDirection,
         password: String?,
+        linkId: String? = null,
     ) {
         val transferDB = TransferDB(
             id = transfer.id,
@@ -557,6 +582,7 @@ class TransfersTest : RobolectricTestsBase() {
             transferStatus = transfer.transferStatus,
             recipientsEmails = transfer.recipientsEmails,
             userOwnerId = userId,
+            linkId = linkId,
         )
         appDatabase.getTransferDao().upsertTransfer(transferDB)
     }
