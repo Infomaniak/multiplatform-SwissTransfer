@@ -62,7 +62,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.Transf
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher
-import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher.isV2Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -610,7 +609,7 @@ class TransferManager internal constructor(
         UnauthorizedException::class,
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): TransferUi? = withContext(Dispatchers.Default) {
-        if (isV2Url(url)) {
+        if (ApiUrlMatcher.isV2Url(url)) {
             val linkUUID = extractLinkUUIDFromURL(url)
             if (linkUUID != null) {
                 val transferApi = transferV2Repository.getTransferByUrl(url, password).transfer
