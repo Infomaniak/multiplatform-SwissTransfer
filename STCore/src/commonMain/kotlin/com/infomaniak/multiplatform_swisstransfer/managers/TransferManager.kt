@@ -399,6 +399,7 @@ class TransferManager internal constructor(
      *
      * @return A transfer matching the specified transferUUID or null.
      */
+    @Throws(RealmException::class, CancellationException::class)
     suspend fun getTransferByUUID(transferUUID: String): TransferUi? {
         val transferUiFromV2 = currentUserId?.let { userId ->
             transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
