@@ -40,6 +40,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApi
 import com.infomaniak.multiplatform_swisstransfer.database.utils.isExpectedRealmError
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
+import com.infomaniak.multiplatform_swisstransfer.exceptions.UnsupportedTransferDeeplinkUrlException
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiList
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiListFlow
@@ -60,6 +61,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.Unauthorize
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher.isV2Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -402,6 +404,36 @@ class TransferManager internal constructor(
             transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
         }
         return transferUiFromV2 ?: transferController.getTransfer(transferUUID)?.let(::TransferUi)
+    }
+
+    /**
+     * Retrieves a transfer by its URL.
+     *
+     * Analyzes the provided URL to determine whether it corresponds to a v1 or v2 transfer,
+     * extracts the relevant identifier, and fetches the transfer from the appropriate source.
+     * The result is mapped to [TransferUi]. If the URL format is not supported, an
+     * [UnsupportedTransferDeeplinkUrlException] is thrown.
+     *
+     * @param url The URL of the transfer to retrieve.
+     * @return The corresponding [TransferUi] if the transfer is found, or null otherwise.
+     */
+    @Throws(
+        RealmException::class,
+        CancellationException::class,
+        UnsupportedTransferDeeplinkUrlException::class,
+    )
+    suspend fun getTransferByUrl(url: String): TransferUi? = withContext(Dispatchers.Default) {
+        return@withContext when {
+            ApiUrlMatcher.isV1Url(url) -> {
+                val linkUUID = ApiUrlMatcher.extractUUID(url)
+                transferController.getTransfer(linkUUID)?.let(::TransferUi)
+            }
+            ApiUrlMatcher.isV2Url(url) -> {
+                val linkId = ApiUrlMatcher.extractUUID(url)
+                transferDao.getTransferByLinkId(linkId)?.toTransferUi(transferDao)
+            }
+            else -> throw UnsupportedTransferDeeplinkUrlException(url)
+        }
     }
 
     /**
