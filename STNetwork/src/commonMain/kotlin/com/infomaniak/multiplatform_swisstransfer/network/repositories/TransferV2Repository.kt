@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferLinkResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.TransferRequest
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
@@ -101,7 +102,7 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
         VirusDetectedFetchTransferException::class,
     )
     suspend fun getTransferByUrl(url: String, password: String?): TransferLinkResponse {
-        return getTransferByLinkUUID(extractUUID(url), password)
+        return getTransferByLinkUUID(ApiUrlMatcher.extractUUID(url), password)
     }
 
     @Throws(
@@ -145,9 +146,6 @@ class TransferV2Repository internal constructor(private val transferRequest: Tra
     ): Boolean = withTransferErrorHandling {
         transferRequest.deleteTransfer(transferId)
     }
-
-
-    internal fun extractUUID(url: String) = url.substringAfterLast("/")
 
     private suspend fun <T> withTransferErrorHandling(block: suspend () -> T) = runCatching {
         block()
