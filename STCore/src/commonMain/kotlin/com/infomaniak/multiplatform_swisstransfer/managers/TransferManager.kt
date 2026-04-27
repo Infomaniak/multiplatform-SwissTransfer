@@ -582,7 +582,8 @@ class TransferManager internal constructor(
         if (transfer == null) {
             addTransfer(transferApi, TransferDirection.RECEIVED, password)
         }
-        return@withContext transferController.getTransfer(transferApi.linkUUID)?.let(::TransferUi)
+        return@withContext transfer?.let(::TransferUi)
+            ?: transferController.getTransfer(transferApi.linkUUID)?.let(::TransferUi)
     }
 
     private fun extractLinkUUIDFromURL(url: String): String? {
