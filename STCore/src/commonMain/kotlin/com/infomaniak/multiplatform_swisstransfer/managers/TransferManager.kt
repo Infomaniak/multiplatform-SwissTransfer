@@ -40,6 +40,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApi
 import com.infomaniak.multiplatform_swisstransfer.database.utils.isExpectedRealmError
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
+import com.infomaniak.multiplatform_swisstransfer.exceptions.UnsupportedTransferDeeplinkUrlException
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiList
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiListFlow
@@ -60,7 +61,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.Unauthorize
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
-import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher.isV2Url
+import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -397,11 +398,54 @@ class TransferManager internal constructor(
      *
      * @return A transfer matching the specified transferUUID or null.
      */
-    suspend fun getTransferByUUID(transferUUID: String): TransferUi? {
+    @Throws(RealmException::class, CancellationException::class)
+    suspend fun getTransferByUUID(transferUUID: String): TransferUi? = withContext(Dispatchers.Default) {
         val transferUiFromV2 = currentUserId?.let { userId ->
             transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
         }
-        return transferUiFromV2 ?: transferController.getTransfer(transferUUID)?.let(::TransferUi)
+        return@withContext transferUiFromV2 ?: transferController.getTransfer(transferUUID)?.let(::TransferUi)
+    }
+
+    /**
+     * Returns the transfer associated with the given link ID as a [TransferUi].
+     *
+     * Note: This function is only supported for transfers created with API v2.
+     *
+     * @param linkId the transfer link identifier.
+     * @return the matching [TransferUi], or null if no transfer is found.
+     */
+    suspend fun getTransferByLinkId(linkId: String): TransferUi? = withContext(Dispatchers.Default) {
+        return@withContext transferDao.getTransferByLinkId(linkId)?.toTransferUi(transferDao)
+    }
+
+    /**
+     * Retrieves a transfer by its URL.
+     *
+     * Analyzes the provided URL to determine whether it corresponds to a v1 or v2 transfer,
+     * extracts the relevant identifier, and fetches the transfer from the appropriate source.
+     * The result is mapped to [TransferUi]. If the URL format is not supported, an
+     * [UnsupportedTransferDeeplinkUrlException] is thrown.
+     *
+     * @param url The URL of the transfer to retrieve.
+     * @return The corresponding [TransferUi] if the transfer is found, or null otherwise.
+     */
+    @Throws(
+        RealmException::class,
+        CancellationException::class,
+        UnsupportedTransferDeeplinkUrlException::class,
+    )
+    suspend fun getTransferByUrl(url: String): TransferUi? = withContext(Dispatchers.Default) {
+        return@withContext when {
+            ApiUrlMatcher.isV1Url(url) -> {
+                val linkUUID = ApiUrlMatcher.extractUUID(url)
+                transferController.getTransfer(linkUUID)?.let(::TransferUi)
+            }
+            ApiUrlMatcher.isV2Url(url) -> {
+                val linkId = ApiUrlMatcher.extractUUID(url)
+                transferDao.getTransferByLinkId(linkId)?.toTransferUi(transferDao)
+            }
+            else -> throw UnsupportedTransferDeeplinkUrlException(url)
+        }
     }
 
     /**
@@ -565,7 +609,7 @@ class TransferManager internal constructor(
         UnauthorizedException::class,
     )
     suspend fun addTransferByUrl(url: String, password: String? = null): TransferUi? = withContext(Dispatchers.Default) {
-        if (isV2Url(url)) {
+        if (ApiUrlMatcher.isV2Url(url)) {
             val linkUUID = extractLinkUUIDFromURL(url)
             if (linkUUID != null) {
                 val transferApi = transferV2Repository.getTransferByUrl(url, password).transfer

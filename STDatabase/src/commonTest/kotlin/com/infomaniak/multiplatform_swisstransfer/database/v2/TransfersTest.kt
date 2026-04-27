@@ -41,6 +41,7 @@ class TransfersTest : RobolectricTestsBase() {
 
     private lateinit var appDatabase: AppDatabase
     private val userId = 0L
+    private val transferDao get() = appDatabase.getTransferDao()
 
     @BeforeTest
     fun createDb() {
@@ -57,7 +58,7 @@ class TransfersTest : RobolectricTestsBase() {
     @Test
     fun canGetAllTransfers() = runTest {
         addTwoRandomTransfersInDatabase()
-        val transfers = appDatabase.getTransferDao().transfersFlow(userId).first()
+        val transfers = transferDao.transfersFlow(userId).first()
         assertEquals(2, transfers.count(), "The transfers list must contain 2 items")
     }
 
@@ -77,9 +78,9 @@ class TransfersTest : RobolectricTestsBase() {
             transferDirection = TransferDirection.SENT,
             transferStatus = TransferStatus.PENDING_UPLOAD,
         )
-        appDatabase.getTransferDao().upsertTransfer(uploadTransfer)
+        transferDao.upsertTransfer(uploadTransfer)
 
-        val transfers = appDatabase.getTransferDao().transfersFlow(userId).first()
+        val transfers = transferDao.transfersFlow(userId).first()
         // Should only return the completed transfer, not the pending upload
         assertEquals(1, transfers.count())
         assertEquals(DummyTransferForV2.transfer1.id, transfers.first().id)
@@ -93,7 +94,7 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.expired, transferDirection, null)
         insertTransfer(DummyTransferForV2.notExpired, transferDirection, null)
 
-        val validTransfers = appDatabase.getTransferDao().validTransfersFlow(userId, transferDirection).first()
+        val validTransfers = transferDao.validTransfersFlow(userId, transferDirection).first()
 
         assertEquals(1, validTransfers.count(), "The valid transfers list must contain 1 item")
         assertEquals(
@@ -111,7 +112,7 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.expired, transferDirection, null)
         insertTransfer(DummyTransferForV2.notExpired, transferDirection, null)
 
-        val expiredTransfers = appDatabase.getTransferDao().expiredTransfersFlow(userId, transferDirection).first()
+        val expiredTransfers = transferDao.expiredTransfersFlow(userId, transferDirection).first()
 
         assertEquals(1, expiredTransfers.count(), "The expired transfers list must contain 1 item")
         assertEquals(
@@ -124,7 +125,7 @@ class TransfersTest : RobolectricTestsBase() {
     @Test
     fun canGetTransfersCountFlow() = runTest {
         addTwoRandomTransfersInDatabase()
-        val count = appDatabase.getTransferDao().transfersCountFlow(userId, TransferDirection.SENT).first()
+        val count = transferDao.transfersCountFlow(userId, TransferDirection.SENT).first()
         assertEquals(1, count, "The transfers count must be 1")
     }
 
@@ -132,13 +133,37 @@ class TransfersTest : RobolectricTestsBase() {
     fun canGetTransferFlow() = runTest {
         val transfer = DummyTransferForV2.transfer1
         insertTransfer(transfer, TransferDirection.SENT, null)
-        val result = appDatabase.getTransferDao().transferFlow(userId, transfer.id).first()
+        val result = transferDao.transferFlow(userId, transfer.id).first()
         assertNotNull(result)
         assertEquals(
             expected = transfer.id,
             actual = result.id,
             message = "The transfer should be `transfer1`",
         )
+    }
+
+    @Test
+    fun canGetTransferByLinkId() = runTest {
+        val transfer1 = DummyTransferForV2.transfer1
+        val transfer2 = DummyTransferForV2.transfer2
+        val expectedLinkId = "linkId"
+
+        insertTransfer(transfer1, TransferDirection.RECEIVED, password = null, linkId = expectedLinkId)
+        insertTransfer(transfer2, TransferDirection.RECEIVED, password = null)
+
+        val transferDBResult = transferDao.getTransferByLinkId(expectedLinkId)
+        assertNotNull(transferDBResult)
+        assertEquals(expectedLinkId, transferDBResult.linkId)
+    }
+
+    @Test
+    fun getTransferByLinkId_returnsNull_whenLinkIdDoesNotMatch() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+
+        insertTransfer(transfer, TransferDirection.RECEIVED, password = null)
+
+        val transferDBResult = transferDao.getTransferByLinkId("linkId")
+        assertNull(transferDBResult)
     }
     //endregion
 
@@ -156,7 +181,7 @@ class TransfersTest : RobolectricTestsBase() {
     private suspend fun canCreateTransfer(direction: TransferDirection) {
         val transfer = DummyTransferForV2.transfer1
         insertTransfer(transfer, direction, "password123")
-        val result = appDatabase.getTransferDao().transferFlow(userId, transfer.id).first()
+        val result = transferDao.transferFlow(userId, transfer.id).first()
         assertNotNull(result, "The transfer cannot be null")
         assertEquals(direction, result.transferDirection)
     }
@@ -182,9 +207,9 @@ class TransfersTest : RobolectricTestsBase() {
             transferDirection = TransferDirection.SENT,
             transferStatus = TransferStatus.READY,
         )
-        appDatabase.getTransferDao().upsertTransfer(updatedTransfer)
+        transferDao.upsertTransfer(updatedTransfer)
 
-        val result = appDatabase.getTransferDao().transferFlow(userId, transfer.id).first()
+        val result = transferDao.transferFlow(userId, transfer.id).first()
         assertNotNull(result)
         assertEquals("Updated Title", result.title)
     }
@@ -196,9 +221,9 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.expired, TransferDirection.SENT, null)
         insertTransfer(DummyTransferForV2.notExpired, TransferDirection.RECEIVED, null)
 
-        appDatabase.getTransferDao().deleteExpiredTransfers()
+        transferDao.deleteExpiredTransfers()
 
-        val transfers = appDatabase.getTransferDao().transfersFlow(userId).first()
+        val transfers = transferDao.transfersFlow(userId).first()
         assertEquals(
             expected = 1,
             actual = transfers.count(),
@@ -214,8 +239,8 @@ class TransfersTest : RobolectricTestsBase() {
     @Test
     fun canRemoveAllTransfers() = runTest {
         insertTransfer(DummyTransferForV2.transfer1, TransferDirection.SENT, null)
-        appDatabase.getTransferDao().deleteTransfers(userId)
-        val transfers = appDatabase.getTransferDao().transfersFlow(userId).first()
+        transferDao.deleteTransfers(userId)
+        val transfers = transferDao.transfersFlow(userId).first()
         assertEquals(0, transfers.count(), "The transfers table must be empty")
     }
 
@@ -230,19 +255,19 @@ class TransfersTest : RobolectricTestsBase() {
             transferId = transfer.id,
             folderId = null,
         )
-        appDatabase.getTransferDao().upsertFile(file)
+        transferDao.upsertFile(file)
 
         // Verify file exists
-        val filesBefore = appDatabase.getTransferDao().getTransferRootFiles(transfer.id)
+        val filesBefore = transferDao.getTransferRootFiles(transfer.id)
         assertEquals(1, filesBefore.count(), "Should have 1 file before deletion")
 
         // Delete the transfer
-        val transferToDelete = appDatabase.getTransferDao().transferFlow(userId, transfer.id).first()
+        val transferToDelete = transferDao.transferFlow(userId, transfer.id).first()
         assertNotNull(transferToDelete)
-        appDatabase.getTransferDao().deleteTransfer(transferToDelete)
+        transferDao.deleteTransfer(transferToDelete)
 
         // Verify transfer and files are deleted
-        val transfers = appDatabase.getTransferDao().transfersFlow(userId).first()
+        val transfers = transferDao.transfersFlow(userId).first()
         assertEquals(0, transfers.count(), "The transfers table must be empty")
     }
     //endregion
@@ -255,9 +280,9 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(transfer, TransferDirection.SENT, null)
 
         val file = DummyTransferForV2.createDummyFile(path = "path/to/file.txt", mimeType = "text/plain", id = "file1")
-        appDatabase.getTransferDao().upsertFile(FileDB(file = file, transferId = transfer.id, folderId = null))
+        transferDao.upsertFile(FileDB(file = file, transferId = transfer.id, folderId = null))
 
-        val result = appDatabase.getTransferDao().fileFlow("file1").first()
+        val result = transferDao.fileFlow("file1").first()
         assertNotNull(result)
         assertEquals("file1", result.id)
         assertEquals("path/to/file.txt", result.path)
@@ -287,12 +312,12 @@ class TransfersTest : RobolectricTestsBase() {
             folderId = "folder1",
         )
 
-        appDatabase.getTransferDao().upsertFile(rootFile)
-        appDatabase.getTransferDao().upsertFile(folderFile1)
-        appDatabase.getTransferDao().upsertFile(folderFile2)
+        transferDao.upsertFile(rootFile)
+        transferDao.upsertFile(folderFile1)
+        transferDao.upsertFile(folderFile2)
 
         // Test getTransferRootFiles (single transfer)
-        val rootFiles = appDatabase.getTransferDao().getTransferRootFiles(transfer.id)
+        val rootFiles = transferDao.getTransferRootFiles(transfer.id)
         assertEquals(1, rootFiles.count())
         assertEquals(rootFile.id, rootFiles.first().id)
 
@@ -305,9 +330,9 @@ class TransfersTest : RobolectricTestsBase() {
             transferId = transfer2.id,
             folderId = null,
         )
-        appDatabase.getTransferDao().upsertFile(rootFile2)
+        transferDao.upsertFile(rootFile2)
 
-        val filesByTransfer = appDatabase.getTransferDao().getTransferRootFiles(listOf(transfer.id, transfer2.id))
+        val filesByTransfer = transferDao.getTransferRootFiles(listOf(transfer.id, transfer2.id))
 
         assertEquals(2, filesByTransfer.size, "Map should contain entries for both transfers")
         assertEquals(1, filesByTransfer[transfer.id]?.size, "First transfer should have 1 root file")
@@ -316,8 +341,8 @@ class TransfersTest : RobolectricTestsBase() {
         assertEquals(rootFile2.id, filesByTransfer[transfer2.id]?.first()?.id)
 
         // Test getTransferFolderFiles
-        val folderFiles = appDatabase.getTransferDao().transferFolderFilesFlow(transfer.id, "folder1").first()
-        val folderFilesFlow = appDatabase.getTransferDao().filesByFolderIdFlow("folder1")
+        val folderFiles = transferDao.transferFolderFilesFlow(transfer.id, "folder1").first()
+        val folderFilesFlow = transferDao.filesByFolderIdFlow("folder1")
         assertEquals(2, folderFiles.count())
         assertEquals(2, folderFilesFlow.first().count())
     }
@@ -326,13 +351,13 @@ class TransfersTest : RobolectricTestsBase() {
     //region Edge cases
     @Test
     fun getTransferWithNonExistentIdReturnsNull() = runTest {
-        val result = appDatabase.getTransferDao().transferFlow(userId, "non-existent-id").first()
+        val result = transferDao.transferFlow(userId, "non-existent-id").first()
         assertNull(result)
     }
 
     @Test
     fun getFileWithNonExistentIdReturnsNull() = runTest {
-        val result = appDatabase.getTransferDao().fileFlow("non-existent-id").first()
+        val result = transferDao.fileFlow("non-existent-id").first()
         assertNull(result)
     }
 
@@ -346,7 +371,7 @@ class TransfersTest : RobolectricTestsBase() {
             transferId = transfer.id,
             folderId = null,
         )
-        appDatabase.getTransferDao().upsertFile(file)
+        transferDao.upsertFile(file)
 
         // Update same file (same ID) with new path
         val updatedFile = FileDB(
@@ -354,9 +379,9 @@ class TransfersTest : RobolectricTestsBase() {
             transferId = transfer.id,
             folderId = null,
         )
-        appDatabase.getTransferDao().upsertFile(updatedFile)
+        transferDao.upsertFile(updatedFile)
 
-        val result = appDatabase.getTransferDao().fileFlow("file1").first()
+        val result = transferDao.fileFlow("file1").first()
         assertNotNull(result)
         assertEquals("new/path.txt", result.path)
         assertEquals(10_000_000L, result.size)
@@ -390,12 +415,12 @@ class TransfersTest : RobolectricTestsBase() {
             folderId = "subfolder1",
         ).copy(isFolder = true)
 
-        appDatabase.getTransferDao().upsertFile(rootFile)
-        appDatabase.getTransferDao().upsertFile(folderFile1)
-        appDatabase.getTransferDao().upsertFile(folderFile2)
-        appDatabase.getTransferDao().upsertFile(subfolder)
+        transferDao.upsertFile(rootFile)
+        transferDao.upsertFile(folderFile1)
+        transferDao.upsertFile(folderFile2)
+        transferDao.upsertFile(subfolder)
 
-        val allFiles = appDatabase.getTransferDao().getTransferFilesOnly(transfer.id)
+        val allFiles = transferDao.getTransferFilesOnly(transfer.id)
 
         assertEquals(3, allFiles.size, "Should return all files in the transfer")
         assertTrue(allFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3")))
@@ -465,15 +490,15 @@ class TransfersTest : RobolectricTestsBase() {
             folderId = null,
         ).copy(isFolder = true)
 
-        appDatabase.getTransferDao().upsertFile(docFile1)
-        appDatabase.getTransferDao().upsertFile(docFile2)
-        appDatabase.getTransferDao().upsertFile(subFile)
-        appDatabase.getTransferDao().upsertFile(otherFile)
-        appDatabase.getTransferDao().upsertFile(fileWithWildcardPercent)
-        appDatabase.getTransferDao().upsertFile(fileWithWildcardUnderscore)
-        appDatabase.getTransferDao().upsertFile(folderItself)
+        transferDao.upsertFile(docFile1)
+        transferDao.upsertFile(docFile2)
+        transferDao.upsertFile(subFile)
+        transferDao.upsertFile(otherFile)
+        transferDao.upsertFile(fileWithWildcardPercent)
+        transferDao.upsertFile(fileWithWildcardUnderscore)
+        transferDao.upsertFile(folderItself)
 
-        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
+        val folderFiles = transferDao.getFilesUnderPath(transfer.id, "documents")
 
         assertEquals(5, folderFiles.size, "Should return files in folder and subfolders")
         assertTrue(folderFiles.map { it.id }.containsAll(listOf("file1", "file2", "file3", "file5", "file6")))
@@ -499,12 +524,12 @@ class TransfersTest : RobolectricTestsBase() {
             folderId = "otherFolder",
         )
 
-        appDatabase.getTransferDao().upsertFile(docFile1)
-        appDatabase.getTransferDao().upsertFile(otherFile)
+        transferDao.upsertFile(docFile1)
+        transferDao.upsertFile(otherFile)
 
         // With LIKE 'documents%', this would also match "documentsother/file.txt"
         // But with lexicographical range, % is treated as a literal character, so only the exact "documents%" prefix matches
-        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents%")
+        val folderFiles = transferDao.getFilesUnderPath(transfer.id, "documents%")
 
         assertEquals(1, folderFiles.size, "Should return only 1 file")
         assertTrue(folderFiles.any { it.id == "file1" }, "The % should be treated as a literal character, not a wildcard")
@@ -521,9 +546,9 @@ class TransfersTest : RobolectricTestsBase() {
             folderId = "folder1",
         )
 
-        appDatabase.getTransferDao().upsertFile(docFile1)
+        transferDao.upsertFile(docFile1)
 
-        val folderFiles = appDatabase.getTransferDao().getFilesUnderPath(transfer.id, "documents")
+        val folderFiles = transferDao.getFilesUnderPath(transfer.id, "documents")
 
         assertEquals(1, folderFiles.size, "Should return only 1 file")
         assertTrue(folderFiles.any { it.id == "file1" }, "The % should be treated as a literal character, not a wildcard")
@@ -543,6 +568,7 @@ class TransfersTest : RobolectricTestsBase() {
         transfer: Transfer,
         transferDirection: TransferDirection,
         password: String?,
+        linkId: String? = null,
     ) {
         val transferDB = TransferDB(
             id = transfer.id,
@@ -557,8 +583,9 @@ class TransfersTest : RobolectricTestsBase() {
             transferStatus = transfer.transferStatus,
             recipientsEmails = transfer.recipientsEmails,
             userOwnerId = userId,
+            linkId = linkId,
         )
-        appDatabase.getTransferDao().upsertTransfer(transferDB)
+        transferDao.upsertTransfer(transferDB)
     }
     //endregion
 }
