@@ -525,7 +525,7 @@ class TransferManager internal constructor(
      *
      * @param url The URL associated with the transfer to retrieve.
      *
-     * @return The transferUUID of the added transfer, otherwise null if the api doesn't return the transfer
+     * @return The [TransferUi] of the added transfer, otherwise null if the api doesn't return the transfer
      *
      * @throws CancellationException If the operation is cancelled.
      * @throws ApiErrorException If there is an error related to the API during transfer retrieval.
@@ -564,7 +564,7 @@ class TransferManager internal constructor(
         TransferCancelledException::class,
         UnauthorizedException::class,
     )
-    suspend fun addTransferByUrl(url: String, password: String? = null): String? = withContext(Dispatchers.Default) {
+    suspend fun addTransferByUrl(url: String, password: String? = null): TransferUi? = withContext(Dispatchers.Default) {
         if (isV2Url(url)) {
             val linkUUID = extractLinkUUIDFromURL(url)
             if (linkUUID != null) {
@@ -572,7 +572,7 @@ class TransferManager internal constructor(
                 if (transferDao.getTransfer(transferApi.id) == null) {
                     addTransferV2(linkUUID, transferApi, password)
                 }
-                return@withContext transferApi.id
+                return@withContext transferDao.getTransfer(transferApi.id)?.toTransferUi(transferDao)
             }
         }
 
@@ -582,7 +582,8 @@ class TransferManager internal constructor(
         if (transfer == null) {
             addTransfer(transferApi, TransferDirection.RECEIVED, password)
         }
-        return@withContext transferApi.linkUUID
+        return@withContext transfer?.let(::TransferUi)
+            ?: transferController.getTransfer(transferApi.linkUUID)?.let(::TransferUi)
     }
 
     private fun extractLinkUUIDFromURL(url: String): String? {
