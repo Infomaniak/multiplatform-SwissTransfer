@@ -569,7 +569,9 @@ class TransferManager internal constructor(
             val linkUUID = extractLinkUUIDFromURL(url)
             if (linkUUID != null) {
                 val transferApi = transferV2Repository.getTransferByUrl(url, password).transfer
-                addTransferV2(linkUUID, transferApi, password)
+                if (transferDao.getTransfer(transferApi.id) == null) {
+                    addTransferV2(linkUUID, transferApi, password)
+                }
                 return@withContext transferApi.id
             }
         }
