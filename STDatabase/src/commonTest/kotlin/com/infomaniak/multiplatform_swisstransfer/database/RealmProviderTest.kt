@@ -17,6 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.job
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -25,6 +27,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
 class RealmProviderTest {
@@ -65,5 +68,54 @@ class RealmProviderTest {
 
         realmProvider.closeTransfersDb()
         assertTrue(transfersRealm.isClosed())
+    }
+
+    @Test
+    fun concurrentOpenTransfersDbCallsAreSafe() = runTest {
+        val provider = RealmProvider(loadDataInMemory = true)
+
+        val results = (1..10).map {
+            async { provider.openTransfersDb(userId = 1) }
+        }.awaitAll()
+
+        assertEquals(10, results.size, "All concurrent openTransfersDb calls must complete")
+        assertTrue(provider.isTransfersDbOpen(), "Transfers DB must be open after concurrent calls")
+        assertFalse(provider.transfersAsync.getCompleted().isClosed(), "The resulting realm must not be closed")
+
+        provider.closeTransfersDb()
+    }
+
+    @Test
+    fun openTransfersDbRetryAfterFailedStateSucceeds() = runTest {
+        val provider = RealmProvider(loadDataInMemory = true)
+
+        // Simulate a failed open by completing the deferred exceptionally
+        provider.transfersAsync.completeExceptionally(RuntimeException("Simulated open failure"))
+
+        assertFalse(provider.isTransfersDbOpen(), "DB must not be reported as open after a failure")
+
+        // A retry must succeed and restore a valid open state
+        provider.openTransfersDb(userId = 1)
+        assertTrue(provider.isTransfersDbOpen(), "DB must be open after a successful retry")
+
+        provider.closeTransfersDb()
+    }
+
+    @Test
+    fun closeTransfersDbResetsStateForReopen() = runTest {
+        val provider = RealmProvider(loadDataInMemory = true)
+        provider.openTransfersDb(userId = 1)
+        val firstRealm = provider.transfersAsync.getCompleted()
+
+        provider.closeTransfersDb()
+        assertFalse(provider.isTransfersDbOpen(), "DB must not be reported as open after close")
+
+        provider.openTransfersDb(userId = 1)
+        assertTrue(provider.isTransfersDbOpen(), "DB must be open after reopen")
+        val secondRealm = provider.transfersAsync.getCompleted()
+        assertNotSame(firstRealm, secondRealm, "Reopening must produce a new Realm instance")
+        assertFalse(secondRealm.isClosed(), "The reopened realm must not be closed")
+
+        provider.closeTransfersDb()
     }
 }
