@@ -50,28 +50,33 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
 
     suspend fun openTransfersDb(userId: Long) {
         transfersMutex.withLock {
-            if (currentTransfersUserId == userId && transfersAsync.isCompleted) return
+            val existingRealm = runCatching {
+                if (currentTransfersUserId == userId) transfersAsync.getCompleted() else null
+            }.getOrNull()
+            if (existingRealm != null && !existingRealm.isClosed()) return
 
-            if (transfersAsync.isCompleted) closeTransfersDb()
-            if (!transfersAsync.isActive) {
-                transfersAsync = CompletableDeferred()
-            }
+            closeTransfersDbLocked()
+            transfersAsync = CompletableDeferred()
+            currentTransfersUserId = userId
 
             runCatching {
-                currentTransfersUserId = userId
                 Realm.open(realmTransfersConfiguration(userId))
             }.onSuccess { realm ->
                 transfersAsync.complete(realm)
             }.onFailure { throwable ->
                 currentTransfersUserId = null
                 transfersAsync.completeExceptionally(throwable)
-                transfersAsync = CompletableDeferred()
                 throw throwable
             }
         }
     }
 
-    fun isTransfersDbOpen(): Boolean = transfersAsync.isCompleted && transfersAsync.isCancelled.not()
+    fun isTransfersDbOpen(): Boolean = runCatching { transfersAsync.getCompleted() }.getOrNull()?.isClosed() == false
+
+    private fun closeTransfersDbLocked() {
+        runCatching { transfersAsync.getCompleted() }.getOrNull()?.close()
+        currentTransfersUserId = null
+    }
 
     internal suspend inline fun <T> withTransfersDb(block: (Realm) -> T): T {
         runThrowingRealm {
@@ -94,11 +99,13 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     }
 
     suspend fun closeTransfersDb() {
-        transfersAsync.await().close()
+        transfersMutex.withLock {
+            closeTransfersDbLocked()
+            transfersAsync = CompletableDeferred()
+        }
     }
 
     suspend fun closeAllDatabases() {
-        currentTransfersUserId = null
         closeAppSettingsDb()
         closeUploadsDb()
         closeTransfersDb()
