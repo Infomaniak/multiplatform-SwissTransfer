@@ -94,9 +94,7 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     }
 
     suspend fun closeTransfersDb() {
-        transfersMutex.withLock {
-            transfersAsync.await().close()
-        }
+        transfersAsync.await().close()
     }
 
     suspend fun closeAllDatabases() {
