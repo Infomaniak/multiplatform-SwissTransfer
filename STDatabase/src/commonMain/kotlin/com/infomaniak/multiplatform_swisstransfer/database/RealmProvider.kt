@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class RealmProvider(private val databaseRootDirectory: String? = null, private val loadDataInMemory: Boolean = false) {
 
@@ -43,12 +45,30 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     internal var transfersAsync = CompletableDeferred<Realm>()
     private suspend fun transfers(): Realm = transfersAsync.await()
 
+    private val transfersMutex = Mutex()
+    private var currentTransfersUserId: Long? = null
+
     suspend fun openTransfersDb(userId: Long) {
-        if (!transfersAsync.isActive) {
-            closeTransfersDb()
-            transfersAsync = CompletableDeferred()
+        transfersMutex.withLock {
+            if (currentTransfersUserId == userId && transfersAsync.isCompleted) return
+
+            if (!transfersAsync.isActive) {
+                closeTransfersDb()
+                transfersAsync = CompletableDeferred()
+            }
+
+            runCatching {
+                currentTransfersUserId = userId
+                Realm.open(realmTransfersConfiguration(userId))
+            }.onSuccess { realm ->
+                transfersAsync.complete(realm)
+            }.onFailure { throwable ->
+                currentTransfersUserId = null
+                transfersAsync.completeExceptionally(throwable)
+                transfersAsync = CompletableDeferred()
+                throw throwable
+            }
         }
-        transfersAsync.complete(Realm.open(realmTransfersConfiguration(userId)))
     }
 
     fun isTransfersDbOpen(): Boolean = transfersAsync.isCompleted && transfersAsync.isCancelled.not()
@@ -74,10 +94,13 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     }
 
     suspend fun closeTransfersDb() {
-        transfersAsync.await().close()
+        transfersMutex.withLock {
+            transfersAsync.await().close()
+        }
     }
 
     suspend fun closeAllDatabases() {
+        currentTransfersUserId = null
         closeAppSettingsDb()
         closeUploadsDb()
         closeTransfersDb()
