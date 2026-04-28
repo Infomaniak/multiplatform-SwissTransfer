@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ class SwissTransferInjection(
     }
 
     /** A manager used to orchestrate Files operations. */
-    val fileManager by lazy { FileManager(accountManager, appDatabase, fileController) }
+    val fileManager by lazy { FileManager(appDatabase, fileController) }
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy { AppSettingsManager(appDatabase, appSettingsController, emailLanguageUtils) }

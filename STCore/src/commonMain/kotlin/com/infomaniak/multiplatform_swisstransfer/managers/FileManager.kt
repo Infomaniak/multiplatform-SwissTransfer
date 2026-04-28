@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
-import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUi
@@ -36,7 +35,6 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
 class FileManager(
-    private val accountManager: AccountManager,
     private val appDatabase: AppDatabase,
     private val fileController: FileController,
 ) {
@@ -49,20 +47,15 @@ class FileManager(
      */
     fun getFilesFromTransfer(
         folderUuid: String
-    ): Flow<List<FileUi>> = accountManager.currentUserFlow.transformLatest { currentUser ->
-        when (currentUser) {
-            is STUser.AuthUser -> {
-                emitAll(appDatabase.getTransferDao().filesByFolderIdFlow(folderId = folderUuid).map { it.toFileUiList() })
+    ): Flow<List<FileUi>> = appDatabase.getTransferDao().filesByFolderIdFlow(folderId = folderUuid)
+        .map { it.toFileUiList() }
+        .transformLatest { files ->
+            if (files.isEmpty()) {
+                emitAll(fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } })
+            } else {
+                emit(files)
             }
-            else -> emit(emptyList())
         }
-    }.transformLatest { files ->
-        if (files.isEmpty()) {
-            emitAll(fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } })
-        } else {
-            emit(files)
-        }
-    }
 
     /**
      * Retrieves a single file by its unique identifier.
