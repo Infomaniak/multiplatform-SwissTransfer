@@ -158,13 +158,13 @@ class TransferManager internal constructor(
                 SortedTransfers(valid.mapToList(::TransferUi), expired.mapToList(::TransferUi))
             }
         },
-        merge = { a, b -> a + b }
+        merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
     ).catchDbExceptions()
 
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
         flowForGuestUser = { transferController.getTransfersCountFlow(transferDirection) },
-        merge = { a, b -> a + b }
+        merge = { authTransfersCount, guestTransfersCount -> authTransfersCount + guestTransfersCount }
     ).catchDbExceptions()
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -173,7 +173,7 @@ class TransferManager internal constructor(
             transferDao.transferFlow(userId, transferUUID).mapLatest { transferDB -> transferDB?.toTransferUi(transferDao) }
         },
         flowForGuestUser = { transferController.getTransferFlow(transferUUID).map { transfer -> transfer?.let(::TransferUi) } },
-        merge = { a, b -> a ?: b }
+        merge = { authTransfer, guestTransfer -> authTransfer ?: guestTransfer }
     ).catchDbExceptions()
 
     /**
