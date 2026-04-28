@@ -18,17 +18,21 @@
 package com.infomaniak.multiplatform_swisstransfer.utils
 
 /**
- * Merges this list with the given list, returning a new list containing all elements of both.
+ * Merges this list with the given list.
+ *
+ * Returns the other list unchanged when this list is empty, and this list unchanged when the other
+ * list is empty (zero-copy fast paths). Otherwise returns a new list containing all elements of
+ * this list followed by all elements of the other list.
  *
  * @param otherList The list to merge with this list.
- * @return A new list with all elements of this list followed by all elements of the other list.
+ * @return A list with all elements of this list followed by all elements of the other list.
  */
 internal fun <T> List<T>.mergeWith(otherList: List<T>): List<T> {
     if (this.isEmpty()) return otherList
     if (otherList.isEmpty()) return this
 
     return ArrayList<T>(this.size + otherList.size).apply {
-        addAll(this)
+        addAll(this@mergeWith)
         addAll(otherList)
     }
 }
