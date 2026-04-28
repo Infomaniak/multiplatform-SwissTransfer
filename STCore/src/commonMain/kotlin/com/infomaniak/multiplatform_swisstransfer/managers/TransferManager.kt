@@ -33,6 +33,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
+import com.infomaniak.multiplatform_swisstransfer.data.STUser.GuestUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
@@ -124,8 +125,12 @@ class TransferManager internal constructor(
      */
     fun getAllTransfers(): Flow<List<TransferUi>> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao) },
-        flowForGuestUser = { transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) } },
-        merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
+        flowForGuestUser = {
+            combine(
+                transferDao.transfersFlow(GuestUser.id).toTransferUiListFlow(transferDao),
+                transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) },
+            ) { guestList1, guestList2 -> guestList1.mergeWith(guestList2) }
+        },
         merge = { authTransfers, guestTransfers -> authTransfers.mergeWith(guestTransfers) }
     ).catchDbExceptions()
 
@@ -142,20 +147,24 @@ class TransferManager internal constructor(
         flowForAuthUser = { userId ->
             combine(
                 transferDao.validTransfersFlow(userId, transferDirection),
-                transferDao.expiredTransfersFlow(userId, transferDirection)
+                transferDao.expiredTransfersFlow(userId, transferDirection),
             ) { valid, expired ->
                 SortedTransfers(
                     valid.toTransferUiList(transferDao),
-                    expired.toTransferUiList(transferDao)
+                    expired.toTransferUiList(transferDao),
                 )
             }
         },
         flowForGuestUser = {
             combine(
+                transferDao.validTransfersFlow(GuestUser.id, transferDirection).toTransferUiListFlow(transferDao),
+                transferDao.expiredTransfersFlow(GuestUser.id, transferDirection).toTransferUiListFlow(transferDao),
                 transferController.getValidTransfersFlow(transferDirection),
-                transferController.getExpiredTransfersFlow(transferDirection)
-            ) { valid, expired ->
-                SortedTransfers(valid.mapToList(::TransferUi), expired.mapToList(::TransferUi))
+                transferController.getExpiredTransfersFlow(transferDirection),
+            ) { valid1, expired1, valid2, expired2 ->
+                val validList = valid1.mergeWith(valid2.mapToList(::TransferUi))
+                val expiredList = expired1.mergeWith(expired2.mapToList(::TransferUi))
+                SortedTransfers(validList, expiredList)
             }
         },
         merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
@@ -163,7 +172,12 @@ class TransferManager internal constructor(
 
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
-        flowForGuestUser = { transferController.getTransfersCountFlow(transferDirection) },
+        flowForGuestUser = {
+            combine(
+                transferDao.transfersCountFlow(GuestUser.id, transferDirection),
+                transferController.getTransfersCountFlow(transferDirection),
+            ) { count1, count2 -> count1 + count2 }
+        },
         merge = { authTransfersCount, guestTransfersCount -> authTransfersCount + guestTransfersCount }
     ).catchDbExceptions()
 
@@ -172,7 +186,12 @@ class TransferManager internal constructor(
         flowForAuthUser = { userId ->
             transferDao.transferFlow(userId, transferUUID).mapLatest { transferDB -> transferDB?.toTransferUi(transferDao) }
         },
-        flowForGuestUser = { transferController.getTransferFlow(transferUUID).map { transfer -> transfer?.let(::TransferUi) } },
+        flowForGuestUser = {
+            combine(
+                transferDao.transferFlow(GuestUser.id, transferUUID).mapLatest { it?.toTransferUi(transferDao) },
+                transferController.getTransferFlow(transferUUID).map { transfer -> transfer?.let(::TransferUi) }
+            ) { transfer1, transfer2 -> transfer1 ?: transfer2 }
+        },
         merge = { authTransfer, guestTransfer -> authTransfer ?: guestTransfer }
     ).catchDbExceptions()
 
@@ -638,7 +657,7 @@ class TransferManager internal constructor(
     }
 
     private suspend fun addTransferV2(linkId: String, transferApi: TransferApiV2, password: String?) {
-        val userId = currentUserId ?: STUser.GuestUser.id
+        val userId = currentUserId ?: GuestUser.id
         val transferDB = TransferDB(
             transfer = transferApi,
             linkId = linkId,
@@ -788,7 +807,7 @@ class TransferManager internal constructor(
                     }
                 }
             }
-            STUser.GuestUser -> flowForGuestUser()
+            GuestUser -> flowForGuestUser()
             null -> emptyFlow()
         }
     }
