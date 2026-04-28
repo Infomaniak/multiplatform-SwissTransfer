@@ -62,6 +62,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.Transf
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiUrlMatcher
+import com.infomaniak.multiplatform_swisstransfer.utils.mergeWith
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -125,6 +126,7 @@ class TransferManager internal constructor(
         flowForAuthUser = { userId -> transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao) },
         flowForGuestUser = { transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) } },
         merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
+        merge = { authTransfers, guestTransfers -> authTransfers.mergeWith(guestTransfers) }
     ).catchDbExceptions()
 
     /**
