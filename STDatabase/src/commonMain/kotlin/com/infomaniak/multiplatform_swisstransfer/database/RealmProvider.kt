@@ -52,8 +52,8 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         transfersMutex.withLock {
             if (currentTransfersUserId == userId && transfersAsync.isCompleted) return
 
+            if (transfersAsync.isCompleted) closeTransfersDb()
             if (!transfersAsync.isActive) {
-                closeTransfersDb()
                 transfersAsync = CompletableDeferred()
             }
 
