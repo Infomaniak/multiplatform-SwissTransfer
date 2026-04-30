@@ -43,6 +43,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2R
 import io.ktor.http.content.OutgoingContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlin.contracts.ExperimentalContracts
 import kotlin.coroutines.cancellation.CancellationException
@@ -70,12 +71,16 @@ class UploadV2Manager(
             ?: throw UnknownException(Exception("No user logged in"))
     }
 
-    @Throws(CancellationException::class)
+    @Throws(CancellationException::class, SerializationException::class)
     suspend fun encodeSessionRequest(request: UploadSessionRequest): String = withContext(Dispatchers.Default) {
         Json.encodeToString(request)
     }
 
-    @Throws(CancellationException::class)
+    @Throws(
+        CancellationException::class,
+        SerializationException::class,
+        IllegalArgumentException::class,
+    )
     suspend fun decodeSessionRequest(encodedString: String): UploadSessionRequest = withContext(Dispatchers.Default) {
         Json.decodeFromString(encodedString)
     }
