@@ -391,7 +391,9 @@ class TransferManager internal constructor(
             val newStatus: TransferStatus = when (exception) {
                 is VirusCheckFetchTransferException -> TransferStatus.WAIT_VIRUS_CHECK
                 is VirusDetectedFetchTransferException -> TransferStatus.VIRUS_DETECTED
-                is ExpiredDateFetchTransferException, is NotFoundFetchTransferException -> TransferStatus.EXPIRED_DATE
+                is ExpiredDateFetchTransferException,
+                is NotFoundFetchTransferException -> TransferStatus.EXPIRED_DATE
+                is DownloadLimitReached -> TransferStatus.EXPIRED_DOWNLOAD_QUOTA
                 else -> throw exception
             }
             transferDao.updateStatus(transferId, newStatus)
