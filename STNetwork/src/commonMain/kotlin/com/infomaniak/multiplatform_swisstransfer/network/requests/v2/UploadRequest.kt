@@ -61,14 +61,20 @@ internal class UploadRequest(
         )
     }
 
+    /**
+     * This route is used for authenticated users
+     */
     suspend fun getPresignedUploadUrl(transferId: String, fileId: String): ApiResponseV2Success<PresignedUrlResponse> {
         return post(
             url = createV2Url(ApiRoutes.uploadDirectly(transferId, fileId)),
             data = null,
-            appendHeaders = { appendBearer() } // TODO: Remove this for release, this temporary for checking isStaff, back-end
+            appendHeaders = { appendBearer() }
         )
     }
 
+    /**
+     * This route is used for authenticated users
+     */
     suspend fun getPresignedUploadChunkUrl(
         transferId: String,
         fileId: String,
@@ -77,13 +83,16 @@ internal class UploadRequest(
         return post(
             url = createV2Url(ApiRoutes.uploadChunk(transferId, fileId, chunkIndex)),
             data = null,
-            appendHeaders = { appendBearer() } // TODO: Remove this for release, this temporary for checking isStaff, back-end
+            appendHeaders = { appendBearer() }
         )
     }
 
+    /**
+     * This route is used for authenticated users
+     */
     suspend fun finalizeTransferFile(transferId: String, fileId: String, etags: List<ChunkEtag>): Boolean {
         val response = httpClient.patch(createV2Url(ApiRoutes.uploadDirectly(transferId, fileId))) {
-            headers { appendBearer() } // TODO: Remove this for release, this temporary for checking isStaff, back-end
+            headers { appendBearer() }
             if (etags.isNotEmpty()) {
                 contentType(ContentType.Application.Json)
                 setBody(ChunkedFileUploadFinalizationPayload(etags))
