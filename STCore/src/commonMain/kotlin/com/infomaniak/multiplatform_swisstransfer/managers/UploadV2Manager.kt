@@ -56,9 +56,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class UploadV2Manager(
     private val accountManager: AccountManager,
     private val uploadRepository: UploadV2Repository,
-    private val transferManager: TransferManager,
     private val appDatabase: AppDatabase,
-    private val uploadDao: UploadDao,
     private val transferDao: TransferDao,
 ) {
 

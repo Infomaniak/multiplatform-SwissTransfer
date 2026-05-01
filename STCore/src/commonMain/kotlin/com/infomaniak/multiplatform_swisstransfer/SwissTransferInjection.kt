@@ -135,9 +135,7 @@ class SwissTransferInjection(
         UploadV2Manager(
             accountManager = accountManager,
             uploadRepository = uploadV2Repository,
-            transferManager = transferManager,
             appDatabase = appDatabase,
-            uploadDao = appDatabase.getUploadDao(),
             transferDao = appDatabase.getTransferDao(),
         )
     }
