@@ -143,8 +143,6 @@ class SwissTransferInjection(
     /** A manager used to orchestrate Uploads operations. */
     val uploadManager by lazy {
         UploadManager(
-            appDatabase,
-            accountManager,
             uploadController,
             uploadRepository,
             transferManager,
