@@ -35,6 +35,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.FailedRetryAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
@@ -271,7 +272,8 @@ class UploadManager(
      * @throws UnknownException If an unknown error occurs.
      * @throws RealmException If an error occurs during database access.
      * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
-     * @throws NullPropertyException If remoteUploadHost or remoteContainer is null.
+     * @throws NullPropertyException If remoteContainer is null.
+     * @throws DownloadQuotaExceededException If the transfer was downloaded too many times.
      */
     @Throws(
         CancellationException::class,
@@ -282,6 +284,7 @@ class UploadManager(
         RealmException::class,
         NotFoundException::class,
         NullPropertyException::class,
+        DownloadQuotaExceededException::class,
     )
     suspend fun finishUploadSession(uuid: String): String = withContext(Dispatchers.Default) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
