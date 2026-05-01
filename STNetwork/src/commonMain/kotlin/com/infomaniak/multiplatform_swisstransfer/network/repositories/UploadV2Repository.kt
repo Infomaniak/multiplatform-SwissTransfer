@@ -25,6 +25,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferCancelled
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferExpired
@@ -84,6 +85,8 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         NotFoundException::class,
     )
     suspend fun getPresignedUploadUrl(transferId: String, fileId: String): PresignedUrlResponse {
@@ -98,6 +101,8 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         NotFoundException::class,
     )
     suspend fun getPresignedUploadChunkUrl(
@@ -116,6 +121,8 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         NotFoundException::class,
         TransferCancelled::class,
     )
@@ -185,6 +192,8 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         CancellationException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UnknownException::class,
     )
     suspend fun uploadFile(
@@ -199,6 +208,8 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         CancellationException::class,
         NetworkException::class,
         UnexpectedApiErrorFormatException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UnknownException::class,
     )
     suspend fun uploadChunkToEtag(

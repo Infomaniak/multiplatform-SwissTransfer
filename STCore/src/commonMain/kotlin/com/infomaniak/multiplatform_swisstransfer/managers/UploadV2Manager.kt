@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
+import androidx.sqlite.SQLiteException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
@@ -98,6 +99,10 @@ class UploadV2Manager(
      * @throws UnauthorizedException If the request is unauthorized.
      * @throws TooManyRequestException If too many requests have been made.
      * @throws CancellationException If the operation is cancelled.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
+     * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      */
     @OptIn(ExperimentalContracts::class)
     @Throws(
@@ -108,6 +113,12 @@ class UploadV2Manager(
         UnknownException::class,
         UnauthorizedException::class,
         TooManyRequestException::class,
+        SQLiteException::class,
+        RuntimeException::class,
+        UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
+        UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
     )
     suspend fun prepareTransfer(
         request: UploadSessionRequest,
@@ -157,7 +168,7 @@ class UploadV2Manager(
      * Returns a transfer previously created through [prepareTransfer], that hasn't been finalized yet.
      *
      * @throws UnknownException If no user is logged in.
-     * @throws CancellationException If the operation is cancelled.
+     * @throws CancellationException If the operation is canceled.
      */
     @Throws(CancellationException::class, UnknownException::class)
     suspend fun getPendingTransferIfAny(): Transfer? {
@@ -179,7 +190,12 @@ class UploadV2Manager(
      * @throws ApiV2ErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
-     * @throws UploadErrorsException.NotFoundException If the transfer or file is not found.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws TooManyRequestException If too many requests have been made.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
+     * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
@@ -188,7 +204,12 @@ class UploadV2Manager(
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
+        UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
     )
     suspend fun uploadFileChunk(
         transferId: String,
@@ -218,7 +239,12 @@ class UploadV2Manager(
      * @throws ApiV2ErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
-     * @throws UploadErrorsException.NotFoundException If the transfer or file is not found.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws TooManyRequestException If too many requests have been made.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
+     * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
@@ -227,7 +253,12 @@ class UploadV2Manager(
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
+        UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
     )
     suspend fun getUploadFileChunkUrl(
         transferId: String,
@@ -251,8 +282,12 @@ class UploadV2Manager(
      * @throws ApiV2ErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
-     * @throws UploadErrorsException.NotFoundException If the transfer or file is not found.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws TooManyRequestException If too many requests have been made.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
      * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
@@ -261,8 +296,12 @@ class UploadV2Manager(
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
         UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
     )
     suspend fun finalizeFileUploadedInChunks(
         transferId: String,
@@ -288,8 +327,12 @@ class UploadV2Manager(
      * @throws ApiV2ErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
-     * @throws UploadErrorsException.NotFoundException If the transfer or file is not found.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws TooManyRequestException If too many requests have been made.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
      * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
@@ -298,8 +341,12 @@ class UploadV2Manager(
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
         UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
     )
     suspend fun finalizeDirectFileUploaded(
         transferId: String,
@@ -319,7 +366,12 @@ class UploadV2Manager(
      * @throws ApiV2ErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
-     * @throws UploadErrorsException.NotFoundException If the transfer or file is not found.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws TooManyRequestException If too many requests have been made.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
+     * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
@@ -328,7 +380,12 @@ class UploadV2Manager(
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
+        UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
     )
     suspend fun uploadFile(
         transferId: String,
@@ -356,7 +413,12 @@ class UploadV2Manager(
      * @throws ApiV2ErrorException If there is a general API error.
      * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
      * @throws UnknownException If an unknown error occurs.
-     * @throws UploadErrorsException.NotFoundException If the transfer or file is not found.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws TooManyRequestException If too many requests have been made.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
+     * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
@@ -364,7 +426,12 @@ class UploadV2Manager(
         ApiV2ErrorException::class,
         UnexpectedApiErrorFormatException::class,
         UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
         UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
+        UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
         CancellationException::class,
     )
     suspend fun getUploadFileUrl(
@@ -424,6 +491,7 @@ class UploadV2Manager(
      * @throws UploadErrorsException.NotFoundException If the transfer is not found.
      * @throws UploadErrorsException.TransferExpired If the transfer has expired.
      * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      * @throws CancellationException If the operation is cancelled.
      */
     @Throws(
@@ -436,6 +504,7 @@ class UploadV2Manager(
         UploadErrorsException.NotFoundException::class,
         UploadErrorsException.TransferExpired::class,
         UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
         CancellationException::class,
     )
     suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
