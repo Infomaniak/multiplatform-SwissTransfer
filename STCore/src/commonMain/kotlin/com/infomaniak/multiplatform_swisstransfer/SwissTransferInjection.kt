@@ -143,6 +143,7 @@ class SwissTransferInjection(
     /** A manager used to orchestrate Uploads operations. */
     val uploadManager by lazy {
         UploadManager(
+            crashReport,
             uploadController,
             uploadRepository,
             transferManager,
@@ -154,7 +155,7 @@ class SwissTransferInjection(
     /** A manager used to perform Uploads operations, without session persistence. */
     val inMemoryUploadManager by lazy {
         InMemoryUploadManager(
-            uploadController,
+            crashReport,
             uploadRepository,
             transferManager,
             emailLanguageUtils,

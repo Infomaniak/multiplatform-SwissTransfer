@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,17 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.utils
 
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.FetchTransferException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 
 internal suspend fun TransferManager.addTransferByLinkUUID(
+    crashReport: CrashReportInterface,
     finishUploadResponse: UploadCompleteResponse,
     uploadSession: UploadSession,
 ) {
@@ -36,10 +39,25 @@ internal suspend fun TransferManager.addTransferByLinkUUID(
             transferDirection = TransferDirection.SENT,
         )
     }.onFailure { exception ->
-        if (exception is FetchTransferException) {
-            createTransferLocally(exception, finishUploadResponse, uploadSession)
-        } else {
-            throw exception
+        when (exception) {
+            is FetchTransferException -> {
+                createTransferLocally(exception, finishUploadResponse, uploadSession)
+            }
+            is DownloadQuotaExceededException -> {
+                createTransferLocally(
+                    linkUUID = finishUploadResponse.linkUUID,
+                    uploadSession = uploadSession,
+                    transferStatus = TransferStatus.EXPIRED_DOWNLOAD_QUOTA,
+                )
+                crashReport.capture(
+                    message = "Unexpected error occurred: Download quota exceeded ",
+                    data = mapOf("linkUUID" to finishUploadResponse.linkUUID),
+                    error = exception,
+                )
+            }
+            else -> {
+                throw exception
+            }
         }
     }
 }

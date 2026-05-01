@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
@@ -61,6 +62,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * @property uploadTokensManager Manager that handle uploads' token operation
  */
 class UploadManager(
+    private val crashReport: CrashReportInterface,
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
@@ -275,7 +277,6 @@ class UploadManager(
         RealmException::class,
         NotFoundException::class,
         NullPropertyException::class,
-        DownloadQuotaExceededException::class,
     )
     suspend fun finishUploadSession(uuid: String): String = withContext(Dispatchers.Default) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
@@ -294,7 +295,8 @@ class UploadManager(
             throw if (exception is NoSuchElementException) UnknownException(exception) else exception
         }
 
-        transferManager.addTransferByLinkUUID(finishUploadResponse, uploadSession)
+        transferManager.addTransferByLinkUUID(crashReport, finishUploadResponse, uploadSession)
+
         uploadController.removeUploadSession(uuid)
 
         return@withContext finishUploadResponse.linkUUID // Here the linkUUID correspond to the transferUUID of a transferUI
