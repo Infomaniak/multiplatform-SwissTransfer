@@ -50,7 +50,7 @@ internal suspend fun TransferManager.addTransferByLinkUUID(
                     transferStatus = TransferStatus.EXPIRED_DOWNLOAD_QUOTA,
                 )
                 crashReport.capture(
-                    message = "Unexpected error occurred: Download quota exceeded ",
+                    message = "Unexpected error occurred: Download quota exceeded",
                     data = mapOf("linkUUID" to finishUploadResponse.linkUUID),
                     error = exception,
                 )

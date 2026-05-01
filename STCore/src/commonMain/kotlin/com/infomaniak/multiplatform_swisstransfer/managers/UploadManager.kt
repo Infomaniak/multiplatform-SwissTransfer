@@ -34,7 +34,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.FailedRetryAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
@@ -55,6 +54,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * This class handles the initialization, progress, and completion of uploads,
  * interacting with the database and the network repository.
  *
+ * @property crashReport A crash report interface used to report errors and add breadcrumbs.
  * @property uploadController The controller for managing upload data in the database.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
  * @property transferManager Transfer operations
@@ -266,7 +266,6 @@ class UploadManager(
      * @throws RealmException If an error occurs during database access.
      * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
      * @throws NullPropertyException If remoteContainer is null.
-     * @throws DownloadQuotaExceededException If the transfer was downloaded too many times.
      */
     @Throws(
         CancellationException::class,

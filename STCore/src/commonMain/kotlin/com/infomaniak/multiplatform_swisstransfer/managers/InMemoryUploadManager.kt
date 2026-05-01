@@ -52,7 +52,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * This class handles the initialization, progress, and completion of uploads,
  * interacting with the database and the network repository.
  *
- * @property uploadController The controller for managing upload data in the database.
+ * @property crashReport A crash report interface used to report errors and add breadcrumbs.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
  * @property transferManager Transfer operations
  * @property emailLanguageUtils Utils containing helpers for email language
