@@ -50,15 +50,15 @@ import kotlin.coroutines.cancellation.CancellationException
  * This class handles the initialization, progress, and completion of uploads,
  * interacting with the database and the network repository.
  *
+ * @property accountManager A manager used to orchestrate Accounts operations.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
- * @property transferManager Transfer operations
+ * @property appDatabase The provider for managing Room database operations.
+ * @property transferDao The DAO for performing database operations on transfers.
  */
 class UploadV2Manager(
     private val accountManager: AccountManager,
     private val uploadRepository: UploadV2Repository,
-    private val transferManager: TransferManager,
     private val appDatabase: AppDatabase,
-    private val uploadDao: UploadDao,
     private val transferDao: TransferDao,
 ) {
 
