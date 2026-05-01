@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,13 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.data.NewUploadSession
-import com.infomaniak.multiplatform_swisstransfer.data.STUser
-import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
@@ -35,7 +34,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.FailedRetryAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.DownloadQuotaExceededException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
@@ -47,7 +45,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRep
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import com.infomaniak.multiplatform_swisstransfer.utils.addTransferByLinkUUID
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -57,6 +54,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * This class handles the initialization, progress, and completion of uploads,
  * interacting with the database and the network repository.
  *
+ * @property crashReport A crash report interface used to report errors and add breadcrumbs.
  * @property uploadController The controller for managing upload data in the database.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
  * @property transferManager Transfer operations
@@ -64,18 +62,13 @@ import kotlin.coroutines.cancellation.CancellationException
  * @property uploadTokensManager Manager that handle uploads' token operation
  */
 class UploadManager(
-    private val appDatabase: AppDatabase,
-    private val accountManager: AccountManager,
+    private val crashReport: CrashReportInterface,
     private val uploadController: UploadController,
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
     private val emailLanguageUtils: EmailLanguageUtils,
     private val uploadTokensManager: UploadTokensManager,
 ) {
-    private val currentUserId: Long?
-        get() = (accountManager.currentUser as? STUser.AuthUser)?.id
-    private val uploadDao get() = appDatabase.getUploadDao()
-
     val lastUploadFlow get() = uploadController.getLastUploadFlow()
 
     /**
@@ -273,7 +266,6 @@ class UploadManager(
      * @throws RealmException If an error occurs during database access.
      * @throws NotFoundException If we cannot find the upload session in the database with the specified uuid.
      * @throws NullPropertyException If remoteContainer is null.
-     * @throws DownloadQuotaExceededException If the transfer was downloaded too many times.
      */
     @Throws(
         CancellationException::class,
@@ -284,7 +276,6 @@ class UploadManager(
         RealmException::class,
         NotFoundException::class,
         NullPropertyException::class,
-        DownloadQuotaExceededException::class,
     )
     suspend fun finishUploadSession(uuid: String): String = withContext(Dispatchers.Default) {
         val uploadSession = uploadController.getUploadByUUID(uuid)
@@ -303,7 +294,8 @@ class UploadManager(
             throw if (exception is NoSuchElementException) UnknownException(exception) else exception
         }
 
-        transferManager.addTransferByLinkUUID(finishUploadResponse, uploadSession)
+        transferManager.addTransferByLinkUUID(crashReport, finishUploadResponse, uploadSession)
+
         uploadController.removeUploadSession(uuid)
 
         return@withContext finishUploadResponse.linkUUID // Here the linkUUID correspond to the transferUUID of a transferUI

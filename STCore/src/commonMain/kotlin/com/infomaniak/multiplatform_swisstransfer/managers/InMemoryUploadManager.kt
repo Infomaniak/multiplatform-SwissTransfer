@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadDestination
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
@@ -52,14 +52,14 @@ import kotlin.coroutines.cancellation.CancellationException
  * This class handles the initialization, progress, and completion of uploads,
  * interacting with the database and the network repository.
  *
- * @property uploadController The controller for managing upload data in the database.
+ * @property crashReport A crash report interface used to report errors and add breadcrumbs.
  * @property uploadRepository The repository for interacting with the SwissTransfer API for uploads.
  * @property transferManager Transfer operations
  * @property emailLanguageUtils Utils containing helpers for email language
  * @property uploadTokensManager Manager that handle uploads' token operation
  */
 class InMemoryUploadManager(
-    private val uploadController: UploadController,
+    private val crashReport: CrashReportInterface,
     private val uploadRepository: UploadRepository,
     private val transferManager: TransferManager,
     private val emailLanguageUtils: EmailLanguageUtils,
@@ -303,7 +303,7 @@ class InMemoryUploadManager(
                 throw if (exception is NoSuchElementException) UnknownException(exception) else exception
             }
 
-            transferManager.addTransferByLinkUUID(finishUploadResponse, uploadSession)
+            transferManager.addTransferByLinkUUID(crashReport, finishUploadResponse, uploadSession)
 
             finishUploadResponse.linkUUID // Here the linkUUID corresponds to the transferUUID of a transferUI
         }
