@@ -158,6 +158,7 @@ class ApiClientProvider internal constructor(
             runCatching {
                 unauthorizedHandler?.onUnauthorized(currentUserId?.invoke())
             }.onFailure { throwable ->
+                if (throwable is CancellationException) throw throwable
                 crashReport?.capture("An error has occurred on `onUnauthorized`", error = throwable)
             }
         }
