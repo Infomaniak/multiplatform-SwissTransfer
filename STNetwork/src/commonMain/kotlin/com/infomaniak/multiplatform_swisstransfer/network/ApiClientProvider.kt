@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@ import io.ktor.http.contentLength
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.network.UnresolvedAddressException
 import io.ktor.utils.io.CancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
@@ -53,14 +55,23 @@ class ApiClientProvider internal constructor(
     // When you don't use SwissTransferInjection, you don't have an userAgent, so we're currently setting a default value.
     // See later how to improve it.
     private val userAgent: String = "Ktor client",
+    private val currentUserId: (() -> Long?)? = null,
     private val crashReport: CrashReportInterface? = null,
+    private val unauthorizedHandler: UnauthorizedHandler? = null,
 ) {
 
     constructor() : this(null)
-    constructor(userAgent: String, crashReport: CrashReportInterface) : this(
+    constructor(
+        userAgent: String,
+        currentUserId: () -> Long?,
+        crashReport: CrashReportInterface,
+        unauthorizedHandler: UnauthorizedHandler,
+    ) : this(
         engine = null,
         userAgent = userAgent,
+        currentUserId = currentUserId,
         crashReport = crashReport,
+        unauthorizedHandler = unauthorizedHandler,
     )
 
     val json = Json {
@@ -105,6 +116,8 @@ class ApiClientProvider internal constructor(
                     addSentryUrlBreadcrumb(response, statusCode, requestContextId)
 
                     if (statusCode >= 300) {
+                        if (statusCode == 401) handleUnauthorized()
+
                         val bodyResponse = response.bodyAsText()
                         runCatching {
                             if (response.request.url.toString().isFromApiV2()) {
@@ -138,6 +151,16 @@ class ApiClientProvider internal constructor(
         }
 
         return if (engine != null) HttpClient(engine, block) else HttpClient(block)
+    }
+
+    private suspend fun handleUnauthorized() = coroutineScope {
+        launch {
+            runCatching {
+                unauthorizedHandler?.onUnauthorized(currentUserId?.invoke())
+            }.onFailure { throwable ->
+                crashReport?.capture("An error has occurred on `onUnauthorized`", error = throwable)
+            }
+        }
     }
 
     private fun addSentryUrlBreadcrumb(response: HttpResponse, statusCode: Int, requestContextId: String) {
