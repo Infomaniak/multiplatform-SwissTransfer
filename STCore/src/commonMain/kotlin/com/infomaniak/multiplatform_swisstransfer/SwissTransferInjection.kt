@@ -39,6 +39,7 @@ import com.infomaniak.multiplatform_swisstransfer.managers.UploadManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadTokensManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadV2Manager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
+import com.infomaniak.multiplatform_swisstransfer.network.UnauthorizedHandler
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
@@ -58,6 +59,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property legacyDatabaseRootDirectory Customize root directory for realm, eg. iOS app group container.
  * @property databaseNameOrPath Full file path on iOS, just name (without extension) on Android.
  * @property crashReport A crash report interface used to report errors and add breadcrumbs.
+ * @property unauthorizedHandler An interface used to handle unauthorized access events (HTTP 401).
  * @property transferManager A manager used to orchestrate transfer operations.
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
@@ -72,6 +74,7 @@ class SwissTransferInjection(
     private val legacyDatabaseRootDirectory: String? = null,
     private val databaseNameOrPath: String,
     private val crashReport: CrashReportInterface,
+    private val unauthorizedHandler: UnauthorizedHandler,
 ) {
 
     private val requireToken: () -> String = {
@@ -84,7 +87,14 @@ class SwissTransferInjection(
         val databaseConfig = DatabaseConfig(databaseNameOrPath = databaseNameOrPath)
         DatabaseProvider(databaseConfig).getAppDatabase()
     }
-    private val apiClientProvider by lazy { ApiClientProvider(userAgent, crashReport) }
+    private val apiClientProvider by lazy {
+        ApiClientProvider(
+            userAgent = userAgent,
+            currentUserId = { accountManager.currentUser?.takeIf { it is STUser.AuthUser }?.id },
+            crashReport = crashReport,
+            unauthorizedHandler = unauthorizedHandler
+        )
+    }
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
     private val uploadV2Repository by lazy { UploadV2Repository(apiClientProvider, environment, requireToken) }
