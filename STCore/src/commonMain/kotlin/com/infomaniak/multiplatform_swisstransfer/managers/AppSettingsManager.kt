@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
+import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
@@ -32,6 +33,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettin
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
+import com.infomaniak.multiplatform_swisstransfer.utils.catchDbExceptions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -49,6 +51,7 @@ class AppSettingsManager internal constructor(
     private val appDatabase: AppDatabase,
     private val appSettingsController: AppSettingsController,
     private val emailLanguageUtils: EmailLanguageUtils,
+    private val crashReport: CrashReportInterface,
 ) {
 
     private val dao: AppSettingsDao get() = appDatabase.getAppSettingsDao()
@@ -59,7 +62,7 @@ class AppSettingsManager internal constructor(
     val appSettings: Flow<AppSettings?> = dao.getAppSettings().transformLatest { appSettings ->
         if (appSettings != null) emit(appSettings)
         else Migrator.migrateOrCreateAppSettings(appSettingsController, dao, emailLanguageUtils)
-    }
+    }.catchDbExceptions(crashReport)
 
     suspend fun getAppSettings(): AppSettings? = appSettings.first()
 
