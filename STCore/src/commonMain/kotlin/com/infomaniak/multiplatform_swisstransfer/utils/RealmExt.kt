@@ -22,8 +22,19 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.isExpectedRealm
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 
-internal fun <T> Flow<T>.catchDbExceptions(crashReport: CrashReportInterface) = catch { throwable ->
+internal fun <T> Flow<T>.catchTransfersDbExceptions(crashReport: CrashReportInterface): Flow<T> {
+    return catchDbExceptions(crashReport, message = "Failure to load transfers from Realm")
+}
+
+internal fun <T> Flow<T>.catchAppSettingsDbExceptions(crashReport: CrashReportInterface): Flow<T> {
+    return catchDbExceptions(crashReport, message = "Failure to load AppSettings from Realm")
+}
+
+internal fun <T> Flow<T>.catchDbExceptions(
+    crashReport: CrashReportInterface,
+    message: String,
+) = catch { throwable ->
     if (throwable.isExpectedRealmError().not()) {
-        crashReport.capture("Failure to load transfers", throwable)
+        crashReport.capture(message, throwable)
     }
 }

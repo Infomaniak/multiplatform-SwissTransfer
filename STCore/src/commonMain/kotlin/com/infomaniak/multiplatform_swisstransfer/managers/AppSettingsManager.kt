@@ -33,7 +33,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettin
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
-import com.infomaniak.multiplatform_swisstransfer.utils.catchDbExceptions
+import com.infomaniak.multiplatform_swisstransfer.utils.catchAppSettingsDbExceptions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -62,7 +62,7 @@ class AppSettingsManager internal constructor(
     val appSettings: Flow<AppSettings?> = dao.getAppSettings().transformLatest { appSettings ->
         if (appSettings != null) emit(appSettings)
         else Migrator.migrateOrCreateAppSettings(appSettingsController, dao, emailLanguageUtils)
-    }.catchDbExceptions(crashReport)
+    }.catchAppSettingsDbExceptions(crashReport)
 
     suspend fun getAppSettings(): AppSettings? = appSettings.first()
 
