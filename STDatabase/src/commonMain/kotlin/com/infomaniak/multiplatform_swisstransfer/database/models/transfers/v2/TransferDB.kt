@@ -19,13 +19,14 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2
 
 import androidx.room.Entity
 import androidx.room.Ignore
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 
-@Entity
+@Entity(indices = [Index("createdAt")])
 data class TransferDB(
     @PrimaryKey
     override val id: String,
