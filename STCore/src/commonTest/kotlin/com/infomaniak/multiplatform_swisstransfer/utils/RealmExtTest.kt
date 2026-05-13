@@ -22,7 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportI
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportLevel
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -31,7 +31,7 @@ import kotlin.test.assertTrue
 class RealmExtTest {
 
     @Test
-    fun catchDbExceptions_ignoresExpectedRealmClosureErrors() = runBlocking {
+    fun catchDbExceptions_ignoresExpectedRealmClosureErrors() = runTest {
         val crashReport = TestCrashReport()
 
         flow<Int> {
@@ -44,7 +44,7 @@ class RealmExtTest {
     }
 
     @Test
-    fun catchDbExceptions_capturesUnexpectedErrors() = runBlocking {
+    fun catchDbExceptions_capturesUnexpectedErrors() = runTest {
         val crashReport = TestCrashReport()
         val exception = IllegalStateException("Unexpected exception")
 
