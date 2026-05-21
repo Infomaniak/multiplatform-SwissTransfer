@@ -194,6 +194,13 @@ class TransferManager internal constructor(
         merge = { authTransfer, guestTransfer -> authTransfer ?: guestTransfer }
     ).catchTransfersDbExceptions(crashReport)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getTransferByLinkIdFlow(linkId: String): Flow<TransferUi?> {
+        return transferDao.getTransferByLinkIdFlow(linkId).mapLatest { transferDB ->
+            transferDB?.toTransferUi(transferDao)
+        }.catchTransfersDbExceptions(crashReport)
+    }
+
     /**
      * Fetch all transfers in database to update their status
      *

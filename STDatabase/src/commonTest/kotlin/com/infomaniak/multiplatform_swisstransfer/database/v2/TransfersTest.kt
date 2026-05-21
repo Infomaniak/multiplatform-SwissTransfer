@@ -165,6 +165,30 @@ class TransfersTest : RobolectricTestsBase() {
         val transferDBResult = transferDao.getTransferByLinkId("linkId")
         assertNull(transferDBResult)
     }
+
+    @Test
+    fun canGetTransferByLinkIdFlow() = runTest {
+        val transfer1 = DummyTransferForV2.transfer1
+        val transfer2 = DummyTransferForV2.transfer2
+        val expectedLinkId = "linkId"
+
+        insertTransfer(transfer1, TransferDirection.RECEIVED, password = null, linkId = expectedLinkId)
+        insertTransfer(transfer2, TransferDirection.RECEIVED, password = null)
+
+        val transferDBResult = transferDao.getTransferByLinkIdFlow(expectedLinkId).first()
+        assertNotNull(transferDBResult)
+        assertEquals(expectedLinkId, transferDBResult.linkId)
+    }
+
+    @Test
+    fun getTransferByLinkIdFlow_returnsNull_whenLinkIdDoesNotMatch() = runTest {
+        val transfer = DummyTransferForV2.transfer1
+
+        insertTransfer(transfer, TransferDirection.RECEIVED, password = null)
+
+        val transferDBResult = transferDao.getTransferByLinkIdFlow("linkId").first()
+        assertNull(transferDBResult)
+    }
     //endregion
 
     //region Upsert data
