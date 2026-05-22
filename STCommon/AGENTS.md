@@ -5,10 +5,11 @@
 
 ## Module Summary
 
-`STCommon` is the shared, dependency-free foundation of the multiplatform SwissTransfer library. It contains the
-interfaces, data models, utilities, exceptions and Matomo analytics constants used by all other modules. It is the
-**only** module re-exported through the iOS XCFramework of `STCore` (`appleExportedProjects = listOf(commonProject)`
-in `STCore/build.gradle.kts`), so its public surface is what iOS Swift code actually sees.
+`STCommon` is the shared foundation of the multiplatform SwissTransfer library, with no dependencies on other ST
+modules. It contains the interfaces, data models, utilities, exceptions and Matomo analytics constants used by all
+other modules. It is the **only** module re-exported through the iOS XCFramework of `STCore`
+(`appleExportedProjects = listOf(commonProject)` in `STCore/build.gradle.kts`), so its public surface is what iOS
+Swift code actually sees.
 
 ## Tech Stack & Dependencies
 

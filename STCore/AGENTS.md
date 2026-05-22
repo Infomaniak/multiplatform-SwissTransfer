@@ -13,8 +13,10 @@ all the managers an app needs:
 - `transferManager` — `TransferManager`
 - `fileManager` — `FileManager`
 - `accountManager` — `AccountManager`
-- `uploadManager` / `inMemoryUploadManager` / `UploadV2Manager` / `UploadTokensManager`
-- `emailTokensManager`
+- `uploadManager` — `UploadManager`
+- `inMemoryUploadManager` — `InMemoryUploadManager`
+- `uploadV2Manager` — `UploadV2Manager`
+- `uploadTokensManager` — `UploadTokensManager`
 - `sharedApiUrlCreator` — `SharedApiUrlCreator` (shared deep-link / API URL helpers)
 
 `SwissTransferInjection` is the only entry point consumer apps (`Infomaniak/android-SwissTransfer`,
@@ -59,7 +61,8 @@ STCore/src/
   apps to instantiate managers, controllers, or repositories directly.
 - Properties on `SwissTransferInjection` are lazy by design — keep new dependencies lazy too, so the cost of
   constructing the facade stays close to zero.
-- `loadUser(userId)` is the user-switching entry point. Any new per-user state must hook into that flow.
+- User switching is done via `accountManager.loadUser(user: STUser)` (and related logout APIs). Any new per-user
+  state must hook into that flow.
 
 ### Managers
 

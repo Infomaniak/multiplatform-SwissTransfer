@@ -43,26 +43,28 @@ schema-changing edit MUST regenerate these.
 ## Layout
 
 ```
-STDatabase/src/
-├── commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/database/
-│   ├── DatabaseConfig.kt
-│   ├── DatabaseProvider.kt        # Aggregates Realm + Room handles
-│   ├── RealmProvider.kt
-│   ├── RealmMigrations.kt
-│   ├── Converters.kt              # Room TypeConverters
-│   ├── StringExtensions.kt
-│   ├── controllers/               # Domain-level controllers (Realm + Room facades)
-│   ├── dao/                       # Room @Dao interfaces
-│   ├── models/
-│   │   ├── appSettings/{,v2/}
-│   │   ├── transfers/{,v2/}
-│   │   └── upload/
-│   └── utils/
-├── androidMain/    # Android-specific Room/Realm wiring
-├── appleMain/      # iOS Room driver wiring
-├── commonTest/     # KMP unit tests
-└── appleTest/      # iOS-specific tests (e.g. database/v2/utils)
-└── schemas/        # Room exported schemas (commit them!)
+STDatabase/
+├── src/
+│   ├── commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/database/
+│   │   ├── DatabaseConfig.kt
+│   │   ├── DatabaseProvider.kt        # Aggregates Realm + Room handles
+│   │   ├── RealmProvider.kt
+│   │   ├── RealmMigrations.kt
+│   │   ├── Converters.kt              # Room TypeConverters
+│   │   ├── StringExtensions.kt
+│   │   ├── controllers/               # Domain-level controllers (Realm + Room facades)
+│   │   ├── dao/                       # Room @Dao interfaces
+│   │   ├── models/
+│   │   │   ├── appSettings/{,v2/}
+│   │   │   ├── transfers/{,v2/}
+│   │   │   └── upload/
+│   │   └── utils/
+│   ├── androidMain/        # Android-specific Room/Realm wiring
+│   ├── androidUnitTest/    # Android JVM/Robolectric tests
+│   ├── appleMain/          # iOS Room driver wiring
+│   ├── commonTest/         # KMP unit tests
+│   └── appleTest/          # iOS-specific tests (e.g. database/v2/utils)
+└── schemas/                # Room exported schemas (commit them!)
 ```
 
 ## Local Norms
