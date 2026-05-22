@@ -109,9 +109,6 @@ class TransferManager internal constructor(
     private val minDurationBetweenAutoUpdates = 15.minutes
     private var lastUpdateDate: TimeMark = TimeSource.Monotonic.markNow() - (minDurationBetweenAutoUpdates + 1.seconds)
 
-    private val currentUserId: Long?
-        get() = (accountManager.currentUser as? STUser.AuthUser)?.id
-
     private val transferDao get() = appDatabase.getTransferDao()
 
     /**
@@ -243,7 +240,7 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun fetchWaitingTransfers(): Unit = withContext(Dispatchers.Default) {
-        when (val userId = currentUserId) {
+        when (val userId = accountManager.currentUser?.id) {
             null -> Unit
             else -> launch {
                 transferDao.getUploadedButNotReadyTransfers(userId).forEach { transfer ->
@@ -303,7 +300,7 @@ class TransferManager internal constructor(
         batchLimit: Int = 500,
     ) {
         require(batchLimit > 0) { "batchLimit must be greater than 0" }
-        if (currentUserId == null) error("No user logged in")
+        if (accountManager.currentUser == null) error("No user logged in")
         downloadManagerArgs.chunked(batchLimit).forEach { batch ->
             appDatabase.useWriterConnection {
                 it.immediateTransaction {
@@ -429,7 +426,7 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun getTransferByUUID(transferUUID: String): TransferUi? = withContext(Dispatchers.Default) {
-        val transferUiFromV2 = currentUserId?.let { userId ->
+        val transferUiFromV2 = accountManager.currentUser?.id?.let { userId ->
             transferDao.transferFlow(userId, transferUUID).first()?.toTransferUi(transferDao)
         }
         return@withContext transferUiFromV2 ?: transferController.getTransfer(transferUUID)?.let(::TransferUi)
@@ -665,7 +662,7 @@ class TransferManager internal constructor(
     }
 
     private suspend fun addTransferV2(linkId: String, transferApi: TransferApiV2, password: String?) {
-        val userId = currentUserId ?: GuestUser.id
+        val userId = accountManager.currentUser?.id ?: return
         val transferDB = TransferDB(
             transfer = transferApi,
             linkId = linkId,
@@ -741,7 +738,7 @@ class TransferManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun deleteExpiredTransfers() = withContext(Dispatchers.Default) {
-        currentUserId?.let { transferDao.deleteExpiredTransfers() }
+        accountManager.currentUser?.let { transferDao.deleteExpiredTransfers() }
         if (showGuestData()) transferController.deleteExpiredTransfers()
     }
 
