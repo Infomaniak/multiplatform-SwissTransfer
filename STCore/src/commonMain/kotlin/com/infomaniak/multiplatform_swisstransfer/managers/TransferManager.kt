@@ -770,7 +770,7 @@ class TransferManager internal constructor(
                     transferId = transferId,
                     fileId = fileUid ?: "",
                     downloadManagerUniqueId = uniqueDownloadManagerId,
-                    userOwnerId = currentUserId ?: return
+                    userOwnerId = accountManager.currentUser?.id ?: return
                 )
             )
         }
