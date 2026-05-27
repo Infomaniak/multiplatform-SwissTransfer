@@ -278,13 +278,11 @@ class TransferController(private val realmProvider: RealmProvider) {
         private fun getValidTransfersQuery(realm: Realm, transferDirection: TransferDirection?): RealmQuery<TransferDB> {
             val directionFilterQuery = directionFilterQuery(transferDirection)
             return realm.query<TransferDB>("$directionFilterQuery AND NOT ($expiredDateQuery OR $downloadCounterQuery)")
-                .sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)
         }
 
         private fun getExpiredTransfersQuery(realm: Realm, transferDirection: TransferDirection?): RealmQuery<TransferDB> {
             val directionFilterQuery = directionFilterQuery(transferDirection)
             return realm.query<TransferDB>("$directionFilterQuery AND ($expiredDateQuery OR $downloadCounterQuery)")
-                .sort(TransferDB::createdDateTimestamp.name, Sort.DESCENDING)
         }
 
         private fun directionFilterQuery(transferDirection: TransferDirection?): String {

@@ -45,8 +45,7 @@ interface TransferDao {
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
-        ORDER BY createdAt DESC """
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime"""
     )
     fun validTransfersFlow(
         userId: Long,
@@ -58,8 +57,7 @@ interface TransferDao {
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
-        ORDER BY createdAt DESC """
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime """
     )
     fun expiredTransfersFlow(
         userId: Long,

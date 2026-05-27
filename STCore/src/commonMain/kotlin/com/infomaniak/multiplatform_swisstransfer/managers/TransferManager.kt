@@ -164,7 +164,10 @@ class TransferManager internal constructor(
             }
         },
         merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
-    ).catchTransfersDbExceptions(crashReport)
+    ).map {
+        // Sort transfers at the end of the flow instead of inside the database to avoid badly sorted transfers when merging valid1 and valid2
+        it.sortedByDescendingCreatedDate()
+    }.catchTransfersDbExceptions(crashReport)
 
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
@@ -818,9 +821,16 @@ class TransferManager internal constructor(
         internal operator fun plus(other: SortedTransfers): SortedTransfers {
             return SortedTransfers(
                 validTransfers = validTransfers + other.validTransfers,
-                expiredTransfers = expiredTransfers + other.expiredTransfers
+                expiredTransfers = expiredTransfers + other.expiredTransfers,
             )
         }
+    }
+
+    private fun SortedTransfers.sortedByDescendingCreatedDate(): SortedTransfers {
+        return SortedTransfers(
+            validTransfers.sortedByDescending { it.createdDateTimestamp },
+            expiredTransfers.sortedByDescending { it.createdDateTimestamp },
+        )
     }
 
     data class DownloadManagerArgs(val transferId: String, val fileId: String?, val uniqueDownloadManagerId: Long?)
