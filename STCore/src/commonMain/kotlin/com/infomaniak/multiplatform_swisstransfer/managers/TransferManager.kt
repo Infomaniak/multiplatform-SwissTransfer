@@ -159,7 +159,9 @@ class TransferManager internal constructor(
                 transferController.getExpiredTransfersFlow(transferDirection),
             ) { valid1, expired1, valid2, expired2 ->
                 val validList = valid1.mergeWith(valid2.mapToList(::TransferUi))
+                    .sortedByDescending { it.createdDateTimestamp }
                 val expiredList = expired1.mergeWith(expired2.mapToList(::TransferUi))
+                    .sortedByDescending { it.createdDateTimestamp }
                 SortedTransfers(validList, expiredList)
             }
         },
@@ -817,8 +819,10 @@ class TransferManager internal constructor(
     ) {
         internal operator fun plus(other: SortedTransfers): SortedTransfers {
             return SortedTransfers(
-                validTransfers = validTransfers + other.validTransfers,
-                expiredTransfers = expiredTransfers + other.expiredTransfers
+                validTransfers = (validTransfers + other.validTransfers)
+                    .sortedByDescending { it.createdDateTimestamp },
+                expiredTransfers = (expiredTransfers + other.expiredTransfers)
+                    .sortedByDescending { it.createdDateTimestamp },
             )
         }
     }
