@@ -823,8 +823,11 @@ class TransferManager internal constructor(
         }
     }
 
-    private fun SortedTransfers.sortedByDescendingCreatedDate(): SortedTransfers{
-        return SortedTransfers(validTransfers.sortedByDescending { it.createdDateTimestamp }, expiredTransfers.sortedByDescending { it.createdDateTimestamp })
+    private fun SortedTransfers.sortedByDescendingCreatedDate(): SortedTransfers {
+        return SortedTransfers(
+            validTransfers.sortedByDescending { it.createdDateTimestamp },
+            expiredTransfers.sortedByDescending { it.createdDateTimestamp },
+        )
     }
 
     data class DownloadManagerArgs(val transferId: String, val fileId: String?, val uniqueDownloadManagerId: Long?)
