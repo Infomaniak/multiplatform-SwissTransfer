@@ -164,7 +164,10 @@ class TransferManager internal constructor(
             }
         },
         merge = { authTransfers, guestTransfers -> authTransfers + guestTransfers }
-    ).map { it.sortedByDescendingCreatedDate() }.catchTransfersDbExceptions(crashReport)
+    ).map {
+        // Sort transfers at the end of the flow instead of inside the database to avoid badly sorted transfers when merging valid1 and valid2
+        it.sortedByDescendingCreatedDate()
+    }.catchTransfersDbExceptions(crashReport)
 
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
