@@ -15,25 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2
+package com.infomaniak.multiplatform_swisstransfer.mappers
 
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 
-interface Transfer {
-    val id: String
-    val senderEmail: String
-    val title: String?
-    val message: String?
-    val createdAt: Long
-    val expiresAt: Long
-    val files: List<File> get() = emptyList()
-    val totalSize: Long
-
-    //region Only local
-    val password: String? get() = null
-    val transferStatus: TransferStatus get() = TransferStatus.READY
-    val recipientsEmails: Set<String> get() = emptySet()
-    val linkId: String? get() = null
-    //endregion
-}
+internal fun TransferApi.toTransferDB(
+    direction: TransferDirection,
+    linkId: String?,
+    userOwnerId: Long,
+    password: String? = null,
+    status: TransferStatus = TransferStatus.READY,
+): TransferDB = TransferDB(
+    id = id,
+    senderEmail = senderEmail,
+    title = title,
+    message = message,
+    createdAt = createdAt,
+    expiresAt = expiresAt,
+    totalSize = totalSize,
+    password = password,
+    transferDirection = direction,
+    transferStatus = status,
+    recipientsEmails = emptySet(),
+    linkId = linkId,
+    userOwnerId = userOwnerId,
+)

@@ -18,8 +18,9 @@
 package com.infomaniak.multiplatform_swisstransfer.database.v2.dataset
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.File
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
+import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 
 object DummyTransferForV2 {
 
@@ -27,30 +28,32 @@ object DummyTransferForV2 {
         id: String,
         expiresAt: Long,
         transferStatus: TransferStatus = TransferStatus.READY,
-    ): Transfer = object : Transfer {
-        override val id: String = id
-        override val senderEmail: String = ""
-        override val title: String? = null
-        override val message: String? = null
-        override val createdAt: Long = 0
-        override val expiresAt: Long = expiresAt
-        override val totalSize: Long = 0
-        override val transferStatus: TransferStatus = transferStatus
-    }
+    ): TransferDB = TransferDB(
+        id = id,
+        senderEmail = "",
+        title = null,
+        message = null,
+        createdAt = 0,
+        expiresAt = expiresAt,
+        totalSize = 0,
+        transferDirection = TransferDirection.SENT,
+        transferStatus = transferStatus,
+        userOwnerId = 0L,
+    )
 
     private const val `2024-11-01` = 1_730_458_842L
     private const val `2100-01-01` = 4_102_441_200L
 
-    val transfer1 = transfer("transferLinkUUID1", `2024-11-01`)
+    val transfer1: TransferDB = transfer("transferLinkUUID1", `2024-11-01`)
 
-    val transfer2 = transfer("transfer2", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
-    val transfer3 = transfer("transfer3", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
-    val transfer4 = transfer("transfer4", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
+    val transfer2: TransferDB = transfer("transfer2", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
+    val transfer3: TransferDB = transfer("transfer3", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
+    val transfer4: TransferDB = transfer("transfer4", `2100-01-01`, TransferStatus.WAIT_VIRUS_CHECK)
 
-    val expired: Transfer = transfer1
-    val notExpired: Transfer = transfer2
+    val expired: TransferDB = transfer1
+    val notExpired: TransferDB = transfer2
 
-    val transfers = listOf(transfer1, transfer2, transfer3, transfer4)
+    val transfers: List<TransferDB> = listOf(transfer1, transfer2, transfer3, transfer4)
 
     fun createDummyFile(
         path: String,

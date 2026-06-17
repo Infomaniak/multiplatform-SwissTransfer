@@ -17,22 +17,21 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TransferApi(
-    override val id: String,
+    val id: String,
     @SerialName("sender")
-    override val senderEmail: String,
-    override val title: String? = null,
-    override val message: String? = null,
+    val senderEmail: String,
+    val title: String? = null,
+    val message: String? = null,
     @SerialName("created_at")
-    override val createdAt: Long,
+    val createdAt: Long,
     @SerialName("expires_at")
-    override val expiresAt: Long,
-    override val files: List<FileApi>,
+    val expiresAt: Long,
+    val files: List<FileApi>,
     @SerialName("total_size")
-    override val totalSize: Long,
-) : Transfer
+    val totalSize: Long,
+)

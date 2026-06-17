@@ -41,6 +41,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApi
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.NullPropertyException
 import com.infomaniak.multiplatform_swisstransfer.exceptions.UnsupportedTransferDeeplinkUrlException
+import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferDB
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUi
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiList
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferUiListFlow
@@ -666,8 +667,7 @@ class TransferManager internal constructor(
 
     private suspend fun addTransferV2(linkId: String, transferApi: TransferApiV2, password: String?) {
         val userId = accountManager.currentUser?.id ?: return
-        val transferDB = TransferDB(
-            transfer = transferApi,
+        val transferDB = transferApi.toTransferDB(
             linkId = linkId,
             userOwnerId = userId,
             direction = TransferDirection.RECEIVED,
