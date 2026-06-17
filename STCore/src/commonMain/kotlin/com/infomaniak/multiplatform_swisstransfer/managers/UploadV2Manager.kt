@@ -21,7 +21,6 @@ import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import androidx.sqlite.SQLiteException
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
@@ -31,12 +30,14 @@ import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
+import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferDB
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.TransferFile
@@ -89,7 +90,7 @@ class UploadV2Manager(
     /**
      * Prepare a transfer to be uploaded.
      *
-     * @return The [Transfer] object to use for [uploadFileChunk] and [uploadFile],
+     * @return The [TransferApi] object to use for [uploadFileChunk] and [uploadFile],
      * or [getUploadFileChunkUrl] and [getUploadFileUrl]
      *
      * @throws NetworkException If there is a network error.
@@ -122,7 +123,7 @@ class UploadV2Manager(
     )
     suspend fun prepareTransfer(
         request: UploadSessionRequest,
-    ): Transfer = withContext(Dispatchers.Default) {
+    ): TransferApi = withContext(Dispatchers.Default) {
         val userId = requireCurrentUserId()
         transferDao.deleteAnyPendingTransfer(userId)
 
@@ -143,8 +144,7 @@ class UploadV2Manager(
             recipients = request.recipientsEmails.toList()
         )
         uploadRepository.createTransfer(transferCreationPayload).also { apiTransfer ->
-            val transferToPersist = TransferDB(
-                transfer = apiTransfer,
+            val transferToPersist = apiTransfer.toTransferDB(
                 linkId = null,
                 password = transferCreationPayload.password,
                 direction = TransferDirection.SENT,
@@ -171,7 +171,7 @@ class UploadV2Manager(
      * @throws CancellationException If the operation is canceled.
      */
     @Throws(CancellationException::class, UnknownException::class)
-    suspend fun getPendingTransferIfAny(): Transfer? {
+    suspend fun getPendingTransferIfAny(): TransferDB? {
         val userId = requireCurrentUserId()
         return transferDao.getPendingTransfer(userId)
     }

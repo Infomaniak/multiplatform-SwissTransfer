@@ -20,56 +20,29 @@ package com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.File
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 
 @Entity
 data class TransferDB(
     @PrimaryKey
-    override val id: String,
-    override val senderEmail: String,
-    override val title: String?,
-    override val message: String?,
-    override val createdAt: Long,
-    override val expiresAt: Long,
-    override val totalSize: Long,
+    val id: String,
+    val senderEmail: String,
+    val title: String?,
+    val message: String?,
+    val createdAt: Long,
+    val expiresAt: Long,
+    val totalSize: Long,
     // Local
-    override val password: String? = null,
+    val password: String? = null,
     val transferDirection: TransferDirection,
-    override val transferStatus: TransferStatus,
-    override val recipientsEmails: Set<String> = emptySet(),
-    override val linkId: String? = null,
+    val transferStatus: TransferStatus,
+    val recipientsEmails: Set<String> = emptySet(),
+    val linkId: String? = null,
     val userOwnerId: Long,
     //TODO[ST-v2]: Add language
-) : Transfer {
+) {
     @Ignore
-    override var files: List<File> = emptyList()
+    var files: List<FileDB> = emptyList()
         internal set
-
-    constructor(
-        transfer: Transfer,
-        direction: TransferDirection,
-        linkId: String?,
-        userOwnerId: Long,
-        password: String? = transfer.password,
-        status: TransferStatus = transfer.transferStatus
-    ) : this(
-        id = transfer.id,
-        senderEmail = transfer.senderEmail,
-        title = transfer.title,
-        message = transfer.message,
-        createdAt = transfer.createdAt,
-        expiresAt = transfer.expiresAt,
-        totalSize = transfer.totalSize,
-        password = password,
-        transferDirection = direction,
-        transferStatus = status,
-        recipientsEmails = transfer.recipientsEmails,
-        linkId = linkId,
-        userOwnerId = userOwnerId
-    ) {
-        this.files = transfer.files
-    }
 }

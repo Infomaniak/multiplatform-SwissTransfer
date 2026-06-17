@@ -17,7 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.v2
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
@@ -68,15 +67,11 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.transfer1, TransferDirection.SENT, null)
 
         // Insert a pending upload
-        val uploadTransfer = TransferDB(
-            transfer = DummyTransferForV2.transfer2,
-            direction = TransferDirection.SENT,
-            linkId = null,
-            userOwnerId = userId,
-        ).copy(
+        val uploadTransfer = DummyTransferForV2.transfer2.copy(
             id = "upload1",
             transferDirection = TransferDirection.SENT,
             transferStatus = TransferStatus.PENDING_UPLOAD,
+            userOwnerId = userId,
         )
         transferDao.upsertTransfer(uploadTransfer)
 
@@ -589,27 +584,19 @@ class TransfersTest : RobolectricTestsBase() {
     }
 
     private suspend fun insertTransfer(
-        transfer: Transfer,
+        transfer: TransferDB,
         transferDirection: TransferDirection,
         password: String?,
         linkId: String? = null,
     ) {
-        val transferDB = TransferDB(
-            id = transfer.id,
-            senderEmail = transfer.senderEmail,
-            title = transfer.title,
-            message = transfer.message,
-            createdAt = transfer.createdAt,
-            expiresAt = transfer.expiresAt,
-            totalSize = transfer.totalSize,
-            password = password,
-            transferDirection = transferDirection,
-            transferStatus = transfer.transferStatus,
-            recipientsEmails = transfer.recipientsEmails,
-            userOwnerId = userId,
-            linkId = linkId,
+        transferDao.upsertTransfer(
+            transfer.copy(
+                transferDirection = transferDirection,
+                password = password,
+                userOwnerId = userId,
+                linkId = linkId,
+            )
         )
-        transferDao.upsertTransfer(transferDB)
     }
     //endregion
 }
