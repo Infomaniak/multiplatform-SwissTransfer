@@ -90,7 +90,7 @@ class UploadV2Manager(
     /**
      * Prepare a transfer to be uploaded.
      *
-     * @return The [Transfer] object to use for [uploadFileChunk] and [uploadFile],
+     * @return The [TransferApi] object to use for [uploadFileChunk] and [uploadFile],
      * or [getUploadFileChunkUrl] and [getUploadFileUrl]
      *
      * @throws NetworkException If there is a network error.
