@@ -27,7 +27,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
-import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferDB
@@ -143,12 +142,13 @@ class UploadV2Manager(
             },
             recipients = request.recipientsEmails.toList()
         )
-        uploadRepository.createTransfer(transferCreationPayload).also { apiTransfer ->
+        uploadRepository.createTransfer(transferCreationPayload, request.organizationAccountId).also { apiTransfer ->
             val transferToPersist = apiTransfer.toTransferDB(
-                linkId = null,
-                password = transferCreationPayload.password,
                 direction = TransferDirection.SENT,
+                linkId = null,
                 userOwnerId = userId,
+                organizationAccountId = request.organizationAccountId,
+                password = transferCreationPayload.password,
                 status = TransferStatus.PENDING_UPLOAD,
             )
             val filesToInsert = FileUtilsForApiV2.getFileDbTree(
@@ -470,10 +470,10 @@ class UploadV2Manager(
         UploadErrorsException.TransferFailed::class,
         CancellationException::class,
     )
-    suspend fun cancelTransfer(transferId: String, failed: Boolean): Boolean {
+    suspend fun cancelTransfer(transferId: String, organizationAccountId: Long?, failed: Boolean): Boolean {
         return when (failed) {
-            true -> uploadRepository.markTransferAsFailed(transferId)
-            false -> uploadRepository.cancelTransfer(transferId)
+            true -> uploadRepository.markTransferAsFailed(transferId, organizationAccountId)
+            false -> uploadRepository.cancelTransfer(transferId, organizationAccountId)
         }.also { transferDao.deleteTransfer(transferId = transferId) }
     }
 
@@ -507,8 +507,8 @@ class UploadV2Manager(
         UploadErrorsException.TransferFailed::class,
         CancellationException::class,
     )
-    suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
-        return uploadRepository.finalizeTransferAndGetLinkUuid(transferId).also {
+    suspend fun finalizeTransferAndGetLinkUuid(transferId: String, organizationAccountId: Long?): String {
+        return uploadRepository.finalizeTransferAndGetLinkUuid(transferId, organizationAccountId).also {
             transferDao.markPendingTransferAsReady(transferId = transferId, linkId = it)
         }
     }

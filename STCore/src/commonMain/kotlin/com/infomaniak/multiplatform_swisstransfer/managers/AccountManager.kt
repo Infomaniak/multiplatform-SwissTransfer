@@ -25,7 +25,12 @@ import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
+import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
+import com.infomaniak.multiplatform_swisstransfer.mappers.toDbModel
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.UserInfoRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +39,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -51,6 +57,7 @@ class AccountManager internal constructor(
     private val uploadController: UploadController,
     private val transferController: TransferController,
     private val appSettingsManager: AppSettingsManager,
+    private val userInfoRepository: UserInfoRepository,
     private val realmProvider: RealmProvider,
 ) {
 
@@ -81,13 +88,44 @@ class AccountManager internal constructor(
 
     val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
 
+    /*
+    * We need to:
+    * - retrieve the org accounts for each user
+    * - store this data
+    * - know when to update it
+    * - store what is the last organization selected for a given user account
+    * - select the default org (only the first time we retrieve the org accounts)
+    *
+    * */
+
+    /**
+     * @see switchToOrganization
+     * @see organizationAccountsForUser
+     */
+    fun organizationAccountIdForUser(userId: Long): Flow<Long?> = appDatabase.organizationsDao.lastSelectedOrgId(userId)
+
+    suspend fun switchToOrganization(organizationAccountId: Long?) {
+        val userId = currentUser?.id ?: return
+        if (organizationAccountId == null) return appDatabase.organizationsDao.deleteLastSelectionOrganization(userId)
+
+        val selectedOrgAccount = SelectedOrganizationAccount(userId = userId, organizationAccountId = organizationAccountId)
+        appDatabase.organizationsDao.updateLastSelectedOrganization(selectedOrgAccount)
+    }
+
+    suspend fun organizationAccountsForUser(userId: Long): List<OrganizationAccount> {
+        return appDatabase.organizationsDao.orgAccountsForUser(userId)
+    }
+
     /**
      * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun loadUser(user: STUser) {
+    suspend fun loadUser(user: STUser) = coroutineScope {
+        launch {
+            if (user is STUser.AuthUser) refreshUserInfo(userId = user.id)
+        }
         userSwitchMutex.withLock {
-            if (currentUser?.id == user.id) return
+            if (currentUser?.id == user.id) return@coroutineScope
             if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
@@ -122,5 +160,15 @@ class AccountManager internal constructor(
         if (realmProvider.isTransfersDbOpen().not()) {
             realmProvider.openTransfersDb(STUser.GuestUser.id)
         }
+    }
+
+    private suspend fun refreshUserInfo(userId: Long) {
+        val userInfo = runCatching {
+            userInfoRepository.getMyUserInfo()
+        }.onFailure {
+            if (it is CancellationException) throw it
+        }.getOrNull() ?: return
+        appDatabase.organizationsDao.updateOrganizations(userInfo.organizationAccounts.map { it.toDbModel(userId) })
+        //TODO: Improve error handling, to report abnormal stuff, and allow retrying somehow.
     }
 }

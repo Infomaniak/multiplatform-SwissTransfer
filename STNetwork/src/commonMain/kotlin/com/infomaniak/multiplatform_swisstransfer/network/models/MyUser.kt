@@ -15,22 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2
+package com.infomaniak.multiplatform_swisstransfer.network.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * [Online doc](https://developer.infomaniak.com/docs/api/get/1/swisstransfer/users/me)
+ */
 @Serializable
-data class CreateTransfer(
-    val title: String? = null,
-    val message: String? = null,
-    val password: String? = null,
-    val language: String,
-    @SerialName("expires_in_days")
-    val expiresInDays: Int,
-    @SerialName("max_download")
-    val maxDownload: Int,
-    val files: List<TransferFile>,
-    val recipients: List<String>,
-    // val organizationAccountId: Long?
-)
+data class MyUser(
+    @SerialName("accounts")
+    val organizationAccounts: List<OrganizationAccountApi>,
+    @SerialName("default_account_id")
+    val defaultOrganizationAccountId: Long,
+) {
+    @Serializable
+    data class OrganizationAccountApi(
+        val id: Long,
+        val name: String,
+        val type: String,
+        val pack: String,
+        @SerialName("is_in_ksuite")
+        val isInKSuite: Boolean,
+        val limits: Limits,
+    ) {
+        @Serializable
+        data class Limits(
+            @SerialName("transfer_total_size")
+            val transferTotalSize: Long,
+        )
+    }
+}

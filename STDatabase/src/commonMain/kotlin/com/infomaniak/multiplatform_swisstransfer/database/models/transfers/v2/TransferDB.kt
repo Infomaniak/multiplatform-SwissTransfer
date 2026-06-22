@@ -40,6 +40,7 @@ data class TransferDB(
     val recipientsEmails: Set<String> = emptySet(),
     val linkId: String? = null,
     val userOwnerId: Long,
+    val organizationAccountId: Long? = null,
     //TODO[ST-v2]: Add language
 ) {
     @Ignore
