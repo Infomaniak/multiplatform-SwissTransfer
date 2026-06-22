@@ -35,4 +35,5 @@ data class UploadSessionRequest(
     val languageCode: EmailLanguage,
     val filesMetadata: List<FileToUploadMetadata>,
     val recipientsEmails: Set<String>,
+    val organizationAccountId: Long?,
 )

@@ -51,10 +51,12 @@ interface TransferDao {
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime"""
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
+        AND organizationAccountId=:organizationAccountId"""
     )
     fun validTransfersFlow(
         userId: Long,
+        organizationAccountId: Long?,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
@@ -63,10 +65,12 @@ interface TransferDao {
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime """
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
+        AND organizationAccountId=:organizationAccountId"""
     )
     fun expiredTransfersFlow(
         userId: Long,
+        organizationAccountId: Long?,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
@@ -74,10 +78,12 @@ interface TransferDao {
 
     @Query(
         """SELECT count(*) FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction"""
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND
+        (organizationAccountId=:organizationAccountId OR organizationAccountId=NULL)"""
     )
     fun transfersCountFlow(
         userId: Long,
+        organizationAccountId: Long?,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<Int>
