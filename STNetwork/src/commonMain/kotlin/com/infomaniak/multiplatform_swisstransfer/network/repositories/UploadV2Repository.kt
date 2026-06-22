@@ -25,7 +25,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferCancelled
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferExpired
@@ -73,9 +72,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         UnauthorizedException::class,
         TooManyRequestException::class,
     )
-    suspend fun createTransfer(createTransfer: CreateTransfer): TransferApi {
+    suspend fun createTransfer(createTransfer: CreateTransfer, organizationAccountId: Long?): TransferApi {
         return withUploadErrorHandling {
-            uploadRequest.createTransfer(createTransfer).data
+            uploadRequest.createTransfer(createTransfer, organizationAccountId).data
         }
     }
 
@@ -144,9 +143,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         TransferExpired::class,
         TransferCancelled::class,
     )
-    suspend fun finalizeTransferAndGetLinkUuid(transferId: String): String {
+    suspend fun finalizeTransferAndGetLinkUuid(transferId: String, organizationAccountId: Long?): String {
         return withUploadErrorHandling {
-            uploadRequest.finalizeTransferAndGetLinkUuid(transferId).data.link.id
+            uploadRequest.finalizeTransferAndGetLinkUuid(transferId, organizationAccountId).data.link.id
         }
     }
 
@@ -163,9 +162,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         TransferCancelled::class,
         TransferFailed::class,
     )
-    suspend fun cancelTransfer(transferId: String): Boolean {
+    suspend fun cancelTransfer(transferId: String, organizationAccountId: Long?): Boolean {
         return withUploadErrorHandling {
-            uploadRequest.abortTransfer(transferId, UploadTransferStatus.Cancelled)
+            uploadRequest.abortTransfer(transferId, organizationAccountId, UploadTransferStatus.Cancelled)
         }
     }
 
@@ -182,9 +181,9 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         TransferCancelled::class,
         TransferFailed::class,
     )
-    suspend fun markTransferAsFailed(transferId: String): Boolean {
+    suspend fun markTransferAsFailed(transferId: String, organizationAccountId: Long?): Boolean {
         return withUploadErrorHandling {
-            uploadRequest.abortTransfer(transferId, UploadTransferStatus.Failed)
+            uploadRequest.abortTransfer(transferId, organizationAccountId, UploadTransferStatus.Failed)
         }
     }
 

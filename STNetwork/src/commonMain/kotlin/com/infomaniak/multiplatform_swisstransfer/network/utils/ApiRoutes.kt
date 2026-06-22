@@ -41,12 +41,24 @@ internal object ApiRoutes {
     const val finishUpload = "uploadComplete"
     const val cancelUpload = "cancelUpload"
 
-    fun createTransfer() = "transfers"
+    fun createTransfer(organizationAccountId: Long?): String {
+        return when (organizationAccountId) {
+            null -> "transfers"
+            else -> "accounts/$organizationAccountId/transfers"
+        }
+    }
     fun uploadDirectly(transferId: String, fileId: String) = "transfers/$transferId/files/$fileId"
     fun uploadChunk(transferId: String, fileId: String, chunkIndex: Int): String {
         return "${uploadDirectly(transferId, fileId)}/chunks/$chunkIndex"
     }
 
-    fun finishTransfer(transferId: String) = "transfers/$transferId"
+    fun finishTransfer(transferId: String, organizationAccountId: Long?): String {
+        return when (organizationAccountId) {
+            null -> "transfers/$transferId"
+            else -> "accounts/$organizationAccountId/transfers/$transferId"
+        }
+    }
     //endregion
+
+    const val usersMe = "users/me"
 }

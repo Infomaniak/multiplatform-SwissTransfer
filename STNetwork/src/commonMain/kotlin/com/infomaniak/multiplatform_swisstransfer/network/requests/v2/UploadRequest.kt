@@ -50,12 +50,12 @@ internal class UploadRequest(
     token: () -> String,
 ) : BaseRequest(environment, json, httpClient, token) {
 
-    suspend fun createTransfer(createTransfer: CreateTransfer): ApiResponseV2Success<TransferApi> {
+    suspend fun createTransfer(createTransfer: CreateTransfer, organizationAccountId: Long?): ApiResponseV2Success<TransferApi> {
         val nullableJson = Json(json) {
             explicitNulls = false
         }
         return post(
-            url = createV2Url(ApiRoutes.createTransfer()),
+            url = createV2Url(ApiRoutes.createTransfer(organizationAccountId = organizationAccountId)),
             data = nullableJson.encodeToString(createTransfer),
             appendHeaders = { appendBearer() }
         )
@@ -101,16 +101,23 @@ internal class UploadRequest(
         return response.status.isSuccess()
     }
 
-    suspend fun finalizeTransferAndGetLinkUuid(transferId: String): ApiResponseV2Success<CompletionResponse> {
-        return httpClient.patch(url = createV2Url(ApiRoutes.finishTransfer(transferId))) {
+    suspend fun finalizeTransferAndGetLinkUuid(
+        transferId: String,
+        organizationAccountId: Long?,
+    ): ApiResponseV2Success<CompletionResponse> {
+        return httpClient.patch(url = createV2Url(ApiRoutes.finishTransfer(transferId, organizationAccountId))) {
             headers { appendBearer() }
             contentType(ContentType.Application.Json)
             setBody(mapOf("status" to UploadTransferStatus.Completed.apiValue))
         }.decode()
     }
 
-    suspend fun abortTransfer(transferId: String, status: UploadTransferStatus.Aborted): Boolean {
-        val response = httpClient.patch(createV2Url(ApiRoutes.finishTransfer(transferId))) {
+    suspend fun abortTransfer(
+        transferId: String,
+        organizationAccountId: Long?,
+        status: UploadTransferStatus.Aborted,
+    ): Boolean {
+        val response = httpClient.patch(createV2Url(ApiRoutes.finishTransfer(transferId, organizationAccountId))) {
             headers { appendBearer() }
             contentType(ContentType.Application.Json)
             setBody(mapOf("status" to status.apiValue))

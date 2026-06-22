@@ -139,21 +139,31 @@ class TransferManager internal constructor(
      * @return A `Flow` that emits a list of transfers matching the specified direction.
      */
     fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> = userDependentFlow(
-        flowForAuthUser = { userId ->
-            combine(
-                transferDao.validTransfersFlow(userId, transferDirection),
-                transferDao.expiredTransfersFlow(userId, transferDirection),
-            ) { valid, expired ->
-                SortedTransfers(
-                    valid.toTransferUiList(transferDao),
-                    expired.toTransferUiList(transferDao),
-                )
+        flowForAuthUser = { userId, organizationIdFlow ->
+            organizationIdFlow.flatMapLatest { organizationAccountId ->
+                combine(
+                    transferDao.validTransfersFlow(userId, organizationAccountId = organizationAccountId, transferDirection),
+                    transferDao.expiredTransfersFlow(userId, organizationAccountId = organizationAccountId, transferDirection),
+                ) { valid, expired ->
+                    SortedTransfers(
+                        valid.toTransferUiList(transferDao),
+                        expired.toTransferUiList(transferDao),
+                    )
+                }
             }
         },
         flowForGuestUser = {
             combine(
-                transferDao.validTransfersFlow(GuestUser.id, transferDirection).toTransferUiListFlow(transferDao),
-                transferDao.expiredTransfersFlow(GuestUser.id, transferDirection).toTransferUiListFlow(transferDao),
+                transferDao.validTransfersFlow(
+                    userId = GuestUser.id,
+                    organizationAccountId = null,
+                    direction = transferDirection,
+                ).toTransferUiListFlow(transferDao),
+                transferDao.expiredTransfersFlow(
+                    userId = GuestUser.id,
+                    organizationAccountId = null,
+                    direction = transferDirection,
+                ).toTransferUiListFlow(transferDao),
                 transferController.getValidTransfersFlow(transferDirection),
                 transferController.getExpiredTransfersFlow(transferDirection),
             ) { valid1, expired1, valid2, expired2 ->
@@ -178,20 +188,9 @@ class TransferManager internal constructor(
         transferController.getTransfersCountFlow().catchTransfersDbExceptions(crashReport).onEmpty { emit(0L) },
     ) { countInRoom, countInRealm -> countInRoom > 0 || countInRealm > 0L }.distinctUntilChanged()
 
-    fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
-        flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
-        flowForGuestUser = {
-            combine(
-                transferDao.transfersCountFlow(GuestUser.id, transferDirection),
-                transferController.getTransfersCountFlow(transferDirection),
-            ) { count1, count2 -> count1 + count2 }
-        },
-        merge = { authTransfersCount, guestTransfersCount -> authTransfersCount + guestTransfersCount }
-    ).catchTransfersDbExceptions(crashReport)
-
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getTransferFlow(transferUUID: String): Flow<TransferUi?> = userDependentFlow(
-        flowForAuthUser = { userId ->
+        flowForAuthUser = { userId, _ ->
             transferDao.transferFlow(userId, transferUUID).mapLatest { transferDB -> transferDB?.toTransferUi(transferDao) }
         },
         flowForGuestUser = {
@@ -676,9 +675,9 @@ class TransferManager internal constructor(
     private suspend fun addTransferV2(linkId: String, transferApi: TransferApiV2, password: String?) {
         val userId = accountManager.currentUser?.id ?: return
         val transferDB = transferApi.toTransferDB(
+            direction = TransferDirection.RECEIVED,
             linkId = linkId,
             userOwnerId = userId,
-            direction = TransferDirection.RECEIVED,
             password = password,
         )
 
@@ -798,22 +797,30 @@ class TransferManager internal constructor(
 
     private suspend fun showGuestData(): Boolean = accountManager.showGuestData.first()
 
+    private fun interface AuthenticatedFlowFactory<T> {
+        fun createFlowForAuthUser(userId: Long, organizationIdFlow: Flow<Long?>): Flow<T>
+    }
+
     private fun <T> userDependentFlow(
-        flowForAuthUser: (userId: Long) -> Flow<T>,
+        flowForAuthUser: AuthenticatedFlowFactory<T>,
         flowForGuestUser: () -> Flow<T>,
         merge: suspend (authUserData: T, guestUserData: T) -> T,
     ): Flow<T> = accountManager.currentUserFlow.flatMapLatest { currentUser ->
         when (currentUser) {
             is STUser.AuthUser -> {
                 accountManager.shouldShowGuestData(currentUser).flatMapLatest { shouldShowGuestData ->
+                    val dataForAuthenticatedUser = flowForAuthUser.createFlowForAuthUser(
+                        userId = currentUser.id,
+                        organizationIdFlow = accountManager.organizationAccountIdForUser(currentUser.id)
+                    )
                     when {
-                        shouldShowGuestData -> {
-                            combine(
-                                flowForAuthUser(currentUser.id),
-                                flowForGuestUser()
-                            ) { authUserData, guestUserData -> merge(authUserData, guestUserData) }
+                        shouldShowGuestData -> combine(
+                            dataForAuthenticatedUser,
+                            flowForGuestUser()
+                        ) { authUserData, guestUserData ->
+                            merge(authUserData, guestUserData)
                         }
-                        else -> flowForAuthUser(currentUser.id)
+                        else -> dataForAuthenticatedUser
                     }
                 }
             }
