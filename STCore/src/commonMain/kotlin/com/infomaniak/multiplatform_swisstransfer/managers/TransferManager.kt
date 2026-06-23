@@ -118,18 +118,14 @@ class TransferManager internal constructor(
      * @see addTransferByUrl
      * @see addTransferByLinkUUID
      *
-     * @return A `Flow` that emits the list of all transfers.
+     * @return A `Flow` that emits the list of all transfers, regardless of the selected user.
      */
-    fun getAllTransfers(): Flow<List<TransferUi>> = userDependentFlow(
-        flowForAuthUser = { userId -> transferDao.transfersFlow(userId).toTransferUiListFlow(transferDao) },
-        flowForGuestUser = {
-            combine(
-                transferDao.transfersFlow(GuestUser.id).toTransferUiListFlow(transferDao),
-                transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) },
-            ) { guestList1, guestList2 -> guestList1.mergeWith(guestList2) }
-        },
-        merge = { authTransfers, guestTransfers -> authTransfers.mergeWith(guestTransfers) }
-    ).catchTransfersDbExceptions(crashReport)
+    fun getAllTransfers(): Flow<List<TransferUi>> = combine(
+        transferDao.allTransfersFlow.toTransferUiListFlow(transferDao),
+        transferController.getAllTransfersFlow().map { it.mapToList(::TransferUi) },
+    ) { guestList1, guestList2 ->
+        guestList1.mergeWith(guestList2)
+    }.catchTransfersDbExceptions(crashReport)
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
