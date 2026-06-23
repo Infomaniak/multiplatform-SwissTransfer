@@ -42,6 +42,9 @@ interface TransferDao {
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<List<TransferDB>>
 
+    @get:Query("SELECT * FROM TransferDB ORDER BY createdAt DESC")
+    val allTransfersFlow: Flow<List<TransferDB>>
+
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
