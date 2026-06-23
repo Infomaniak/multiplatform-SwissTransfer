@@ -70,11 +70,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -165,6 +167,16 @@ class TransferManager internal constructor(
         // Sort transfers at the end of the flow instead of inside the database to avoid badly sorted transfers when merging valid1 and valid2
         it.sortedByDescendingCreatedDate()
     }.catchTransfersDbExceptions(crashReport)
+
+    /**
+     * Emits `true` if there's at least one transfer in the database(s), regardless of whether it's in the current account.
+     *
+     * Use case: Prompting the user to create their first transfer when the emitted value is `false`.
+     */
+    fun hasAnyTransferFlow(): Flow<Boolean> = combine(
+        transferDao.allTransfersCountFlow,
+        transferController.getTransfersCountFlow().catchTransfersDbExceptions(crashReport).onEmpty { emit(0L) },
+    ) { countInRoom, countInRealm -> countInRoom > 0 || countInRealm > 0L }.distinctUntilChanged()
 
     fun getTransfersCount(transferDirection: TransferDirection): Flow<Long> = userDependentFlow(
         flowForAuthUser = { userId -> transferDao.transfersCountFlow(userId, transferDirection).map { it.toLong() } },
