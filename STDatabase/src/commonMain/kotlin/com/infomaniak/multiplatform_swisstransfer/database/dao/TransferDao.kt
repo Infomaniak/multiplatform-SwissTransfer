@@ -45,6 +45,9 @@ interface TransferDao {
     @get:Query("SELECT * FROM TransferDB ORDER BY createdAt DESC")
     val allTransfersFlow: Flow<List<TransferDB>>
 
+    @get:Query("SELECT count(*) FROM TransferDB ORDER BY createdAt DESC")
+    val allTransfersCountFlow: Flow<Int>
+
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
