@@ -32,9 +32,12 @@ import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runT
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -55,12 +58,12 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
             }.getOrNull()
             if (existingRealm != null && !existingRealm.isClosed()) return
 
-            closeTransfersDbLocked()
+            Dispatchers.IO { closeTransfersDbLocked() }
             transfersAsync = CompletableDeferred()
             currentTransfersUserId = userId
 
             runCatching {
-                Realm.open(realmTransfersConfiguration(userId))
+                Dispatchers.IO { Realm.open(realmTransfersConfiguration(userId)) }
             }.onSuccess { realm ->
                 transfersAsync.complete(realm)
             }.onFailure { throwable ->
