@@ -52,7 +52,7 @@ interface TransferDao {
     @Query(
         """SELECT * FROM TransferDB 
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
-        AND organizationAccountId=:organizationAccountId"""
+        AND (organizationAccountId=:organizationAccountId OR (:organizationAccountId IS NULL AND organizationAccountId IS NULL))"""
     )
     fun validTransfersFlow(
         userId: Long,
@@ -66,7 +66,7 @@ interface TransferDao {
     @Query(
         """SELECT * FROM TransferDB 
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
-        AND organizationAccountId=:organizationAccountId"""
+        AND (organizationAccountId=:organizationAccountId OR (:organizationAccountId IS NULL AND organizationAccountId IS NULL))"""
     )
     fun expiredTransfersFlow(
         userId: Long,
@@ -79,7 +79,7 @@ interface TransferDao {
     @Query(
         """SELECT count(*) FROM TransferDB 
         WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND
-        (organizationAccountId=:organizationAccountId OR organizationAccountId=NULL)"""
+        (organizationAccountId=:organizationAccountId OR organizationAccountId IS NULL)"""
     )
     fun transfersCountFlow(
         userId: Long,
