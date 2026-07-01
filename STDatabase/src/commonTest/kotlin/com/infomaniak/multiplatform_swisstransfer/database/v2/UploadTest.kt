@@ -17,7 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.v2
 
-import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.DatabaseProvider
@@ -144,28 +143,20 @@ class UploadTest : RobolectricTestsBase() {
     private fun createPendingUploadTransfer(
         id: String,
         createdAt: Long = 0,
-    ): TransferDB = TransferDB(
-        transfer = DummyTransferForV2.transfer1,
-        direction = TransferDirection.SENT,
-        linkId = null,
-        userOwnerId = userId,
-    ).copy(
+    ): TransferDB = DummyTransferForV2.transfer1.copy(
         id = id,
         createdAt = createdAt,
         transferStatus = TransferStatus.PENDING_UPLOAD,
+        userOwnerId = userId,
     )
 
     private fun createTransferWithStatus(
         id: String,
         status: TransferStatus,
-    ): TransferDB = TransferDB(
-        transfer = DummyTransferForV2.transfer1,
-        direction = TransferDirection.SENT,
-        linkId = null,
-        userOwnerId = userId,
-    ).copy(
+    ): TransferDB = DummyTransferForV2.transfer1.copy(
         id = id,
         transferStatus = status,
+        userOwnerId = userId,
     )
     //endregion
 }
