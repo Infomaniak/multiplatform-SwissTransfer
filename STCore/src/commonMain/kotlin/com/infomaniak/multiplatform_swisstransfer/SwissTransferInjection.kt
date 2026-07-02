@@ -44,6 +44,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferR
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2Repository
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.UserInfoRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 
 /**
@@ -100,6 +101,7 @@ class SwissTransferInjection(
     private val uploadV2Repository by lazy { UploadV2Repository(apiClientProvider, environment, requireToken) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
     private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, requireToken) }
+    private val userInfoRepository: UserInfoRepository by lazy { UserInfoRepository(apiClientProvider, environment, requireToken) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
@@ -139,6 +141,7 @@ class SwissTransferInjection(
             uploadController = uploadController,
             transferController = transferController,
             appSettingsManager = appSettingsManager,
+            userInfoRepository = userInfoRepository,
             realmProvider = realmProvider,
         )
     }

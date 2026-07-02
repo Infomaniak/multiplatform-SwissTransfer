@@ -70,7 +70,7 @@ class TransferController(private val realmProvider: RealmProvider) {
     }
 
     @Throws(RealmException::class)
-    fun getTransfersCountFlow(transferDirection: TransferDirection): Flow<Long> = realmProvider.flowWithTransfersDb {
+    fun getTransfersCountFlow(transferDirection: TransferDirection? = null): Flow<Long> = realmProvider.flowWithTransfersDb {
         getTransfersCount(realmProvider, transferDirection).asFlow()
     }
 

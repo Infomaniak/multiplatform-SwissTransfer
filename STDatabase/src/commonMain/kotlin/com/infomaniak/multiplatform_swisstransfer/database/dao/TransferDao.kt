@@ -42,13 +42,21 @@ interface TransferDao {
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<List<TransferDB>>
 
+    @get:Query("SELECT * FROM TransferDB ORDER BY createdAt DESC")
+    val allTransfersFlow: Flow<List<TransferDB>>
+
+    @get:Query("SELECT count(*) FROM TransferDB ORDER BY createdAt DESC")
+    val allTransfersCountFlow: Flow<Int>
+
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime"""
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
+        AND (organizationAccountId=:organizationAccountId OR (:organizationAccountId IS NULL AND organizationAccountId IS NULL))"""
     )
     fun validTransfersFlow(
         userId: Long,
+        organizationAccountId: Long?,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
@@ -57,10 +65,12 @@ interface TransferDao {
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime """
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
+        AND (organizationAccountId=:organizationAccountId OR (:organizationAccountId IS NULL AND organizationAccountId IS NULL))"""
     )
     fun expiredTransfersFlow(
         userId: Long,
+        organizationAccountId: Long?,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
@@ -68,10 +78,12 @@ interface TransferDao {
 
     @Query(
         """SELECT count(*) FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction"""
+        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND
+        (organizationAccountId=:organizationAccountId OR organizationAccountId IS NULL)"""
     )
     fun transfersCountFlow(
         userId: Long,
+        organizationAccountId: Long?,
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<Int>

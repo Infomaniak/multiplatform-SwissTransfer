@@ -23,5 +23,8 @@ sealed interface STUser {
     data object GuestUser : STUser {
         override val id: Long get() = -1
     }
-    data class AuthUser(override val id: Long, val token: String) : STUser
+    data class AuthUser(
+        override val id: Long,
+        val token: String,
+    ) : STUser
 }

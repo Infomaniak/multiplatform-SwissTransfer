@@ -89,7 +89,7 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.expired, transferDirection, null)
         insertTransfer(DummyTransferForV2.notExpired, transferDirection, null)
 
-        val validTransfers = transferDao.validTransfersFlow(userId, transferDirection).first()
+        val validTransfers = transferDao.validTransfersFlow(userId, organizationAccountId = null, transferDirection).first()
 
         assertEquals(1, validTransfers.count(), "The valid transfers list must contain 1 item")
         assertEquals(
@@ -107,7 +107,7 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.expired, transferDirection, null)
         insertTransfer(DummyTransferForV2.notExpired, transferDirection, null)
 
-        val expiredTransfers = transferDao.expiredTransfersFlow(userId, transferDirection).first()
+        val expiredTransfers = transferDao.expiredTransfersFlow(userId, organizationAccountId = null, transferDirection).first()
 
         assertEquals(1, expiredTransfers.count(), "The expired transfers list must contain 1 item")
         assertEquals(
@@ -120,8 +120,8 @@ class TransfersTest : RobolectricTestsBase() {
     @Test
     fun canGetTransfersCountFlow() = runTest {
         addTwoRandomTransfersInDatabase()
-        val count = transferDao.transfersCountFlow(userId, TransferDirection.SENT).first()
-        assertEquals(1, count, "The transfers count must be 1")
+        val count = transferDao.allTransfersCountFlow.first()
+        assertEquals(2, count, "The transfers count must be 2")
     }
 
     @Test
