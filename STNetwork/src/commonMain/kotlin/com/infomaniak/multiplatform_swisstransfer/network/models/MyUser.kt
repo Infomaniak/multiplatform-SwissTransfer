@@ -28,7 +28,7 @@ data class MyUser(
     @SerialName("accounts")
     val organizationAccounts: List<OrganizationAccountApi>,
     @SerialName("default_account_id")
-    val defaultOrganizationAccountId: Long,
+    val defaultOrganizationAccountId: Long?,
 ) {
     @Serializable
     data class OrganizationAccountApi(
