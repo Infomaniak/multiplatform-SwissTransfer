@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
@@ -169,6 +170,10 @@ class AccountManager internal constructor(
             if (it is CancellationException) throw it
         }.getOrNull() ?: return
         appDatabase.organizationsDao.updateOrganizations(userInfo.organizationAccounts.map { it.toDbModel(userId) })
+
+        if (organizationAccountIdForUser(userId).first() == null) {
+            switchToOrganization(userInfo.defaultOrganizationAccountId)
+        }
         //TODO: Improve error handling, to report abnormal stuff, and allow retrying somehow.
     }
 }
