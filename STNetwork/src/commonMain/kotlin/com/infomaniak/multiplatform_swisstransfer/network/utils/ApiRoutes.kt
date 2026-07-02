@@ -60,5 +60,5 @@ internal object ApiRoutes {
     }
     //endregion
 
-    const val usersMe = "users/me"
+    const val usersMeWithAccountsAndLimits = "users/me?with=accounts,accounts.limits"
 }
