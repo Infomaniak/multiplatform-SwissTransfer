@@ -89,24 +89,21 @@ class AccountManager internal constructor(
 
     val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
 
-    /*
-    * We need to:
-    * - retrieve the org accounts for each user
-    * - store this data
-    * - know when to update it
-    * - store what is the last organization selected for a given user account
-    * - select the default org (only the first time we retrieve the org accounts)
-    *
-    * */
-
     /**
-     * @see switchToOrganization
-     * @see organizationAccountsForUser
+     * Emits the currently selected organization for the given user.
+     * The emitted id should match what [organizationAccountsForUser] returns for the same [userId].
+     *
+     * What this flow will emit can be changed by calling [switchToOrganization].
      */
     fun selectedOrganizationAccountIdForUser(userId: Long): Flow<Long?> {
         return appDatabase.organizationsDao.lastSelectedOrgId(userId)
     }
 
+    /**
+     * Switches to the given [organizationAccountId] that has been retrieved from [organizationAccountsForUser].
+     *
+     * Will lead to [selectedOrganizationAccountIdForUser] to emit a new value just as it's saved into the database.
+     */
     suspend fun switchToOrganization(organizationAccountId: Long?) {
         val userId = currentUser?.id ?: return
         if (organizationAccountId == null) return appDatabase.organizationsDao.deleteLastSelectionOrganization(userId)
@@ -115,6 +112,9 @@ class AccountManager internal constructor(
         appDatabase.organizationsDao.updateLastSelectedOrganization(selectedOrgAccount)
     }
 
+    /**
+     * Returns the list of organization accounts that the given user is part of.
+     */
     suspend fun organizationAccountsForUser(userId: Long): List<OrganizationAccount> {
         return appDatabase.organizationsDao.orgAccountsForUser(userId)
     }
