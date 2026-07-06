@@ -811,7 +811,7 @@ class TransferManager internal constructor(
                 accountManager.shouldShowGuestData(currentUser).flatMapLatest { shouldShowGuestData ->
                     val dataForAuthenticatedUser = flowForAuthUser.createFlowForAuthUser(
                         userId = currentUser.id,
-                        organizationIdFlow = accountManager.organizationAccountIdForUser(currentUser.id)
+                        organizationIdFlow = accountManager.selectedOrganizationAccountIdForUser(currentUser.id)
                     )
                     when {
                         shouldShowGuestData -> combine(

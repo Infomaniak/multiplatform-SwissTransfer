@@ -103,7 +103,9 @@ class AccountManager internal constructor(
      * @see switchToOrganization
      * @see organizationAccountsForUser
      */
-    fun organizationAccountIdForUser(userId: Long): Flow<Long?> = appDatabase.organizationsDao.lastSelectedOrgId(userId)
+    fun selectedOrganizationAccountIdForUser(userId: Long): Flow<Long?> {
+        return appDatabase.organizationsDao.lastSelectedOrgId(userId)
+    }
 
     suspend fun switchToOrganization(organizationAccountId: Long?) {
         val userId = currentUser?.id ?: return
@@ -171,7 +173,7 @@ class AccountManager internal constructor(
         }.getOrNull() ?: return
         appDatabase.organizationsDao.updateOrganizations(userInfo.organizationAccounts.map { it.toDbModel(userId) })
 
-        if (organizationAccountIdForUser(userId).first() == null) {
+        if (selectedOrganizationAccountIdForUser(userId).first() == null) {
             switchToOrganization(userInfo.defaultOrganizationAccountId)
         }
         //TODO: Improve error handling, to report abnormal stuff, and allow retrying somehow.
