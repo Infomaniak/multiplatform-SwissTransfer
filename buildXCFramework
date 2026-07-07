@@ -38,3 +38,15 @@ echo "${bold}assembleNetworkReleaseXCFramework task completed.${endBold}"
 echo "${bold}Start assembleCoreReleaseXCFramework Task${endBold}"
 ./gradlew :STCore:assembleSTCoreReleaseXCFramework
 echo "${bold}assembleCoreReleaseXCFramework task completed.${endBold}"
+
+echo "${bold}Zipping all XCFrameworks into root build directory...${endBold}"
+mkdir -p build
+# Ensure the zip is fresh
+rm -f build/SwissTransferXCFrameworks.zip
+
+# Zip each framework from its respective directory to ensure they are at the root of the zip
+(cd STDatabase/build/XCFrameworks/release && zip -ry "../../../../build/SwissTransferXCFrameworks.zip" *.xcframework)
+(cd STNetwork/build/XCFrameworks/release && zip -ry "../../../../build/SwissTransferXCFrameworks.zip" *.xcframework)
+(cd STCore/build/XCFrameworks/release && zip -ry "../../../../build/SwissTransferXCFrameworks.zip" *.xcframework)
+
+echo "${bold}Zip completed. Output: build/SwissTransferXCFrameworks.zip${endBold}"
