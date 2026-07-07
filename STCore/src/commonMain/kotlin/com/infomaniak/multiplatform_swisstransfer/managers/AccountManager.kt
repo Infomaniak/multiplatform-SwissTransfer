@@ -125,7 +125,7 @@ class AccountManager internal constructor(
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) = coroutineScope {
         launch {
-            if (user is STUser.AuthUser) refreshUserInfo(userId = user.id)
+            if (user is STUser.AuthUser) refreshUserInfoWithAccountsAndLimits(userId = user.id)
         }
         userSwitchMutex.withLock {
             if (currentUser?.id == user.id) return@coroutineScope
@@ -165,9 +165,9 @@ class AccountManager internal constructor(
         }
     }
 
-    private suspend fun refreshUserInfo(userId: Long) {
+    private suspend fun refreshUserInfoWithAccountsAndLimits(userId: Long) {
         val userInfo = runCatching {
-            userInfoRepository.getMyUserInfo()
+            userInfoRepository.getMyUserInfoWithAccountsAndLimits()
         }.onFailure {
             if (it is CancellationException) throw it
         }.getOrNull() ?: return
