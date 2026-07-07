@@ -63,8 +63,8 @@ class UserInfoRepository internal constructor(private val userInfoRequests: User
         TooManyRequestException::class,
         NotFoundException::class,
     )
-    suspend fun getMyUserInfo(): MyUser = withErrorHandling {
-        userInfoRequests.getMyUserInfo().data
+    suspend fun getMyUserInfoWithAccountsAndLimits(): MyUser = withErrorHandling {
+        userInfoRequests.getMyUserInfoWithAccountsAndLimits().data
     }
 
     private suspend fun <T> withErrorHandling(block: suspend () -> T) = runCatching {
