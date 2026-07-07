@@ -90,19 +90,35 @@ class AccountManager internal constructor(
     val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
 
     /**
+     * Emits the currently selected organization.
+     *
+     * What this flow will emit can be changed by calling [switchToOrganization], and by changing the current user
+     * through a call to [loadUser], or [logoutCurrentUser].
+     */
+    fun selectedOrganizationAccount(): Flow<OrganizationAccount?> {
+        return currentUserFlow.transformLatest { currentUser ->
+            currentUser ?: return@transformLatest emit(null)
+            val accounts = organizationAccountsForUser(currentUser.id)
+            emitAll(appDatabase.organizationsDao.lastSelectedOrgId(currentUser.id).map { selectedId ->
+                if (selectedId == null) null else accounts.first { account -> account.id == selectedId }
+            })
+        }
+    }
+
+    /**
      * Emits the currently selected organization for the given user.
      * The emitted id should match what [organizationAccountsForUser] returns for the same [userId].
      *
      * What this flow will emit can be changed by calling [switchToOrganization].
      */
-    fun selectedOrganizationAccountIdForUser(userId: Long): Flow<Long?> {
+    internal fun selectedOrganizationAccountIdForUser(userId: Long): Flow<Long?> {
         return appDatabase.organizationsDao.lastSelectedOrgId(userId)
     }
 
     /**
      * Switches to the given [organizationAccountId] that has been retrieved from [organizationAccountsForUser].
      *
-     * Will lead to [selectedOrganizationAccountIdForUser] to emit a new value just as it's saved into the database.
+     * Will lead to [selectedOrganizationAccount] to emit a new value just as it's saved into the database.
      */
     suspend fun switchToOrganization(organizationAccountId: Long?) {
         val userId = currentUser?.id ?: return
@@ -173,7 +189,7 @@ class AccountManager internal constructor(
         }.getOrNull() ?: return
         appDatabase.organizationsDao.updateOrganizations(userInfo.organizationAccounts.map { it.toDbModel(userId) })
 
-        if (selectedOrganizationAccountIdForUser(userId).first() == null) {
+        if (selectedOrganizationAccount().first() == null) {
             switchToOrganization(userInfo.defaultOrganizationAccountId)
         }
         //TODO: Improve error handling, to report abnormal stuff, and allow retrying somehow.
