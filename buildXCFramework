@@ -29,12 +29,12 @@ echo "${bold}cleanAll task completed.${endBold}"
 
 echo "${bold}Start assembleDBReleaseXCFramework Task${endBold}"
 ./gradlew :STDatabase:assembleSTDatabaseReleaseXCFramework
-echo "${bold}cleanAll task completed.${endBold}"
+echo "${bold}assembleDBReleaseXCFramework task completed.${endBold}"
 
 echo "${bold}Start assembleNetworkReleaseXCFramework Task${endBold}"
 ./gradlew :STNetwork:assembleSTNetworkReleaseXCFramework
-echo "${bold}cleanAll task completed.${endBold}"
+echo "${bold}assembleNetworkReleaseXCFramework task completed.${endBold}"
 
 echo "${bold}Start assembleCoreReleaseXCFramework Task${endBold}"
 ./gradlew :STCore:assembleSTCoreReleaseXCFramework
-echo "${bold}cleanAll task completed.${endBold}"
+echo "${bold}assembleCoreReleaseXCFramework task completed.${endBold}"
