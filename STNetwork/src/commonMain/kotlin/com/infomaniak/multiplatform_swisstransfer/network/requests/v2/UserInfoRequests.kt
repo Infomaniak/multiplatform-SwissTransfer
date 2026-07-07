@@ -35,7 +35,7 @@ internal class UserInfoRequests(
     token: () -> String,
 ) : BaseRequest(environment, json, httpClient, token) {
 
-    suspend fun getMyUserInfo(): ApiResponseV2Success<MyUser> {
+    suspend fun getMyUserInfoWithAccountsAndLimits(): ApiResponseV2Success<MyUser> {
         return httpClient.get(url = createV2Url(ApiRoutes.usersMeWithAccountsAndLimits)) {
             headers { appendBearer() }
         }.decode()
