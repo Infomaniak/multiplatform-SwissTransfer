@@ -140,9 +140,6 @@ class AccountManager internal constructor(
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun loadUser(user: STUser) = coroutineScope {
-        launch {
-            if (user is STUser.AuthUser) refreshUserInfoWithAccountsAndLimits(userId = user.id)
-        }
         userSwitchMutex.withLock {
             if (currentUser?.id == user.id) return@coroutineScope
             if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
@@ -150,6 +147,9 @@ class AccountManager internal constructor(
             }
             loadGuestDatabaseIfNeeded()
             currentUser = user
+        }
+        launch {
+            if (user is STUser.AuthUser) refreshUserInfoWithAccountsAndLimits(userId = user.id)
         }
     }
 
@@ -186,6 +186,7 @@ class AccountManager internal constructor(
             userInfoRepository.getMyUserInfoWithAccountsAndLimits()
         }.onFailure {
             if (it is CancellationException) throw it
+            it.printStackTrace()
         }.getOrNull() ?: return
         appDatabase.organizationsDao.updateOrganizations(userInfo.organizationAccounts.map { it.toDbModel(userId) })
 
