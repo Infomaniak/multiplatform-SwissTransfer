@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "e52578af3a12f7f9e97da32297af1380",
+    "identityHash": "56d1c1092831f020f6af4543dc76b8c1",
     "entities": [
       {
         "tableName": "AppSettingsDB",
@@ -328,7 +328,7 @@
       },
       {
         "tableName": "SelectedOrganizationAccount",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` INTEGER NOT NULL, `organizationAccountId` INTEGER NOT NULL, PRIMARY KEY(`userId`, `organizationAccountId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` INTEGER NOT NULL, `organizationAccountId` INTEGER NOT NULL, PRIMARY KEY(`userId`))",
         "fields": [
           {
             "fieldPath": "userId",
@@ -346,15 +346,14 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "userId",
-            "organizationAccountId"
+            "userId"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e52578af3a12f7f9e97da32297af1380')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '56d1c1092831f020f6af4543dc76b8c1')"
     ]
   }
 }
