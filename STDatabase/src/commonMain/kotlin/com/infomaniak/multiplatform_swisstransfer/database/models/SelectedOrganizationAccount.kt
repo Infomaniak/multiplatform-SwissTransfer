@@ -22,7 +22,7 @@ import androidx.room.Entity
 /**
  * Keeps the id of the lastly selected organization account for a given user.
  */
-@Entity(primaryKeys = ["userId", "organizationAccountId"])
+@Entity(primaryKeys = ["userId"])
 data class SelectedOrganizationAccount(
     val userId: Long,
     val organizationAccountId: Long,
