@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -53,7 +54,10 @@ fun DatabaseProvider.getAppDatabase(
 
 @Database(
     entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class],
-    version = 1
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+    ],
+    version = 2
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(AppDatabaseConstructor::class)

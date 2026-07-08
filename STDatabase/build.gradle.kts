@@ -24,10 +24,12 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.androidx.room.testing)
         }
         androidUnitTest.dependencies {
             implementation(libs.android.test)
             implementation(libs.robolectric)
+            implementation(libs.androidx.room.testing)
         }
     }
 }
@@ -38,6 +40,13 @@ room {
 
 android {
     compileOptions { isCoreLibraryDesugaringEnabled = true }
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+
+    sourceSets {
+        getByName("test") {
+            assets.srcDirs("$projectDir/schemas")
+        }
+    }
 }
 
 dependencies {
