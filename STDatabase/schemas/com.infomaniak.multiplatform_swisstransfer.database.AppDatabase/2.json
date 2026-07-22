@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "56d1c1092831f020f6af4543dc76b8c1",
+    "identityHash": "bfd6af1282e774ffdbb72584c5885cb2",
     "entities": [
       {
         "tableName": "AppSettingsDB",
@@ -273,7 +273,7 @@
       },
       {
         "tableName": "OrganizationAccount",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `userId` INTEGER NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `pack` TEXT NOT NULL, `isInKSuite` INTEGER NOT NULL, `transferTotalSize` INTEGER NOT NULL, PRIMARY KEY(`id`, `userId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `userId` INTEGER NOT NULL, `name` TEXT NOT NULL, `logoUrl` TEXT, `type` TEXT NOT NULL, `pack` TEXT NOT NULL, `isInKSuite` INTEGER NOT NULL, `transferTotalSize` INTEGER NOT NULL, PRIMARY KEY(`id`, `userId`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -292,6 +292,11 @@
             "columnName": "name",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "logoUrl",
+            "columnName": "logoUrl",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "type",
@@ -353,7 +358,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '56d1c1092831f020f6af4543dc76b8c1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bfd6af1282e774ffdbb72584c5885cb2')"
     ]
   }
 }

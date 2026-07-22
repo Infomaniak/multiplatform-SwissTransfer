@@ -24,6 +24,7 @@ internal fun MyUser.OrganizationAccountApi.toDbModel(userId: Long): Organization
     id = id,
     userId = userId,
     name = name,
+    logoUrl = logoUrl,
     type = type,
     pack = pack,
     isInKSuite = isInKSuite,
