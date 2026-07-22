@@ -34,6 +34,8 @@ data class MyUser(
     data class OrganizationAccountApi(
         val id: Long,
         val name: String,
+        @SerialName("logo_url")
+        val logoUrl: String? = null,
         val type: String,
         val pack: String,
         @SerialName("is_in_ksuite")

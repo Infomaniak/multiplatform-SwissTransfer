@@ -29,6 +29,7 @@ data class OrganizationAccount(
     val id: Long,
     val userId: Long,
     val name: String,
+    val logoUrl: String?,
     val type: String,
     val pack: String,
     val isInKSuite: Boolean,
