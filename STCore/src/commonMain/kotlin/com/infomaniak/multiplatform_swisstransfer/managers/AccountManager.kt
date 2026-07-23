@@ -98,9 +98,12 @@ class AccountManager internal constructor(
     fun selectedOrganizationAccount(): Flow<OrganizationAccount?> {
         return currentUserFlow.transformLatest { currentUser ->
             currentUser ?: return@transformLatest emit(null)
-            val accounts = organizationAccountsForUser(currentUser.id)
             emitAll(appDatabase.organizationsDao.lastSelectedOrgId(currentUser.id).map { selectedId ->
-                if (selectedId == null) null else accounts.first { account -> account.id == selectedId }
+                if (selectedId == null) {
+                    null
+                } else {
+                    organizationAccountsForUser(currentUser.id).firstOrNull { account -> account.id == selectedId }
+                }
             })
         }
     }
