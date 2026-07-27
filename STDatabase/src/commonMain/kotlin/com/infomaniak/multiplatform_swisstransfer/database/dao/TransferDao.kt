@@ -87,6 +87,12 @@ interface TransferDao {
         direction: TransferDirection,
         uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<Int>
+    
+    @Query("SELECT count(*) FROM TransferDB WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus")
+    fun accountTransfersCountFlow(
+        userId: Long,
+        uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
+    ): Flow<Int>
 
     @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND id=:transferId LIMIT 1")
     fun transferFlow(userId: Long, transferId: String): Flow<TransferDB?>
