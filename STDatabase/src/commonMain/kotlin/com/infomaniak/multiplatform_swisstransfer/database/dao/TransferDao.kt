@@ -36,10 +36,10 @@ import kotlin.time.ExperimentalTime
 @Dao
 interface TransferDao {
 
-    @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus ORDER BY createdAt DESC")
+    @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND transferStatus!=:excludedUploadStatus ORDER BY createdAt DESC")
     fun transfersFlow(
         userId: Long,
-        uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
+        excludedUploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<List<TransferDB>>
 
     @get:Query("SELECT * FROM TransferDB ORDER BY createdAt DESC")
@@ -51,47 +51,47 @@ interface TransferDao {
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
+        WHERE userOwnerId=:userId AND transferStatus!=:excludedUploadStatus AND transferDirection=:direction AND expiresAt >= :currentTime
         AND (organizationAccountId=:organizationAccountId OR (:organizationAccountId IS NULL AND organizationAccountId IS NULL))"""
     )
     fun validTransfersFlow(
         userId: Long,
         organizationAccountId: Long?,
         direction: TransferDirection,
-        uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
+        excludedUploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
     ): Flow<List<TransferDB>>
 
     @OptIn(ExperimentalTime::class)
     @Query(
         """SELECT * FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
+        WHERE userOwnerId=:userId AND transferStatus!=:excludedUploadStatus AND transferDirection=:direction AND expiresAt < :currentTime 
         AND (organizationAccountId=:organizationAccountId OR (:organizationAccountId IS NULL AND organizationAccountId IS NULL))"""
     )
     fun expiredTransfersFlow(
         userId: Long,
         organizationAccountId: Long?,
         direction: TransferDirection,
-        uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
+        excludedUploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
         currentTime: Long = Clock.System.now().epochSeconds,
     ): Flow<List<TransferDB>>
 
     @Query(
         """SELECT count(*) FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND
+        WHERE userOwnerId=:userId AND transferStatus!=:excludedUploadStatus AND transferDirection=:direction AND
         (organizationAccountId=:organizationAccountId OR organizationAccountId IS NULL)"""
     )
     fun transfersCountFlow(
         userId: Long,
         organizationAccountId: Long?,
         direction: TransferDirection,
-        uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
+        excludedUploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<Int>
-    
-    @Query("SELECT count(*) FROM TransferDB WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus")
+
+    @Query("SELECT count(*) FROM TransferDB WHERE userOwnerId=:userId AND transferStatus!=:excludedUploadStatus")
     fun accountTransfersCountFlow(
         userId: Long,
-        uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
+        excludedUploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
     ): Flow<Int>
 
     @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND id=:transferId LIMIT 1")
