@@ -118,7 +118,7 @@ class TransfersTest : RobolectricTestsBase() {
     }
 
     @Test
-    fun canGetTransfersCountFlow() = runTest {
+    fun canGetAllTransfersCountFlow() = runTest {
         addTwoRandomTransfersInDatabase()
         val count = transferDao.allTransfersCountFlow.first()
         assertEquals(2, count, "The transfers count must be 2")
