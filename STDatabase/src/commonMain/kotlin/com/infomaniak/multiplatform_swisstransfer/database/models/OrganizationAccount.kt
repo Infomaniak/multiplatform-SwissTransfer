@@ -19,7 +19,6 @@ package com.infomaniak.multiplatform_swisstransfer.database.models
 
 import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 /**
  * [Online doc](https://developer.infomaniak.com/docs/api/get/1/swisstransfer/users/me)
