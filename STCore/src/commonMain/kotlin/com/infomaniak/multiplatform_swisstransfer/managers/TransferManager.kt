@@ -189,18 +189,20 @@ class TransferManager internal constructor(
     ) { countInRoom, countInRealm -> countInRoom > 0 || countInRealm > 0L }.distinctUntilChanged()
 
     /**
-     * Emits 'true' if there is at least one transfer for the current account, among all organizations of this account.
+     * Emits 'true' if there is at least one sent transfer for the current account, among all organizations of this account.
      *
-     * Unlike [hasAnyTransferFlow], transfers belonging to another account are ignored here.
+     * Unlike [hasAnyTransferFlow], transfers belonging to another account and received transfers are ignored here.
      */
     fun hasAccountTransferFlow(): Flow<Boolean> = userDependentFlow(
         flowForAuthUser = { userId, _ ->
-            transferDao.accountTransfersCountFlow(userId).map { it > 0 }
+            transferDao.accountTransfersCountFlow(userId, direction = TransferDirection.SENT).map { it > 0 }
         },
         flowForGuestUser = {
             combine(
-                transferDao.accountTransfersCountFlow(userId = GuestUser.id),
-                transferController.getTransfersCountFlow().catchTransfersDbExceptions(crashReport).onEmpty { emit(0L) },
+                transferDao.accountTransfersCountFlow(userId = GuestUser.id, direction = TransferDirection.SENT),
+                transferController.getTransfersCountFlow(TransferDirection.SENT)
+                    .catchTransfersDbExceptions(crashReport)
+                    .onEmpty { emit(0L) },
             ) { countInRoom, countInRealm -> countInRoom > 0 || countInRealm > 0L }
         },
         merge = { hasAuthTransfer, hasGuestTransfer -> hasAuthTransfer || hasGuestTransfer },
