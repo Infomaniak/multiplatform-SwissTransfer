@@ -18,7 +18,6 @@
 package com.infomaniak.multiplatform_swisstransfer.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
