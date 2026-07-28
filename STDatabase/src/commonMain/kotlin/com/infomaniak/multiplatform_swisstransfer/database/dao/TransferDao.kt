@@ -76,18 +76,6 @@ interface TransferDao {
         currentTime: Long = Clock.System.now().epochSeconds,
     ): Flow<List<TransferDB>>
 
-    @Query(
-        """SELECT count(*) FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:uploadStatus AND transferDirection=:direction AND
-        (organizationAccountId=:organizationAccountId OR organizationAccountId IS NULL)"""
-    )
-    fun transfersCountFlow(
-        userId: Long,
-        organizationAccountId: Long?,
-        direction: TransferDirection,
-        uploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
-    ): Flow<Int>
-
     @Query("SELECT * FROM TransferDB WHERE userOwnerId=:userId AND id=:transferId LIMIT 1")
     fun transferFlow(userId: Long, transferId: String): Flow<TransferDB?>
 
