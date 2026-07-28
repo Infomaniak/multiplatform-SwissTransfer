@@ -32,5 +32,4 @@ data class CreateTransfer(
     val maxDownload: Int,
     val files: List<TransferFile>,
     val recipients: List<String>,
-    // val organizationAccountId: Long?
 )
