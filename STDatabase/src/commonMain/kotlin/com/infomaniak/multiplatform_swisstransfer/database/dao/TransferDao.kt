@@ -77,18 +77,6 @@ interface TransferDao {
     ): Flow<List<TransferDB>>
 
     @Query(
-        """SELECT count(*) FROM TransferDB 
-        WHERE userOwnerId=:userId AND transferStatus!=:excludedUploadStatus AND transferDirection=:direction AND
-        (organizationAccountId=:organizationAccountId OR organizationAccountId IS NULL)"""
-    )
-    fun transfersCountFlow(
-        userId: Long,
-        organizationAccountId: Long?,
-        direction: TransferDirection,
-        excludedUploadStatus: TransferStatus = TransferStatus.PENDING_UPLOAD,
-    ): Flow<Int>
-
-    @Query(
         """SELECT count(*) FROM TransferDB
         WHERE userOwnerId=:userId AND transferStatus!=:excludedUploadStatus AND transferDirection=:direction"""
     )
