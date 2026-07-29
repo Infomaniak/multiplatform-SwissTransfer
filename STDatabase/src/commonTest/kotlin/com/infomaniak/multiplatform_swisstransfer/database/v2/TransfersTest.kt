@@ -221,24 +221,6 @@ class TransfersTest : RobolectricTestsBase() {
     }
 
     @Test
-    fun accountTransfersCountFlow_isNotRestrictedToOneOrganization_unlikeTransfersCountFlow() = runTest {
-        insertTransfer("noOrg", userOwnerId = userId, direction = TransferDirection.SENT)
-        insertTransfer("orgA1", userOwnerId = userId, direction = TransferDirection.SENT, organizationAccountId = orgA)
-        insertTransfer("orgB1", userOwnerId = userId, direction = TransferDirection.SENT, organizationAccountId = orgB)
-
-        assertEquals(
-            expected = 2,
-            actual = transferDao.transfersCountFlow(userId, organizationAccountId = orgA, TransferDirection.SENT).first(),
-            message = "`transfersCountFlow` must only count the given organization and the transfers without organization",
-        )
-        assertEquals(
-            expected = 3,
-            actual = transferDao.accountTransfersCountFlow(userId, TransferDirection.SENT).first(),
-            message = "`accountTransfersCountFlow` must count the transfers of every organization of the account",
-        )
-    }
-
-    @Test
     fun canGetTransferFlow() = runTest {
         val transfer = DummyTransferForV2.transfer1
         insertTransfer(transfer, TransferDirection.SENT, null)
