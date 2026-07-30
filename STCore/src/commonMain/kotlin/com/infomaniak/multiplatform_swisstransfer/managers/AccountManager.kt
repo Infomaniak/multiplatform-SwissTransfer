@@ -25,15 +25,25 @@ import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
+import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
+import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
+import com.infomaniak.multiplatform_swisstransfer.mappers.toDbModel
+import com.infomaniak.multiplatform_swisstransfer.network.repositories.UserInfoRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
@@ -51,6 +61,7 @@ class AccountManager internal constructor(
     private val uploadController: UploadController,
     private val transferController: TransferController,
     private val appSettingsManager: AppSettingsManager,
+    private val userInfoRepository: UserInfoRepository,
     private val realmProvider: RealmProvider,
 ) {
 
@@ -82,17 +93,80 @@ class AccountManager internal constructor(
     val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
 
     /**
+     * Emits the currently selected organization.
+     *
+     * What this flow will emit can be changed by calling [switchToOrganization], and by changing the current user
+     * through a call to [loadUser], or [logoutCurrentUser].
+     */
+    fun selectedOrganizationAccount(): Flow<OrganizationAccount?> {
+        return currentUserFlow.transformLatest { currentUser ->
+            currentUser ?: return@transformLatest emit(null)
+            val selectedIdFlow = appDatabase.organizationsDao.lastSelectedOrgId(currentUser.id)
+            emitAll(selectedIdFlow.combine(organizationAccountsForUser(currentUser.id)) { selectedId, accounts ->
+                accounts.firstOrNull { account -> account.id == selectedId }
+            })
+        }
+    }
+
+    /**
+     * Emits the currently selected organization for the given user.
+     * The emitted id should match what [organizationAccountsForUser] returns for the same [userId].
+     *
+     * What this flow will emit can be changed by calling [switchToOrganization].
+     */
+    internal fun selectedOrganizationAccountIdForUser(userId: Long): Flow<Long?> {
+        return appDatabase.organizationsDao.lastSelectedOrgId(userId)
+    }
+
+    /**
+     * Switches to the given [organizationAccountId] that has been retrieved from [organizationAccountsForCurrentUser].
+     *
+     * Will lead to [selectedOrganizationAccount] to emit a new value just as it's saved into the database.
+     */
+    suspend fun switchToOrganization(organizationAccountId: Long?) {
+        val userId = currentUser?.id ?: return
+        if (organizationAccountId == null) return appDatabase.organizationsDao.deleteLastSelectionOrganization(userId)
+
+        val selectedOrgAccount = SelectedOrganizationAccount(userId = userId, organizationAccountId = organizationAccountId)
+        appDatabase.organizationsDao.updateLastSelectedOrganization(selectedOrgAccount)
+    }
+
+    /**
+     * Emits the list of organization accounts that the current user is part of,
+     * and emits again each time they change, for example once [loadUser] has refreshed them from the API.
+     *
+     * Emits an empty list when there's no current user, which can be changed by changing the current user
+     * through a call to [loadUser], or [logoutCurrentUser].
+     */
+    fun organizationAccountsForCurrentUser(): Flow<List<OrganizationAccount>> {
+        return currentUserFlow.flatMapLatest { currentUser ->
+            currentUser?.let { organizationAccountsForUser(it.id) } ?: flowOf(emptyList())
+        }.distinctUntilChanged()
+    }
+
+    /**
+     * Emits the list of organization accounts that the given user is part of,
+     * and emits again each time they change, for example once [loadUser] has refreshed them from the API.
+     */
+    internal fun organizationAccountsForUser(userId: Long): Flow<List<OrganizationAccount>> {
+        return appDatabase.organizationsDao.orgAccountsForUser(userId)
+    }
+
+    /**
      * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun loadUser(user: STUser) {
+    suspend fun loadUser(user: STUser) = coroutineScope {
         userSwitchMutex.withLock {
-            if (currentUser?.id == user.id) return
+            if (currentUser?.id == user.id) return@coroutineScope
             if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
             loadGuestDatabaseIfNeeded()
             currentUser = user
+        }
+        launch {
+            if (user is STUser.AuthUser) refreshUserInfoWithAccountsAndLimits(userId = user.id)
         }
     }
 
@@ -122,5 +196,20 @@ class AccountManager internal constructor(
         if (realmProvider.isTransfersDbOpen().not()) {
             realmProvider.openTransfersDb(STUser.GuestUser.id)
         }
+    }
+
+    private suspend fun refreshUserInfoWithAccountsAndLimits(userId: Long) {
+        val userInfo = runCatching {
+            userInfoRepository.getMyUserInfoWithAccountsAndLimits()
+        }.onFailure {
+            if (it is CancellationException) throw it
+            it.printStackTrace()
+        }.getOrNull() ?: return
+        appDatabase.organizationsDao.updateOrganizations(userInfo.organizationAccounts.map { it.toDbModel(userId) })
+
+        if (selectedOrganizationAccount().first() == null) {
+            switchToOrganization(userInfo.defaultOrganizationAccountId)
+        }
+        //TODO: Improve error handling, to report abnormal stuff, and allow retrying somehow.
     }
 }

@@ -40,6 +40,9 @@ class TransfersTest : RobolectricTestsBase() {
 
     private lateinit var appDatabase: AppDatabase
     private val userId = 0L
+    private val otherUserId = 1L
+    private val orgA = 10L
+    private val orgB = 20L
     private val transferDao get() = appDatabase.getTransferDao()
 
     @BeforeTest
@@ -89,7 +92,7 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.expired, transferDirection, null)
         insertTransfer(DummyTransferForV2.notExpired, transferDirection, null)
 
-        val validTransfers = transferDao.validTransfersFlow(userId, transferDirection).first()
+        val validTransfers = transferDao.validTransfersFlow(userId, organizationAccountId = null, transferDirection).first()
 
         assertEquals(1, validTransfers.count(), "The valid transfers list must contain 1 item")
         assertEquals(
@@ -107,7 +110,7 @@ class TransfersTest : RobolectricTestsBase() {
         insertTransfer(DummyTransferForV2.expired, transferDirection, null)
         insertTransfer(DummyTransferForV2.notExpired, transferDirection, null)
 
-        val expiredTransfers = transferDao.expiredTransfersFlow(userId, transferDirection).first()
+        val expiredTransfers = transferDao.expiredTransfersFlow(userId, organizationAccountId = null, transferDirection).first()
 
         assertEquals(1, expiredTransfers.count(), "The expired transfers list must contain 1 item")
         assertEquals(
@@ -118,10 +121,103 @@ class TransfersTest : RobolectricTestsBase() {
     }
 
     @Test
-    fun canGetTransfersCountFlow() = runTest {
+    fun canGetAllTransfersCountFlow() = runTest {
         addTwoRandomTransfersInDatabase()
-        val count = transferDao.transfersCountFlow(userId, TransferDirection.SENT).first()
-        assertEquals(1, count, "The transfers count must be 1")
+        val count = transferDao.allTransfersCountFlow.first()
+        assertEquals(2, count, "The transfers count must be 2")
+    }
+
+    @Test
+    fun accountTransfersCountFlow_countsTransfersOfAllOrganizationsOfTheAccount() = runTest {
+        insertTransfer("noOrg", userOwnerId = userId, direction = TransferDirection.SENT)
+        insertTransfer("orgA1", userOwnerId = userId, direction = TransferDirection.SENT, organizationAccountId = orgA)
+        insertTransfer("orgA2", userOwnerId = userId, direction = TransferDirection.SENT, organizationAccountId = orgA)
+        insertTransfer("orgB1", userOwnerId = userId, direction = TransferDirection.SENT, organizationAccountId = orgB)
+
+        val count = transferDao.accountTransfersCountFlow(userId, TransferDirection.SENT).first()
+
+        assertEquals(4, count, "All the transfers of the account must be counted, whatever their organization")
+    }
+
+    @Test
+    fun accountTransfersCountFlow_ignoresTransfersOfOtherAccounts() = runTest {
+        insertTransfer("mine", userOwnerId = userId, direction = TransferDirection.SENT, organizationAccountId = orgA)
+        insertTransfer("theirs1", userOwnerId = otherUserId, direction = TransferDirection.SENT, organizationAccountId = orgA)
+        insertTransfer("theirs2", userOwnerId = otherUserId, direction = TransferDirection.SENT)
+
+        assertEquals(
+            expected = 1,
+            actual = transferDao.accountTransfersCountFlow(userId, TransferDirection.SENT).first(),
+            message = "Only the transfers owned by the given user must be counted",
+        )
+        assertEquals(
+            expected = 2,
+            actual = transferDao.accountTransfersCountFlow(otherUserId, TransferDirection.SENT).first(),
+            message = "Each account must count its own transfers",
+        )
+    }
+
+    @Test
+    fun accountTransfersCountFlow_returnsZero_whenTheAccountHasNoTransfer() = runTest {
+        insertTransfer("theirs", userOwnerId = otherUserId, direction = TransferDirection.SENT, organizationAccountId = orgA)
+
+        val count = transferDao.accountTransfersCountFlow(userId, TransferDirection.SENT).first()
+
+        assertEquals(0, count, "An account without any transfer must be counted as 0")
+    }
+
+    @Test
+    fun accountTransfersCountFlow_filtersByDirection() = runTest {
+        insertTransfer("sent1", userOwnerId = userId, direction = TransferDirection.SENT)
+        insertTransfer("sent2", userOwnerId = userId, direction = TransferDirection.SENT, organizationAccountId = orgA)
+        insertTransfer("received1", userOwnerId = userId, direction = TransferDirection.RECEIVED)
+        insertTransfer("received2", userOwnerId = userId, direction = TransferDirection.RECEIVED, organizationAccountId = orgA)
+        insertTransfer("received3", userOwnerId = userId, direction = TransferDirection.RECEIVED, organizationAccountId = orgB)
+
+        assertEquals(
+            expected = 2,
+            actual = transferDao.accountTransfersCountFlow(userId, TransferDirection.SENT).first(),
+            message = "Received transfers must not be counted when asking for sent ones",
+        )
+        assertEquals(
+            expected = 3,
+            actual = transferDao.accountTransfersCountFlow(userId, TransferDirection.RECEIVED).first(),
+            message = "Sent transfers must not be counted when asking for received ones",
+        )
+    }
+
+    @Test
+    fun accountTransfersCountFlow_excludesPendingUploads() = runTest {
+        insertTransfer("ready", userOwnerId = userId, direction = TransferDirection.SENT)
+        insertTransfer(
+            id = "pendingNoOrg",
+            userOwnerId = userId,
+            direction = TransferDirection.SENT,
+            organizationAccountId = null,
+            transferStatus = TransferStatus.PENDING_UPLOAD
+        )
+        insertTransfer(
+            id = "pendingOrgA",
+            userOwnerId = userId,
+            direction = TransferDirection.SENT,
+            organizationAccountId = orgA,
+            transferStatus = TransferStatus.PENDING_UPLOAD
+        )
+
+        assertEquals(
+            expected = 1,
+            actual = transferDao.accountTransfersCountFlow(userId, TransferDirection.SENT).first(),
+            message = "Pending uploads must not be counted, whatever their organization",
+        )
+        assertEquals(
+            expected = 2,
+            actual = transferDao.accountTransfersCountFlow(
+                userId,
+                TransferDirection.SENT,
+                excludedUploadStatus = TransferStatus.READY
+            ).first(),
+            message = "The excluded status must be the one given as parameter",
+        )
     }
 
     @Test
@@ -581,6 +677,24 @@ class TransfersTest : RobolectricTestsBase() {
             val transferDirection = if (index == 0) TransferDirection.SENT else TransferDirection.RECEIVED
             insertTransfer(transfer, transferDirection, null)
         }
+    }
+
+    private suspend fun insertTransfer(
+        id: String,
+        userOwnerId: Long,
+        direction: TransferDirection,
+        organizationAccountId: Long? = null,
+        transferStatus: TransferStatus = TransferStatus.READY,
+    ) {
+        transferDao.upsertTransfer(
+            DummyTransferForV2.notExpired.copy(
+                id = id,
+                userOwnerId = userOwnerId,
+                transferDirection = direction,
+                organizationAccountId = organizationAccountId,
+                transferStatus = transferStatus,
+            )
+        )
     }
 
     private suspend fun insertTransfer(

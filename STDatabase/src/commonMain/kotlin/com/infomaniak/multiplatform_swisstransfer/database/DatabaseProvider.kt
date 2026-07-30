@@ -17,6 +17,7 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -26,8 +27,11 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.DownloadManagerRefDao
+import com.infomaniak.multiplatform_swisstransfer.database.dao.OrganizationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
+import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
+import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.DownloadManagerRef
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
@@ -52,8 +56,10 @@ fun DatabaseProvider.getAppDatabase(
 }
 
 @Database(
-    entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class],
-    version = 1
+    entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class,
+        OrganizationAccount::class, SelectedOrganizationAccount::class],
+    version = 2,
+    autoMigrations = [AutoMigration(from = 1, to = 2)]
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -62,6 +68,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getDownloadManagerRef(): DownloadManagerRefDao
     abstract fun getTransferDao(): TransferDao
     abstract fun getUploadDao(): UploadDao
+    abstract val organizationsDao: OrganizationsDao
 }
 
 // The Room compiler generates the `actual` implementations. Avoid error before 1st build.
