@@ -35,9 +35,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
@@ -98,12 +101,9 @@ class AccountManager internal constructor(
     fun selectedOrganizationAccount(): Flow<OrganizationAccount?> {
         return currentUserFlow.transformLatest { currentUser ->
             currentUser ?: return@transformLatest emit(null)
-            emitAll(appDatabase.organizationsDao.lastSelectedOrgId(currentUser.id).map { selectedId ->
-                if (selectedId == null) {
-                    null
-                } else {
-                    organizationAccountsForUser(currentUser.id).firstOrNull { account -> account.id == selectedId }
-                }
+            val selectedIdFlow = appDatabase.organizationsDao.lastSelectedOrgId(currentUser.id)
+            emitAll(selectedIdFlow.combine(organizationAccountsForUser(currentUser.id)) { selectedId, accounts ->
+                accounts.firstOrNull { account -> account.id == selectedId }
             })
         }
     }
@@ -119,7 +119,7 @@ class AccountManager internal constructor(
     }
 
     /**
-     * Switches to the given [organizationAccountId] that has been retrieved from [organizationAccountsForUser].
+     * Switches to the given [organizationAccountId] that has been retrieved from [organizationAccountsForCurrentUser].
      *
      * Will lead to [selectedOrganizationAccount] to emit a new value just as it's saved into the database.
      */
@@ -132,9 +132,23 @@ class AccountManager internal constructor(
     }
 
     /**
-     * Returns the list of organization accounts that the given user is part of.
+     * Emits the list of organization accounts that the current user is part of,
+     * and emits again each time they change, for example once [loadUser] has refreshed them from the API.
+     *
+     * Emits an empty list when there's no current user, which can be changed by changing the current user
+     * through a call to [loadUser], or [logoutCurrentUser].
      */
-    suspend fun organizationAccountsForUser(userId: Long): List<OrganizationAccount> {
+    fun organizationAccountsForCurrentUser(): Flow<List<OrganizationAccount>> {
+        return currentUserFlow.flatMapLatest { currentUser ->
+            currentUser?.let { organizationAccountsForUser(it.id) } ?: flowOf(emptyList())
+        }.distinctUntilChanged()
+    }
+
+    /**
+     * Emits the list of organization accounts that the given user is part of,
+     * and emits again each time they change, for example once [loadUser] has refreshed them from the API.
+     */
+    internal fun organizationAccountsForUser(userId: Long): Flow<List<OrganizationAccount>> {
         return appDatabase.organizationsDao.orgAccountsForUser(userId)
     }
 

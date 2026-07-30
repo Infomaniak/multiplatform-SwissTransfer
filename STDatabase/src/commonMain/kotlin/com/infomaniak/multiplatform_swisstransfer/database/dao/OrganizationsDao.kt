@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.Flow
 interface OrganizationsDao {
 
     @Query("SELECT * FROM OrganizationAccount WHERE userId=:userId ORDER BY name")
-    suspend fun orgAccountsForUser(userId: Long): List<OrganizationAccount>
+    fun orgAccountsForUser(userId: Long): Flow<List<OrganizationAccount>>
 
     @Query("SELECT organizationAccountId FROM SelectedOrganizationAccount WHERE userId=:userId LIMIT 1")
     fun lastSelectedOrgId(userId: Long): Flow<Long?>
