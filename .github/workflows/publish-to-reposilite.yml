@@ -26,7 +26,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check acknowledgement
-        run: test "${{ inputs.acknowledgement }}" = "Yes" || (echo "Acknowledgement missing" && exit 1)
+        env:
+          ACKNOWLEDGEMENT: ${{ inputs.acknowledgement }}
+        run: test "$ACKNOWLEDGEMENT" = "Yes" || (echo "Acknowledgement missing" && exit 1)
+      # Guard against publishing a "release" that's actually a snapshot (e.g. "1.2.3-SNAPSHOT"):
+      # PublishPlugin would silently route it to the snapshots repository instead of failing.
+      - name: Validate version format
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || {
+            echo "Version '$VERSION' is not a valid release version (expected x.x.x, e.g. 1.2.3)"
+            exit 1
+          }
 
   publish:
     needs: check-acknowledgement
