@@ -1,0 +1,31 @@
+name: Publish Release on Merged
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    uses: Infomaniak/.github/.github/workflows/kmp-publish-on-release-merge.yml@v2
+    with:
+      merged: ${{ github.event.pull_request.merged }}
+      head-ref: ${{ github.event.pull_request.head.ref }}
+      merge-commit-sha: ${{ github.event.pull_request.merge_commit_sha }}
+      lib-name: "SwissTransfer lib"
+      spm-line: |
+        .package(url: "https://github.com/Infomaniak/multiplatform-SwissTransfer", from: "{VERSION}")
+      android-line: |
+        implementation("com.infomaniak.multiplatform_swisstransfer:STCore:{VERSION}")
+        implementation("com.infomaniak.multiplatform_swisstransfer:STDatabase:{VERSION}")
+        implementation("com.infomaniak.multiplatform_swisstransfer:STNetwork:{VERSION}")
+    secrets:
+      REPOSILITE_USERNAME: ${{ secrets.REPOSILITE_USERNAME }}
+      REPOSILITE_PASSWORD: ${{ secrets.REPOSILITE_PASSWORD }}
+      GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PRIVATE_PASSWORD: ${{ secrets.GPG_PRIVATE_PASSWORD }}
+      KCHAT_KMP_WEBHOOK_URL: ${{ secrets.KCHAT_KMP_WEBHOOK_URL }}

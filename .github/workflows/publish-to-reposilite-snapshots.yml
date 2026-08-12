@@ -1,0 +1,36 @@
+name: Publish to Reposilite Snapshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Snapshot version to publish (e.g. 0.1.0)'
+        required: true
+        type: string
+      perform-a-gradle-clean:
+        description: "Perform a Gradle clean"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    uses: Infomaniak/.github/.github/workflows/kmp-publish-reposilite-snapshot.yml@v2
+    with:
+      version: ${{ inputs.version }}
+      perform-a-gradle-clean: ${{ inputs.perform-a-gradle-clean }}
+      lib-name: "Android SwissTransfer"
+      artifact-line: |
+        implementation("com.infomaniak.multiplatform_swisstransfer:STCore:{VERSION}")
+        implementation("com.infomaniak.multiplatform_swisstransfer:STDatabase:{VERSION}")
+        implementation("com.infomaniak.multiplatform_swisstransfer:STNetwork:{VERSION}")
+      maven-group-path: "com/infomaniak/multiplatform_swisstransfer"
+    secrets:
+      REPOSILITE_USERNAME: ${{ secrets.REPOSILITE_USERNAME }}
+      REPOSILITE_PASSWORD: ${{ secrets.REPOSILITE_PASSWORD }}
+      GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PRIVATE_PASSWORD: ${{ secrets.GPG_PRIVATE_PASSWORD }}
+      KCHAT_KMP_WEBHOOK_URL: ${{ secrets.KCHAT_KMP_WEBHOOK_URL }}

@@ -1,0 +1,15 @@
+name: PR Build Check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    uses: Infomaniak/.github/.github/workflows/kmp-pr-build-check.yml@v2
+    with:
+      # SwissTransfer still uses the classic com.android.library plugin (not androidLibrary),
+      # which doesn't have an "assembleAndroidMain" task - it builds debug/release variants instead.
+      build-task: assembleDebug assembleRelease linkDebugFrameworkIosSimulatorArm64 linkReleaseFrameworkIosSimulatorArm64
