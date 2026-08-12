@@ -27,7 +27,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 data class TransferDB(
     @PrimaryKey
     val id: String,
-    val senderEmail: String,
     val title: String?,
     val message: String?,
     val createdAt: Long,

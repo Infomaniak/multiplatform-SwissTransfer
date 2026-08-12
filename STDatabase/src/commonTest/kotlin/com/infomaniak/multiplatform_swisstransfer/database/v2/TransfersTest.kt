@@ -216,7 +216,6 @@ class TransfersTest : RobolectricTestsBase() {
         // Update the transfer with new values
         val updatedTransfer = TransferDB(
             id = transfer.id,
-            senderEmail = transfer.senderEmail,
             title = "Updated Title",
             message = transfer.message,
             createdAt = transfer.createdAt,

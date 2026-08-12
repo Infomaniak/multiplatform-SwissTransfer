@@ -30,7 +30,6 @@ object DummyTransferForV2 {
         transferStatus: TransferStatus = TransferStatus.READY,
     ): TransferDB = TransferDB(
         id = id,
-        senderEmail = "",
         title = null,
         message = null,
         createdAt = 0,

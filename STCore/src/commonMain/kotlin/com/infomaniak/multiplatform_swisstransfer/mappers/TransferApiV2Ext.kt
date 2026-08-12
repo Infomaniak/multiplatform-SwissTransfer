@@ -30,7 +30,6 @@ internal fun TransferApi.toTransferDB(
     status: TransferStatus = TransferStatus.READY,
 ): TransferDB = TransferDB(
     id = id,
-    senderEmail = senderEmail,
     title = title,
     message = message,
     createdAt = createdAt,
