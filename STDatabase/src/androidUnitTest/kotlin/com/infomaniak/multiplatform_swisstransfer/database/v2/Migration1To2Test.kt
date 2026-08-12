@@ -96,6 +96,14 @@ class Migration1To2Test {
                         ON UPDATE NO ACTION ON DELETE CASCADE)"""
             )
 
+            db.execSQL(
+                "CREATE INDEX IF NOT EXISTS `index_FileDB_transferId` ON `FileDB` (`transferId`)"
+            )
+
+            // Room uses room_master_table to verify the schema identity hash before migration.
+            db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
+            db.execSQL("INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES(42, 'd70e7f13f5355ab969659ba9acdbfb0e')")
+
             // Populate with a transfer row that includes senderEmail and an associated file.
             db.execSQL(
                 """INSERT INTO TransferDB
