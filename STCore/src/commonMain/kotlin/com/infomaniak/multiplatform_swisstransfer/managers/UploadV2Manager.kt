@@ -27,7 +27,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
-import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferDB

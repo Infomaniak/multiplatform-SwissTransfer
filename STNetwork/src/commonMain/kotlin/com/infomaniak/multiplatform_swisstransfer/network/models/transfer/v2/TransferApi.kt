@@ -23,8 +23,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TransferApi(
     val id: String,
-    @SerialName("sender")
-    val senderEmail: String,
     val title: String? = null,
     val message: String? = null,
     @SerialName("created_at")

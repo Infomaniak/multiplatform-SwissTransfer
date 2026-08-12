@@ -17,11 +17,14 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
+import androidx.room.DeleteColumn
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
@@ -53,7 +56,13 @@ fun DatabaseProvider.getAppDatabase(
 
 @Database(
     entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class],
-    version = 1
+    version = 2,
+    autoMigrations = [
+        AutoMigration(
+            from = 1, to = 2,
+            spec = AppDatabaseAutoMigration1To2::class,
+        ),
+    ],
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -63,6 +72,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getTransferDao(): TransferDao
     abstract fun getUploadDao(): UploadDao
 }
+
+@DeleteColumn(tableName = "TransferDB", columnName = "senderEmail")
+internal class AppDatabaseAutoMigration1To2 : AutoMigrationSpec
 
 // The Room compiler generates the `actual` implementations. Avoid error before 1st build.
 @Suppress("KotlinNoActualForExpect", "RedundantSuppression")
