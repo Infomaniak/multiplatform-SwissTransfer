@@ -1,0 +1,32 @@
+name: Cleanup old snapshots
+
+on:
+  schedule:
+    - cron: '0 3 * * 2'
+  workflow_dispatch:
+    inputs:
+      max-age-days:
+        description: 'Delete snapshots older than this many days'
+        required: false
+        type: number
+        default: 15
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup-ios:
+    permissions:
+      contents: write
+    uses: Infomaniak/.github/.github/workflows/kmp-cleanup-ios-snapshots.yml@v2
+    with:
+      max-age-days: ${{ fromJSON(inputs.max-age-days || '15') }}
+
+  cleanup-android:
+    uses: Infomaniak/.github/.github/workflows/cleanup-reposilite-snapshots.yml@v2
+    with:
+      max-age-days: ${{ fromJSON(inputs.max-age-days || '15') }}
+      maven-group-path: "com/infomaniak/multiplatform_swisstransfer"
+    secrets:
+      REPOSILITE_USERNAME: ${{ secrets.REPOSILITE_USERNAME }}
+      REPOSILITE_PASSWORD: ${{ secrets.REPOSILITE_PASSWORD }}

@@ -1,0 +1,34 @@
+name: Build iOS Snapshot
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Snapshot version to build (e.g. 0.1.0)'
+        required: true
+        type: string
+      label:
+        description: 'Optional label (e.g. your name) to let multiple snapshots coexist without overwriting each other'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    uses: Infomaniak/.github/.github/workflows/kmp-publish-ios-snapshot.yml@v2
+    with:
+      version: ${{ inputs.version }}
+      label: ${{ inputs.label }}
+      xcframeworks: |
+        [
+          {"name":"STCore","module":"STCore","task":"assembleSTCoreReleaseXCFramework"},
+          {"name":"STDatabase","module":"STDatabase","task":"assembleSTDatabaseReleaseXCFramework"},
+          {"name":"STNetwork","module":"STNetwork","task":"assembleSTNetworkReleaseXCFramework"}
+        ]
+      lib-name: "iOS SwissTransfer"
+    secrets:
+      BOT_MOBILE_GPG_PRIVATE_KEY: ${{ secrets.BOT_MOBILE_GPG_PRIVATE_KEY }}
+      BOT_MOBILE_GPG_PASSPHRASE: ${{ secrets.BOT_MOBILE_GPG_PASSPHRASE }}
+      KCHAT_KMP_WEBHOOK_URL: ${{ secrets.KCHAT_KMP_WEBHOOK_URL }}

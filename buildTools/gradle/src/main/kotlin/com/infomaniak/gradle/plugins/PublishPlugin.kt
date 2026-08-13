@@ -36,13 +36,14 @@ class PublishPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         target.plugins.apply(SigningPlugin::class.java)
         target.plugins.apply("maven-publish")
-        target.plugins.apply("com.gradleup.nmcp")
 
         // Create the PublishExtension and add it to the project
         val extension = target.extensions.create<PublishExtension>(PublishExtension.EXTENSION_NAME)
 
         target.group = "com.infomaniak.multiplatform_swisstransfer"
-        target.version = Versions.mavenVersionName
+        // Prefer the CI-provided "-Pcore.version" property (see the Release/Publish reusable
+        // workflows in Infomaniak/.github), falling back to the constant for local builds.
+        target.version = getPropertyValue(target, "core.version") ?: Versions.mavenVersionName
 
         target.afterEvaluate {
             val mavenName = extension.mavenName ?: target.name
@@ -80,6 +81,23 @@ class PublishPlugin : Plugin<Project> {
                                     url.set("https://www.infomaniak.com/")
                                 }
                             }
+                        }
+                    }
+                }
+
+                repositories {
+                    maven {
+                        name = "reposilite"
+                        url = target.uri(
+                            if (target.version.toString().endsWith("SNAPSHOT")) {
+                                "https://maven.infomaniak.app/snapshots"
+                            } else {
+                                "https://maven.infomaniak.app/releases"
+                            }
+                        )
+                        credentials {
+                            username = getPropertyValue(target, "reposiliteUsername")
+                            password = getPropertyValue(target, "reposilitePassword")
                         }
                     }
                 }
