@@ -22,6 +22,7 @@ jobs:
         implementation("com.infomaniak.multiplatform_swisstransfer:STCore:{VERSION}")
         implementation("com.infomaniak.multiplatform_swisstransfer:STDatabase:{VERSION}")
         implementation("com.infomaniak.multiplatform_swisstransfer:STNetwork:{VERSION}")
+      maven-group-path: "com/infomaniak/multiplatform_swisstransfer"
     secrets:
       REPOSILITE_USERNAME: ${{ secrets.REPOSILITE_USERNAME }}
       REPOSILITE_PASSWORD: ${{ secrets.REPOSILITE_PASSWORD }}
