@@ -62,7 +62,6 @@ private fun KotlinMultiplatformExtension.setup(
             baseName = xcframeworkName
             binaryOption("bundleId", "com.infomaniak.multiplatform_swisstransfer.${xcframeworkName}")
             xcf.add(this)
-            isStatic = true
 
             project.afterEvaluate {
                 stMultiplatformExtension.appleExportedProjects.forEach { stProject ->
