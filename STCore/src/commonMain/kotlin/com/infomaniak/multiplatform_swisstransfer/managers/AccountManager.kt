@@ -105,7 +105,7 @@ class AccountManager internal constructor(
             emitAll(selectedIdFlow.combine(organizationAccountsForUser(currentUser.id)) { selectedId, orgAccounts ->
                 orgAccounts.firstOrNull { orgAccount -> orgAccount.id == selectedId }
             })
-        }
+        }.distinctUntilChanged()
     }
 
     /**
