@@ -48,7 +48,11 @@ function show_help {
 
 function release_android {
     echo "Releasing Android version $1"
-    sed -i '' "s|mavenVersionName = \".*\"|mavenVersionName = \"$1\"|g" buildTools/gradle/src/main/kotlin/com/infomaniak/gradle/utils/Versions.kt
+    if grep -q "^core\\.version=" gradle.properties; then
+        perl -pi -e "s|^core\\.version=.*|core.version=$1|g" gradle.properties
+    else
+        echo "core.version=$1" >> gradle.properties
+    fi
 }
 
 function release_ios {
