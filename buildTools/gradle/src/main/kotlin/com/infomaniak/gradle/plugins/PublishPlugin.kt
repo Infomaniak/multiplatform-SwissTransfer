@@ -43,7 +43,7 @@ class PublishPlugin : Plugin<Project> {
         target.group = "com.infomaniak.multiplatform_swisstransfer"
         // Prefer the CI-provided "-Pcore.version" property (see the Release/Publish reusable
         // workflows in Infomaniak/.github), falling back to the constant for local builds.
-        target.version = getPropertyValue(target, "core.version") ?: Versions.mavenVersionName
+        target.version = getPropertyValue(target, "core.version") ?: "unspecified"
 
         target.afterEvaluate {
             val mavenName = extension.mavenName ?: target.name

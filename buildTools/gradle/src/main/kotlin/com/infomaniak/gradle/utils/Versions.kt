@@ -20,8 +20,6 @@ package com.infomaniak.gradle.utils
 import org.gradle.api.JavaVersion
 
 internal object Versions {
-    const val mavenVersionName = "10.1.1"
-
     const val minSdk = 24
     const val compileSdk = 35
     const val skieMaxArgumentCount = 7
