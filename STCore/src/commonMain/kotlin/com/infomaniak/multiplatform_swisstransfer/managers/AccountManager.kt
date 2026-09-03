@@ -205,7 +205,8 @@ class AccountManager internal constructor(
             if (it is CancellationException) throw it
             it.printStackTrace()
         }.getOrNull() ?: return
-        appDatabase.organizationsDao.updateOrganizations(userInfo.organizationAccounts.map { it.toDbModel(userId) })
+        val organizations = userInfo.organizationAccounts.filter { it.isInKSuite }.map { it.toDbModel(userId) }
+        appDatabase.organizationsDao.updateOrganizations(organizations)
 
         if (selectedOrganizationAccount().first() == null) {
             switchToOrganization(userInfo.defaultOrganizationAccountId)
