@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 2,
-    "identityHash": "db22fda582900c6f9f5930187e8d9384",
+    "version": 3,
+    "identityHash": "4bb871f8ade91546324e4553055db68b",
     "entities": [
       {
         "tableName": "AppSettingsDB",
@@ -101,7 +101,7 @@
       },
       {
         "tableName": "TransferDB",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT, `message` TEXT, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `totalSize` INTEGER NOT NULL, `password` TEXT, `transferDirection` TEXT NOT NULL, `transferStatus` TEXT NOT NULL, `recipientsEmails` TEXT NOT NULL, `linkId` TEXT, `userOwnerId` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT, `message` TEXT, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `totalSize` INTEGER NOT NULL, `password` TEXT, `transferDirection` TEXT NOT NULL, `transferStatus` TEXT NOT NULL, `recipientsEmails` TEXT NOT NULL, `linkId` TEXT, `userOwnerId` INTEGER NOT NULL, `organizationAccountId` INTEGER, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -170,6 +170,11 @@
             "columnName": "userOwnerId",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "organizationAccountId",
+            "columnName": "organizationAccountId",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -259,11 +264,95 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "OrganizationAccount",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `userId` INTEGER NOT NULL, `name` TEXT NOT NULL, `logoUrl` TEXT, `type` TEXT NOT NULL, `pack` TEXT NOT NULL, `isInKSuite` INTEGER NOT NULL, `transferTotalSize` INTEGER NOT NULL, PRIMARY KEY(`id`, `userId`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "logoUrl",
+            "columnName": "logoUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pack",
+            "columnName": "pack",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isInKSuite",
+            "columnName": "isInKSuite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "limits.transferTotalSize",
+            "columnName": "transferTotalSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id",
+            "userId"
+          ]
+        }
+      },
+      {
+        "tableName": "SelectedOrganizationAccount",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` INTEGER NOT NULL, `organizationAccountId` INTEGER NOT NULL, PRIMARY KEY(`userId`))",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "organizationAccountId",
+            "columnName": "organizationAccountId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "userId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'db22fda582900c6f9f5930187e8d9384')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4bb871f8ade91546324e4553055db68b')"
     ]
   }
 }

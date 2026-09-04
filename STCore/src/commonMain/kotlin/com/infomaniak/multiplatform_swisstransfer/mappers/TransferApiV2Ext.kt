@@ -26,6 +26,7 @@ internal fun TransferApi.toTransferDB(
     direction: TransferDirection,
     linkId: String?,
     userOwnerId: Long,
+    organizationAccountId: Long? = null,
     password: String? = null,
     status: TransferStatus = TransferStatus.READY,
 ): TransferDB = TransferDB(
@@ -41,4 +42,5 @@ internal fun TransferApi.toTransferDB(
     recipientsEmails = emptySet(),
     linkId = linkId,
     userOwnerId = userOwnerId,
+    organizationAccountId = organizationAccountId,
 )
