@@ -30,5 +30,9 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+
+        macosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+        }
     }
 }
