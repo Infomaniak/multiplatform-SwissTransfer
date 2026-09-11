@@ -27,7 +27,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
         }
 
-        iosMain.dependencies {
+        appleMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
     }
