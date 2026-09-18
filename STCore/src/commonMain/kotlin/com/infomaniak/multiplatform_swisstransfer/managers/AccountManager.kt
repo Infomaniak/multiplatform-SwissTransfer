@@ -208,7 +208,8 @@ class AccountManager internal constructor(
         val organizations = userInfo.organizationAccounts.filter { it.isInKSuite }.map { it.toDbModel(userId) }
         appDatabase.organizationsDao.updateOrganizations(organizations)
 
-        if (selectedOrganizationAccount().first() == null) {
+        val selectedOrganizationId = selectedOrganizationAccount().first()?.id
+        if (organizations.none { it.id == selectedOrganizationId }) {
             val defaultOrganization = organizations.firstOrNull { it.id == userInfo.defaultOrganizationAccountId }
                 ?: organizations.firstOrNull()
             switchToOrganization(defaultOrganization?.id)
