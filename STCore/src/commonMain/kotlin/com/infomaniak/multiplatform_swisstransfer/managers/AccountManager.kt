@@ -208,8 +208,11 @@ class AccountManager internal constructor(
         val organizations = userInfo.organizationAccounts.filter { it.isInKSuite }.map { it.toDbModel(userId) }
         appDatabase.organizationsDao.updateOrganizations(organizations)
 
-        if (selectedOrganizationAccount().first() == null) {
-            switchToOrganization(userInfo.defaultOrganizationAccountId)
+        val selectedOrganizationId = selectedOrganizationAccount().first()?.id
+        if (organizations.none { it.id == selectedOrganizationId }) {
+            val defaultOrganization = organizations.firstOrNull { it.id == userInfo.defaultOrganizationAccountId }
+                ?: organizations.firstOrNull()
+            switchToOrganization(defaultOrganization?.id)
         }
         //TODO: Improve error handling, to report abnormal stuff, and allow retrying somehow.
     }
