@@ -209,7 +209,9 @@ class AccountManager internal constructor(
         appDatabase.organizationsDao.updateOrganizations(organizations)
 
         if (selectedOrganizationAccount().first() == null) {
-            switchToOrganization(userInfo.defaultOrganizationAccountId)
+            val defaultOrganization = organizations.firstOrNull { it.id == userInfo.defaultOrganizationAccountId }
+                ?: organizations.firstOrNull()
+            switchToOrganization(defaultOrganization?.id)
         }
         //TODO: Improve error handling, to report abnormal stuff, and allow retrying somehow.
     }
