@@ -19,6 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.mappers
 
 import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.network.models.MyUser
+import com.infomaniak.multiplatform_swisstransfer.utils.FileUtils
 
 internal fun MyUser.OrganizationAccountApi.toDbModel(userId: Long): OrganizationAccount = OrganizationAccount(
     id = id,
@@ -32,5 +33,7 @@ internal fun MyUser.OrganizationAccountApi.toDbModel(userId: Long): Organization
 )
 
 internal fun MyUser.OrganizationAccountApi.Limits.toLimits(): OrganizationAccount.Limits = OrganizationAccount.Limits(
-    transferTotalSize = transferTotalSize
+    transferTotalSize = FileUtils.MAX_FILES_SIZE, //TODO[limits]: Replace this by the end of the week?
+    // transferTotalSize = 50_000_000 //TODO[limits]: Put this back by the end of the week if we keep it.
+    //TODO[limits]: Add downloadLimit
 )

@@ -44,8 +44,10 @@ data class MyUser(
     ) {
         @Serializable
         data class Limits(
-            @SerialName("transfer_total_size")
-            val transferTotalSize: Long,
+            @SerialName("download_limit")
+            val downloadLimit: List<Int?>,
+            // @SerialName("transfer_total_size") //TODO[limits]: Put this back by the end of the week if we keep it.
+            // val transferTotalSize: Long,
         )
     }
 }
