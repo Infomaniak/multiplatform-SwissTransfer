@@ -131,6 +131,7 @@ class TransferManager internal constructor(
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
+     * Sent transfers are scoped to the selected organization; received transfers include all organizations.
      *
      * @see addTransferByUrl
      * @see addTransferByLinkUUID

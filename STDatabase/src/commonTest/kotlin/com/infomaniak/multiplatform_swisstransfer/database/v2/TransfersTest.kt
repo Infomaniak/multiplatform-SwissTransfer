@@ -121,6 +121,26 @@ class TransfersTest : RobolectricTestsBase() {
     }
 
     @Test
+    fun validReceivedTransfersIncludeAllOrganizations() = runTest {
+        assertTransfersOrganizationScope(TransferDirection.RECEIVED, expired = false)
+    }
+
+    @Test
+    fun expiredReceivedTransfersIncludeAllOrganizations() = runTest {
+        assertTransfersOrganizationScope(TransferDirection.RECEIVED, expired = true)
+    }
+
+    @Test
+    fun validSentTransfersAreScopedToSelectedOrganization() = runTest {
+        assertTransfersOrganizationScope(TransferDirection.SENT, expired = false)
+    }
+
+    @Test
+    fun expiredSentTransfersAreScopedToSelectedOrganization() = runTest {
+        assertTransfersOrganizationScope(TransferDirection.SENT, expired = true)
+    }
+
+    @Test
     fun canGetAllTransfersCountFlow() = runTest {
         addTwoRandomTransfersInDatabase()
         val count = transferDao.allTransfersCountFlow.first()
@@ -670,6 +690,45 @@ class TransfersTest : RobolectricTestsBase() {
     //endregion
 
     //region Helper methods
+    private suspend fun assertTransfersOrganizationScope(direction: TransferDirection, expired: Boolean) {
+        val currentTime = 1000L
+        val organizations = listOf(null, orgA, orgB)
+        for (transferDirection in TransferDirection.entries) {
+            for ((index, organizationAccountId) in organizations.withIndex()) {
+                for (isExpired in listOf(false, true)) {
+                    val transfer = DummyTransferForV2.notExpired.copy(
+                        id = "$transferDirection-$index-$isExpired",
+                        userOwnerId = userId,
+                        transferDirection = transferDirection,
+                        organizationAccountId = organizationAccountId,
+                        transferStatus = TransferStatus.READY,
+                        expiresAt = if (isExpired) currentTime - 1 else currentTime,
+                    )
+                    transferDao.upsertTransfer(transfer)
+                    transferDao.upsertTransfer(transfer.copy(id = "${transfer.id}-otherUser", userOwnerId = otherUserId))
+                    transferDao.upsertTransfer(
+                        transfer.copy(id = "${transfer.id}-pending", transferStatus = TransferStatus.PENDING_UPLOAD)
+                    )
+                }
+            }
+        }
+
+        for ((index, organizationAccountId) in organizations.withIndex()) {
+            val transfers = if (expired) {
+                transferDao.expiredTransfersFlow(userId, organizationAccountId, direction, currentTime = currentTime)
+            } else {
+                transferDao.validTransfersFlow(userId, organizationAccountId, direction, currentTime = currentTime)
+            }.first()
+            val expectedIndices = if (direction == TransferDirection.RECEIVED) organizations.indices.toList() else listOf(index)
+
+            assertEquals(
+                expected = expectedIndices.map { "$direction-$it-$expired" }.toSet(),
+                actual = transfers.map { it.id }.toSet(),
+                message = "Unexpected $direction transfers for organization $organizationAccountId (expired=$expired)",
+            )
+        }
+    }
+
     private suspend fun addTwoRandomTransfersInDatabase() {
         DummyTransferForV2.transfers.take(2).forEachIndexed { index, transfer ->
             println("index:$index id:${transfer.id}, status:${transfer.transferStatus}")
