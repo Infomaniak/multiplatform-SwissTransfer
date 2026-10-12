@@ -142,9 +142,10 @@ class TransferManager internal constructor(
     fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> = userDependentFlow(
         flowForAuthUser = { userId, organizationIdFlow ->
             organizationIdFlow.flatMapLatest { organizationAccountId ->
+                val organizationId = organizationAccountId.takeUnless { transferDirection == TransferDirection.RECEIVED }
                 combine(
-                    transferDao.validTransfersFlow(userId, organizationAccountId = organizationAccountId, transferDirection),
-                    transferDao.expiredTransfersFlow(userId, organizationAccountId = organizationAccountId, transferDirection),
+                    transferDao.validTransfersFlow(userId, organizationAccountId = organizationId, transferDirection),
+                    transferDao.expiredTransfersFlow(userId, organizationAccountId = organizationId, transferDirection),
                 ) { valid, expired ->
                     SortedTransfers(
                         valid.toTransferUiList(transferDao),
