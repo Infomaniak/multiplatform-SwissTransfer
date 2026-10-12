@@ -670,7 +670,6 @@ class TransfersTest : RobolectricTestsBase() {
     //endregion
 
     //region Helper methods
-
     private suspend fun addTwoRandomTransfersInDatabase() {
         DummyTransferForV2.transfers.take(2).forEachIndexed { index, transfer ->
             println("index:$index id:${transfer.id}, status:${transfer.transferStatus}")
