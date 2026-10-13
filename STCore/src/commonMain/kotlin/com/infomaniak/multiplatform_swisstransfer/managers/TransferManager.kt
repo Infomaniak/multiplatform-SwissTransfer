@@ -131,6 +131,7 @@ class TransferManager internal constructor(
 
     /**
      * Retrieves a flow of transfers based on the specified transfer direction.
+     * Sent transfers are scoped to the selected organization; received transfers include all organizations.
      *
      * @see addTransferByUrl
      * @see addTransferByLinkUUID
@@ -141,9 +142,10 @@ class TransferManager internal constructor(
     fun getSortedTransfers(transferDirection: TransferDirection): Flow<SortedTransfers> = userDependentFlow(
         flowForAuthUser = { userId, organizationIdFlow ->
             organizationIdFlow.flatMapLatest { organizationAccountId ->
+                val organizationId = organizationAccountId.takeUnless { transferDirection == TransferDirection.RECEIVED }
                 combine(
-                    transferDao.validTransfersFlow(userId, organizationAccountId = organizationAccountId, transferDirection),
-                    transferDao.expiredTransfersFlow(userId, organizationAccountId = organizationAccountId, transferDirection),
+                    transferDao.validTransfersFlow(userId, organizationAccountId = organizationId, transferDirection),
+                    transferDao.expiredTransfersFlow(userId, organizationAccountId = organizationId, transferDirection),
                 ) { valid, expired ->
                     SortedTransfers(
                         valid.toTransferUiList(transferDao),
