@@ -24,5 +24,6 @@ enum class ValidityPeriod(val days: Int) {
     THIRTY(30),
     FIFTEEN(15),
     SEVEN(7),
+    THREE(3),
     ONE(1),
 }
