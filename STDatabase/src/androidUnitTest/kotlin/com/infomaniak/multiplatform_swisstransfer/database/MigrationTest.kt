@@ -37,6 +37,12 @@ class MigrationTest {
     )
 
     @Test
+    fun autoMigrate1To2() {
+        helper.createDatabase(name = testDbName, version = 1).close()
+        helper.runMigrationsAndValidate(name = testDbName, version = 2, validateDroppedTables = true).close()
+    }
+
+    @Test
     fun migrate3To4() {
         // Create the database with version 3
         helper.createDatabase(testDbName, 3).use {
