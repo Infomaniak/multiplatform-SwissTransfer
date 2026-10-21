@@ -50,10 +50,7 @@ class MigrationTest {
 
     @Test
     fun autoMigrate3To4() {
-        helper.createDatabase(name = testDbName, version = 3).use {
-            // No data insertion needed for this specific migration test as it's an auto-migration
-            // that adds an index. Validation will be handled by runMigrationsAndValidate.
-        }
+        helper.createDatabase(name = testDbName, version = 3).close()
 
         helper.runMigrationsAndValidate(name = testDbName, version = 4, validateDroppedTables = true).use { connection ->
             // Verify that the new index exists
