@@ -43,6 +43,12 @@ class MigrationTest {
     }
 
     @Test
+    fun autoMigrate2To3() {
+        helper.createDatabase(name = testDbName, version = 2).close()
+        helper.runMigrationsAndValidate(name = testDbName, version = 3, validateDroppedTables = true).close()
+    }
+
+    @Test
     fun autoMigrate3To4() {
         helper.createDatabase(name = testDbName, version = 3).use {
             // No data insertion needed for this specific migration test as it's an auto-migration
