@@ -37,15 +37,22 @@ class MigrationTest {
     )
 
     @Test
-    fun migrate3To4() {
-        // Create the database with version 3
-        helper.createDatabase(testDbName, 3).use {
-            // No data insertion needed for this specific migration test as it's an auto-migration
-            // that adds an index. Validation will be handled by runMigrationsAndValidate.
-        }
+    fun autoMigrate1To2() {
+        helper.createDatabase(name = testDbName, version = 1).close()
+        helper.runMigrationsAndValidate(name = testDbName, version = 2, validateDroppedTables = true).close()
+    }
 
-        // Run migration to version 4
-        helper.runMigrationsAndValidate(testDbName, 4, true).use { connection ->
+    @Test
+    fun autoMigrate2To3() {
+        helper.createDatabase(name = testDbName, version = 2).close()
+        helper.runMigrationsAndValidate(name = testDbName, version = 3, validateDroppedTables = true).close()
+    }
+
+    @Test
+    fun autoMigrate3To4() {
+        helper.createDatabase(name = testDbName, version = 3).close()
+
+        helper.runMigrationsAndValidate(name = testDbName, version = 4, validateDroppedTables = true).use { connection ->
             // Verify that the new index exists
             connection.query("SELECT name FROM sqlite_master WHERE type='index' AND name='index_TransferDB_createdAt'").use { cursor ->
                 assertTrue(cursor.moveToFirst(), "Index 'index_TransferDB_createdAt' should exist after migration to v2")
