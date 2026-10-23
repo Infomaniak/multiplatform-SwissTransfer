@@ -62,6 +62,7 @@ enum class MatomoName(val value: String) {
     System("system"),
     TermsAndConditions("termsAndConditions"),
     ThirtyDays("30days"),
+    ThreeDays("3days"),
     TogglePassword("togglePassword"),
     TwentyDownloads("20downloads"),
     TwoHundredAndFiftyDownloads("250downloads"),

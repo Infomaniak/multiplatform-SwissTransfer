@@ -21,9 +21,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable // Only used for short-term storage, for iOS.
 enum class ValidityPeriod(val days: Int) {
-    THIRTY(30),
-    FIFTEEN(15),
-    SEVEN(7),
-    THREE(3),
     ONE(1),
+    THREE(3),
+    SEVEN(7),
+    FIFTEEN(15),
+    THIRTY(30),
 }
