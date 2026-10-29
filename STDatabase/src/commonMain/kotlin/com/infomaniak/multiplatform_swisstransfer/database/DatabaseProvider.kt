@@ -29,9 +29,11 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.DownloadManagerRefDao
+import com.infomaniak.multiplatform_swisstransfer.database.dao.EmailValidationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.OrganizationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
+import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidation
 import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
@@ -59,8 +61,8 @@ fun DatabaseProvider.getAppDatabase(
 
 @Database(
     entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class,
-            OrganizationAccount::class, SelectedOrganizationAccount::class],
-    version = 4,
+            OrganizationAccount::class, SelectedOrganizationAccount::class, EmailValidation::class],
+    version = 5,
     autoMigrations = [
         AutoMigration(
             from = 1, to = 2,
@@ -68,6 +70,7 @@ fun DatabaseProvider.getAppDatabase(
         ),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5),
     ],
 )
 @TypeConverters(Converters::class)
@@ -78,6 +81,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getTransferDao(): TransferDao
     abstract fun getUploadDao(): UploadDao
     abstract val organizationsDao: OrganizationsDao
+    abstract val emailValidationsDao: EmailValidationsDao
 }
 
 @DeleteColumn(tableName = "TransferDB", columnName = "senderEmail")

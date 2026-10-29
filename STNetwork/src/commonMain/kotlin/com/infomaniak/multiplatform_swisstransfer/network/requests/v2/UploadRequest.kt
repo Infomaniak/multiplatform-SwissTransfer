@@ -18,12 +18,17 @@
 package com.infomaniak.multiplatform_swisstransfer.network.requests.v2
 
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.models.ApiResponseV2Success
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkedFileUploadFinalizationPayload
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.ValidateEmailCodeBody
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.CreateValidationRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.EmailValidationRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.EmailValidationRequestStatus
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.CompletionResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.BaseRequest
@@ -58,6 +63,47 @@ internal class UploadRequest(
             url = createV2Url(ApiRoutes.createTransfer(organizationAccountId = organizationAccountId)),
             data = nullableJson.encodeToString(createTransfer),
             appendHeaders = { appendBearer() }
+        )
+    }
+
+    /**
+     * [API online doc](https://developer.infomaniak.com/docs/api/post/1/swisstransfer/email-validations)
+     */
+    suspend fun createEmailValidationRequest(request: CreateValidationRequest): ApiResponseV2Success<EmailValidationRequest> {
+        return post(
+            url = createV2Url(ApiRoutes.emailValidations),
+            data = request,
+        )
+    }
+
+    /**
+     * [API online doc](https://developer.infomaniak.com/docs/api/post/1/swisstransfer/email-validations/%7Buuid%7D/confirm)
+     */
+    suspend fun validateEmailWithCode(validationId: String, code: String): ApiResponseV2Success<Unit> {
+        return post(
+            url = createV2Url(ApiRoutes.validateEmail(validationId)),
+            data = ValidateEmailCodeBody(token = code),
+        )
+    }
+
+    /**
+     * @return Returns `true` if the re-send request was successful, `false` if the email is already validated.
+     */
+    suspend fun reSendValidationEmail(validationId: String): EmailValidationRequest? = try {
+        post<ApiResponseV2Success<EmailValidationRequest>>(
+            url = createV2Url(ApiRoutes.resendValidationEmail(validationId)),
+            data = null,
+        ).data
+    } catch (e: ApiV2ErrorException) {
+        if (e.code == "email_already_validated") null else throw e
+    }
+
+    suspend fun checkEmailValidationStatus(
+        validationId: String,
+        email: String,
+    ): ApiResponseV2Success<EmailValidationRequestStatus> {
+        return get(
+            url = createV2Url(ApiRoutes.emailValidationStatus(validationId), "email" to email),
         )
     }
 

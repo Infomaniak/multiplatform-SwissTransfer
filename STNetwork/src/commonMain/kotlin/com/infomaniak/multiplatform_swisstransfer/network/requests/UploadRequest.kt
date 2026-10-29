@@ -20,7 +20,6 @@ package com.infomaniak.multiplatform_swisstransfer.network.requests
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
@@ -66,13 +65,6 @@ internal class UploadRequest(
 
     suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {
         return post(url = createUrl(ApiRoutes.verifyEmailCode), verifyEmailCodeBody)
-    }
-
-    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody) {
-        httpClient.post(url = createUrl(ApiRoutes.resendEmailCode)) {
-            contentType(ContentType.Application.Json)
-            setBody(resendEmailCodeBody)
-        }
     }
 
     suspend fun doesChunkExist(

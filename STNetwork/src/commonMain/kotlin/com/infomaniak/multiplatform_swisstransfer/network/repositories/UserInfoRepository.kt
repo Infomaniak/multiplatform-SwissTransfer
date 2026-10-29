@@ -26,7 +26,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.NotFoundException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.toUploadErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.models.MyUser
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.UserInfoRequests
 import io.ktor.client.HttpClient
@@ -73,7 +72,6 @@ class UserInfoRepository internal constructor(private val userInfoRequests: User
         throw when (exception) {
             is ApiV2ErrorException if exception.code == "not_authorized" -> UnauthorizedException(exception.requestContextId)
             is ApiV2ErrorException if exception.code == "too_many_request" -> TooManyRequestException(exception.requestContextId)
-            is ApiV2ErrorException -> exception.toUploadErrorsException()
             else -> exception
         }
     }

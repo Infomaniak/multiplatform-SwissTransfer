@@ -150,8 +150,10 @@ class SwissTransferInjection(
         UploadV2Manager(
             accountManager = accountManager,
             uploadRepository = uploadV2Repository,
+            emailLanguageUtils = emailLanguageUtils,
             appDatabase = appDatabase,
             transferDao = appDatabase.getTransferDao(),
+            emailValidationsDao = appDatabase.emailValidationsDao,
         )
     }
 

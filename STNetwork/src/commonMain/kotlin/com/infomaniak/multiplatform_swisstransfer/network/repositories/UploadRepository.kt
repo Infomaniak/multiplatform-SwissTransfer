@@ -30,7 +30,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValida
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
@@ -100,17 +99,6 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
                 throw exception
             }
         }
-    }
-
-    @Throws(
-        CancellationException::class,
-        ApiErrorException::class,
-        NetworkException::class,
-        UnexpectedApiErrorFormatException::class,
-        UnknownException::class,
-    )
-    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody) {
-        uploadRequest.resendEmailCode(resendEmailCodeBody)
     }
 
     @Throws(

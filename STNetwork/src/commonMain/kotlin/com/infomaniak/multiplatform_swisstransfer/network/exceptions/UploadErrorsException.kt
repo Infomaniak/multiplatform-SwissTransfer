@@ -23,6 +23,9 @@ sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV
     requestContextId = requestContextId
 ) {
 
+    class InvalidEmailValidationCode(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class EmailValidationRequired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class EmailValidationLocked(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class NotFoundException(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferCancelled(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferExpired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
@@ -30,6 +33,10 @@ sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV
 }
 
 internal fun ApiException.ApiV2ErrorException.toUploadErrorsException() = when (code) {
+    TODO() -> UploadErrorsException.EmailValidationRequired(requestContextId)
+    "email_validation_request_locked" -> UploadErrorsException.EmailValidationLocked(requestContextId)
+    "email_validation_token_expired" -> TODO()
+    "invalid_validation_token" -> UploadErrorsException.InvalidEmailValidationCode(requestContextId)
     "object_not_found" -> UploadErrorsException.NotFoundException(requestContextId)
     "transfer_cancelled" -> UploadErrorsException.TransferCancelled(requestContextId)
     "transfer_expired" -> UploadErrorsException.TransferExpired(requestContextId)

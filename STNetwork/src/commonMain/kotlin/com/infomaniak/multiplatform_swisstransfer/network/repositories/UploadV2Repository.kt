@@ -34,6 +34,8 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.Tra
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.CreateValidationRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.EmailValidationRequest
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.UploadRequest
 import io.ktor.client.HttpClient
@@ -75,6 +77,37 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
     suspend fun createTransfer(createTransfer: CreateTransfer, organizationAccountId: Long?): TransferApi {
         return withUploadErrorHandling {
             uploadRequest.createTransfer(createTransfer, organizationAccountId).data
+        }
+    }
+
+    suspend fun createEmailValidationRequest(request: CreateValidationRequest): EmailValidationRequest {
+        return withEmailValidationErrorHandling {
+            uploadRequest.createEmailValidationRequest(request).data
+        }
+    }
+
+    suspend fun validateEmailWithCode(validationId: String, code: String) {
+        return withEmailValidationErrorHandling {
+            uploadRequest.validateEmailWithCode(validationId = validationId, code = code)
+        }
+    }
+
+    /**
+     * @return Returns `null` if the email is already validated.
+     */
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        NotFoundException::class,
+    )
+    suspend fun resendValidationEmail(validationId: String): EmailValidationRequest? {
+        return withEmailValidationErrorHandling {
+            uploadRequest.reSendValidationEmail(validationId = validationId)
         }
     }
 
@@ -226,6 +259,17 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
             is ApiV2ErrorException if exception.code == "not_authorized" -> UnauthorizedException(exception.requestContextId)
             is ApiV2ErrorException if exception.code == "too_many_request" -> TooManyRequestException(exception.requestContextId)
             is ApiV2ErrorException -> exception.toUploadErrorsException()
+            else -> exception
+        }
+    }
+
+    private suspend fun <T> withEmailValidationErrorHandling(block: suspend () -> T) = runCatching {
+        block()
+    }.getOrElse { exception ->
+        throw when (exception) {
+            is ApiV2ErrorException if exception.code == "not_authorized" -> UnauthorizedException(exception.requestContextId)
+            is ApiV2ErrorException if exception.code == "too_many_request" -> TooManyRequestException(exception.requestContextId)
+            is ApiV2ErrorException -> exception.toEmailValidationErrorsException()
             else -> exception
         }
     }

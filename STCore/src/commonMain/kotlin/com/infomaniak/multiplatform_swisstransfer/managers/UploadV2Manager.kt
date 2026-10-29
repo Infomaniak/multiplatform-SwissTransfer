@@ -26,7 +26,9 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirectio
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
+import com.infomaniak.multiplatform_swisstransfer.database.dao.EmailValidationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
+import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidation
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferDB
@@ -36,11 +38,15 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.TransferFile
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.CreateValidationRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2Repository
+import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import io.ktor.http.content.OutgoingContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -63,8 +69,10 @@ import kotlin.coroutines.cancellation.CancellationException
 class UploadV2Manager(
     private val accountManager: AccountManager,
     private val uploadRepository: UploadV2Repository,
+    private val emailLanguageUtils: EmailLanguageUtils,
     private val appDatabase: AppDatabase,
     private val transferDao: TransferDao,
+    private val emailValidationsDao: EmailValidationsDao,
 ) {
 
     private fun requireCurrentUserId(): Long {
@@ -86,6 +94,77 @@ class UploadV2Manager(
         Json.decodeFromString(encodedString)
     }
 
+    @Throws(
+        CancellationException::class,
+        ApiV2ErrorException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        SQLiteException::class,
+        RuntimeException::class,
+    )
+    suspend fun createEmailValidationRequest(email: String): Unit = withContext(Dispatchers.Default) {
+        val language = emailLanguageUtils.getEmailLanguageFromLocale()
+        val body = CreateValidationRequest(email = email, language = language.code)
+        val response = uploadRepository.createEmailValidationRequest(body)
+        val pendingValidation = EmailValidation(
+            email = email,
+            id = response.id,
+            validationRequiredByTimestampSeconds = response.tokenExpiryUtcTimestampSeconds,
+        )
+        emailValidationsDao.upsertEmailValidation(pendingValidation)
+    }
+
+    /**
+     * @throws NoSuchElementException if there's no pending validation
+     */
+    @Throws(
+        CancellationException::class,
+        ApiV2ErrorException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        SQLiteException::class,
+        NoSuchElementException::class,
+        RuntimeException::class,
+    )
+    suspend fun validateEmailWithCode(email: String, code: String): Unit = withContext(Dispatchers.Default) {
+        val validation = emailValidationsDao.getEmailValidation(email)
+            ?: throw NoSuchElementException("No pending validation found in the database for the given email")
+        uploadRepository.validateEmailWithCode(validationId = validation.id, code = code)
+        emailValidationsDao.markAsValidated(validationId = validation.id)
+    }
+
+    /**
+     * @return Returns `null` if the email is already validated.
+     * Note that in this latter case, the email will be marked as validated in the DB before returning.
+     */
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        NotFoundException::class,
+    )
+    suspend fun resendValidationEmail(validationId: String): Boolean = withContext(Dispatchers.Default) {
+        val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)
+        when (updatedValidationRequest) {
+            null -> emailValidationsDao.markAsValidated(validationId = validationId)
+            else -> emailValidationsDao.updatePendingValidation(
+                validationId = validationId,
+                validationRequiredByTimestampSeconds = updatedValidationRequest.tokenExpiryUtcTimestampSeconds
+            )
+        }
+        updatedValidationRequest != null
+    }
+
     /**
      * Prepare a transfer to be uploaded.
      *
@@ -104,7 +183,6 @@ class UploadV2Manager(
      * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
      * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      */
-    @OptIn(ExperimentalContracts::class)
     @Throws(
         CancellationException::class,
         ApiV2ErrorException::class,
