@@ -15,18 +15,18 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "Core",
-            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/11.1.2/STCore.xcframework.zip",
-            checksum: "dcf2d4f1cbe86457638023347e850d5027bb57c61557196b544fcd25e6572e8b"
+            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/ios-snapshot-12.0.1-202610301457-41074521429-1/STCore.xcframework.zip",
+            checksum: "c2632b313d2fbd1bac7c6d21b060e422229a17522c1949259c404287c0eb56ed"
         ),
         .binaryTarget(
             name: "Database",
-            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/11.1.2/STDatabase.xcframework.zip",
-            checksum: "579da9fd088699b653293a7873a5f77577bee1ef55542acc669c11bacf291b7f"
+            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/ios-snapshot-12.0.1-202610301457-41074521429-1/STDatabase.xcframework.zip",
+            checksum: "fb8c36f713295473c4409816fa5410eae9895679ba38fe738bcb07321646e795"
         ),
         .binaryTarget(
             name: "Network",
-            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/11.1.2/STNetwork.xcframework.zip",
-            checksum: "183da4548a731d6384beb64367b5e59cfb86dadf3f6ad3ff0c2f640352699190"
+            url: "https://github.com/Infomaniak/multiplatform-SwissTransfer/releases/download/ios-snapshot-12.0.1-202610301457-41074521429-1/STNetwork.xcframework.zip",
+            checksum: "3c730f44589147f5d5aa358b7a48b978eb9922529a43cd5d23c20535c646102d"
         ),
     ]
 )
