@@ -445,12 +445,12 @@ class UploadV2Manager(
     ).url
 
     /**
-     * Returns the url where to upload an entire file in a given transfer.
+     * Returns presigned upload URLs for a batch of files or file chunks in a given transfer.
      *
      * @param transferId The id of the transfer created in [prepareTransfer].
-     * @param fileId The id of the file to upload.
+     * @param uploadUrlRequests The file ids and optional chunk indices to request upload URLs for.
      *
-     * @return The target url
+     * @return The file/chunk identifiers and their corresponding upload URLs.
      *
      * @throws NetworkException If there is a network error.
      * @throws ApiV2ErrorException If there is a general API error.
