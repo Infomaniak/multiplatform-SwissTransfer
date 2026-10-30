@@ -22,5 +22,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BatchPresignedUrlRequest(
     val file: String,
-    val chunk: Int? = null,
+    val chunk: Int?,
 )
