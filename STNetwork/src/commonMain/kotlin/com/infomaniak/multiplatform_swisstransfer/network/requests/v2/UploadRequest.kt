@@ -94,10 +94,9 @@ internal class UploadRequest(
         transferId: String,
         requests: List<BatchPresignedUrlRequest>,
     ): ApiResponseV2Success<List<BatchPresignedUrlResponse>> {
-        val nullableJson = Json(json) { explicitNulls = false }
         return post(
             url = createV2Url(ApiRoutes.batchPresignedUploadUrls(transferId)),
-            data = nullableJson.encodeToString(BatchPresignedUrlRequestPayload(requests)),
+            data = json.encodeToString(BatchPresignedUrlRequestPayload(requests)),
             appendHeaders = { appendBearer() }
         )
     }
