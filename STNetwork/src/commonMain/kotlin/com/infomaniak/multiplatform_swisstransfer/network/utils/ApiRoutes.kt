@@ -48,6 +48,7 @@ internal object ApiRoutes {
         }
     }
     fun uploadDirectly(transferId: String, fileId: String) = "transfers/$transferId/files/$fileId"
+    fun batchPresignedUploadUrls(transferId: String) = "transfers/$transferId/files"
     fun uploadChunk(transferId: String, fileId: String, chunkIndex: Int): String {
         return "${uploadDirectly(transferId, fileId)}/chunks/$chunkIndex"
     }

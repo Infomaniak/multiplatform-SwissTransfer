@@ -31,9 +31,11 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadError
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.TransferFailed
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.toUploadErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.BatchPresignedUrlRequest
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.BatchPresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.v2.UploadRequest
 import io.ktor.client.HttpClient
@@ -111,6 +113,25 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
     ): PresignedUrlResponse {
         return withUploadErrorHandling {
             uploadRequest.getPresignedUploadChunkUrl(transferId, fileId, chunkIndex).data
+        }
+    }
+
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        NotFoundException::class,
+    )
+    suspend fun getBatchPresignedUploadUrls(
+        transferId: String,
+        requests: List<BatchPresignedUrlRequest>,
+    ): List<BatchPresignedUrlResponse> {
+        return withUploadErrorHandling {
+            uploadRequest.getBatchPresignedUploadUrls(transferId, requests).data
         }
     }
 

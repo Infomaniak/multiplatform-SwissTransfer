@@ -37,9 +37,11 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequ
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.BatchPresignedUrlRequest
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.TransferFile
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.BatchPresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2Repository
 import io.ktor.http.content.OutgoingContent
 import kotlinx.coroutines.Dispatchers
@@ -441,6 +443,46 @@ class UploadV2Manager(
         transferId = transferId,
         fileId = fileId,
     ).url
+
+    /**
+     * Returns presigned upload URLs for a batch of files or file chunks in a given transfer.
+     *
+     * @param transferId The id of the transfer created in [prepareTransfer].
+     * @param uploadUrlRequests The file ids and optional chunk indices to request upload URLs for.
+     *
+     * @return The file/chunk identifiers and their corresponding upload URLs.
+     *
+     * @throws NetworkException If there is a network error.
+     * @throws ApiV2ErrorException If there is a general API error.
+     * @throws UnexpectedApiErrorFormatException If the API error format is unexpected.
+     * @throws UnknownException If an unknown error occurs.
+     * @throws UnauthorizedException If the request is unauthorized.
+     * @throws TooManyRequestException If too many requests have been made.
+     * @throws UploadErrorsException.NotFoundException If the transfer is not found.
+     * @throws UploadErrorsException.TransferExpired If the transfer has expired.
+     * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
+     * @throws UploadErrorsException.TransferFailed If the transfer has failed.
+     * @throws CancellationException If the operation is cancelled.
+     */
+    @Throws(
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        UploadErrorsException.NotFoundException::class,
+        UploadErrorsException.TransferExpired::class,
+        UploadErrorsException.TransferCancelled::class,
+        UploadErrorsException.TransferFailed::class,
+        CancellationException::class,
+    )
+    suspend fun getBatchPresignedUploadUrls(
+        transferId: String,
+        uploadUrlRequests: List<BatchPresignedUrlRequest>,
+    ): List<BatchPresignedUrlResponse> = uploadRepository.getBatchPresignedUploadUrls(transferId, uploadUrlRequests)
 
     /**
      * Cancels an upload session and remove the transfer from the database.
