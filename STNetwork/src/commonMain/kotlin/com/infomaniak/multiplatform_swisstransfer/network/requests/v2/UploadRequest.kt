@@ -26,6 +26,9 @@ import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.UploadTransferStatus
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.CompletionResponse
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.PresignedUrlResponse
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.BatchPresignedUrlRequest
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.BatchPresignedUrlRequestPayload
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.v2.BatchPresignedUrlResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.BaseRequest
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
@@ -83,6 +86,18 @@ internal class UploadRequest(
         return post(
             url = createV2Url(ApiRoutes.uploadChunk(transferId, fileId, chunkIndex)),
             data = null,
+            appendHeaders = { appendBearer() }
+        )
+    }
+
+    suspend fun getBatchPresignedUploadUrls(
+        transferId: String,
+        requests: List<BatchPresignedUrlRequest>,
+    ): ApiResponseV2Success<List<BatchPresignedUrlResponse>> {
+        val nullableJson = Json(json) { explicitNulls = false }
+        return post(
+            url = createV2Url(ApiRoutes.batchPresignedUploadUrls(transferId)),
+            data = nullableJson.encodeToString(BatchPresignedUrlRequestPayload(requests)),
             appendHeaders = { appendBearer() }
         )
     }
