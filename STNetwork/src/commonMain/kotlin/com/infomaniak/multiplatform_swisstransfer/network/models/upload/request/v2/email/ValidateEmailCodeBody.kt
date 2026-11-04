@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * @property token User input. Should be 6 characters, which were received by email.
+ */
 @Serializable
-data class VerifyEmailCodeBody(
-    val code: String,
-    @SerialName("address")
-    val email: String,
+data class ValidateEmailCodeBody(
+    val token: String,
 )

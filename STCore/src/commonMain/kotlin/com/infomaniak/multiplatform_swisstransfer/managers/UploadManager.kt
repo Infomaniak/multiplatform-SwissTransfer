@@ -34,13 +34,9 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.FailedRetryAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import com.infomaniak.multiplatform_swisstransfer.utils.addTransferByLinkUUID
@@ -359,27 +355,4 @@ class UploadManager(
         uploadController.removeData()
     }
 
-    @Throws(
-        CancellationException::class,
-        EmailValidationException::class,
-        ApiErrorException::class,
-        NetworkException::class,
-        UnexpectedApiErrorFormatException::class,
-        UnknownException::class,
-    )
-    suspend fun verifyEmailCode(code: String, address: String): AuthorEmailToken = withContext(Dispatchers.Default) {
-        return@withContext uploadRepository.verifyEmailCode(VerifyEmailCodeBody(code, address))
-    }
-
-    @Throws(
-        CancellationException::class,
-        ApiErrorException::class,
-        NetworkException::class,
-        UnexpectedApiErrorFormatException::class,
-        UnknownException::class,
-    )
-    suspend fun resendEmailCode(address: String): Unit = withContext(Dispatchers.Default) {
-        val language = emailLanguageUtils.getEmailLanguageFromLocale()
-        uploadRepository.resendEmailCode(ResendEmailCodeBody(address, language.code))
-    }
 }

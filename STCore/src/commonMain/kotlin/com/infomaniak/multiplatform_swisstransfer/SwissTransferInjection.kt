@@ -78,10 +78,7 @@ class SwissTransferInjection(
     private val unauthorizedHandler: UnauthorizedHandler,
 ) {
 
-    private val requireToken: () -> String = {
-        (accountManager.currentUser as? STUser.AuthUser)?.token
-            ?: throw UnknownException(Exception("No user logged in"))
-    }
+    private val getToken: () -> String? = { (accountManager.currentUser as? STUser.AuthUser)?.token }
 
     private val realmProvider by lazy { RealmProvider(legacyDatabaseRootDirectory) }
     private val appDatabase by lazy {
@@ -98,10 +95,10 @@ class SwissTransferInjection(
     }
 
     private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
-    private val uploadV2Repository by lazy { UploadV2Repository(apiClientProvider, environment, requireToken) }
+    private val uploadV2Repository by lazy { UploadV2Repository(apiClientProvider, environment, getToken) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
-    private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, requireToken) }
-    private val userInfoRepository: UserInfoRepository by lazy { UserInfoRepository(apiClientProvider, environment, requireToken) }
+    private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, getToken) }
+    private val userInfoRepository: UserInfoRepository by lazy { UserInfoRepository(apiClientProvider, environment, getToken) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
@@ -150,8 +147,11 @@ class SwissTransferInjection(
         UploadV2Manager(
             accountManager = accountManager,
             uploadRepository = uploadV2Repository,
+            emailLanguageUtils = emailLanguageUtils,
             appDatabase = appDatabase,
             transferDao = appDatabase.getTransferDao(),
+            emailValidationsDao = appDatabase.emailValidationsDao,
+            uploadTokensManager = uploadTokensManager,
         )
     }
 

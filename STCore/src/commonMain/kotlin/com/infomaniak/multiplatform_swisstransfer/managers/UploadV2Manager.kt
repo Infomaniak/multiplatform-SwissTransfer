@@ -20,33 +20,39 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import androidx.sqlite.SQLiteException
+import com.infomaniak.multiplatform_swisstransfer.AttestationTokenGenerator
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownException
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
+import com.infomaniak.multiplatform_swisstransfer.database.dao.EmailValidationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
+import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidation
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferDB
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.TransferFile
+import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email.CreateValidationRequest
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2Repository
+import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import io.ktor.http.content.OutgoingContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import kotlin.contracts.ExperimentalContracts
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -63,13 +69,15 @@ import kotlin.coroutines.cancellation.CancellationException
 class UploadV2Manager(
     private val accountManager: AccountManager,
     private val uploadRepository: UploadV2Repository,
+    private val emailLanguageUtils: EmailLanguageUtils,
     private val appDatabase: AppDatabase,
     private val transferDao: TransferDao,
+    private val emailValidationsDao: EmailValidationsDao,
+    private val uploadTokensManager: UploadTokensManager,
 ) {
 
     private fun requireCurrentUserId(): Long {
-        return (accountManager.currentUser as? STUser.AuthUser)?.id
-            ?: throw UnknownException(Exception("No user logged in"))
+        return accountManager.currentUser?.id ?: throw UnknownException(Exception("No user logged in"))
     }
 
     @Throws(CancellationException::class, SerializationException::class)
@@ -84,6 +92,79 @@ class UploadV2Manager(
     )
     suspend fun decodeSessionRequest(encodedString: String): UploadSessionRequest = withContext(Dispatchers.Default) {
         Json.decodeFromString(encodedString)
+    }
+
+    @Throws(
+        CancellationException::class,
+        ApiV2ErrorException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        SQLiteException::class,
+        RuntimeException::class,
+    )
+    suspend fun createEmailValidationRequest(email: String): Unit = withContext(Dispatchers.Default) {
+        val language = emailLanguageUtils.getEmailLanguageFromLocale()
+        val body = CreateValidationRequest(email = email, language = language.code)
+        val response = uploadRepository.createEmailValidationRequest(body)
+        val pendingValidation = EmailValidation(
+            email = email,
+            id = response.id,
+            validationRequiredByTimestampSeconds = response.tokenExpiryUtcTimestampSeconds,
+        )
+        emailValidationsDao.upsertEmailValidation(pendingValidation)
+    }
+
+    /**
+     * @throws NoSuchElementException if there's no pending validation
+     */
+    @Throws(
+        CancellationException::class,
+        ApiV2ErrorException::class,
+        NetworkException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        SQLiteException::class,
+        EmailValidationException::class,
+        NoSuchElementException::class,
+        RuntimeException::class,
+    )
+    suspend fun validateEmailWithCode(email: String, code: String): Unit = withContext(Dispatchers.Default) {
+        val validation = emailValidationsDao.getEmailValidation(email)
+            ?: throw NoSuchElementException("No pending validation found in the database for the given email")
+        uploadRepository.validateEmailWithCode(validationId = validation.id, code = code)
+        emailValidationsDao.markAsValidated(validationId = validation.id)
+    }
+
+    /**
+     * @return Returns `false` if the email is already validated.
+     * Note that in this latter case, the email will be marked as validated in the DB before returning.
+     */
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        EmailValidationException.TooManyAttempts::class,
+        NotFoundException::class,
+    )
+    suspend fun resendValidationEmail(validationId: String): Boolean = withContext(Dispatchers.Default) {
+        val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)
+        when (updatedValidationRequest) {
+            null -> emailValidationsDao.markAsValidated(validationId = validationId)
+            else -> emailValidationsDao.updatePendingValidation(
+                validationId = validationId,
+                validationRequiredByTimestampSeconds = updatedValidationRequest.tokenExpiryUtcTimestampSeconds
+            )
+        }
+        updatedValidationRequest != null
     }
 
     /**
@@ -104,7 +185,6 @@ class UploadV2Manager(
      * @throws UploadErrorsException.TransferCancelled If the transfer has been cancelled.
      * @throws UploadErrorsException.TransferFailed If the transfer has failed.
      */
-    @OptIn(ExperimentalContracts::class)
     @Throws(
         CancellationException::class,
         ApiV2ErrorException::class,
@@ -119,10 +199,22 @@ class UploadV2Manager(
         UploadErrorsException.TransferExpired::class,
         UploadErrorsException.TransferCancelled::class,
         UploadErrorsException.TransferFailed::class,
+        UploadErrorsException.EmailValidationRequired::class,
     )
     suspend fun prepareTransfer(
         request: UploadSessionRequest,
+        attestationTokenGenerator: AttestationTokenGenerator,
     ): TransferApi = withContext(Dispatchers.Default) {
+        val emailAndAppValidationRequired = accountManager.currentUser is STUser.GuestUser
+        if (emailAndAppValidationRequired) require(request.authorEmail.isNotEmpty())
+        val authorEmail = request.authorEmail.takeUnless { it.isEmpty() }
+        val emailValidationId: String? = authorEmail?.let { email ->
+            emailValidationsDao.getEmailValidation(email = email)?.takeIf { it.isValidated }?.id
+        }
+        if (emailAndAppValidationRequired && emailValidationId == null) {
+            throw UploadErrorsException.EmailValidationRequired(requestContextId = "")
+        }
+
         val userId = requireCurrentUserId()
         transferDao.deleteAnyPendingTransfer(userId)
 
@@ -130,6 +222,8 @@ class UploadV2Manager(
             title = request.title,
             message = request.message,
             password = request.password,
+            email = authorEmail,
+            emailValidationId = emailValidationId,
             language = request.languageCode.code.substringBefore('_'),
             expiresInDays = request.validityPeriod.days,
             maxDownload = request.downloadCountLimit.value,
@@ -142,26 +236,37 @@ class UploadV2Manager(
             },
             recipients = request.recipientsEmails.toList()
         )
-        uploadRepository.createTransfer(transferCreationPayload, request.organizationAccountId).also { apiTransfer ->
-            val transferToPersist = apiTransfer.toTransferDB(
-                direction = TransferDirection.SENT,
-                linkId = null,
-                userOwnerId = userId,
-                organizationAccountId = request.organizationAccountId,
-                password = transferCreationPayload.password,
-                status = TransferStatus.PENDING_UPLOAD,
-            )
-            val filesToInsert = FileUtilsForApiV2.getFileDbTree(
-                transferId = apiTransfer.id,
-                files = apiTransfer.files
-            )
-            appDatabase.useWriterConnection {
-                it.immediateTransaction {
-                    transferDao.upsertTransfer(transferToPersist)
-                    filesToInsert.forEach { file -> transferDao.upsertFile(file) }
-                }
+        val apiTransfer: TransferApi = try {
+            val attestationToken: String? = if (emailAndAppValidationRequired) uploadTokensManager.getAttestationToken() else null
+            uploadRepository.createTransfer(transferCreationPayload, request.organizationAccountId, attestationToken)
+        } catch (_: UploadErrorsException.InvalidAttestationTokenException) {
+            val attestationToken: String = attestationTokenGenerator.generateAttestationToken().also {
+                uploadTokensManager.setAttestationToken(it)
+            }
+            // `createTransfer` might throw an `InvalidAttestationTokenException` again,
+            // but in that case, it means the new token returned by the backend was bad,
+            // so we let it propagate (but this should never happen, realistically).
+            uploadRepository.createTransfer(transferCreationPayload, request.organizationAccountId, attestationToken)
+        }
+        val transferToPersist = apiTransfer.toTransferDB(
+            direction = TransferDirection.SENT,
+            linkId = null,
+            userOwnerId = userId,
+            organizationAccountId = request.organizationAccountId,
+            password = transferCreationPayload.password,
+            status = TransferStatus.PENDING_UPLOAD,
+        )
+        val filesToInsert = FileUtilsForApiV2.getFileDbTree(
+            transferId = apiTransfer.id,
+            files = apiTransfer.files
+        )
+        appDatabase.useWriterConnection {
+            it.immediateTransaction {
+                transferDao.upsertTransfer(transferToPersist)
+                filesToInsert.forEach { file -> transferDao.upsertFile(file) }
             }
         }
+        apiTransfer
     }
 
     /**
