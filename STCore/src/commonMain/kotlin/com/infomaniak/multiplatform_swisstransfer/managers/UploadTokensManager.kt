@@ -27,7 +27,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -107,7 +106,6 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
             if (tokenExpiryAt < Clock.System.now().epochSeconds) throw InvalidAttestationTokenException("Local token is expired")
         }
 
-        @OptIn(ExperimentalEncodingApi::class)
         @Throws(InvalidAttestationTokenException::class)
         internal fun decodeJwtToken(token: String): Long = runCatching {
             val encodedPayload = token.split('.')[1]

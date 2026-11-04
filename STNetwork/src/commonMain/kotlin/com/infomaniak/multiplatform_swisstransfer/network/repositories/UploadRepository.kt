@@ -25,14 +25,9 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiExceptio
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ContainerErrorsException.Companion.toContainerErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException.Companion.toEmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.FinishUploadBody
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.InitUploadBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.ResendEmailCodeBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.VerifyEmailCodeBody
-import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.AuthorEmailToken
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.InitUploadResponseApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.response.UploadCompleteResponse
 import com.infomaniak.multiplatform_swisstransfer.network.requests.UploadRequest
@@ -80,37 +75,6 @@ class UploadRepository internal constructor(private val uploadRequest: UploadReq
                 throw exception
             }
         }
-    }
-
-    @Throws(
-        CancellationException::class,
-        EmailValidationException::class,
-        ApiErrorException::class,
-        NetworkException::class,
-        UnexpectedApiErrorFormatException::class,
-        UnknownException::class,
-    )
-    suspend fun verifyEmailCode(verifyEmailCodeBody: VerifyEmailCodeBody): AuthorEmailToken {
-        return runCatching {
-            uploadRequest.verifyEmailCode(verifyEmailCodeBody)
-        }.getOrElse { exception ->
-            if (exception is UnexpectedApiErrorFormatException) {
-                throw exception.toEmailValidationException()
-            } else {
-                throw exception
-            }
-        }
-    }
-
-    @Throws(
-        CancellationException::class,
-        ApiErrorException::class,
-        NetworkException::class,
-        UnexpectedApiErrorFormatException::class,
-        UnknownException::class,
-    )
-    suspend fun resendEmailCode(resendEmailCodeBody: ResendEmailCodeBody) {
-        uploadRequest.resendEmailCode(resendEmailCodeBody)
     }
 
     @Throws(

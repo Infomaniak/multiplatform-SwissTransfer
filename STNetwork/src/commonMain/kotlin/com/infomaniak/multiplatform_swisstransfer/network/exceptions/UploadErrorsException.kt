@@ -23,6 +23,8 @@ sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV
     requestContextId = requestContextId
 ) {
 
+    class EmailValidationRequired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class InvalidAttestationTokenException(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class NotFoundException(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferCancelled(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferExpired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
@@ -30,6 +32,8 @@ sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV
 }
 
 internal fun ApiException.ApiV2ErrorException.toUploadErrorsException() = when (code) {
+    "whatever", "whatever-else" -> UploadErrorsException.InvalidAttestationTokenException(requestContextId) //TODO: Update
+    "validation_failed" -> UploadErrorsException.EmailValidationRequired(requestContextId) //TODO: Update
     "object_not_found" -> UploadErrorsException.NotFoundException(requestContextId)
     "transfer_cancelled" -> UploadErrorsException.TransferCancelled(requestContextId)
     "transfer_expired" -> UploadErrorsException.TransferExpired(requestContextId)
