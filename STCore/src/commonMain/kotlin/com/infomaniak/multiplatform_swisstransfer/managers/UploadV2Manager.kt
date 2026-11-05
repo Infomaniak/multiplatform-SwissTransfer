@@ -25,13 +25,15 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.UnknownExcep
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSessionRequest
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
+import com.infomaniak.multiplatform_swisstransfer.data.EmailValidation
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.dao.EmailValidationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
-import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidation
+import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidationDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.FileUtilsForApiV2
+import com.infomaniak.multiplatform_swisstransfer.mappers.toEmailValidation
 import com.infomaniak.multiplatform_swisstransfer.mappers.toTransferDB
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
@@ -50,6 +52,8 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2R
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
 import io.ktor.http.content.OutgoingContent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -94,6 +98,10 @@ class UploadV2Manager(
         Json.decodeFromString(encodedString)
     }
 
+    fun emailValidationStatus(email: String): Flow<EmailValidation?> {
+        return emailValidationsDao.getEmailValidationFlow(email).map { it?.toEmailValidation() }
+    }
+
     @Throws(
         CancellationException::class,
         ApiV2ErrorException::class,
@@ -109,10 +117,10 @@ class UploadV2Manager(
         val language = emailLanguageUtils.getEmailLanguageFromLocale()
         val body = CreateValidationRequest(email = email, language = language.code)
         val response = uploadRepository.createEmailValidationRequest(body)
-        val pendingValidation = EmailValidation(
+        val pendingValidation = EmailValidationDB(
             email = email,
             id = response.id,
-            validationRequiredByTimestampSeconds = response.tokenExpiryUtcTimestampSeconds,
+            lastSentCodeExpirationTimestampSeconds = response.tokenExpiryUtcTimestampSeconds,
         )
         emailValidationsDao.upsertEmailValidation(pendingValidation)
     }
@@ -161,7 +169,7 @@ class UploadV2Manager(
             null -> emailValidationsDao.markAsValidated(validationId = validationId)
             else -> emailValidationsDao.updatePendingValidation(
                 validationId = validationId,
-                validationRequiredByTimestampSeconds = updatedValidationRequest.tokenExpiryUtcTimestampSeconds
+                lastSentCodeExpirationTimestampSeconds = updatedValidationRequest.tokenExpiryUtcTimestampSeconds
             )
         }
         updatedValidationRequest != null
