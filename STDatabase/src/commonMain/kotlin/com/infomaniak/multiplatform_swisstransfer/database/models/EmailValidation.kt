@@ -17,19 +17,21 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.models
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * If [validationRequiredByTimestampSeconds] is non-null, the email validation is still pending.
+ * If [lastSentCodeExpirationTimestampSeconds] is non-null, the email validation is still pending.
  * Otherwise, it's valid until deleted from the database (following a backend rejection).
  */
-@Entity
-data class EmailValidation(
+@Entity(tableName = "EmailValidation")
+data class EmailValidationDB(
     @PrimaryKey
     val email: String,
     val id: String,
-    val validationRequiredByTimestampSeconds: Long?,
+    @ColumnInfo(name = "code_expiration_timestamp_seconds")
+    val lastSentCodeExpirationTimestampSeconds: Long?,
 ) {
-    inline val isValidated: Boolean get() = validationRequiredByTimestampSeconds == null
+    inline val isValidated: Boolean get() = lastSentCodeExpirationTimestampSeconds == null
 }

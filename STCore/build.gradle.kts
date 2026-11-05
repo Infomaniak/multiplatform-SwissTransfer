@@ -17,6 +17,7 @@ kotlin {
         commonMain.dependencies {
             api(commonProject)
             api(libs.ktor.client.core)
+            api(libs.compose.runtime.annotations)
             implementation(project(":STDatabase"))
             implementation(project(":STNetwork"))
         }

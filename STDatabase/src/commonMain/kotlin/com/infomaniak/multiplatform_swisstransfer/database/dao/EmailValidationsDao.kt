@@ -20,22 +20,26 @@ package com.infomaniak.multiplatform_swisstransfer.database.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
-import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidation
+import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidationDB
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EmailValidationsDao {
 
     @Upsert
-    suspend fun upsertEmailValidation(validations: EmailValidation)
+    suspend fun upsertEmailValidation(validations: EmailValidationDB)
 
     @Query("SELECT * FROM EmailValidation WHERE email=:email")
-    suspend fun getEmailValidation(email: String): EmailValidation?
+    fun getEmailValidationFlow(email: String): Flow<EmailValidationDB?>
 
-    @Query("UPDATE EmailValidation SET validationRequiredByTimestampSeconds = NULL WHERE id=:validationId")
+    @Query("SELECT * FROM EmailValidation WHERE email=:email")
+    suspend fun getEmailValidation(email: String): EmailValidationDB?
+
+    @Query("UPDATE EmailValidation SET code_expiration_timestamp_seconds = NULL WHERE id=:validationId")
     suspend fun markAsValidated(validationId: String)
 
     @Query("UPDATE EmailValidation " +
-            "SET validationRequiredByTimestampSeconds =:validationRequiredByTimestampSeconds " +
+            "SET code_expiration_timestamp_seconds =:lastSentCodeExpirationTimestampSeconds " +
             "WHERE id=:validationId")
-    suspend fun updatePendingValidation(validationId: String, validationRequiredByTimestampSeconds: Long)
+    suspend fun updatePendingValidation(validationId: String, lastSentCodeExpirationTimestampSeconds: Long)
 }

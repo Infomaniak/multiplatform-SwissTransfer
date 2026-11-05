@@ -33,7 +33,7 @@ import com.infomaniak.multiplatform_swisstransfer.database.dao.EmailValidationsD
 import com.infomaniak.multiplatform_swisstransfer.database.dao.OrganizationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
-import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidation
+import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidationDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
@@ -61,7 +61,7 @@ fun DatabaseProvider.getAppDatabase(
 
 @Database(
     entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class,
-            OrganizationAccount::class, SelectedOrganizationAccount::class, EmailValidation::class],
+            OrganizationAccount::class, SelectedOrganizationAccount::class, EmailValidationDB::class],
     version = 5,
     autoMigrations = [
         AutoMigration(
