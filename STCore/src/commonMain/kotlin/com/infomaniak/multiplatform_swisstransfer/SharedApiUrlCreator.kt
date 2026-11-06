@@ -31,6 +31,7 @@ import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferR
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiV2Routes
 import kotlin.coroutines.cancellation.CancellationException
+import io.ktor.http.URLBuilder
 
 /**
  * Utility class responsible for creating API URLs for shared routes.
@@ -104,6 +105,22 @@ class SharedApiUrlCreator internal constructor(
             isLastChunk = isLastChunk,
             isRetry = isRetry
         )
+    }
+
+    fun reportTransferUrl(transfer: TransferUi): String {
+        val transferUrl = when (transfer.apiSource) {
+            V1 -> shareTransferUrl(transfer.uuid)
+            V2 -> shareTransferV2Url(
+                linkUUID = requireNotNull(transfer.linkId) {
+                    "A received v2 transfer must have a link ID"
+                }
+            )
+        }
+
+        return URLBuilder("https://www.infomaniak.com/gtl/report_abuse").apply {
+            parameters.append("from", "swisstransfer")
+            parameters.append("url", transferUrl)
+        }.buildString()
     }
 
     private val Transfer.notEmptyPassword get() = password?.takeIf { it.isNotEmpty() }
