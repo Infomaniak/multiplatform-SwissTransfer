@@ -28,6 +28,8 @@ actual class EmailLanguageUtils actual constructor() {
             "de" -> EmailLanguage.GERMAN
             "it" -> EmailLanguage.ITALIAN
             "es" -> EmailLanguage.SPANISH
+            "pt" -> EmailLanguage.PORTUGUESE
+            "nl" -> EmailLanguage.DUTCH
             else -> EmailLanguage.ENGLISH
         }
     }
