@@ -19,11 +19,12 @@ package com.infomaniak.multiplatform_swisstransfer.data
 
 import androidx.compose.runtime.Immutable
 
+/**
+ * @property lastSentCodeExpirationTimestampSeconds if null, then the email is validated.
+ */
 @Immutable
 data class EmailValidation(
     val email: String,
     val id: String,
     val lastSentCodeExpirationTimestampSeconds: Long?,
-) {
-    inline val isValidated: Boolean get() = lastSentCodeExpirationTimestampSeconds == null
-}
+)
