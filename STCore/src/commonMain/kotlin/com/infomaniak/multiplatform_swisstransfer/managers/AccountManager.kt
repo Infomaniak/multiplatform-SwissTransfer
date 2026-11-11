@@ -90,8 +90,6 @@ class AccountManager internal constructor(
         }
     }
 
-    val shouldUseV1Api: Boolean get() = currentUser is STUser.GuestUser
-
     /**
      * Emits the currently selected organization.
      *
