@@ -88,7 +88,7 @@ internal class UploadRequest(
     /**
      * [API online doc](https://developer.infomaniak.com/docs/api/post/1/swisstransfer/email-validations/%7Buuid%7D/confirm)
      */
-    suspend fun validateEmailWithCode(validationId: String, code: String): ApiResponseV2Success<Unit> {
+    suspend fun validateEmailWithCode(validationId: String, code: String): ApiResponseV2Success<Boolean> {
         return post(
             url = createV2Url(ApiRoutes.validateEmail(validationId)),
             data = ValidateEmailCodeBody(token = code),
