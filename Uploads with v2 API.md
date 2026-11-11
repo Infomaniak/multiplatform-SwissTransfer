@@ -25,7 +25,7 @@
 
 TODO: Add a Flow returning function that exposes the validation status for a given email,
 so it's 100% crystal clear if the pending validation expired, and if we need to resend the code.
-It might also expose the validationId to use. ⏳🎯
+It might also expose the validationId to use. **Done ✅**
 
 #### Files to touch
 
@@ -53,3 +53,17 @@ It might also expose the validationId to use. ⏳🎯
 - [InitUploadBody](STNetwork/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/network/models/upload/request/InitUploadBody.kt)
 - [UploadDestination](STCommon/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/common/interfaces/upload/UploadDestination.kt)
 - [UploadFileRequest](STNetwork/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/network/models/upload/request/UploadFileRequest.kt) + some things it references (the ones not used in v2)
+
+#### Upload Session stuff
+
+- [UploadSession](STCommon/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/common/interfaces/upload/UploadSession.kt)
+- [UploadSessionDB](STDatabase/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/database/models/upload/UploadSessionDB.kt)
+- [UploadFileSessionDB](STDatabase/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/database/models/upload/UploadFileSessionDB.kt)
+- Maybe [UploadFileSession](STCommon/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/common/interfaces/upload/UploadFileSession.kt)
+- And also `toUploadFileSession()` from [FileUi](STCommon/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/common/interfaces/ui/FileUi.kt)
+
+
+### Post decommission removal
+
+- [File](STCommon/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/common/interfaces/transfers/File.kt) w/ dependents
+- 
