@@ -26,7 +26,12 @@ sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV
     class CountryBlocked(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class AccessDenied(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class EmailValidationRequired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
-    class InvalidAttestationTokenException(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+
+    class InvalidAttestationTokenException(
+        requestContextId: String,
+        override val cause: Throwable? = null,
+    ) : UploadErrorsException(requestContextId = requestContextId)
+
     class NotFoundException(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferCancelled(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferExpired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)

@@ -19,7 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTokensController
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.InvalidAttestationTokenException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
