@@ -58,6 +58,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Manages upload operations for SwissTransfer.
@@ -113,9 +116,21 @@ class UploadV2Manager(
         SQLiteException::class,
         RuntimeException::class,
     )
-    suspend fun createEmailValidationRequest(email: String): Unit = withContext(Dispatchers.Default) {
+    @OptIn(ExperimentalTime::class)
+    suspend fun prepareEmailValidationRequest(email: String): Unit = withContext(Dispatchers.Default) {
+        val existingValidation = emailValidationsDao.getEmailValidation(email)
+        if (existingValidation != null) {
+            val codeExpiration = existingValidation.lastSentCodeExpirationTimestampSeconds?.let { Instant.fromEpochSeconds(it) }
+            if (codeExpiration != null) {
+                val expired = Clock.System.now() > codeExpiration
+                if (expired) resendValidationEmail(existingValidation.id)
+                return@withContext
+            }
+            // If there's no expiration, it means the previously valid email validation has been revoked,
+            // so we proceed to replacing it with a new validation (though it might fail too).
+        }
         val language = emailLanguageUtils.getEmailLanguageFromLocale()
-        val body = CreateValidationRequest(email = email, language = language.code)
+        val body = CreateValidationRequest(email = email, language = language.shortCode())
         val response = uploadRepository.createEmailValidationRequest(body)
         val pendingValidation = EmailValidationDB(
             email = email,
@@ -232,7 +247,7 @@ class UploadV2Manager(
             password = request.password,
             email = authorEmail,
             emailValidationId = emailValidationId,
-            language = request.languageCode.code.substringBefore('_'),
+            language = request.languageCode.shortCode(),
             expiresInDays = request.validityPeriod.days,
             maxDownload = request.downloadCountLimit.value,
             files = request.filesMetadata.map {

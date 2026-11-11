@@ -26,4 +26,7 @@ enum class EmailLanguage(val value: String, val code: String) {
     GERMAN("german", "de_DE"),
     ITALIAN("italian", "it_IT"),
     SPANISH("spanish", "es_ES"),
+    ;
+
+    fun shortCode() = code.substringBefore('_')
 }
