@@ -18,7 +18,7 @@
 package com.infomaniak.multiplatform_swisstransfer
 
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadTokensManager
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.InvalidAttestationTokenException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs

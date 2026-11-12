@@ -24,6 +24,9 @@ import kotlinx.serialization.Serializable
 data class CreateTransfer(
     val title: String? = null,
     val message: String? = null,
+    val email: String? = null,
+    @SerialName("email_validation_id")
+    val emailValidationId: String? = null,
     val password: String? = null,
     val language: String,
     @SerialName("expires_in_days")

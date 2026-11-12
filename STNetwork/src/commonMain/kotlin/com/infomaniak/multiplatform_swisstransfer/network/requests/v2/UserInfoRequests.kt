@@ -32,7 +32,7 @@ internal class UserInfoRequests(
     environment: ApiEnvironment,
     json: Json,
     httpClient: HttpClient,
-    token: () -> String,
+    token: () -> String?,
 ) : BaseRequest(environment, json, httpClient, token) {
 
     suspend fun getMyUserInfoWithAccountsAndLimits(): ApiResponseV2Success<MyUser> {

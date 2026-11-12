@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.infomaniak.multiplatform_swisstransfer.database
 
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
@@ -24,15 +26,12 @@ import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.Cont
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.DownloadManagerRef
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.TransferDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.RemoteUploadFileDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadContainerDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadFileSessionDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.upload.UploadSessionDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -44,7 +43,6 @@ import kotlinx.coroutines.sync.withLock
 class RealmProvider(private val databaseRootDirectory: String? = null, private val loadDataInMemory: Boolean = false) {
 
     val appSettings by lazy { Realm.open(realmAppSettingsConfiguration) }
-    val uploads by lazy { Realm.open(realmUploadDBConfiguration) }
     internal var transfersAsync = CompletableDeferred<Realm>()
     private suspend fun transfers(): Realm = transfersAsync.await()
 
@@ -97,10 +95,6 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         appSettings.close()
     }
 
-    fun closeUploadsDb() {
-        uploads.close()
-    }
-
     suspend fun closeTransfersDb() {
         transfersMutex.withLock {
             closeTransfersDbLocked()
@@ -110,7 +104,6 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
 
     suspend fun closeAllDatabases() {
         closeAppSettingsDb()
-        closeUploadsDb()
         closeTransfersDb()
     }
 
@@ -125,22 +118,6 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
         .schemaVersion(APP_SETTINGS_SCHEMA_VERSION)
         .loadDataInMemoryIfNeeded()
         .migration(APP_SETTINGS_MIGRATION)
-        .build()
-
-    private val realmUploadDBConfiguration = RealmConfiguration
-        .Builder(
-            schema = setOf(
-                UploadSessionDB::class,
-                UploadFileSessionDB::class,
-                UploadContainerDB::class,
-                RemoteUploadFileDB::class,
-            )
-        )
-        .customDirectoryIfNeeded()
-        .name("Uploads.realm")
-        .schemaVersion(UPLOAD_SCHEMA_VERSION)
-        .loadDataInMemoryIfNeeded()
-        .migration(UPLOAD_MIGRATION)
         .build()
 
     private fun realmTransfersConfiguration(userId: Long) = RealmConfiguration
@@ -161,7 +138,6 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     companion object {
         //region Configurations versions
         const val APP_SETTINGS_SCHEMA_VERSION = 2L
-        const val UPLOAD_SCHEMA_VERSION = 1L
         const val TRANSFERS_SCHEMA_VERSION = 2L
         //endregion
     }
