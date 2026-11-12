@@ -24,7 +24,6 @@ import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.mappers.toDbModel
@@ -52,13 +51,11 @@ import kotlin.coroutines.cancellation.CancellationException
  * AccountManager is responsible for orchestrating Accounts operations, with the database(s).
  *
  * @property appDatabase The provider for managing Room database operations.
- * @property uploadController The controller for managing Upload operations.
  * @property transferController The controller for managing Transfers operation.
  * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
     private val appDatabase: AppDatabase,
-    private val uploadController: UploadController,
     private val transferController: TransferController,
     private val appSettingsManager: AppSettingsManager,
     private val userInfoRepository: UserInfoRepository,
@@ -177,7 +174,6 @@ class AccountManager internal constructor(
         when (user) {
             is STUser.AuthUser -> appDatabase.getTransferDao().deleteTransfers(user.id)
             STUser.GuestUser -> {
-                uploadController.removeData()
                 transferController.removeData()
                 realmProvider.closeAllDatabases()
             }

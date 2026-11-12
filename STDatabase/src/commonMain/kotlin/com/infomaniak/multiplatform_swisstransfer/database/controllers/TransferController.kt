@@ -22,7 +22,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.exceptions.TransferWith
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
@@ -128,22 +127,6 @@ class TransferController(private val realmProvider: RealmProvider) {
         }
     }
 
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun generateAndInsert(
-        linkUUID: String,
-        uploadSession: UploadSession,
-        transferStatus: TransferStatus,
-    ) = realmProvider.withTransfersDb { realm ->
-        val transferDB = TransferDB(linkUUID, uploadSession, transferStatus).apply {
-            container?.files?.let { files ->
-                FileUtils.getFileDBTree(containerUUID, files)
-            }
-        }
-
-        realm.write {
-            this.copyToRealm(transferDB, UpdatePolicy.ALL)
-        }
-    }
     //endregion
 
     //region Update data

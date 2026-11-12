@@ -28,7 +28,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Tr
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V1
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V2
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
@@ -802,18 +801,6 @@ class TransferManager internal constructor(
                     userOwnerId = accountManager.currentUser?.id ?: return
                 )
             )
-        }
-    }
-
-    internal suspend fun createTransferLocally(
-        linkUUID: String,
-        uploadSession: UploadSession,
-        transferStatus: TransferStatus
-    ) {
-        runCatching {
-            transferController.generateAndInsert(linkUUID, uploadSession, transferStatus)
-        }.onFailure {
-            throw UnknownException(it)
         }
     }
 

@@ -102,18 +102,6 @@ centralized access point to orchestrate transfer operations.
   // Use the accountManager to orchestrate Accounts
   ```
 
-- **Type**: `UploadManager`
-- **Description**:
-    - `uploadManager` is a lazily initialized property that provides a manager to orchestrate all Uploads operations. It uses
-      `uploadController` and `uploadRepository` to configure and manage Uploads efficiently.
-
-- **Usage Example**:
-  ```kotlin
-  val core = SwissTransferInjection(userAgent = "user_agent")
-  val uploadManager = core.uploadManager
-  // Use the uploadManager to orchestrate Uploads
-  ```
-
 - **Type**: `EmailTokensManager`
 - **Description**:
     - `emailTokensManager` is a lazily initialized property that provides a manager to orchestrate all EmailTokens operations. It

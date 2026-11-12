@@ -18,15 +18,11 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Container
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadContainer
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 import io.realm.kotlin.ext.backlinks
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 class ContainerDB() : Container, RealmObject {
     @PrimaryKey
@@ -66,21 +62,4 @@ class ContainerDB() : Container, RealmObject {
         this.files = container.files.mapTo(realmListOf(), ::FileDB)
     }
 
-    constructor(uploadContainer: UploadContainer, uploadFileSessionList: List<UploadFileSession>) : this() {
-        this.uuid = uploadContainer.uuid
-        this.duration = uploadContainer.duration.toLong()
-        @OptIn(ExperimentalTime::class)
-        this.createdDateTimestamp = Clock.System.now().epochSeconds
-        this.expiredDateTimestamp = uploadContainer.expiredDateTimestamp
-        this.numberOfFiles = uploadContainer.numberOfFiles
-        this.message = uploadContainer.message
-        this.needPassword = uploadContainer.needPassword
-        this.language = uploadContainer.language
-        this.sizeUploaded = uploadFileSessionList.sumOf { it.size }
-        this.deletedDateTimestamp = null
-        this.swiftVersion = uploadContainer.swiftVersion.toInt()
-        this.downloadLimit = uploadContainer.downloadLimit
-        this.source = uploadContainer.source
-        this.files = uploadFileSessionList.mapTo(realmListOf()) { FileDB(uploadContainer, it) }
-    }
 }

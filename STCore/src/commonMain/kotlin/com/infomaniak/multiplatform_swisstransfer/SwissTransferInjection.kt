@@ -26,22 +26,18 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTokensController
 import com.infomaniak.multiplatform_swisstransfer.database.getAppDatabase
 import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
 import com.infomaniak.multiplatform_swisstransfer.managers.FileManager
-import com.infomaniak.multiplatform_swisstransfer.managers.InMemoryUploadManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
-import com.infomaniak.multiplatform_swisstransfer.managers.UploadManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadTokensManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadV2Manager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.UnauthorizedHandler
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
-import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UserInfoRepository
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
@@ -63,8 +59,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property transferManager A manager used to orchestrate transfer operations.
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
- * @property inMemoryUploadManager A manager used to perform Uploads operations, without session persistence.
- * @property uploadManager A manager used to orchestrate Uploads operations.
+ * @property uploadV2Manager A manager used to orchestrate Uploads operations.
  * @property uploadTokensManager A manager used to orchestrate operations of tokens needed for the upload.
  * @property sharedApiUrlCreator An utils to help use shared routes.
  */
@@ -93,7 +88,6 @@ class SwissTransferInjection(
         )
     }
 
-    private val uploadRepository by lazy { UploadRepository(apiClientProvider, environment) }
     private val uploadV2Repository by lazy { UploadV2Repository(apiClientProvider, environment, getToken) }
     private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
     private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, getToken) }
@@ -101,7 +95,6 @@ class SwissTransferInjection(
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
-    private val uploadController by lazy { UploadController(realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
     private val fileController by lazy { FileController(realmProvider) }
 
@@ -134,7 +127,6 @@ class SwissTransferInjection(
     val accountManager by lazy {
         AccountManager(
             appDatabase = appDatabase,
-            uploadController = uploadController,
             transferController = transferController,
             appSettingsManager = appSettingsManager,
             userInfoRepository = userInfoRepository,
@@ -154,37 +146,12 @@ class SwissTransferInjection(
         )
     }
 
-    /** A manager used to orchestrate Uploads operations. */
-    val uploadManager by lazy {
-        UploadManager(
-            crashReport,
-            uploadController,
-            uploadRepository,
-            transferManager,
-            emailLanguageUtils,
-            uploadTokensManager,
-        )
-    }
-
-    /** A manager used to perform Uploads operations, without session persistence. */
-    val inMemoryUploadManager by lazy {
-        InMemoryUploadManager(
-            crashReport,
-            uploadRepository,
-            transferManager,
-            emailLanguageUtils,
-            uploadTokensManager,
-        )
-    }
-
     /** An utils to help use shared routes  */
     val sharedApiUrlCreator by lazy {
         SharedApiUrlCreator(
             environment,
-            appDatabase,
             fileController,
             transferController,
-            uploadController,
             transferRepository,
         )
     }

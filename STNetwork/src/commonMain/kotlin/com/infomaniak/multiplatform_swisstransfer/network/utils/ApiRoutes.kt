@@ -34,11 +34,7 @@ internal object ApiRoutes {
     fun generateDownloadToken() = "generateDownloadToken"
     //endregion
 
-    //region Upload
-    const val initUpload = "mobile/containers"
     const val emailValidations = "email-validations"
-    const val finishUpload = "uploadComplete"
-    const val cancelUpload = "cancelUpload"
 
     fun createTransfer(organizationAccountId: Long?): String {
         return when (organizationAccountId) {
