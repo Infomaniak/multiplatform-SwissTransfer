@@ -42,7 +42,6 @@ import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkExce
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.NotFoundException
 import com.infomaniak.multiplatform_swisstransfer.network.models.transfer.v2.TransferApi
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.ChunkEtag
 import com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.CreateTransfer
@@ -176,7 +175,7 @@ class UploadV2Manager(
         UnauthorizedException::class,
         TooManyRequestException::class,
         EmailValidationException.TooManyAttempts::class,
-        NotFoundException::class,
+        UploadErrorsException.NotFoundException::class,
     )
     suspend fun resendValidationEmail(validationId: String): Boolean = withContext(Dispatchers.Default) {
         val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)
