@@ -89,6 +89,10 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         }
     }
 
+    fun createTransferUrl(organizationAccountId: Long?): String {
+        return uploadRequest.createTransferUrl(organizationAccountId).toString()
+    }
+
     suspend fun createEmailValidationRequest(request: CreateValidationRequest): EmailValidationRequest {
         return withEmailValidationErrorHandling {
             uploadRequest.createEmailValidationRequest(request).data

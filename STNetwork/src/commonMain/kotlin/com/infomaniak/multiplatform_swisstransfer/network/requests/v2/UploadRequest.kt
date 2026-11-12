@@ -43,6 +43,7 @@ import io.ktor.client.request.patch
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.Url
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -64,7 +65,7 @@ internal class UploadRequest(
             explicitNulls = false
         }
         return post(
-            url = createV2Url(ApiRoutes.createTransfer(organizationAccountId = organizationAccountId)),
+            url = createTransferUrl(organizationAccountId),
             data = nullableJson.encodeToString(createTransfer),
             appendHeaders = {
                 when (attestationToken) {
@@ -72,6 +73,12 @@ internal class UploadRequest(
                     else -> append("Ik-mobile-token", attestationToken)
                 }
             }
+        )
+    }
+
+    fun createTransferUrl(organizationAccountId: Long?): Url {
+        return createV2Url(
+            path = ApiRoutes.createTransfer(organizationAccountId = organizationAccountId)
         )
     }
 

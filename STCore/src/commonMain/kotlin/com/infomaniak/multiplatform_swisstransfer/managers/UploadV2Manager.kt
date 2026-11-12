@@ -262,7 +262,9 @@ class UploadV2Manager(
             val attestationToken: String? = if (emailAndAppValidationRequired) uploadTokensManager.getAttestationToken() else null
             uploadRepository.createTransfer(transferCreationPayload, request.organizationAccountId, attestationToken)
         } catch (_: UploadErrorsException.InvalidAttestationTokenException) {
-            val attestationToken: String = attestationTokenGenerator.generateAttestationToken().also {
+            val attestationToken: String = attestationTokenGenerator.generateAttestationToken(
+                targetUrl = uploadRepository.createTransferUrl(organizationAccountId = request.organizationAccountId)
+            ).also {
                 uploadTokensManager.setAttestationToken(it)
             }
             // `createTransfer` might throw an `InvalidAttestationTokenException` again,

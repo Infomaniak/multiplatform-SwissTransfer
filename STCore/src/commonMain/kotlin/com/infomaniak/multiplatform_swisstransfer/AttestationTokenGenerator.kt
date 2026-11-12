@@ -18,5 +18,5 @@
 package com.infomaniak.multiplatform_swisstransfer
 
 fun interface AttestationTokenGenerator {
-    suspend fun generateAttestationToken(): String
+    suspend fun generateAttestationToken(targetUrl: String): String
 }
