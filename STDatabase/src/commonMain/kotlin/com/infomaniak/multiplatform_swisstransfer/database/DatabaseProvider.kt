@@ -33,10 +33,12 @@ import com.infomaniak.multiplatform_swisstransfer.database.dao.EmailValidationsD
 import com.infomaniak.multiplatform_swisstransfer.database.dao.OrganizationsDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.dao.UploadDao
+import com.infomaniak.multiplatform_swisstransfer.database.dao.AttestationTokensDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidationDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AttestationTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.DownloadManagerRef
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
@@ -59,10 +61,13 @@ fun DatabaseProvider.getAppDatabase(
         .build()
 }
 
+internal const val DB_VERSION = 6
+
 @Database(
     entities = [AppSettingsDB::class, DownloadManagerRef::class, TransferDB::class, FileDB::class,
-            OrganizationAccount::class, SelectedOrganizationAccount::class, EmailValidationDB::class],
-    version = 5,
+            OrganizationAccount::class, SelectedOrganizationAccount::class, EmailValidationDB::class,
+            AttestationTokenDB::class],
+    version = DB_VERSION,
     autoMigrations = [
         AutoMigration(
             from = 1, to = 2,
@@ -71,6 +76,7 @@ fun DatabaseProvider.getAppDatabase(
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6),
     ],
 )
 @TypeConverters(Converters::class)
@@ -82,6 +88,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun getUploadDao(): UploadDao
     abstract val organizationsDao: OrganizationsDao
     abstract val emailValidationsDao: EmailValidationsDao
+    abstract val attestationTokensDao: AttestationTokensDao
 }
 
 @DeleteColumn(tableName = "TransferDB", columnName = "senderEmail")

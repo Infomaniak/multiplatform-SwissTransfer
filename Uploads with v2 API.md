@@ -16,7 +16,7 @@ Remove `Uploads.realm`
 ### Data migration
 
 Store email tokens and attestation tokens outside of a Realm database. ⏳
-See [UploadTokensController](STDatabase/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/database/controllers/UploadTokensController.kt)
+See [UploadTokensController](STDatabase/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/database/controllers/AttestationTokenStorage.kt)
 Also remove [UploadToken](STCommon/src/commonMain/kotlin/com/infomaniak/multiplatform_swisstransfer/common/interfaces/appSettings/UploadToken.kt) & dependents.
 
 ### Adding stuff to v2 based lib APIs

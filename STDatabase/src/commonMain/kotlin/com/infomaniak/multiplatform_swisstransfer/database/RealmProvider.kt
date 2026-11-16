@@ -21,7 +21,6 @@ package com.infomaniak.multiplatform_swisstransfer.database
 
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AttestationTokenDB
-import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.EmailTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.ContainerDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.DownloadManagerRef
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.FileDB
@@ -112,7 +111,7 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
     }
 
     private val realmAppSettingsConfiguration = RealmConfiguration
-        .Builder(schema = setOf(AppSettingsDB::class, EmailTokenDB::class, AttestationTokenDB::class))
+        .Builder(schema = setOf(AppSettingsDB::class, AttestationTokenDB::class))
         .customDirectoryIfNeeded()
         .name("AppSettings.realm")
         .schemaVersion(APP_SETTINGS_SCHEMA_VERSION)

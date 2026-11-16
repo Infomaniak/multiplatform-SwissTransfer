@@ -79,7 +79,7 @@ class UploadV2Manager(
     private val appDatabase: AppDatabase,
     private val transferDao: TransferDao,
     private val emailValidationsDao: EmailValidationsDao,
-    private val uploadTokensManager: UploadTokensManager,
+    private val attestationTokenManager: AttestationTokenManager,
 ) {
 
     private fun requireCurrentUserId(): Long {
@@ -259,13 +259,13 @@ class UploadV2Manager(
             recipients = request.recipientsEmails.toList()
         )
         val apiTransfer: TransferApi = try {
-            val attestationToken: String? = if (emailAndAppValidationRequired) uploadTokensManager.getAttestationToken() else null
+            val attestationToken: String? = if (emailAndAppValidationRequired) attestationTokenManager.getAttestationToken() else null
             uploadRepository.createTransfer(transferCreationPayload, request.organizationAccountId, attestationToken)
         } catch (_: UploadErrorsException.InvalidAttestationTokenException) {
             val attestationToken: String = attestationTokenGenerator.generateAttestationToken(
                 targetUrl = uploadRepository.createTransferUrl(organizationAccountId = request.organizationAccountId)
             ).also {
-                uploadTokensManager.setAttestationToken(it)
+                attestationTokenManager.setAttestationToken(it)
             }
             // `createTransfer` might throw an `InvalidAttestationTokenException` again,
             // but in that case, it means the new token returned by the backend was bad,

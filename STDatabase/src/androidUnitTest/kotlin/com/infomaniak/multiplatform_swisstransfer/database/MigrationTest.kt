@@ -59,4 +59,10 @@ class MigrationTest {
             }
         }
     }
+
+    @Test
+    fun autoMigrate4ToLatest() {
+        helper.createDatabase(name = testDbName, version = 4).close()
+        helper.runMigrationsAndValidate(name = testDbName, version = DB_VERSION, validateDroppedTables = true).close()
+    }
 }

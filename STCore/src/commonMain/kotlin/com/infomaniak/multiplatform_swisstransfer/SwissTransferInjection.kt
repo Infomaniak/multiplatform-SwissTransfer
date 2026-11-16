@@ -26,13 +26,13 @@ import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTokensController
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.AttestationTokenStorage
 import com.infomaniak.multiplatform_swisstransfer.database.getAppDatabase
 import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
 import com.infomaniak.multiplatform_swisstransfer.managers.FileManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
-import com.infomaniak.multiplatform_swisstransfer.managers.UploadTokensManager
+import com.infomaniak.multiplatform_swisstransfer.managers.AttestationTokenManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadV2Manager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.UnauthorizedHandler
@@ -60,7 +60,7 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property appSettingsManager A manager used to orchestrate AppSettings operations.
  * @property accountManager A manager used to orchestrate Accounts operations.
  * @property uploadV2Manager A manager used to orchestrate Uploads operations.
- * @property uploadTokensManager A manager used to orchestrate operations of tokens needed for the upload.
+ * @property attestationTokenManager A manager used to orchestrate operations of tokens needed for the upload.
  * @property sharedApiUrlCreator An utils to help use shared routes.
  */
 class SwissTransferInjection(
@@ -94,7 +94,7 @@ class SwissTransferInjection(
     private val userInfoRepository: UserInfoRepository by lazy { UserInfoRepository(apiClientProvider, environment, getToken) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
-    private val uploadTokensController by lazy { UploadTokensController(realmProvider) }
+    private val attestationTokenStorage by lazy { AttestationTokenStorage(appDatabase, realmProvider) }
     private val transferController by lazy { TransferController(realmProvider) }
     private val fileController by lazy { FileController(realmProvider) }
 
@@ -121,7 +121,7 @@ class SwissTransferInjection(
     }
 
     /** A manager used to orchestrate uploads' tokens operations (email token or attestation token). */
-    val uploadTokensManager by lazy { UploadTokensManager(uploadTokensController) }
+    val attestationTokenManager by lazy { AttestationTokenManager(attestationTokenStorage) }
 
     /** A manager used to orchestrate Accounts operations. */
     val accountManager by lazy {
@@ -142,7 +142,7 @@ class SwissTransferInjection(
             appDatabase = appDatabase,
             transferDao = appDatabase.getTransferDao(),
             emailValidationsDao = appDatabase.emailValidationsDao,
-            uploadTokensManager = uploadTokensManager,
+            attestationTokenManager = attestationTokenManager,
         )
     }
 

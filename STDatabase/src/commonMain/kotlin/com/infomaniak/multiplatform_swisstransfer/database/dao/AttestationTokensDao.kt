@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings
+package com.infomaniak.multiplatform_swisstransfer.database.dao
 
-interface UploadToken {
-    val token: String
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Upsert
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AttestationTokenDB
+
+@Dao
+interface AttestationTokensDao {
+
+    @Query("SELECT * FROM AttestationToken WHERE id = 1")
+    suspend fun getAttestationToken(): AttestationTokenDB?
+
+    @Upsert
+    suspend fun upsertAttestationToken(attestationToken: AttestationTokenDB)
 }
