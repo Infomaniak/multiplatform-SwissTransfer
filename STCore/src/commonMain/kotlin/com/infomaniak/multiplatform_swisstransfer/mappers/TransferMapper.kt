@@ -19,7 +19,6 @@ package com.infomaniak.multiplatform_swisstransfer.mappers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource
 import com.infomaniak.multiplatform_swisstransfer.database.dao.TransferDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
@@ -49,7 +48,6 @@ internal suspend fun TransferDB.toTransferUi(
         files = files.map { it.toFileUi() },
         direction = this.transferDirection,
         transferStatus = this.transferStatus,
-        apiSource = ApiSource.V2,
     )
 }
 

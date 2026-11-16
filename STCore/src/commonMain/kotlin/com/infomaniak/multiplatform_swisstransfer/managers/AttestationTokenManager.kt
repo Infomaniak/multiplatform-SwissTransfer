@@ -17,7 +17,6 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.managers
 
-import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AttestationTokenStorage
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.InvalidAttestationTokenException
 import kotlinx.coroutines.Dispatchers
@@ -37,11 +36,10 @@ class AttestationTokenManager(private val attestationTokenStorage: AttestationTo
      *
      * @return A token which is used to attest the app integrity to the API.
      *
-     * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      * @throws InvalidAttestationTokenException If the token is expired or if we couldn't get a new one from the API
      */
-    @Throws(RealmException::class, CancellationException::class, InvalidAttestationTokenException::class)
+    @Throws(CancellationException::class, InvalidAttestationTokenException::class)
     suspend fun getAttestationToken(): String = withContext(Dispatchers.Default) {
         return@withContext attestationTokenStorage.getAttestationToken()?.token?.also(::assertAttestationTokenValidity)
             ?: throw InvalidAttestationTokenException("Missing token")
@@ -52,10 +50,9 @@ class AttestationTokenManager(private val attestationTokenStorage: AttestationTo
      *
      * @param attestationToken The valid attestation token used to attest the app integrity to the API.
      *
-     * @throws RealmException If an error occurs during database access.
      * @throws CancellationException If the operation is cancelled.
      */
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(CancellationException::class)
     suspend fun setAttestationToken(attestationToken: String): Unit = withContext(Dispatchers.Default) {
         attestationTokenStorage.setAttestationToken(attestationToken)
     }

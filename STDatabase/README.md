@@ -3,7 +3,7 @@
 ## Introduction
 
 The Database module is a critical part of the SwissTransfer Core project. It is responsible for managing all database operations
-using Realm, providing controllers for database interactions.
+using Room, providing controllers for database interactions.
 
 ## Installation
 
@@ -25,30 +25,14 @@ For iOS, the Database module is provided as part of the XCFramework. Follow thes
 
 ## Overview
 
-The Database module handles database operations using Realm, offering a structured way to manage data persistence. It exposes
+The Database module handles database operations using Room, offering a structured way to manage data persistence. It exposes
 various controllers to facilitate database interactions.
 
 ## Features
 
-- **Realm Integration**: Manages all database operations using Realm.
+- **Room Integration**: Manages all database operations using Room.
 - **Controllers**: Exposes controllers for efficient database management.
 - **Data Persistence**: Ensures data is stored and retrieved efficiently.
-
-## Usage
-
-Here’s an example of how to use the `ExampleController`:
-
-```kotlin
-val realmProvider = RealmProvider()
-val exampleController = ExampleController(realmProvider)
-
-// Add data
-val data = DataModel(id = "1", name = "Example")
-exampleController.addData(data)
-
-// Retrieve data
-val retrievedData = exampleController.getData("1")
-```
 
 ## Contributing
 

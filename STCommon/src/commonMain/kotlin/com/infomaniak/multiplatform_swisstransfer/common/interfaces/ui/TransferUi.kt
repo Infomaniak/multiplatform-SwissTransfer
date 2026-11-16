@@ -17,10 +17,8 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
-import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 
 data class TransferUi(
     val uuid: String,
@@ -37,27 +35,4 @@ data class TransferUi(
     val files: List<FileUi>,
     val direction: TransferDirection? = null,
     val transferStatus: TransferStatus? = null,
-    val apiSource: ApiSource,
-) {
-    enum class ApiSource {
-        V1, V2
-    }
-
-    constructor(transfer: Transfer) : this(
-        uuid = transfer.linkUUID,
-        linkId = null,
-        createdDateTimestamp = transfer.createdDateTimestamp,
-        expirationDateTimestamp = transfer.expiredDateTimestamp,
-        sizeUploaded = transfer.container?.sizeUploaded ?: 0,
-        downloadLimit = transfer.container?.downloadLimit ?: 0,
-        downloadLeft = transfer.downloadCounterCredit,
-        title = null,
-        message = transfer.container?.message,
-        password = transfer.password,
-        recipientsEmails = transfer.recipientsEmails.mapTo(destination = mutableSetOf(), transform = { it }),
-        files = transfer.container?.files?.mapToList(::FileUi) ?: emptyList(),
-        direction = transfer.transferDirection,
-        transferStatus = transfer.transferStatus,
-        apiSource = ApiSource.V1,
-    )
-}
+)

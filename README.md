@@ -31,12 +31,12 @@ module is integrated.
 ### 2. Database
 
 **Description**:
-The Database module is responsible for managing the database operations using Realm. It exposes controllers for database
+The Database module is responsible for managing the database operations using Room. It exposes controllers for database
 interactions.
 
 **Key Features**:
 
-- Manages database operations with Realm
+- Manages database operations with Room
 - Exposes controllers for database management
 
 ### 3. Common

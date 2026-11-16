@@ -9,7 +9,6 @@ kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.9.0"
 ksp = "2.3.0"
 ktor = "3.3.0"
-realmKotlin = "3.2.8-2"
 robolectric = "4.16.1"
 room = "2.8.4"
 skie = "0.10.6"
@@ -36,7 +35,6 @@ ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = 
 ktor-client-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
-realm-base = { module = "com.infomaniak.realm.kotlin:library-base", version.ref = "realmKotlin" }
 skie-gradle-plugin = { module = "co.touchlab.skie:gradle-plugin-api", version.ref = "skie" }
 splitties-appctx = { module = "com.louiscad.splitties:splitties-appctx", version.ref = "splitties" }
 #Test
@@ -50,5 +48,4 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-realm = { id = "com.infomaniak.realm.kotlin", version.ref = "realmKotlin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }

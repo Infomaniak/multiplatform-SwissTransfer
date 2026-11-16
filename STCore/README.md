@@ -40,8 +40,7 @@ centralized access point to orchestrate transfer operations.
 | Property | transferManager       | A manager used to orchestrate Transfers operations.                        |
 | Property | fileManager           | A manager used to orchestrate Files operations.                            |
 | Property | accountManager        | A manager used to orchestrate Accounts operations.                         |
-| Property | inMemoryUploadManager | A manager used to perform Uploads operations, without session persistence. |
-| Property | uploadManager         | A manager used to orchestrate Uploads operations.                          |
+| Property | uploadV2Manager       | A manager used to orchestrate Uploads operations.                          |
 | Property | emailTokensManager    | A manager used to orchestrate EmailTokens operations.                      |
 | Property | sharedApiUrlCreator   | An utils to help use shared routes                                         |
 
@@ -51,8 +50,7 @@ centralized access point to orchestrate transfer operations.
 
 - **Type**: `AppSettingsManager`
 - **Description**:
-    - `appSettingsManager` is a lazily initialized property that provides a manager to orchestrate all AppSettings operations. It
-      uses `realmProvider` to configure and manage AppSettings efficiently.
+    - `appSettingsManager` is a lazily initialized property that provides a manager to orchestrate all AppSettings operations.
 
 - **Usage Example**:
   ```kotlin
@@ -85,33 +83,6 @@ centralized access point to orchestrate transfer operations.
   val core = SwissTransferInjection(userAgent = "user_agent")
   val fileManager = core.fileManager
   // Use the fileManager to orchestrate Files
-  ```
-
-#### Property: `accountManager`
-
-- **Type**: `AccountManager`
-- **Description**:
-    - `accountManager` is a lazily initialized property that provides a manager to orchestrate all Accounts operations. It uses
-      `appSettingsController`, `uploadController`, `transfersController` and `realmProvider` to configure and manage Accounts
-      efficiently.
-
-- **Usage Example**:
-  ```kotlin
-  val core = SwissTransferInjection(userAgent = "user_agent")
-  val accountManager = core.accountManager
-  // Use the accountManager to orchestrate Accounts
-  ```
-
-- **Type**: `EmailTokensManager`
-- **Description**:
-    - `emailTokensManager` is a lazily initialized property that provides a manager to orchestrate all EmailTokens operations. It
-      uses `EmailTokensController` to do operations.
-
-- **Usage Example**:
-  ```kotlin
-  val core = SwissTransferInjection(userAgent = "user_agent")
-  val emailTokensManager = core.emailTokensManager
-  // Use the EmailTokensManager to orchestrate EmailTokens
   ```
 
 #### Property: `sharedApiUrlCreator`
