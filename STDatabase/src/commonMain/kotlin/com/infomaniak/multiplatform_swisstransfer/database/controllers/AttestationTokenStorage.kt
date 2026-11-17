@@ -19,14 +19,7 @@ package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
-import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.AttestationTokenDB as LegacyAttestationTokenDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AttestationTokenDB
-import com.infomaniak.multiplatform_swisstransfer.database.utils.RealmUtils.runThrowingRealm
-import com.infomaniak.multiplatform_swisstransfer.database.utils.findSuspend
-import io.realm.kotlin.ext.query
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
