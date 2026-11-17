@@ -20,7 +20,7 @@ package com.infomaniak.gradle.utils
 import org.gradle.api.JavaVersion
 
 internal object Versions {
-    const val minSdk = 24
+    const val minSdk = 27 // Should match the Android app.
     const val compileSdk = 35
     const val skieMaxArgumentCount = 7
 
