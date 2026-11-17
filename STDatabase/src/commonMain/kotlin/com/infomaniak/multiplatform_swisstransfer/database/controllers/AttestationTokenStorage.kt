@@ -30,8 +30,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Stores upload tokens in Room. Tokens still present in the legacy Realm database are
- * lazily migrated to Room when they're not found in Room, then removed from Realm.
+ * Stores upload tokens in Room.
  */
 class AttestationTokenStorage(private val appDatabase: AppDatabase) {
     private val dao get() = appDatabase.attestationTokensDao
