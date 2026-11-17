@@ -21,7 +21,7 @@ import org.gradle.api.JavaVersion
 
 internal object Versions {
     const val minSdk = 27 // Should match the Android app.
-    const val compileSdk = 35
+    const val compileSdk = 37
     const val skieMaxArgumentCount = 7
 
     val javaVersion = JavaVersion.VERSION_17
