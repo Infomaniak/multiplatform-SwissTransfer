@@ -136,7 +136,7 @@ class RealmProvider(private val databaseRootDirectory: String? = null, private v
 
     companion object {
         //region Configurations versions
-        const val APP_SETTINGS_SCHEMA_VERSION = 2L
+        const val APP_SETTINGS_SCHEMA_VERSION = 3L
         const val TRANSFERS_SCHEMA_VERSION = 2L
         //endregion
     }
