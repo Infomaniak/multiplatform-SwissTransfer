@@ -1,19 +1,19 @@
 [versions]
-agp = "8.13.0"
+agp = "9.5.1"
 coreKtx = "1.7.0"
-compose = "1.10.6"
-coroutines = "1.10.2"
+compose = "1.12.1"
+coroutines = "1.11.0"
 desugar_jdk_libs = "2.1.5"
-kotlin = "2.2.0"
-kotlinxDatetime = "0.7.1"
-kotlinxSerializationJson = "1.9.0"
-ksp = "2.3.0"
-ktor = "3.3.0"
-robolectric = "4.16.1"
-room = "2.8.4"
-skie = "0.10.6"
+kotlin = "2.4.10" # Skip 2.4.20 & 2.4.21 or TransferDB.toTransferUi() won't compile: https://youtrack.jetbrains.com/issue/KT-90051
+kotlinxDatetime = "0.8.0"
+kotlinxSerializationJson = "1.13.0"
+ksp = "2.3.14"
+ktor = "3.6.1"
+robolectric = "4.18"
+room = "2.8.5"
+skie = "0.10.16"
 splitties = "3.0.0"
-sqlite = "2.6.2"
+sqlite = "2.7.1"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
