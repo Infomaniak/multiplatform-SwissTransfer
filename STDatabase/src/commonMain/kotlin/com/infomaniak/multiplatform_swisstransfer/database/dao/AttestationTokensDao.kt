@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
+package com.infomaniak.multiplatform_swisstransfer.database.dao
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Upsert
+import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AttestationTokenDB
 
-@Serializable
-data class ResendEmailCodeBody(
-    val address: String,
-    @SerialName("lang")
-    val language: String, // example "fr_FR"
-)
+@Dao
+interface AttestationTokensDao {
+
+    @Query("SELECT * FROM AttestationToken WHERE id = 1")
+    suspend fun getAttestationToken(): AttestationTokenDB?
+
+    @Upsert
+    suspend fun upsertAttestationToken(attestationToken: AttestationTokenDB)
+}

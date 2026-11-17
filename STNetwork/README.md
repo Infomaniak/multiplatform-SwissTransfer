@@ -26,13 +26,13 @@ For iOS, the Network module is provided as part of the XCFramework. Follow these
 ## Overview
 
 The Network module handles communication with external APIs, offering a streamlined way to manage data transfers and uploads. It
-exposes two primary repositories: `TransferRepository` and `UploadRepository`, which can be used for orchestrating network
+exposes two primary repositories: `TransferRepository` and `UploadV2Repository`, which can be used for orchestrating network
 operations.
 
 ## Features
 
 - **API Client Management**: Handles all API calls required for data transfer and upload.
-- **Repositories**: Provides `TransferRepository` and `UploadRepository` for managing network operations.
+- **Repositories**: Provides `TransferRepository` and `UploadV2Repository` for managing network operations.
 - **Error Handling**: Implements robust error handling mechanisms for network requests.
 
 ## Repositories
@@ -45,7 +45,7 @@ Manages data transfers between the client and server.
 
 - `getTransfer(linkUUID:String) -> ApiResponse<TransferApi>`: Get a transfer by linkUUID.
 
-### UploadRepository
+### UploadV2Repository
 
 Handles file uploads to the server.
 
@@ -55,7 +55,7 @@ TODO
 
 ## Usage
 
-Here’s an example of how to use the `TransferRepository` and `UploadRepository`:
+Here’s an example of how to use the `TransferRepository`:
 
 #### Android
 

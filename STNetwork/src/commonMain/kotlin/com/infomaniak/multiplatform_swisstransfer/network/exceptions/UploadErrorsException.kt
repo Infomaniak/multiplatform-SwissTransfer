@@ -23,6 +23,15 @@ sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV
     requestContextId = requestContextId
 ) {
 
+    class CountryBlocked(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class AccessDenied(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+    class EmailValidationRequired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
+
+    class InvalidAttestationTokenException(
+        requestContextId: String,
+        override val cause: Throwable? = null,
+    ) : UploadErrorsException(requestContextId = requestContextId)
+
     class NotFoundException(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferCancelled(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
     class TransferExpired(requestContextId: String) : UploadErrorsException(requestContextId = requestContextId)
@@ -30,6 +39,10 @@ sealed class UploadErrorsException(requestContextId: String) : ApiException.ApiV
 }
 
 internal fun ApiException.ApiV2ErrorException.toUploadErrorsException() = when (code) {
+    "country_blocked" -> UploadErrorsException.CountryBlocked(requestContextId)
+    "access_denied" -> UploadErrorsException.AccessDenied(requestContextId)
+    "email_not_verified" -> UploadErrorsException.EmailValidationRequired(requestContextId)
+    "mobile_attestation_failed" -> UploadErrorsException.InvalidAttestationTokenException(requestContextId)
     "object_not_found" -> UploadErrorsException.NotFoundException(requestContextId)
     "transfer_cancelled" -> UploadErrorsException.TransferCancelled(requestContextId)
     "transfer_expired" -> UploadErrorsException.TransferExpired(requestContextId)

@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings
+package com.infomaniak.multiplatform_swisstransfer.mappers
 
-interface EmailToken : UploadToken {
-    val email: String
-}
+import com.infomaniak.multiplatform_swisstransfer.data.EmailValidation
+import com.infomaniak.multiplatform_swisstransfer.database.models.EmailValidationDB
+
+internal fun EmailValidationDB.toEmailValidation(): EmailValidation = EmailValidation(
+    email = email,
+    id = id,
+    lastSentCodeExpirationTimestampSeconds = lastSentCodeExpirationTimestampSeconds
+)

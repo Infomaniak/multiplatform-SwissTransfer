@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class FinishUploadBody(
-    @SerialName("UUID")
-    val containerUUID: String = "",
-    @SerialName("lang")
-    val language: String = "",
-    val recipientsEmails: Set<String>? = null,
+data class EmailValidationRequestStatus(
+    @SerialName("is_validated")
+    val isValidated: Boolean,
 )

@@ -15,10 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email
 
-interface InitUploadResponse<C : UploadContainer> {
-    val container: C
-    val uploadHost: String
-    val filesUUID: List<String>
-}
+import kotlinx.serialization.Serializable
+
+/**
+ * @property token User input. Should be 6 characters, which were received by email.
+ */
+@Serializable
+data class ValidateEmailCodeBody(
+    val token: String,
+)

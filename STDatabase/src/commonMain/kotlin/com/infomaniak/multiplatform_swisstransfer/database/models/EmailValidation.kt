@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request
+package com.infomaniak.multiplatform_swisstransfer.database.models
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-@Serializable
-data class VerifyEmailCodeBody(
-    val code: String,
-    @SerialName("address")
+/**
+ * If [lastSentCodeExpirationTimestampSeconds] is non-null, the email validation is still pending.
+ * Otherwise, it's valid until deleted from the database (following a backend rejection).
+ */
+@Entity(tableName = "EmailValidation")
+data class EmailValidationDB(
+    @PrimaryKey
     val email: String,
-)
+    val id: String,
+    @ColumnInfo(name = "code_expiration_timestamp_seconds")
+    val lastSentCodeExpirationTimestampSeconds: Long?,
+) {
+    inline val isValidated: Boolean get() = lastSentCodeExpirationTimestampSeconds == null
+}

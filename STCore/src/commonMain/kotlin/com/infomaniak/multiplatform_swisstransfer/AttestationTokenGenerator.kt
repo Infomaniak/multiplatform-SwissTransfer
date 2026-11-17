@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
+package com.infomaniak.multiplatform_swisstransfer
 
-interface RemoteUploadFile {
-    val uuid: String
-    val uploadedChunks: List<Int>
-    val uploadStatus: UploadStatus
+fun interface AttestationTokenGenerator {
+    suspend fun generateAttestationToken(targetUrl: String): String
 }

@@ -19,8 +19,6 @@ package com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.File
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.v2.File as FileV2
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.RemoteUploadFile
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadFileSession
 
 /**
  * @property localPath Platform-specific local storage path:
@@ -62,14 +60,4 @@ data class FileUi(
         thumbnailPath = file.thumbnailPath,
     )
 
-    fun toUploadFileSession(): UploadFileSession {
-        return object : UploadFileSession {
-            override val name: String = fileName
-            override val path: String? = this@FileUi.path
-            override val size: Long = fileSize
-            override val mimeType: String = this@FileUi.mimeType ?: ""
-            override val localPath: String = this@FileUi.localPath ?: ""
-            override val remoteUploadFile: RemoteUploadFile? = null
-        }
-    }
 }

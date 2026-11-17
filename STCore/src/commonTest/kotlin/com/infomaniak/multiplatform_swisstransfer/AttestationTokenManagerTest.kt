@@ -17,42 +17,42 @@
  */
 package com.infomaniak.multiplatform_swisstransfer
 
-import com.infomaniak.multiplatform_swisstransfer.managers.UploadTokensManager
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
+import com.infomaniak.multiplatform_swisstransfer.managers.AttestationTokenManager
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.InvalidAttestationTokenException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 
-class UploadTokensManagerTest {
+class AttestationTokenManagerTest {
 
     @Test
     fun decodeJwtToken_EmptyTokenTest() {
-        assertFailsWith<InvalidAttestationTokenException> { UploadTokensManager.decodeJwtToken("") }
+        assertFailsWith<InvalidAttestationTokenException> { AttestationTokenManager.decodeJwtToken("") }
     }
 
     @Test
     fun decodeJwtToken_InvalidTokenTest() {
         val missingHeaderPartJWT = FUTURE_TOKEN.drop(64)
         val dummyJWTFormat = "a.a.a"
-        assertFailsWith<InvalidAttestationTokenException> { UploadTokensManager.decodeJwtToken(missingHeaderPartJWT) }
-        assertFailsWith<InvalidAttestationTokenException> { UploadTokensManager.decodeJwtToken(dummyJWTFormat) }
+        assertFailsWith<InvalidAttestationTokenException> { AttestationTokenManager.decodeJwtToken(missingHeaderPartJWT) }
+        assertFailsWith<InvalidAttestationTokenException> { AttestationTokenManager.decodeJwtToken(dummyJWTFormat) }
     }
 
     @Test
     fun decodeJwtToken_ValidTokenTest() {
-        assertIs<Long>(UploadTokensManager.decodeJwtToken(EXPIRED_TOKEN))
-        assertIs<Long>(UploadTokensManager.decodeJwtToken(FUTURE_TOKEN))
+        assertIs<Long>(AttestationTokenManager.decodeJwtToken(EXPIRED_TOKEN))
+        assertIs<Long>(AttestationTokenManager.decodeJwtToken(FUTURE_TOKEN))
     }
 
     @Test
     fun assertAttestationTokenValidity_ExpiredTokenTest() {
-        assertFailsWith<InvalidAttestationTokenException> { UploadTokensManager.assertAttestationTokenValidity("") }
-        assertFailsWith<InvalidAttestationTokenException> { UploadTokensManager.assertAttestationTokenValidity(EXPIRED_TOKEN) }
+        assertFailsWith<InvalidAttestationTokenException> { AttestationTokenManager.assertAttestationTokenValidity("") }
+        assertFailsWith<InvalidAttestationTokenException> { AttestationTokenManager.assertAttestationTokenValidity(EXPIRED_TOKEN) }
     }
 
     @Test
     fun assertAttestationTokenValidity_ValidTokenTest() {
-        UploadTokensManager.assertAttestationTokenValidity(FUTURE_TOKEN)
+        AttestationTokenManager.assertAttestationTokenValidity(FUTURE_TOKEN)
     }
 
     companion object {

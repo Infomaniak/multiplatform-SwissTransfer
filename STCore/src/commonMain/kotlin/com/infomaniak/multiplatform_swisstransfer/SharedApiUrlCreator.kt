@@ -23,10 +23,8 @@ import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferU
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V1
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.TransferUi.ApiSource.V2
 import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
-import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadController
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.SharedApiV2Routes
@@ -38,13 +36,10 @@ import io.ktor.http.URLBuilder
  */
 class SharedApiUrlCreator internal constructor(
     private val environment: ApiEnvironment,
-    private val appDatabase: AppDatabase,
     private val fileController: FileController,
     private val transferController: TransferController,
-    private val uploadController: UploadController,
     private val transferRepository: TransferRepository,
 ) {
-    val createUploadContainerUrl: String = SharedApiRoutes.createUploadContainer(environment)
 
     fun shareTransferUrl(transferUUID: String) = SharedApiRoutes.shareTransfer(environment, transferUUID)
 
@@ -76,34 +71,6 @@ class SharedApiUrlCreator internal constructor(
             environment = environment,
             linkId = transfer.linkId!!, // Should never be null for non pending upload v2 transfers
             fileId = fileUUID
-        )
-    }
-
-    @Throws(RealmException::class)
-    fun doesChunkExistUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, chunkSize: Long): String? {
-        val upload = uploadController.getUploadByUUID(uploadUUID) ?: return null
-        val containerUUID = upload.remoteContainer?.uuid ?: return null
-        return SharedApiRoutes.doesChunkExist(
-            environment = environment,
-            containerUUID = containerUUID,
-            fileUUID = fileUUID,
-            chunkIndex = chunkIndex,
-            chunkSize = chunkSize
-        )
-    }
-
-    @Throws(RealmException::class)
-    fun uploadChunkUrl(uploadUUID: String, fileUUID: String, chunkIndex: Int, isLastChunk: Boolean, isRetry: Boolean): String? {
-        val upload = uploadController.getUploadByUUID(uploadUUID) ?: return null
-        val containerUUID = upload.remoteContainer?.uuid ?: return null
-        val uploadHost = upload.remoteUploadHost ?: return null
-        return SharedApiRoutes.uploadChunk(
-            uploadHost = uploadHost,
-            containerUUID = containerUUID,
-            fileUUID = fileUUID,
-            chunkIndex = chunkIndex,
-            isLastChunk = isLastChunk,
-            isRetry = isRetry
         )
     }
 

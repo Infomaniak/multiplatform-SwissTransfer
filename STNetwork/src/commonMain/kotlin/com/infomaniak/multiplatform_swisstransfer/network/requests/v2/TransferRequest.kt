@@ -33,7 +33,7 @@ internal class TransferRequest(
     environment: ApiEnvironment,
     json: Json,
     httpClient: HttpClient,
-    token: () -> String,
+    token: () -> String?,
 ) : BaseRequest(environment, json, httpClient, token) {
 
     suspend fun getTransfer(linkUUID: String, password: String? = null): ApiResponseV2Success<TransferLinkResponse> {

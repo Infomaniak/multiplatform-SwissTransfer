@@ -21,8 +21,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 
 object SharedApiRoutes {
 
-    fun createUploadContainer(environment: ApiEnvironment): String = "${ApiRoutes.apiBaseUrl(environment)}${ApiRoutes.initUpload}"
-
     fun shareTransfer(environment: ApiEnvironment, linkUUID: String): String = "${environment.baseUrl}/d/$linkUUID"
 
     internal fun downloadFilesBase(downloadHost: String, linkUUID: String) = "https://$downloadHost/api/download/$linkUUID"
@@ -37,30 +35,6 @@ object SharedApiRoutes {
 
     fun downloadFolder(downloadHost: String, linkUUID: String, folderPath: String, token: String?): String {
         return "${downloadFilesBase(downloadHost, linkUUID)}?folder=$folderPath${withToken(token, prefix = "&")}"
-    }
-
-    fun doesChunkExist(
-        environment: ApiEnvironment,
-        containerUUID: String,
-        fileUUID: String,
-        chunkIndex: Int,
-        chunkSize: Long
-    ): String {
-        val params = "chunk_size=$chunkSize"
-        val host = ApiRoutes.apiBaseUrl(environment)
-        return "${host}mobile/containers/${containerUUID}/files/${fileUUID}/chunks/${chunkIndex}/exists?$params"
-    }
-
-    fun uploadChunk(
-        uploadHost: String,
-        containerUUID: String,
-        fileUUID: String,
-        chunkIndex: Int,
-        isLastChunk: Boolean,
-        isRetry: Boolean,
-    ): String {
-        val retry = if (isRetry) "/retry" else ""
-        return "https://$uploadHost/api/uploadChunk/$containerUUID/$fileUUID/$chunkIndex/${isLastChunk.int()}$retry"
     }
 
     private fun withToken(token: String?, prefix: String = "?") = if (token == null) "" else "${prefix}token=$token"

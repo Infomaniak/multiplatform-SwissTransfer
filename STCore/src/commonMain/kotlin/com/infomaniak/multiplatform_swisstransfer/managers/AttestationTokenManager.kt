@@ -18,8 +18,8 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.UploadTokensController
-import com.infomaniak.multiplatform_swisstransfer.network.exceptions.AttestationTokenException.InvalidAttestationTokenException
+import com.infomaniak.multiplatform_swisstransfer.database.controllers.AttestationTokenStorage
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UploadErrorsException.InvalidAttestationTokenException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -27,45 +27,10 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class UploadTokensManager(private val uploadTokensController: UploadTokensController) {
-
-    //region Email token
-
-    /**
-     * Get a token for a given email.
-     *
-     * @param email The email possibly associated with a token.
-     *
-     * @return A token which may be associated with the email.
-     *
-     * @throws RealmException If an error occurs during database access.
-     * @throws CancellationException If the operation is cancelled.
-     */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun getTokenForEmail(email: String): String? = withContext(Dispatchers.Default) {
-        return@withContext uploadTokensController.getTokenForEmail(email)?.token
-    }
-
-    /**
-     * Asynchronously sets the email and it's corresponding token.
-     *
-     * @param email The validated email.
-     * @param emailToken The valid token associated to the email.
-     *
-     * @throws RealmException If an error occurs during database access.
-     * @throws CancellationException If the operation is cancelled.
-     */
-    @Throws(RealmException::class, CancellationException::class)
-    suspend fun setEmailToken(email: String, emailToken: String): Unit = withContext(Dispatchers.Default) {
-        uploadTokensController.setEmailToken(email, emailToken)
-    }
-    //endregion
-
-    //region Attestation token
+class AttestationTokenManager(private val attestationTokenStorage: AttestationTokenStorage) {
 
     /**
      * Get the current attestation token.
@@ -78,7 +43,7 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
      */
     @Throws(RealmException::class, CancellationException::class, InvalidAttestationTokenException::class)
     suspend fun getAttestationToken(): String = withContext(Dispatchers.Default) {
-        return@withContext uploadTokensController.getAttestationToken()?.token?.also(::assertAttestationTokenValidity)
+        return@withContext attestationTokenStorage.getAttestationToken()?.token?.also(::assertAttestationTokenValidity)
             ?: throw InvalidAttestationTokenException("Missing token")
     }
 
@@ -92,10 +57,8 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
      */
     @Throws(RealmException::class, CancellationException::class)
     suspend fun setAttestationToken(attestationToken: String): Unit = withContext(Dispatchers.Default) {
-        uploadTokensController.setAttestationToken(attestationToken)
+        attestationTokenStorage.setAttestationToken(attestationToken)
     }
-
-    //endregion
 
     companion object {
         private const val JSON_JWT_EXPIRATION_KEY = "exp"
@@ -107,7 +70,6 @@ class UploadTokensManager(private val uploadTokensController: UploadTokensContro
             if (tokenExpiryAt < Clock.System.now().epochSeconds) throw InvalidAttestationTokenException("Local token is expired")
         }
 
-        @OptIn(ExperimentalEncodingApi::class)
         @Throws(InvalidAttestationTokenException::class)
         internal fun decodeJwtToken(token: String): Long = runCatching {
             val encodedPayload = token.split('.')[1]

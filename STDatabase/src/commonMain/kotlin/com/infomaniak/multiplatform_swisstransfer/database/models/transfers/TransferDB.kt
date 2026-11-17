@@ -18,7 +18,6 @@
 package com.infomaniak.multiplatform_swisstransfer.database.models.transfers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.transfers.Transfer
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload.UploadSession
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import io.realm.kotlin.ext.realmSetOf
@@ -26,8 +25,6 @@ import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.RealmSet
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 class TransferDB() : Transfer, RealmObject {
     @PrimaryKey
@@ -75,24 +72,6 @@ class TransferDB() : Transfer, RealmObject {
 
         this.transferDirectionValue = transferDirection.name
         this.transferStatusValue = transfer.transferStatus?.name ?: TransferStatus.READY.name
-    }
-
-    @OptIn(ExperimentalTime::class)
-    constructor(linkUUID: String, uploadSession: UploadSession, transferStatus: TransferStatus) : this() {
-        this.linkUUID = linkUUID
-        this.containerUUID = uploadSession.remoteContainer!!.uuid
-        this.downloadCounterCredit = uploadSession.remoteContainer!!.downloadLimit
-        this.createdDateTimestamp = Clock.System.now().epochSeconds
-        this.expiredDateTimestamp = uploadSession.remoteContainer!!.expiredDateTimestamp
-        this.hasBeenDownloadedOneTime = false
-        this.isMailSent = false
-        this.downloadHost = ""
-        this.container = ContainerDB(uploadSession.remoteContainer!!, uploadSession.files)
-        this.password = uploadSession.password.ifEmpty { null }
-        this.recipientsEmails = uploadSession.recipientsEmails.mapTo(destination = realmSetOf(), transform = { it })
-
-        this.transferDirectionValue = TransferDirection.SENT.name
-        this.transferStatusValue = transferStatus.name
     }
 
     internal companion object {

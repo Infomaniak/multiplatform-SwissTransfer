@@ -22,7 +22,6 @@ module is integrated.
 **Repositories**:
 
 - `TransferRepository`
-- `UploadRepository`
 
 **Key Features**:
 

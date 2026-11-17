@@ -1,6 +1,6 @@
 /*
  * Infomaniak SwissTransfer - Multiplatform
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.multiplatform_swisstransfer.common.interfaces.upload
+package com.infomaniak.multiplatform_swisstransfer.network.models.upload.request.v2.email
 
-interface UploadFileSession {
-    val name: String
-    val path: String?
-    val size: Long
-    val mimeType: String
-    val localPath: String
-    val remoteUploadFile: RemoteUploadFile?
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class CreateValidationRequest(
+    val email: String,
+    val language: String,
+)

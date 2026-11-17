@@ -34,12 +34,7 @@ internal object ApiRoutes {
     fun generateDownloadToken() = "generateDownloadToken"
     //endregion
 
-    //region Upload
-    const val initUpload = "mobile/containers"
-    const val verifyEmailCode = "emails-validation"
-    const val resendEmailCode = "$verifyEmailCode/resend"
-    const val finishUpload = "uploadComplete"
-    const val cancelUpload = "cancelUpload"
+    const val emailValidations = "email-validations"
 
     fun createTransfer(organizationAccountId: Long?): String {
         return when (organizationAccountId) {
@@ -47,6 +42,9 @@ internal object ApiRoutes {
             else -> "accounts/$organizationAccountId/transfers"
         }
     }
+    fun validateEmail(validationId: String): String = "$emailValidations/$validationId/confirm"
+    fun emailValidationStatus(validationId: String): String = "$emailValidations/$validationId"
+    fun resendValidationEmail(validationId: String): String = "$emailValidations/$validationId/resend"
     fun uploadDirectly(transferId: String, fileId: String) = "transfers/$transferId/files/$fileId"
     fun uploadChunk(transferId: String, fileId: String, chunkIndex: Int): String {
         return "${uploadDirectly(transferId, fileId)}/chunks/$chunkIndex"

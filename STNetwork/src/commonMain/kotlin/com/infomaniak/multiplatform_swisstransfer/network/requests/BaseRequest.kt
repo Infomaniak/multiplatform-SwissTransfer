@@ -21,7 +21,6 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.utils.ApiRoutes
 import com.infomaniak.multiplatform_swisstransfer.network.utils.decode
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -41,7 +40,7 @@ internal open class BaseRequest(
     protected val environment: ApiEnvironment,
     protected val json: Json,
     protected val httpClient: HttpClient,
-    private val token: () -> String,
+    private val token: () -> String?,
 ) {
 
     protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
@@ -61,7 +60,8 @@ internal open class BaseRequest(
     }.build()
 
     protected fun HeadersBuilder.appendBearer() {
-        append(HttpHeaders.Authorization, "Bearer ${token()}")
+        val currentToken = token() ?: return
+        append(HttpHeaders.Authorization, "Bearer $currentToken")
     }
 
     protected suspend inline fun <reified R> get(
