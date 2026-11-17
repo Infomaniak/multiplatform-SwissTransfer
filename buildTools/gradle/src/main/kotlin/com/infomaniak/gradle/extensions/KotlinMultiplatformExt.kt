@@ -18,11 +18,8 @@
 package com.infomaniak.gradle.extensions
 
 import com.infomaniak.gradle.plugins.STMultiplatformExtension
-import com.infomaniak.gradle.utils.Versions
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -42,15 +39,7 @@ private fun KotlinMultiplatformExtension.setup(
     // Do not generate source code for all platforms, only for Android
     withSourcesJar(publish = false)
     // Targets
-    androidTarget {
-        withSourcesJar(publish = true)
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            jvmTarget.set(JvmTarget.fromTarget(Versions.javaVersion.toString()))
-        }
-        publishLibraryVariants("release")
-    }
-
+    // The Android target is created by the com.android.kotlin.multiplatform.library plugin (see configureAndroid).
     val xcframeworkName = project.name
     val xcf = project.XCFramework()
     listOf(

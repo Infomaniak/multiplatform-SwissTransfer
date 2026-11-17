@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.skie)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
@@ -9,6 +9,10 @@ plugins {
 }
 
 kotlin {
+    android {
+        enableCoreLibraryDesugaring = true
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(project(":STCommon"))
@@ -24,7 +28,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
         }
-        androidUnitTest.dependencies {
+        androidHostTest.dependencies {
             implementation(libs.android.test)
             implementation(libs.robolectric)
             implementation(libs.androidx.room.testing)
@@ -36,13 +40,10 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
-android {
-    compileOptions { isCoreLibraryDesugaringEnabled = true }
-    testOptions { unitTests { isIncludeAndroidResources = true } }
-
-    sourceSets {
-        getByName("test") {
-            assets.srcDirs("$projectDir/schemas")
+androidComponents {
+    onVariants { variant ->
+        variant.hostTests.values.forEach { hostTest ->
+            hostTest.sources.assets?.addStaticSourceDirectory("$projectDir/schemas")
         }
     }
 }

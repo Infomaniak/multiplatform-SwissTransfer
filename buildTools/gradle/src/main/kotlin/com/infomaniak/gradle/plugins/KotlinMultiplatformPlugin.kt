@@ -17,19 +17,24 @@
  */
 package com.infomaniak.gradle.plugins
 
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.infomaniak.gradle.extensions.configureAndroid
 import com.infomaniak.gradle.extensions.configureKotlinMultiplatform
 import com.infomaniak.gradle.extensions.configureSkie
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class KotlinMultiplatformPlugin : Plugin<Project> {
 
     override fun apply(target: Project): Unit = with(target) {
         extensions.apply {
             configure(::configureKotlinMultiplatform)
-            configure(::configureAndroid)
+            configure<KotlinMultiplatformExtension> {
+                targets.withType<KotlinMultiplatformAndroidLibraryTarget>().configureEach { configureAndroid(this) }
+            }
             if (plugins.hasPlugin("skie")) configure(::configureSkie)
         }
     }

@@ -17,18 +17,19 @@
  */
 package com.infomaniak.gradle.extensions
 
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import com.infomaniak.gradle.utils.Versions
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-internal fun Project.configureAndroid(extension: LibraryExtension) = extension.apply {
-    namespace = "com.infomaniak.multiplatform_swisstransfer.${name.lowercase()}"
+internal fun Project.configureAndroid(target: KotlinMultiplatformAndroidLibraryTarget) = target.apply {
+    namespace = "com.infomaniak.multiplatform_swisstransfer.${project.name.lowercase()}"
     compileSdk = Versions.compileSdk
-    defaultConfig {
-        minSdk = Versions.minSdk
-    }
-    compileOptions {
-        sourceCompatibility = Versions.javaVersion
-        targetCompatibility = Versions.javaVersion
+    minSdk = Versions.minSdk
+
+    withSourcesJar(publish = true)
+    withHostTest { isIncludeAndroidResources = true }
+    compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(Versions.javaVersion.toString()))
     }
 }

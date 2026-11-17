@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKmpLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin
     id("infomaniak.kotlinMultiplatform")
     id("infomaniak.publishPlugin")
