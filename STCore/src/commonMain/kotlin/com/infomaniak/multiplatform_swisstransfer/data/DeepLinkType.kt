@@ -23,7 +23,7 @@ sealed class DeepLinkType {
             private val REGEX = "$URL_WITH_UUID_BASE_REGEX\\?delete=(?<token>.+)$".toRegex()
 
             fun fromURL(url: String): DeleteTransfer? {
-                var matchResult = REGEX.matchEntire(url) ?: return null
+                val matchResult = REGEX.matchEntire(url) ?: return null
 
                 val uuid = matchResult.groups["uuid"]?.value ?: return null
                 val token = matchResult.groups["token"]?.value ?: return null
@@ -37,7 +37,7 @@ sealed class DeepLinkType {
             private val REGEX = "$URL_WITH_UUID_BASE_REGEX$".toRegex()
 
             fun fromURL(url: String): OpenTransfer? {
-                var matchResult = REGEX.matchEntire(url) ?: return null
+                val matchResult = REGEX.matchEntire(url) ?: return null
 
                 val uuid = matchResult.groups["uuid"]?.value ?: return null
                 return OpenTransfer(uuid)
