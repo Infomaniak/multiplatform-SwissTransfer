@@ -178,7 +178,9 @@ class UploadV2Manager(
         UploadErrorsException.NotFoundException::class,
     )
     suspend fun resendValidationEmail(validationId: String): Boolean = withContext(Dispatchers.Default) {
-        val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)
+        val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)?.also {
+            check(it.id == validationId) { "The backend broke its contract of reusing the same validation id!" }
+        }
         when (updatedValidationRequest) {
             null -> emailValidationsDao.markAsValidated(validationId = validationId)
             else -> emailValidationsDao.updatePendingValidation(
