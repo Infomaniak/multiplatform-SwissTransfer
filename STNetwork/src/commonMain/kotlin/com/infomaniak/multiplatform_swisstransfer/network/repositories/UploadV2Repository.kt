@@ -22,6 +22,7 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.ApiV2ErrorException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.ApiException.UnexpectedApiErrorFormatException
+import com.infomaniak.multiplatform_swisstransfer.network.exceptions.EmailValidationException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.NetworkException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.TooManyRequestException
 import com.infomaniak.multiplatform_swisstransfer.network.exceptions.UnauthorizedException
@@ -93,12 +94,33 @@ class UploadV2Repository internal constructor(private val uploadRequest: UploadR
         return uploadRequest.createTransferUrl(organizationAccountId).toString()
     }
 
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        NotFoundException::class,
+    )
     suspend fun createEmailValidationRequest(request: CreateValidationRequest): EmailValidationRequest {
         return withEmailValidationErrorHandling {
             uploadRequest.createEmailValidationRequest(request).data
         }
     }
 
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        NotFoundException::class,
+        EmailValidationException::class,
+    )
     suspend fun validateEmailWithCode(validationId: String, code: String) {
         return withEmailValidationErrorHandling {
             uploadRequest.validateEmailWithCode(validationId = validationId, code = code)
