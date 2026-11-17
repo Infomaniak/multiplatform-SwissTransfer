@@ -33,32 +33,14 @@ import kotlin.coroutines.cancellation.CancellationException
  * Stores upload tokens in Room. Tokens still present in the legacy Realm database are
  * lazily migrated to Room when they're not found in Room, then removed from Realm.
  */
-class AttestationTokenStorage(
-    private val appDatabase: AppDatabase,
-    private val realmProvider: RealmProvider,
-) {
-    private val realm by lazy { realmProvider.appSettings }
+class AttestationTokenStorage(private val appDatabase: AppDatabase) {
     private val dao get() = appDatabase.attestationTokensDao
-    private val migrationMutex = Mutex()
 
     @Throws(RealmException::class, CancellationException::class)
-    suspend fun getAttestationToken(): AttestationTokenDB? {
-        dao.getAttestationToken()?.let { return it }
-        return migrationMutex.withLock {
-            dao.getAttestationToken() ?: migrateAttestationTokenFromRealm()
-        }
-    }
+    suspend fun getAttestationToken(): AttestationTokenDB? = dao.getAttestationToken()
 
     @Throws(CancellationException::class)
     suspend fun setAttestationToken(token: String) {
         dao.upsertAttestationToken(AttestationTokenDB(token = token))
-    }
-
-    private suspend fun migrateAttestationTokenFromRealm(): AttestationTokenDB? = runThrowingRealm {
-        val legacyEntity = realm.query<LegacyAttestationTokenDB>().findSuspend().firstOrNull() ?: return null
-        AttestationTokenDB(token = legacyEntity.token).also { migratedEntity ->
-            dao.upsertAttestationToken(migratedEntity)
-            realm.write { delete(LegacyAttestationTokenDB::class) }
-        }
     }
 }

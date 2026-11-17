@@ -94,7 +94,7 @@ class SwissTransferInjection(
     private val userInfoRepository: UserInfoRepository by lazy { UserInfoRepository(apiClientProvider, environment, getToken) }
 
     private val appSettingsController by lazy { AppSettingsController(realmProvider) }
-    private val attestationTokenStorage by lazy { AttestationTokenStorage(appDatabase, realmProvider) }
+    private val attestationTokenStorage by lazy { AttestationTokenStorage(appDatabase) }
     private val transferController by lazy { TransferController(realmProvider) }
     private val fileController by lazy { FileController(realmProvider) }
 
