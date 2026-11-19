@@ -43,10 +43,6 @@ internal open class BaseRequest(
     private val token: () -> String?,
 ) {
 
-    protected fun createUrl(path: String, vararg queries: Pair<String, String>): Url {
-        return createUrl(ApiRoutes.apiBaseUrl(environment), path, queries)
-    }
-
     protected fun createV2Url(path: String, vararg queries: Pair<String, String>): Url {
         return createUrl(ApiRoutes.apiBaseUrlV2(environment), path, queries)
     }

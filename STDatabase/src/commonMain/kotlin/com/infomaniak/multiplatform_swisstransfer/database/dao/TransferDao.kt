@@ -25,7 +25,6 @@ import androidx.room.Upsert
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferDirection
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferStatus
 import com.infomaniak.multiplatform_swisstransfer.common.utils.DateUtils
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController.Companion.DAYS_SINCE_EXPIRATION
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.FileDB
 import com.infomaniak.multiplatform_swisstransfer.database.models.transfers.v2.TransferDB
 import com.infomaniak.multiplatform_swisstransfer.database.utils.MAX_VALID_UNICODE
@@ -180,4 +179,8 @@ interface TransferDao {
 
     @Query("DELETE FROM TransferDB WHERE userOwnerId=:userId")
     suspend fun deleteTransfers(userId: Long)
+
+    private companion object {
+        private const val DAYS_SINCE_EXPIRATION = 15
+    }
 }

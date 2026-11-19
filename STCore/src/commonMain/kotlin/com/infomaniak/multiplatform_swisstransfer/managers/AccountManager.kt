@@ -19,11 +19,8 @@
 
 package com.infomaniak.multiplatform_swisstransfer.managers
 
-import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
-import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.models.OrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.database.models.SelectedOrganizationAccount
 import com.infomaniak.multiplatform_swisstransfer.mappers.toDbModel
@@ -51,15 +48,11 @@ import kotlin.coroutines.cancellation.CancellationException
  * AccountManager is responsible for orchestrating Accounts operations, with the database(s).
  *
  * @property appDatabase The provider for managing Room database operations.
- * @property transferController The controller for managing Transfers operation.
- * @property realmProvider The provider for managing Realm database operations.
  */
 class AccountManager internal constructor(
     private val appDatabase: AppDatabase,
-    private val transferController: TransferController,
     private val appSettingsManager: AppSettingsManager,
     private val userInfoRepository: UserInfoRepository,
-    private val realmProvider: RealmProvider,
 ) {
 
     private val userSwitchMutex = Mutex()
@@ -150,14 +143,13 @@ class AccountManager internal constructor(
     /**
      * Loads the specified user account and ensures database Transfers are initialized for that user.
      */
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(CancellationException::class)
     suspend fun loadUser(user: STUser) = coroutineScope {
         userSwitchMutex.withLock {
             if (currentUser?.id == user.id) return@coroutineScope
             if (currentUser is STUser.GuestUser && user is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = user.id)
             }
-            loadGuestDatabaseIfNeeded()
             currentUser = user
         }
         launch {
@@ -168,27 +160,18 @@ class AccountManager internal constructor(
     /**
      * Delete specified User data
      */
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(CancellationException::class)
     suspend fun logoutCurrentUser(newSTUser: STUser?) {
         val user = currentUser ?: return
         when (user) {
             is STUser.AuthUser -> appDatabase.getTransferDao().deleteTransfers(user.id)
-            STUser.GuestUser -> {
-                transferController.removeData()
-                realmProvider.closeAllDatabases()
-            }
+            STUser.GuestUser -> Unit
         }
         userSwitchMutex.withLock {
             currentUser = newSTUser
             if (newSTUser !is STUser.AuthUser) {
                 appSettingsManager.updateLinkGuestToAccountIfNeeded(accountId = null)
             }
-        }
-    }
-
-    private suspend fun loadGuestDatabaseIfNeeded() {
-        if (realmProvider.isTransfersDbOpen().not()) {
-            realmProvider.openTransfersDb(STUser.GuestUser.id)
         }
     }
 

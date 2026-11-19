@@ -22,21 +22,16 @@ import com.infomaniak.multiplatform_swisstransfer.common.utils.ApiEnvironment
 import com.infomaniak.multiplatform_swisstransfer.data.STUser
 import com.infomaniak.multiplatform_swisstransfer.database.DatabaseConfig
 import com.infomaniak.multiplatform_swisstransfer.database.DatabaseProvider
-import com.infomaniak.multiplatform_swisstransfer.database.RealmProvider
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.TransferController
 import com.infomaniak.multiplatform_swisstransfer.database.controllers.AttestationTokenStorage
 import com.infomaniak.multiplatform_swisstransfer.database.getAppDatabase
 import com.infomaniak.multiplatform_swisstransfer.managers.AccountManager
 import com.infomaniak.multiplatform_swisstransfer.managers.AppSettingsManager
+import com.infomaniak.multiplatform_swisstransfer.managers.AttestationTokenManager
 import com.infomaniak.multiplatform_swisstransfer.managers.FileManager
 import com.infomaniak.multiplatform_swisstransfer.managers.TransferManager
-import com.infomaniak.multiplatform_swisstransfer.managers.AttestationTokenManager
 import com.infomaniak.multiplatform_swisstransfer.managers.UploadV2Manager
 import com.infomaniak.multiplatform_swisstransfer.network.ApiClientProvider
 import com.infomaniak.multiplatform_swisstransfer.network.UnauthorizedHandler
-import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferRepository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.TransferV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UploadV2Repository
 import com.infomaniak.multiplatform_swisstransfer.network.repositories.UserInfoRepository
@@ -52,7 +47,6 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  *
  * @property environment Customize client api base url, for example [ApiEnvironment.Prod]
  * @property userAgent Customize client api userAgent.
- * @property legacyDatabaseRootDirectory Customize root directory for realm, eg. iOS app group container.
  * @property databaseNameOrPath Full file path on iOS, just name (without extension) on Android.
  * @property crashReport A crash report interface used to report errors and add breadcrumbs.
  * @property unauthorizedHandler An interface used to handle unauthorized access events (HTTP 401).
@@ -61,12 +55,11 @@ import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
  * @property accountManager A manager used to orchestrate Accounts operations.
  * @property uploadV2Manager A manager used to orchestrate Uploads operations.
  * @property attestationTokenManager A manager used to orchestrate operations of tokens needed for the upload.
- * @property sharedApiUrlCreator An utils to help use shared routes.
+ * @property sharedApiUrlCreator A util to help use shared routes.
  */
 class SwissTransferInjection(
     private val environment: ApiEnvironment,
     private val userAgent: String,
-    private val legacyDatabaseRootDirectory: String? = null,
     private val databaseNameOrPath: String,
     private val crashReport: CrashReportInterface,
     private val unauthorizedHandler: UnauthorizedHandler,
@@ -74,7 +67,6 @@ class SwissTransferInjection(
 
     private val getToken: () -> String? = { (accountManager.currentUser as? STUser.AuthUser)?.token }
 
-    private val realmProvider by lazy { RealmProvider(legacyDatabaseRootDirectory) }
     private val appDatabase by lazy {
         val databaseConfig = DatabaseConfig(databaseNameOrPath = databaseNameOrPath)
         DatabaseProvider(databaseConfig).getAppDatabase()
@@ -89,14 +81,10 @@ class SwissTransferInjection(
     }
 
     private val uploadV2Repository by lazy { UploadV2Repository(apiClientProvider, environment, getToken) }
-    private val transferRepository by lazy { TransferRepository(apiClientProvider, environment) }
     private val transferV2Repository by lazy { TransferV2Repository(apiClientProvider, environment, getToken) }
     private val userInfoRepository: UserInfoRepository by lazy { UserInfoRepository(apiClientProvider, environment, getToken) }
 
-    private val appSettingsController by lazy { AppSettingsController(realmProvider) }
     private val attestationTokenStorage by lazy { AttestationTokenStorage(appDatabase) }
-    private val transferController by lazy { TransferController(realmProvider) }
-    private val fileController by lazy { FileController(realmProvider) }
 
     private val emailLanguageUtils by lazy { EmailLanguageUtils() }
 
@@ -105,19 +93,16 @@ class SwissTransferInjection(
         TransferManager(
             accountManager,
             appDatabase,
-            crashReport,
-            transferController,
-            transferRepository,
             transferV2Repository,
         )
     }
 
     /** A manager used to orchestrate Files operations. */
-    val fileManager by lazy { FileManager(appDatabase, fileController) }
+    val fileManager by lazy { FileManager(appDatabase) }
 
     /** A manager used to orchestrate AppSettings operations. */
     val appSettingsManager by lazy {
-        AppSettingsManager(appDatabase, appSettingsController, emailLanguageUtils, crashReport)
+        AppSettingsManager(appDatabase, emailLanguageUtils)
     }
 
     /** A manager used to orchestrate uploads' tokens operations (email token or attestation token). */
@@ -127,10 +112,8 @@ class SwissTransferInjection(
     val accountManager by lazy {
         AccountManager(
             appDatabase = appDatabase,
-            transferController = transferController,
             appSettingsManager = appSettingsManager,
             userInfoRepository = userInfoRepository,
-            realmProvider = realmProvider,
         )
     }
 
@@ -146,13 +129,10 @@ class SwissTransferInjection(
         )
     }
 
-    /** An utils to help use shared routes  */
+    /** A util to help use shared routes  */
     val sharedApiUrlCreator by lazy {
         SharedApiUrlCreator(
             environment,
-            fileController,
-            transferController,
-            transferRepository,
         )
     }
 }

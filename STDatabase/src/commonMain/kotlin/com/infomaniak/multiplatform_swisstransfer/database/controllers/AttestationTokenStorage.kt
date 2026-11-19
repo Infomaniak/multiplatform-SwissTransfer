@@ -17,18 +17,18 @@
  */
 package com.infomaniak.multiplatform_swisstransfer.database.controllers
 
-import com.infomaniak.multiplatform_swisstransfer.common.exceptions.RealmException
+
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AttestationTokenDB
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Stores upload tokens in Room.
+ * Stores app integrity attestation tokens.
  */
 class AttestationTokenStorage(private val appDatabase: AppDatabase) {
     private val dao get() = appDatabase.attestationTokensDao
 
-    @Throws(RealmException::class, CancellationException::class)
+    @Throws(CancellationException::class)
     suspend fun getAttestationToken(): AttestationTokenDB? = dao.getAttestationToken()
 
     @Throws(CancellationException::class)

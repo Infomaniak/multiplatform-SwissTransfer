@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.realm)
     alias(libs.plugins.skie)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
@@ -13,7 +12,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":STCommon"))
-            implementation(libs.realm.base)
             api(libs.androidx.room.runtime) //TODO[tech-debt]: Move it back to impl. once we downgrade public symbols to internal.
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.kotlinx.serialization.json)

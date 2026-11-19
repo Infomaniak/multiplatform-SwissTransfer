@@ -20,24 +20,17 @@
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.ui.FileUi
-import com.infomaniak.multiplatform_swisstransfer.common.utils.mapToList
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.FileController
 import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUi
 import com.infomaniak.multiplatform_swisstransfer.mappers.toFileUiList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 
-class FileManager(
-    private val appDatabase: AppDatabase,
-    private val fileController: FileController,
-) {
+class FileManager(private val appDatabase: AppDatabase) {
 
     /**
      * Retrieves a flow of files contained in a folder with the specified folderUuid.
@@ -47,15 +40,7 @@ class FileManager(
      */
     fun getFilesFromTransfer(
         folderUuid: String
-    ): Flow<List<FileUi>> = appDatabase.getTransferDao().filesByFolderIdFlow(folderId = folderUuid)
-        .map { it.toFileUiList() }
-        .transformLatest { files ->
-            if (files.isEmpty()) {
-                emitAll(fileController.getFilesFromTransfer(folderUuid).map { files -> files.mapToList { FileUi(it) } })
-            } else {
-                emit(files)
-            }
-        }
+    ): Flow<List<FileUi>> = appDatabase.getTransferDao().filesByFolderIdFlow(folderId = folderUuid).map { it.toFileUiList() }
 
     /**
      * Retrieves a single file by its unique identifier.

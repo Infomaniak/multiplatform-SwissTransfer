@@ -21,7 +21,6 @@ package com.infomaniak.multiplatform_swisstransfer.managers
 
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
-import com.infomaniak.multiplatform_swisstransfer.common.interfaces.CrashReportInterface
 import com.infomaniak.multiplatform_swisstransfer.common.interfaces.appSettings.AppSettings
 import com.infomaniak.multiplatform_swisstransfer.common.models.DownloadLimit
 import com.infomaniak.multiplatform_swisstransfer.common.models.EmailLanguage
@@ -29,29 +28,24 @@ import com.infomaniak.multiplatform_swisstransfer.common.models.Theme
 import com.infomaniak.multiplatform_swisstransfer.common.models.TransferType
 import com.infomaniak.multiplatform_swisstransfer.common.models.ValidityPeriod
 import com.infomaniak.multiplatform_swisstransfer.database.AppDatabase
-import com.infomaniak.multiplatform_swisstransfer.database.controllers.AppSettingsController
 import com.infomaniak.multiplatform_swisstransfer.database.dao.AppSettingsDao
 import com.infomaniak.multiplatform_swisstransfer.database.models.appSettings.v2.AppSettingsDB
 import com.infomaniak.multiplatform_swisstransfer.utils.EmailLanguageUtils
-import com.infomaniak.multiplatform_swisstransfer.utils.catchAppSettingsDbExceptions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformLatest
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Provides a convenient interface for managing application settings, abstracting the underlying
- * [AppSettingsController]. It handles asynchronous operations and ensures settings updates are
+ * Provides a convenient interface for managing application settings.
+ * It handles asynchronous operations and ensures settings updates are
  * performed on a background thread.
- **/
+ */
 class AppSettingsManager internal constructor(
     private val appDatabase: AppDatabase,
-    private val appSettingsController: AppSettingsController,
     private val emailLanguageUtils: EmailLanguageUtils,
-    private val crashReport: CrashReportInterface,
 ) {
 
     private val dao: AppSettingsDao get() = appDatabase.getAppSettingsDao()
@@ -61,8 +55,11 @@ class AppSettingsManager internal constructor(
      */
     val appSettings: Flow<AppSettings?> = dao.getAppSettings().transformLatest { appSettings ->
         if (appSettings != null) emit(appSettings)
-        else Migrator.migrateOrCreateAppSettings(appSettingsController, dao, emailLanguageUtils)
-    }.catchAppSettingsDbExceptions(crashReport)
+        else AppSettingsDB(emailLanguage = emailLanguageUtils.getEmailLanguageFromLocale()).also {
+            dao.put(it)
+            emit(it)
+        }
+    }.distinctUntilChanged()
 
     suspend fun getAppSettings(): AppSettings? = appSettings.first()
 
@@ -156,35 +153,5 @@ class AppSettingsManager internal constructor(
                 }
             }
         }
-    }
-
-    private object Migrator {
-        private val mutex = Mutex()
-
-        suspend fun migrateOrCreateAppSettings(
-            appSettingsController: AppSettingsController,
-            dao: AppSettingsDao,
-            emailLanguageUtils: EmailLanguageUtils
-        ) {
-            mutex.withLock {
-                //TODO[Nit]: Is not an actual migration (it's only one of the 2 cases). Also, could be a DB transaction.
-                val hasMigrated = dao.getAppSettings().first() != null
-                if (hasMigrated) return
-                val oldAppSettings = appSettingsController.getAppSettings()?.toNewAppSettingsDB()
-                val settings = oldAppSettings
-                    ?: AppSettingsDB(emailLanguage = emailLanguageUtils.getEmailLanguageFromLocale())
-                dao.put(settings)
-                appSettingsController.removeOnlyAppSettingsTableData()
-            }
-        }
-
-        private fun AppSettings.toNewAppSettingsDB(): AppSettingsDB = AppSettingsDB(
-            theme = theme,
-            validityPeriod = validityPeriod,
-            downloadLimit = downloadLimit,
-            emailLanguage = emailLanguage,
-            lastTransferType = lastTransferType,
-            lastAuthorEmail = lastAuthorEmail,
-        )
     }
 }
