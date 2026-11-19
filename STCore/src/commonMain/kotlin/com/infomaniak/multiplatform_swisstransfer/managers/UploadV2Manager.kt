@@ -185,6 +185,7 @@ class UploadV2Manager(
         UnauthorizedException::class,
         TooManyRequestException::class,
         SQLiteException::class,
+        RuntimeException::class,
         EmailValidationException.TooManyAttempts::class,
         UploadErrorsException.NotFoundException::class,
     )
@@ -208,6 +209,7 @@ class UploadV2Manager(
         UnauthorizedException::class,
         TooManyRequestException::class,
         SQLiteException::class,
+        RuntimeException::class,
         EmailValidationException.TooManyAttempts::class,
         UploadErrorsException.NotFoundException::class,
     )
