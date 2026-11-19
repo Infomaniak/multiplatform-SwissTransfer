@@ -40,6 +40,6 @@ interface EmailValidationsDao {
 
     @Query("UPDATE EmailValidation " +
             "SET code_expiration_timestamp_seconds =:lastSentCodeExpirationTimestampSeconds " +
-            "WHERE id=:validationId")
+            "WHERE id=:validationId AND code_expiration_timestamp_seconds IS NOT NULL")
     suspend fun updatePendingValidation(validationId: String, lastSentCodeExpirationTimestampSeconds: Long)
 }
