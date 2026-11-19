@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalContracts::class)
+
 package com.infomaniak.multiplatform_swisstransfer.managers
 
 import androidx.room.immediateTransaction
@@ -56,6 +58,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -163,6 +168,11 @@ class UploadV2Manager(
     }
 
     /**
+     * ##IMPORTANT:
+     *
+     * If you need to trigger something before anything is saved in the database, use the overload that takes the
+     * `onSent` callback.
+     *
      * @return Returns `false` if the email is already validated.
      * Note that in this latter case, the email will be marked as validated in the DB before returning.
      */
@@ -174,21 +184,53 @@ class UploadV2Manager(
         UnknownException::class,
         UnauthorizedException::class,
         TooManyRequestException::class,
+        SQLiteException::class,
+        RuntimeException::class,
         EmailValidationException.TooManyAttempts::class,
         UploadErrorsException.NotFoundException::class,
     )
-    suspend fun resendValidationEmail(validationId: String): Boolean = withContext(Dispatchers.Default) {
-        val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)?.also {
-            check(it.id == validationId) { "The backend broke its contract of reusing the same validation id!" }
+    suspend fun resendValidationEmail(validationId: String): Boolean {
+        val wasEmailSent: Boolean
+        resendValidationEmail(validationId, onSent = { wasEmailSent = it })
+        return wasEmailSent
+    }
+
+    /**
+     * @param onSent Is run on `Dispatchers.Default`. It passes `false` if the email is already validated,
+     * `true` if a new validation email was sent.
+     * Designed for telling the user the email was sent before the database is written to and [emailValidationStatus]
+     * emits a new value (which leads to cancellation when listened with `xxxLatest` operators).
+     */
+    @Throws(
+        CancellationException::class,
+        NetworkException::class,
+        ApiV2ErrorException::class,
+        UnexpectedApiErrorFormatException::class,
+        UnknownException::class,
+        UnauthorizedException::class,
+        TooManyRequestException::class,
+        SQLiteException::class,
+        RuntimeException::class,
+        EmailValidationException.TooManyAttempts::class,
+        UploadErrorsException.NotFoundException::class,
+    )
+    suspend fun resendValidationEmail(validationId: String, onSent: (emailWasSent: Boolean) -> Unit) {
+        contract { callsInPlace(onSent, InvocationKind.EXACTLY_ONCE) }
+        return withContext(Dispatchers.Default) {
+            val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)?.also {
+                check(it.id == validationId) { "The backend broke its contract of reusing the same validation id!" }
+            }
+            // We call onSent right after the backend response purposefully.
+            // The UI should allow entering the code even in the (very) unlikely case of the database update not getting through.
+            onSent(updatedValidationRequest != null)
+            when (updatedValidationRequest) {
+                null -> emailValidationsDao.markAsValidated(validationId = validationId)
+                else -> emailValidationsDao.updatePendingValidation(
+                    validationId = validationId,
+                    lastSentCodeExpirationTimestampSeconds = updatedValidationRequest.tokenExpiryUtcTimestampSeconds
+                )
+            }
         }
-        when (updatedValidationRequest) {
-            null -> emailValidationsDao.markAsValidated(validationId = validationId)
-            else -> emailValidationsDao.updatePendingValidation(
-                validationId = validationId,
-                lastSentCodeExpirationTimestampSeconds = updatedValidationRequest.tokenExpiryUtcTimestampSeconds
-            )
-        }
-        updatedValidationRequest != null
     }
 
     /**
