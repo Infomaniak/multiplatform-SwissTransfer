@@ -217,6 +217,8 @@ class UploadV2Manager(
             val updatedValidationRequest = uploadRepository.resendValidationEmail(validationId)?.also {
                 check(it.id == validationId) { "The backend broke its contract of reusing the same validation id!" }
             }
+            // We call onSent right after the backend response purposefully.
+            // The UI should allow entering the code even in the (very) unlikely case of the database update not getting through.
             onSent(updatedValidationRequest != null)
             when (updatedValidationRequest) {
                 null -> emailValidationsDao.markAsValidated(validationId = validationId)
