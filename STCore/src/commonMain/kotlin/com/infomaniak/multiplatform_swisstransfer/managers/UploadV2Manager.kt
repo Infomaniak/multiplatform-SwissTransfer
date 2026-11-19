@@ -196,7 +196,8 @@ class UploadV2Manager(
     }
 
     /**
-     * @param onSent Passes `false` if the email is already validated, `true` if a new validation email was sent.
+     * @param onSent Is run on `Dispatchers.Default`. It passes `false` if the email is already validated,
+     * `true` if a new validation email was sent.
      * Designed for telling the user the email was sent before the database is written to and [emailValidationStatus]
      * emits a new value (which leads to cancellation when listened with `xxxLatest` operators).
      */
