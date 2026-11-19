@@ -103,7 +103,7 @@ internal class UploadRequest(
     }
 
     /**
-     * @return Returns `true` if the re-send request was successful, `false` if the email is already validated.
+     * @return Returns [EmailValidationRequest] if the re-send request was successful, `null` if the email is already validated.
      */
     suspend fun reSendValidationEmail(validationId: String): EmailValidationRequest? = try {
         post<ApiResponseV2Success<EmailValidationRequest>>(
